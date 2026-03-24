@@ -24,6 +24,486 @@
 
 \begin{document}
 
+% Requires in the preamble:
+% \usepackage{amsmath,amssymb,amsfonts}
+% \usepackage{tikz}
+% \usetikzlibrary{positioning,arrows.meta}
+
+\subsection{Quantum computation as controlled dynamics}
+\label{subsec:quantum_computation_controlled_dynamics}
+
+In the abstract circuit model, a quantum algorithm is described as a sequence of unitary gates acting on an $n$-qubit register. From the hardware point of view, however, these gates are not primitive objects: they arise from the real-time evolution of a physical quantum system driven by externally programmable fields. Quantum control is therefore the discipline that bridges the algorithmic layer of quantum information processing and the dynamical laws governing a concrete device. In this perspective, the implementation of a gate is naturally formulated as an inverse problem: given a desired logical operation, one seeks a family of control signals that steers the system so that its physical evolution reproduces the target operation with high accuracy on the computational degrees of freedom \cite{Palao2003,Koch2022,Mahesh2023,Niu2019}.
+
+For an $n$-qubit processor, the logical information is encoded in the computational subspace
+\begin{equation}
+\mathcal{H}_{\mathrm{comp}}
+\cong
+(\mathbb{C}^{2})^{\otimes n}
+\subseteq
+\mathcal{H}_{\mathrm{phys}},
+\label{eq:computational_subspace}
+\end{equation}
+where $\mathcal{H}_{\mathrm{phys}}$ denotes the full Hilbert space of the device. The inclusion in Eq.~\eqref{eq:computational_subspace} is essential: in realistic platforms, the physical Hilbert space is generally larger than the ideal qubit space. This point is conceptually important already at the beginning of the thesis, because it clarifies that a quantum gate is not merely a map on $\mathcal{H}_{\mathrm{comp}}$, but the effective restriction of a higher-dimensional physical evolution to the logical sector. In superconducting architectures, for instance, this enlarged Hilbert space is associated with higher oscillator levels beyond the two-level qubit approximation, an observation that will later motivate the discussion of leakage errors \cite{Palao2003,Niu2019}.
+
+A broad and standard model for controlled quantum dynamics is a time-dependent Hamiltonian of the form
+\begin{equation}
+H\!\left(t;\mathbf{u}\right)
+=
+H_{\mathrm{d}}
++
+\sum_{k=1}^{m} u_k(t)\, H_k,
+\label{eq:control_hamiltonian}
+\end{equation}
+where $H_{\mathrm{d}}$ is the drift Hamiltonian, fixed by the underlying hardware, while the operators $\{H_k\}_{k=1}^{m}$ specify the controllable interaction channels and the real functions
+\begin{equation}
+\mathbf{u}(t) = \bigl(u_1(t),u_2(t),\dots,u_m(t)\bigr)
+\label{eq:control_vector}
+\end{equation}
+are the externally applied control fields. Depending on the platform, the components of $\mathbf{u}(t)$ may represent microwave amplitudes, phases, detunings, flux biases, or other tunable experimental knobs. The state vector then obeys the time-dependent Schr\"odinger equation
+\begin{equation}
+i\hbar \frac{d}{dt}\ket{\psi(t)}
+=
+H\!\left(t;\mathbf{u}\right)\ket{\psi(t)},
+\label{eq:schrodinger_equation_control}
+\end{equation}
+or, equivalently, the propagator $U(t,0)$ satisfies
+\begin{equation}
+i\hbar \frac{d}{dt} U(t,0)
+=
+H\!\left(t;\mathbf{u}\right) U(t,0),
+\qquad
+U(0,0)=\mathbb{I},
+\label{eq:propagator_differential_equation}
+\end{equation}
+with formal solution
+\begin{equation}
+U(T,0)
+=
+\mathcal{T}
+\exp\!\left[
+-\frac{i}{\hbar}
+\int_0^T H\!\left(t;\mathbf{u}\right)\,dt
+\right],
+\label{eq:time_ordered_propagator}
+\end{equation}
+where $\mathcal{T}$ denotes the time-ordering operator \cite{Palao2003,Koch2022,Mahesh2023}.
+
+The physical task of gate synthesis can now be stated precisely. Let $\Pi_{\mathrm{comp}}$ be the projector onto $\mathcal{H}_{\mathrm{comp}}$, and let $U_{\mathrm{target}}\in U(2^n)$ be the desired logical gate. The effective action induced on the computational sector is
+\begin{equation}
+U_{\mathrm{eff}}(T)
+:=
+\Pi_{\mathrm{comp}}\, U(T,0)\, \Pi_{\mathrm{comp}},
+\label{eq:effective_logical_propagator}
+\end{equation}
+and the control problem consists in selecting the fields $\mathbf{u}(t)$ and, in many cases, the gate duration $T$, so that
+\begin{equation}
+U_{\mathrm{eff}}(T)
+\approx
+e^{i\phi} U_{\mathrm{target}},
+\qquad
+\phi\in\mathbb{R},
+\label{eq:gate_implementation_condition}
+\end{equation}
+up to a physically irrelevant global phase. A convenient generic mismatch functional is therefore
+\begin{equation}
+\varepsilon_U(T)
+=
+\min_{\phi\in\mathbb{R}}
+\left\|
+U_{\mathrm{eff}}(T)-e^{i\phi}U_{\mathrm{target}}
+\right\|,
+\label{eq:generic_gate_error}
+\end{equation}
+where the choice of norm depends on the application. In practical quantum-control problems, the abstract objective in Eq.~\eqref{eq:generic_gate_error} is usually replaced by experimentally meaningful figures of merit, such as gate fidelity, leakage penalties, smoothness constraints, and runtime penalties. These quantities will be introduced in the following paragraphs and then specialized, later in the thesis, to the UFO framework studied in this work \cite{Koch2022,Niu2019}.
+
+For numerical optimization, it is often useful to discretize the controls on a grid
+\(
+0=t_0<t_1<\dots<t_N=T
+\)
+and use a piecewise-constant parameterization,
+\begin{equation}
+u_k(t)=u_{k,\ell},
+\qquad
+t\in[t_\ell,t_{\ell+1}),
+\quad
+k=1,\dots,m,
+\quad
+\ell=0,\dots,N-1.
+\label{eq:piecewise_constant_controls}
+\end{equation}
+Equation~\eqref{eq:piecewise_constant_controls} turns the search for an admissible control field into a finite-dimensional optimization problem over the amplitudes $\{u_{k,\ell}\}$. This viewpoint is especially convenient because it connects naturally both with gradient-based pulse engineering and with reinforcement-learning formulations, where the control trajectory is built sequentially over discrete time steps \cite{Palao2003,Koch2022,Niu2019}.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    node distance=1.7cm and 1.5cm,
+    box/.style={
+        draw,
+        rounded corners,
+        align=center,
+        minimum width=2.8cm,
+        minimum height=1.0cm
+    },
+    arrow/.style={-{Latex[length=2.2mm]}, thick}
+]
+\node[box] (alg) {Quantum algorithm\\or circuit};
+\node[box, right=of alg] (target) {Target logical gate\\$U_{\mathrm{target}}$};
+\node[box, right=of target] (ham) {Controlled Hamiltonian\\$H(t;\mathbf{u})$};
+\node[box, right=of ham] (pulse) {Control fields\\$\mathbf{u}(t)$};
+\node[box, below=of ham] (evol) {Physical evolution\\$U(T,0)$};
+\node[box, left=of evol] (eff) {Effective logical action\\$U_{\mathrm{eff}}(T)$};
+
+\draw[arrow] (alg) -- (target);
+\draw[arrow] (target) -- (ham);
+\draw[arrow] (pulse) -- (ham);
+\draw[arrow] (ham) -- (evol);
+\draw[arrow] (evol) -- (eff);
+\draw[arrow] (eff) |- node[pos=0.25, below] {\small optimize} (target);
+\end{tikzpicture}
+\caption{Conceptual relation between the algorithmic description of a quantum task and its physical realization through controlled dynamics. The central inverse problem of quantum control is to determine the control fields $\mathbf{u}(t)$ such that the induced propagator $U(T,0)$ reproduces the target logical gate on the computational subspace.}
+\label{fig:control_dynamics_pipeline}
+\end{figure}
+
+% Requires in the preamble:
+% \usepackage{amsmath,amssymb,amsfonts}
+% \usepackage{bm}
+
+\subsection{Gate fidelity and runtime as central performance metrics}
+\label{subsec:fidelity_runtime_metrics}
+
+Once a target logical operation has been formulated as a controlled dynamical task, the next question is how to assess the quality of a candidate control protocol. In quantum control, two figures of merit play a particularly central role: the \emph{fidelity} of the implemented gate and its \emph{runtime}. The first quantifies how accurately the physical evolution reproduces the desired logical transformation, while the second measures how long the quantum system must remain under active control in order to realize that transformation. These quantities are not merely technical diagnostics: they directly determine the practical computational power of a hardware platform. In particular, the paper studied in this thesis explicitly identifies fidelity and runtime as the key measures governing the usefulness of a control strategy, and builds its optimization framework around their joint treatment \cite{Niu2019}.
+
+Let $U_{\mathrm{target}} \in U(d)$ denote the desired logical gate acting on a $d$-dimensional computational subspace, and let $U(T)$ denote the unitary evolution generated by a chosen control protocol at final time $T$. In the idealized closed-system setting, where the action of the control sequence remains unitary on the relevant subspace, a standard overlap-based figure of merit is the \emph{gate fidelity}
+\begin{equation}
+F_{\mathrm{gate}}\!\left(U(T),U_{\mathrm{target}}\right)
+=
+\frac{1}{d^{2}}
+\left|
+\mathrm{Tr}\!\left(U_{\mathrm{target}}^{\dagger}U(T)\right)
+\right|^{2}.
+\label{eq:gate_fidelity_unitary}
+\end{equation}
+This quantity satisfies
+\begin{equation}
+0 \leq F_{\mathrm{gate}} \leq 1,
+\label{eq:fidelity_bounds}
+\end{equation}
+and reaches its maximal value $F_{\mathrm{gate}}=1$ if and only if
+\begin{equation}
+U(T)=e^{i\phi}U_{\mathrm{target}},
+\qquad
+\phi\in\mathbb{R},
+\label{eq:perfect_gate_global_phase}
+\end{equation}
+that is, when the realized operation agrees with the target up to an irrelevant global phase. The associated \emph{gate infidelity} is then defined as
+\begin{equation}
+\varepsilon_{\mathrm{gate}}
+:=
+1-F_{\mathrm{gate}}.
+\label{eq:gate_infidelity_def}
+\end{equation}
+This is the quantity most frequently minimized in practical control optimization, since it vanishes precisely at perfect implementation and is cheap to evaluate numerically. The uploaded paper adopts exactly this form of gate infidelity as the first contribution to its control cost function, emphasizing that it provides a computationally convenient measure of control inaccuracy \cite{Niu2019}.
+
+In realistic devices, however, the implemented operation is not exactly unitary on the logical subspace, since calibration errors, stochastic fluctuations, decoherence, and leakage make the effective map better described by a quantum channel $\mathcal{E}$. In that more general setting, an experimentally meaningful notion of quality is the \emph{average gate fidelity}, defined by averaging over all pure input states with respect to the Haar measure:
+\begin{equation}
+\overline{F}\!\left(\mathcal{E},U_{\mathrm{target}}\right)
+=
+\int d\psi\;
+\langle \psi |
+U_{\mathrm{target}}^{\dagger}\,
+\mathcal{E}\!\left(|\psi\rangle\langle\psi|\right)\,
+U_{\mathrm{target}}
+|\psi\rangle.
+\label{eq:average_gate_fidelity_def}
+\end{equation}
+Equation~\eqref{eq:average_gate_fidelity_def} measures the average probability that an arbitrary input state is transformed as intended. It is therefore more operational than a purely state-specific fidelity, and it is particularly useful when one wishes to characterize a gate rather than a single state-transfer task. As discussed in the uploaded paper, average fidelity is also the natural quantity for assessing robustness under stochastic control perturbations, since one may compare how the performance of a control protocol degrades under repeated noisy realizations \cite{Niu2019}. A related quantity is the \emph{average gate infidelity},
+\begin{equation}
+\overline{\varepsilon}_{\mathrm{gate}}
+:=
+1-\overline{F}\!\left(\mathcal{E},U_{\mathrm{target}}\right).
+\label{eq:average_gate_infidelity}
+\end{equation}
+
+For trace-preserving quantum channels, the average fidelity is closely related to the entanglement fidelity and process fidelity. In particular, if $F_{\mathrm{e}}$ denotes the entanglement fidelity with respect to the ideal target unitary, then one has the standard relation
+\begin{equation}
+\overline{F}
+=
+\frac{d\,F_{\mathrm{e}}+1}{d+1}.
+\label{eq:avg_fidelity_entanglement_relation}
+\end{equation}
+In the special case where the implemented evolution is itself unitary, Eq.~\eqref{eq:average_gate_fidelity_def} reduces to
+\begin{equation}
+\overline{F}\!\left(U(T),U_{\mathrm{target}}\right)
+=
+\frac{
+\left|
+\mathrm{Tr}\!\left(U_{\mathrm{target}}^{\dagger}U(T)\right)
+\right|^{2}
++d
+}{
+d(d+1)
+}.
+\label{eq:average_fidelity_unitary_case}
+\end{equation}
+Hence, Eqs.~\eqref{eq:gate_fidelity_unitary} and \eqref{eq:average_fidelity_unitary_case} encode the same mismatch information up to a dimension-dependent affine transformation. This is one reason why overlap-based infidelity is so widely used in numerical optimal control: it is simpler to evaluate, while still remaining closely tied to experimentally relevant benchmarking quantities \cite{Nielsen2002,Pedersen2007}. In the present thesis, the distinction between these notions will remain important: the optimization problem is naturally formulated in terms of gate infidelity, whereas robustness analyses are more naturally reported in terms of average fidelity under noisy implementations, exactly as done in the reference paper \cite{Niu2019}.
+
+Accuracy alone, however, is not sufficient. A gate that is extremely faithful but requires too long a control time may still be of limited practical use, because quantum systems are inevitably exposed to decoherence, relaxation, dephasing, and additional control noise throughout the entire duration of the pulse. For this reason, the total runtime $T$ of a control protocol must be treated as a second fundamental metric. At the most basic level, runtime is simply the final integration time appearing in the propagator
+\begin{equation}
+U(T,0)
+=
+\mathcal{T}
+\exp\!\left[
+-\frac{i}{\hbar}
+\int_{0}^{T} H(t)\,dt
+\right],
+\label{eq:runtime_propagator}
+\end{equation}
+but physically it quantifies the temporal exposure of the quantum state to all imperfections that accumulate during the gate execution. This is why the uploaded paper explicitly states that shorter gate runtimes extend the achievable circuit depth by attempting to complete the intended operation before uncorrectable errors induced by noise and dissipation become dominant \cite{Niu2019}.
+
+A simple phenomenological way to express this point is to note that, in the presence of a coherence timescale $T_{\mathrm{coh}}$, one generically expects the quality of a gate to deteriorate as its duration becomes a non-negligible fraction of that timescale. At the level of a rough heuristic model, one may write
+\begin{equation}
+F_{\mathrm{coh}}(T)
+\sim
+e^{-T/T_{\mathrm{coh}}},
+\label{eq:coherence_decay_heuristic}
+\end{equation}
+or, equivalently,
+\begin{equation}
+\varepsilon_{\mathrm{coh}}(T)
+\sim
+1-e^{-T/T_{\mathrm{coh}}}.
+\label{eq:coherence_infidelity_heuristic}
+\end{equation}
+These expressions should not be interpreted as a complete device model, since the actual decay law depends on the physical noise channels and on the precise gate under consideration. Their role is instead conceptual: they make explicit why gate duration is not a neutral parameter. All else being equal, faster gates are generally preferable because they reduce the time window over which incoherent errors can act. This is precisely why runtime minimization is a standard objective in quantum optimal control, and why the UFO framework includes an explicit runtime penalty term in its cost function \cite{Niu2019,Koch2022}.
+
+The role of runtime is even clearer when one considers that quantum algorithms are implemented as long sequences of elementary or composite operations. If a circuit contains $N_{\mathrm{gates}}$ successive gates with durations $\{T_j\}_{j=1}^{N_{\mathrm{gates}}}$, the total physical runtime is approximately
+\begin{equation}
+T_{\mathrm{circ}}
+=
+\sum_{j=1}^{N_{\mathrm{gates}}} T_j
+\label{eq:total_circuit_runtime}
+\end{equation}
+up to idle times and synchronization overhead. Thus, improving a single gate by shortening its duration can have a multiplicative effect at the circuit level. In this sense, gate runtime is not merely a low-level engineering quantity; it is a parameter that constrains the accessible algorithmic depth before decoherence overwhelms the computation. The reference paper exploits exactly this logic when comparing learned analog controls with a discrete gate-synthesis baseline: one of its main claims is that direct pulse-level optimization can realize certain target unitaries significantly faster than their decomposition into a standard gate sequence \cite{Niu2019}.
+
+The central conceptual point is therefore that quantum control is intrinsically a \emph{multi-objective} problem. Maximizing fidelity alone may lead to excessively long or experimentally fragile pulses, while minimizing runtime alone may produce aggressive controls that suffer from leakage, control non-adiabaticity, or large sensitivity to calibration errors. In practice one seeks a compromise among several competing desiderata, with fidelity and runtime representing the two most basic ones. This tradeoff can be stated abstractly by introducing a generic control objective of the form
+\begin{equation}
+\mathcal{J}[\bm{u}]
+=
+w_{F}\,\varepsilon_{\mathrm{gate}}[\bm{u}]
++
+w_{T}\,T[\bm{u}]
++
+\cdots,
+\label{eq:generic_multiobjective_control}
+\end{equation}
+where $\bm{u}$ denotes the control protocol and the omitted terms may encode additional physical penalties such as leakage, bandwidth constraints, boundary conditions, or energy costs. Equation~\eqref{eq:generic_multiobjective_control} is intentionally schematic, but it captures the philosophy that underlies much of modern quantum control. In the present thesis, this general viewpoint will become concrete in the next chapter, where the UFO cost function will be introduced as a specific realization of this multi-objective principle, with explicit terms for infidelity, leakage, boundary constraints, and runtime \cite{Niu2019}.
+
+From the viewpoint of the thesis structure, the discussion above motivates the distinction that will be used throughout the rest of the work. When the implemented evolution can be treated as approximately unitary, gate infidelity as in Eq.~\eqref{eq:gate_infidelity_def} provides a convenient optimization target. When robustness against stochastic errors is studied, average fidelity as in Eq.~\eqref{eq:average_gate_fidelity_def} becomes the more informative diagnostic. Runtime, on the other hand, remains a fundamental metric in both settings, because it directly mediates the tradeoff between fast control and exposure to imperfections. Together, these quantities provide the minimal language needed to formulate the control problem addressed in this thesis.
+
+% Optional compact summary table
+\begin{table}[t]
+\centering
+\caption{Core performance metrics used in gate-level quantum control.}
+\label{tab:control_metrics_summary}
+\begin{tabular}{ll}
+\hline
+Quantity & Definition / interpretation \\
+\hline
+Gate fidelity &
+$\displaystyle F_{\mathrm{gate}}=\frac{1}{d^2}\left|\mathrm{Tr}(U_{\mathrm{target}}^\dagger U)\right|^2$ \\[0.4em]
+Gate infidelity &
+$\displaystyle \varepsilon_{\mathrm{gate}}=1-F_{\mathrm{gate}}$ \\[0.4em]
+Average gate fidelity &
+$\displaystyle \overline{F}(\mathcal{E},U_{\mathrm{target}})
+=\int d\psi\,\langle\psi|U_{\mathrm{target}}^\dagger
+\mathcal{E}(|\psi\rangle\langle\psi|)U_{\mathrm{target}}|\psi\rangle$ \\[0.6em]
+Average gate infidelity &
+$\displaystyle \overline{\varepsilon}_{\mathrm{gate}}=1-\overline{F}$ \\[0.4em]
+Runtime &
+Final control duration $T$ entering the propagator $U(T,0)$ \\[0.2em]
+\hline
+\end{tabular}
+\end{table}
+
+
+% Requires in the preamble:
+% \usepackage{amsmath,amssymb,amsfonts,amsthm}
+% \usepackage{bm}
+% \usepackage{tikz}
+% \usetikzlibrary{positioning,arrows.meta,fit}
+
+\subsection{Universal gates and direct analog control}
+\label{subsec:universal_gates_analog_control}
+
+A central notion in quantum computation is that of \emph{universality}. At the abstract circuit level, one usually says that a collection of elementary gates $\mathcal{G}$ is universal if arbitrary unitary operations on a finite number of qubits can be generated---exactly or to arbitrary accuracy---by composing gates from $\mathcal{G}$ \cite{NielsenChuang2010,Dawson2005}. For an $n$-qubit register with logical Hilbert space
+\begin{equation}
+\mathcal{H}_{\mathrm{comp}} \cong (\mathbb{C}^{2})^{\otimes n},
+\label{eq:logical_hilbert_space_section13}
+\end{equation}
+the ideal set of logical operations is the unitary group $U(2^n)$, or equivalently $SU(2^n)$ up to a global phase. A finite gate set $\mathcal{G}$ is therefore called universal when the subgroup it generates is dense in $SU(2^n)$:
+\begin{equation}
+\overline{\langle \mathcal{G} \rangle} = SU(2^n).
+\label{eq:universality_dense_subgroup}
+\end{equation}
+Equation~\eqref{eq:universality_dense_subgroup} formalizes the standard circuit-model view: even if the hardware natively exposes only a limited menu of primitive operations, it is still computationally sufficient provided those primitives can approximate any desired logical transformation to arbitrary precision.
+
+In this framework, a target gate $U_{\mathrm{target}} \in SU(2^n)$ is not implemented directly, but rather compiled into a finite sequence of elementary operations,
+\begin{equation}
+U_{\mathrm{syn}}
+=
+G_{L}G_{L-1}\cdots G_{1},
+\qquad
+G_{\ell}\in\mathcal{G},
+\label{eq:compiled_gate_sequence}
+\end{equation}
+such that
+\begin{equation}
+\left\|
+U_{\mathrm{target}} - e^{i\phi} U_{\mathrm{syn}}
+\right\|
+\leq \varepsilon,
+\qquad
+\phi\in\mathbb{R},
+\label{eq:circuit_approximation_error}
+\end{equation}
+for a prescribed synthesis accuracy $\varepsilon > 0$. The existence of such approximations for universal sets is guaranteed in general, and the Solovay--Kitaev theorem further shows that efficient approximations can be constructed with sequence length growing only polylogarithmically in $1/\varepsilon$ for standard assumptions on the gate set \cite{Dawson2005,NielsenChuang2010}. From the perspective of fault-tolerant quantum computing, this discrete picture is fundamental: logical algorithms are compiled into a standard finite library of protected primitives, and the abstraction is both mathematically elegant and operationally robust.
+
+However, the circuit-synthesis viewpoint is not the only physically relevant one. In an actual device, each elementary gate $G_{\ell}$ must itself be realized by controlled time evolution. Thus, the synthesized circuit in Eq.~\eqref{eq:compiled_gate_sequence} ultimately corresponds to a concatenation of pulse segments, each with its own control fields, calibration overhead, and execution time. If $\tau_{\ell}$ denotes the runtime of the $\ell$-th elementary gate, the total physical duration of the synthesized implementation is approximately
+\begin{equation}
+T_{\mathrm{syn}}
+=
+\sum_{\ell=1}^{L} \tau_{\ell},
+\label{eq:synthesized_runtime}
+\end{equation}
+while the logical depth is the number of time layers required to schedule these operations,
+\begin{equation}
+D_{\mathrm{syn}} \leq L.
+\label{eq:logical_depth_definition}
+\end{equation}
+Equation~\eqref{eq:synthesized_runtime} makes explicit a simple but important fact: even when the number of compiled gates is information-theoretically optimal, the resulting implementation may still be physically expensive, because every additional gate consumes coherence time and introduces further opportunities for control error and leakage. This observation becomes especially relevant in pre-fault-tolerant and noisy intermediate-scale quantum devices, where the experimentally accessible circuit depth is strongly limited by decoherence and imperfect control \cite{Koch2022}.
+
+For this reason, near-term hardware often benefits from a more direct viewpoint, in which one seeks to realize the full target unitary through a single analog control protocol rather than through a discrete decomposition. In the notation introduced earlier, one instead searches for control fields $\bm{u}(t)$ such that
+\begin{equation}
+U(T,0)
+=
+\mathcal{T}\exp\!\left[
+-\frac{i}{\hbar}\int_{0}^{T} H\!\left(t;\bm{u}\right)\,dt
+\right]
+\approx
+e^{i\phi}U_{\mathrm{target}},
+\label{eq:direct_analog_realization}
+\end{equation}
+with $T$ as small as possible and with all relevant physical constraints satisfied. The contrast with Eq.~\eqref{eq:compiled_gate_sequence} is conceptual as much as technical. In circuit synthesis, the target unitary is approximated through a universal symbolic alphabet of gates. In direct analog control, by contrast, one exploits the continuous dynamics naturally generated by the underlying Hamiltonian in order to realize the target in one coherent control episode. The uploaded paper is explicitly motivated by this distinction: for near-term devices, it argues that quantum operations need not be restricted to a finite universal gate set, and that implementing a desired unitary with one pulse sequence can reduce resource overhead relative to a longer synthesized circuit \cite{Niu2019}.
+
+This distinction is closely tied to the notion of \emph{controllability}. Let the controlled Hamiltonian be written as
+\begin{equation}
+H(t)
+=
+H_{\mathrm{d}}+\sum_{k=1}^{m} u_{k}(t)H_{k},
+\label{eq:control_hamiltonian_section13}
+\end{equation}
+where $H_{\mathrm{d}}$ is the drift term and the $H_k$ are control generators. A standard sufficient condition for full operator controllability on a $d$-dimensional Hilbert space is that the dynamical Lie algebra generated by the skew-Hermitian operators $\{iH_{\mathrm{d}},iH_{1},\dots,iH_{m}\}$ spans the whole algebra $\mathfrak{su}(d)$:
+\begin{equation}
+\mathrm{Lie}\!\left\{ iH_{\mathrm{d}}, iH_{1}, \dots, iH_{m} \right\}
+=
+\mathfrak{su}(d).
+\label{eq:lie_algebra_controllability}
+\end{equation}
+Equation~\eqref{eq:lie_algebra_controllability} expresses the ideal mathematical limit of analog universality: if the available drift and control Hamiltonians generate all of $\mathfrak{su}(d)$, then any unitary in $SU(d)$ is reachable in principle through suitable time-dependent controls \cite{DAlessandro2007}. In practice, of course, reachability alone is not enough. One must still contend with finite amplitudes, bandwidth limits, leakage outside the computational subspace, calibration uncertainty, and noise. These constraints make the \emph{effective} implementation of arbitrary target gates highly nontrivial even when controllability holds in the abstract.
+
+The practical advantage of direct analog control is most pronounced when the target unitary is naturally aligned with the native interactions of the hardware. If a device Hamiltonian contains, for example, an entangling term of the form
+\begin{equation}
+H_{\mathrm{nat}}
+=
+J \left( \sigma_{1}^{x}\sigma_{2}^{x} + \sigma_{1}^{y}\sigma_{2}^{y} \right),
+\label{eq:native_entangling_hamiltonian}
+\end{equation}
+then free or weakly modulated evolution under this interaction generates the gate family
+\begin{equation}
+U_{\mathrm{nat}}(t)
+=
+\exp\!\left[
+-\frac{i}{\hbar} t H_{\mathrm{nat}}
+\right]
+=
+\exp\!\left[
+-i \theta(t)\left(\sigma_{1}^{x}\sigma_{2}^{x}+\sigma_{1}^{y}\sigma_{2}^{y}\right)
+\right],
+\label{eq:native_gate_family}
+\end{equation}
+with $\theta(t)=Jt/\hbar$. In such a situation, certain entangling operations may be realized almost directly by the device physics itself, possibly supplemented by a small number of local rotations, instead of being compiled into a longer generic circuit. This is precisely the type of hardware-structure exploitation that makes analog control attractive: the control procedure can adapt to the geometry and couplings of a given platform rather than forcing every task through a fixed universal template \cite{Koch2022,DAlessandro2007}.
+
+From a computational perspective, one may therefore distinguish two different notions of efficiency. The first is \emph{gate-set efficiency}, meaning how economically a target unitary can be decomposed into a prescribed universal library. The second is \emph{hardware efficiency}, meaning how economically that same unitary can be realized on a specific physical platform once its native interactions are taken into account. These notions need not coincide. A gate may admit an optimal decomposition within a discrete universal set and yet still be slower than a direct analog realization that exploits the natural Hamiltonian of the device. This tension is one of the central motivations of the present thesis, and it is made explicit in the uploaded paper, which compares direct analog controls with optimal gate-synthesis counterparts for a family of two-qubit gates and reports significant runtime reductions for some targets \cite{Niu2019}. In the following chapters, this distinction will become concrete in the superconducting-gmon setting, where a family of physically relevant two-qubit gates can be analyzed both from the perspective of optimal discrete synthesis and from that of direct pulse-level realization.
+
+It is important, however, not to overstate the case. Direct analog control does not replace the circuit model as a fundamental description of quantum computation, nor does it eliminate the need for universal gate sets in fault-tolerant architectures. Rather, it provides a complementary layer of optimization that is particularly valuable in near-term devices and in hardware-aware quantum algorithms. The relevant question is not whether one should abandon universal discrete gates, but whether a given target operation should be implemented through a compiled sequence or through a direct continuous control trajectory. The answer depends on the interaction between algorithmic structure, hardware native couplings, noise, and control constraints. This is exactly the regime in which modern quantum-control methods, including reinforcement-learning-based approaches, become especially relevant \cite{Niu2019,Koch2022}.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    node distance=1.5cm and 1.2cm,
+    box/.style={
+        draw,
+        rounded corners,
+        align=center,
+        minimum width=3.0cm,
+        minimum height=0.95cm
+    },
+    smallbox/.style={
+        draw,
+        rounded corners,
+        align=center,
+        minimum width=1.25cm,
+        minimum height=0.75cm
+    },
+    arrow/.style={-{Latex[length=2.2mm]}, thick}
+]
+
+% Top row: synthesis
+\node[box] (target1) {$U_{\mathrm{target}}$};
+\node[box, right=of target1] (compiler) {gate compiler\\ / synthesis};
+\node[smallbox, right=of compiler, xshift=0.2cm] (g1) {$G_{1}$};
+\node[smallbox, right=0.15cm of g1] (g2) {$G_{2}$};
+\node[smallbox, right=0.15cm of g2] (g3) {$\cdots$};
+\node[smallbox, right=0.15cm of g3] (g4) {$G_{L}$};
+
+\draw[arrow] (target1) -- (compiler);
+\draw[arrow] (compiler) -- (g1);
+\draw[arrow] (g1) -- (g2);
+\draw[arrow] (g2) -- (g3);
+\draw[arrow] (g3) -- (g4);
+
+\node[below=0.25cm of g2] (toptext) {\small $U_{\mathrm{syn}} = G_L \cdots G_2 G_1$};
+
+% Bottom row: analog
+\node[box, below=2.0cm of target1] (target2) {$U_{\mathrm{target}}$};
+\node[box, right=of target2] (ocp) {optimal control\\ problem};
+\node[box, right=of ocp] (pulse) {single pulse\\ $\bm{u}(t)$};
+\node[box, right=of pulse] (phys) {physical evolution\\ $U(T,0)$};
+
+\draw[arrow] (target2) -- (ocp);
+\draw[arrow] (ocp) -- (pulse);
+\draw[arrow] (pulse) -- (phys);
+
+\node[below=0.25cm of pulse] (bottomtext) {\small $U(T,0)\approx e^{i\phi}U_{\mathrm{target}}$};
+
+% Labels
+\node[above=0.25cm of compiler] {\small \textbf{Compiled gate synthesis}};
+\node[above=0.25cm of ocp] {\small \textbf{Direct analog realization}};
+
+\end{tikzpicture}
+\caption{Two conceptually distinct routes to implementing a target unitary. In the upper route, the gate is compiled into a sequence of elements from a finite universal set. In the lower route, one directly optimizes a continuous control protocol so that the full physical evolution approximates the target in a single coherent pulse sequence.}
+\label{fig:synthesis_vs_analog_control}
+\end{figure}
+
+%========================================================
+% Suggested preamble additions
+%========================================================
+% \usepackage{amsmath,amssymb,bm}
+% \usepackage{braket}
+% \usepackage{tikz}
+% \usetikzlibrary{arrows.meta,positioning}
+%========================================================
+
 \subsection{Quantum control in quantum computing}
 \label{subsec:quantum_control_qc}
 
@@ -155,24 +635,4 @@ iH_{0},\,iH_{1},\,\dots,\,iH_{m}
 \label{eq:dynamic_lie_algebra}
 \end{equation}
 generated by the drift and control Hamiltonians under repeated commutation \cite{dalessandro2007introduction}. If $\mathfrak{L}=\mathfrak{su}(d)$, or $\mathfrak{u}(d)$ when global phases are retained, then the system is controllable on the $d$-dimensional Hilbert space, meaning that any target unitary can in principle be synthesized through an appropriate choice of controls. This observation is crucial for modern quantum control: it explains why the search for hardware-native, pulse-level implementations can outperform purely discrete decompositions in some regimes, and it also clarifies why practical control design must go beyond abstract universality and confront physical constraints directly. In the remainder of this background chapter, the discussion will therefore move from this general control-theoretic viewpoint to the concrete challenges posed by superconducting circuits, where weak anharmonicity and multilevel structure make the suppression of leakage a central issue.
-
-\begin{thebibliography}{99}
-
-\bibitem{nielsen2010quantum}
-M. A. Nielsen and I. L. Chuang,
-\textit{Quantum Computation and Quantum Information},
-Cambridge University Press, Cambridge, 10th anniversary ed., 2010.
-
-\bibitem{dalessandro2007introduction}
-D. D'Alessandro,
-\textit{Introduction to Quantum Control and Dynamics},
-Chapman \& Hall/CRC, Boca Raton, 2007.
-
-\bibitem{niu2018ufo}
-M. Y. Niu, S. Boixo, V. N. Smelyanskiy and H. Neven,
-``Universal quantum control through deep reinforcement learning,''
-\textit{npj Quantum Information}, vol. 5, no. 1, 2019.
-
-\end{thebibliography}
-
 \end{document}
