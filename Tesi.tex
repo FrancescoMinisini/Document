@@ -925,4 +925,154 @@ or higher-excitation sectors
 \label{fig:computational_vs_leakage_subspace}
 \end{figure}
 
+
+% Requires in the preamble:
+% \usepackage{amsmath,amssymb,amsfonts,bm}
+% \usepackage{tikz}
+% \usetikzlibrary{arrows.meta,positioning,decorations.pathreplacing}
+
+\subsection{The speed--leakage tradeoff}
+\label{subsec:speed_leakage_tradeoff}
+
+A central difficulty of quantum control in weakly anharmonic superconducting devices is that the desire for short gate times competes directly with the need to suppress leakage outside the computational subspace. In principle, faster gates are desirable because they reduce the exposure of the system to decoherence, relaxation, dephasing, and low-frequency calibration drift. In practice, however, the implementation of a shorter gate typically requires either stronger control amplitudes, more abrupt temporal modulation, or both. In multilevel systems, these same features tend to increase the coupling to unwanted transitions and therefore raise the probability of populating non-computational states \cite{Motzoi2009,Gambetta2011,Werninghaus2021}. This tension is one of the defining constraints of pulse engineering in superconducting qubits and is a key reason why realistic control optimization must treat runtime and leakage simultaneously rather than as independent objectives \cite{Niu2019}.
+
+The origin of this tradeoff can already be seen in the simplest driven weakly anharmonic model. Consider a three-level truncation of a superconducting mode, with logical states $\ket{0}$ and $\ket{1}$ and the first leakage level $\ket{2}$. In a frame rotating resonantly with the $\ket{0}\leftrightarrow\ket{1}$ transition, a standard effective Hamiltonian takes the form
+\begin{equation}
+\hat{H}_{\mathrm{3lvl}}(t)
+=
+\frac{\Omega(t)}{2}
+\left(
+\ket{0}\bra{1} + \ket{1}\bra{0}
++ \lambda \ket{1}\bra{2} + \lambda \ket{2}\bra{1}
+\right)
++
+\alpha \ket{2}\bra{2},
+\label{eq:three_level_rotating_hamiltonian}
+\end{equation}
+where $\Omega(t)$ is the drive envelope, $\alpha=\omega_{12}-\omega_{01}<0$ is the anharmonicity, and $\lambda$ is the relative matrix element for the $\ket{1}\leftrightarrow\ket{2}$ transition. Equation~\eqref{eq:three_level_rotating_hamiltonian} makes the problem explicit: the same drive that implements logical rotations also couples to the leakage transition, which is only detuned by the finite anharmonicity $\alpha$. Thus, unlike in an ideal two-level system, faster control does not merely accelerate the intended dynamics; it also enhances the unwanted coupling to higher levels \cite{Motzoi2009,Gambetta2011,Krantz2019}.
+
+In the perturbative off-resonant regime,
+\begin{equation}
+|\Omega(t)| \ll |\alpha|,
+\label{eq:off_resonant_regime}
+\end{equation}
+the unwanted excitation of the leakage level can be estimated heuristically from standard off-resonant driving arguments. For a drive amplitude $\Omega$ that is approximately constant over the relevant interval, the leakage amplitude scales as
+\begin{equation}
+|c_{2}(t)|
+\sim
+\frac{\lambda\,\Omega}{2|\alpha|},
+\label{eq:leakage_amplitude_scaling}
+\end{equation}
+so that the corresponding leakage probability obeys the rough scaling law
+\begin{equation}
+P_{\mathrm{leak}}
+\sim
+\left(\frac{\lambda\,\Omega}{2|\alpha|}\right)^{2}.
+\label{eq:leakage_probability_scaling}
+\end{equation}
+Although Eqs.~\eqref{eq:leakage_amplitude_scaling}--\eqref{eq:leakage_probability_scaling} are only heuristic estimates, they capture an essential fact: increasing the control amplitude in order to shorten the gate time tends to increase leakage quadratically relative to the small parameter $\Omega/|\alpha|$. This is precisely why the short-time regime is especially challenging in weakly nonlinear oscillators, and why the leading error mechanism for fast gates is often leakage rather than an ordinary logical over-rotation \cite{Motzoi2009,Gambetta2011}.
+
+A complementary perspective comes from the time-frequency structure of the pulse. A control signal with characteristic duration $T_{\mathrm{g}}$ necessarily has a spectral width of order
+\begin{equation}
+\Delta \omega_{\mathrm{pulse}}
+\sim
+\frac{1}{T_{\mathrm{g}}},
+\label{eq:time_frequency_width}
+\end{equation}
+so that shorter pulses possess broader frequency content. Spectral selectivity of the logical transition requires that the pulse bandwidth remain small compared with the detuning to the nearest unwanted transition. In weakly anharmonic qubits, this means roughly
+\begin{equation}
+\Delta \omega_{\mathrm{pulse}} \ll |\alpha|,
+\label{eq:spectral_selectivity_condition}
+\end{equation}
+or equivalently,
+\begin{equation}
+T_{\mathrm{g}} \gg \frac{1}{|\alpha|}.
+\label{eq:minimum_selective_time}
+\end{equation}
+Equation~\eqref{eq:minimum_selective_time} should not be interpreted as a rigorous lower bound on the gate time, since shaped pulses and interference effects can do substantially better than naive square-pulse estimates. Its conceptual role is instead to show that fast gating is constrained by spectral crowding: once the pulse becomes too short, its Fourier components inevitably overlap the leakage transition and the two-level approximation begins to break down \cite{Motzoi2009,Werninghaus2021}.
+
+The same conclusion can be reached from an adiabaticity viewpoint. As discussed in the previous subsection, the full Hamiltonian may be decomposed into block-diagonal and block-off-diagonal components with respect to the splitting
+\(
+\mathcal{H}_{\mathrm{phys}}
+=
+\mathcal{H}_{\mathrm{comp}}
+\oplus
+\mathcal{H}_{\mathrm{leak}}.
+\)
+The block-off-diagonal term $H_{\mathrm{off}}(t)$ couples the computational and leakage sectors, while rapid temporal modulation enhances non-adiabatic transfer between them. In the uploaded paper, this idea is made quantitative through a leakage bound derived within a time-dependent Schrieffer--Wolff framework, where the accumulated coherent leakage is controlled not only by the size of the block-off-diagonal Hamiltonian but also by the rate at which it varies in time. In schematic form, their bound reads
+\begin{equation}
+L_{\mathrm{tot}}
+\lesssim
+\frac{\|\hat{H}_{\mathrm{od}}(0)\|}{\Delta(0)}
++
+\frac{\|\hat{H}_{\mathrm{od}}(T)\|}{\Delta(T)}
++
+\int_{0}^{T}
+\frac{1}{\Delta(t)^{2}}
+\left\|
+\frac{d^{2}\hat{H}_{\mathrm{od}}(t)}{dt^{2}}
+\right\|
+dt,
+\label{eq:schematic_leakage_bound_speed_tradeoff}
+\end{equation}
+where $\Delta(t)$ denotes the relevant energy gap and $\hat{H}_{\mathrm{od}}(t)$ the effective block-off-diagonal Hamiltonian in the transformed basis \cite{Niu2019}. Equation~\eqref{eq:schematic_leakage_bound_speed_tradeoff} is highly instructive for the present discussion: it shows that leakage is aggravated both by large off-diagonal couplings and by rapid pulse modulation, since faster pulses typically make the derivative term larger. Thus, trying to shorten the gate time too aggressively can increase leakage even if the control amplitudes themselves remain moderate.
+
+The speed--leakage tradeoff is therefore not merely a matter of stronger fields; it is also a matter of pulse smoothness and spectral engineering. This is the physical motivation behind derivative-based correction schemes such as DRAG, where an additional quadrature proportional to the time derivative of the main pulse is introduced to cancel leakage-inducing terms order by order \cite{Motzoi2009,Gambetta2011}. More generally, modern optimal-control methods shape the pulse so that fast logical evolution is achieved while destructive interference suppresses net population transfer to higher levels. Experimental work on superconducting transmons confirms that this balance is nontrivial: very short gates can indeed be realized, but only with carefully optimized pulse shapes that explicitly control leakage \cite{Werninghaus2021}.
+
+At the level of control design, the existence of this tradeoff implies that gate optimization is intrinsically multi-objective. Let $\bm{u}(t)$ denote the control protocol and $T[\bm{u}]$ its final runtime. Then an abstract cost functional consistent with the preceding discussion is
+\begin{equation}
+\mathcal{J}[\bm{u}]
+=
+w_{F}\,\varepsilon_{\mathrm{gate}}[\bm{u}]
++
+w_{L}\,L[\bm{u}]
++
+w_{T}\,T[\bm{u}]
++
+\cdots,
+\label{eq:speed_leakage_multiobjective}
+\end{equation}
+where $\varepsilon_{\mathrm{gate}}$ measures logical inaccuracy, $L[\bm{u}]$ is a leakage functional, and the omitted terms may encode boundary constraints, bandwidth penalties, fluence costs, or robustness objectives. Equation~\eqref{eq:speed_leakage_multiobjective} summarizes the central message of this subsection: making a gate faster is not automatically beneficial unless the resulting increase in leakage remains under control. This perspective is directly aligned with the philosophy of the UFO framework, which later combines gate infidelity, leakage, control constraints, and total runtime into a single optimization objective \cite{Niu2019}.
+
+From the viewpoint of superconducting-qubit physics, one may summarize the tradeoff as follows. Long pulses are usually easier to make spectrally selective and therefore tend to suppress leakage, but they suffer from greater exposure to decoherence and slow noise. Very short pulses reduce the total interaction time with the environment, but they broaden the pulse spectrum, enhance non-adiabaticity, and increase the risk of population transfer into higher levels. The practically relevant regime is therefore neither the slowest nor the fastest one in an absolute sense, but the regime in which runtime has been reduced as much as possible while leakage and control-induced errors remain acceptably small. This balance is one of the central organizing principles of high-fidelity gate design in weakly anharmonic superconducting systems \cite{Krantz2019,Werninghaus2021,Niu2019}.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    x=1cm,y=1cm,
+    axis/.style={thick,->},
+    curve1/.style={thick},
+    curve2/.style={thick,dashed},
+    lbl/.style={font=\small}
+]
+
+% axes
+\draw[axis] (0,0) -- (7.2,0) node[right,lbl] {gate speed / shorter $T_{\mathrm g}$};
+\draw[axis] (0,0) -- (0,4.6) node[above,lbl] {qualitative cost};
+
+% coherence cost (decreases with speed)
+\draw[curve1]
+    plot[smooth] coordinates {(0.5,3.8) (1.5,2.9) (2.5,2.1) (3.5,1.4) (4.5,0.95) (5.5,0.7) (6.5,0.55)};
+\node[lbl] at (1.8,3.4) {decoherence cost};
+
+% leakage cost (increases with speed)
+\draw[curve2]
+    plot[smooth] coordinates {(0.5,0.45) (1.5,0.5) (2.5,0.7) (3.5,1.15) (4.5,1.9) (5.5,3.0) (6.5,4.1)};
+\node[lbl] at (5.4,3.55) {leakage cost};
+
+% total cost
+\draw[very thick]
+    plot[smooth] coordinates {(0.5,4.25) (1.5,3.4) (2.5,2.8) (3.5,2.55) (4.5,2.85) (5.5,3.7) (6.5,4.65)};
+\node[lbl] at (3.9,2.15) {total error / cost};
+
+% optimum marker
+\draw[dotted] (3.5,0) -- (3.5,2.55);
+\filldraw (3.5,2.55) circle (1.4pt);
+\node[lbl] at (3.8,0.35) {optimal compromise};
+
+\end{tikzpicture}
+\caption{Qualitative illustration of the speed--leakage tradeoff in weakly anharmonic superconducting qubits. Slower gates suffer more from decoherence and low-frequency noise, whereas faster gates typically increase leakage through stronger driving, broader spectral content, and larger non-adiabatic effects. The physically relevant control problem is therefore a compromise between these competing tendencies.}
+\label{fig:speed_leakage_tradeoff}
+\end{figure}
+
 \end{document}
