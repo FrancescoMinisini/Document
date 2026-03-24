@@ -16,11 +16,16 @@
 % Graphics and figures
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning}
+
 \usepackage{graphicx}
 \usepackage{float}
 
 % Cross-references and links
 \usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+
+\usepackage{amsmath,amssymb,amsfonts,bm}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,decorations.pathreplacing}
 
 \begin{document}
 
@@ -495,5 +500,222 @@ It is important, however, not to overstate the case. Direct analog control does 
 \label{fig:synthesis_vs_analog_control}
 \end{figure}
 
+
+
+\subsection{Superconducting qubits as weakly anharmonic multilevel systems}
+\label{subsec:superconducting_qubits_multilevel}
+
+Among the leading physical platforms for gate-based quantum information processing, superconducting circuits occupy a particularly important position because they combine lithographic scalability, strong microwave control, and compatibility with fast entangling interactions \cite{Krantz2019,Kjaergaard2020}. From the theoretical point of view, however, a superconducting qubit is not fundamentally a two-level system. Rather, it is a quantized nonlinear electrical circuit built from capacitive, inductive, and Josephson elements. The Josephson junction provides the essential nonlinearity that breaks the equal spacing of a harmonic oscillator and thereby allows the two lowest energy eigenstates to be selectively addressed as a logical qubit \cite{Koch2007,Krantz2019}. This observation is central for the present thesis, because the control problem studied later is formulated on a hardware platform of this kind, and the possibility of populating levels outside the logical subspace is precisely what gives rise to leakage errors.
+
+A standard starting point is the circuit Hamiltonian of a Cooper-pair-box or transmon-type qubit,
+\begin{equation}
+\hat{H}_{\mathrm{tr}}
+=
+4E_C (\hat{n}-n_g)^2
+-
+E_J \cos \hat{\varphi},
+\label{eq:transmon_hamiltonian}
+\end{equation}
+where $E_C$ is the charging energy, $E_J$ the Josephson energy, $\hat{n}$ the number operator for transferred Cooper pairs, $\hat{\varphi}$ the superconducting phase difference across the junction, and $n_g$ an offset charge \cite{Koch2007}. The canonical variables satisfy
+\begin{equation}
+[\hat{\varphi},\hat{n}] = i,
+\label{eq:phase_number_commutator}
+\end{equation}
+so that Eq.~\eqref{eq:transmon_hamiltonian} describes a nonlinear quantum oscillator. In the transmon regime,
+\begin{equation}
+\frac{E_J}{E_C} \gg 1,
+\label{eq:transmon_regime}
+\end{equation}
+charge dispersion is exponentially suppressed, which strongly reduces sensitivity to charge noise, while the residual nonlinearity remains sufficient for qubit operation \cite{Koch2007}. This is one of the main reasons why transmon-like devices, including xmon- and gmon-based architectures, have become so prominent in superconducting quantum computing \cite{Krantz2019,Kjaergaard2020,Chen2014}.
+
+The physics of weak anharmonicity becomes transparent by expanding the cosine potential around one of its minima,
+\begin{equation}
+- E_J \cos \hat{\varphi}
+=
+- E_J
++
+\frac{E_J}{2}\hat{\varphi}^{2}
+-
+\frac{E_J}{24}\hat{\varphi}^{4}
++
+O(\hat{\varphi}^{6}).
+\label{eq:cosine_expansion}
+\end{equation}
+Substituting Eq.~\eqref{eq:cosine_expansion} into Eq.~\eqref{eq:transmon_hamiltonian}, one obtains to lowest nontrivial order
+\begin{equation}
+\hat{H}_{\mathrm{tr}}
+\approx
+4E_C \hat{n}^{2}
++
+\frac{E_J}{2}\hat{\varphi}^{2}
+-
+\frac{E_J}{24}\hat{\varphi}^{4}
+-
+E_J.
+\label{eq:transmon_quartic_approximation}
+\end{equation}
+The first two terms define a harmonic oscillator, while the quartic correction introduces a weak nonlinearity. It is therefore natural to interpret the device as an oscillator whose level spacing is almost, but not exactly, uniform. In other words, superconducting transmon-like qubits are \emph{weakly anharmonic oscillators} rather than exact spin-$1/2$ systems \cite{Koch2007,Krantz2019}. This distinction is crucial: without anharmonicity, a resonant drive tuned to the $\ket{0}\leftrightarrow\ket{1}$ transition would also excite higher transitions, making selective qubit control impossible.
+
+Introducing bosonic ladder operators in the usual way,
+\begin{equation}
+\hat{\varphi} = \varphi_{\mathrm{zpf}}(\hat{a}+\hat{a}^{\dagger}),
+\qquad
+\hat{n} = i n_{\mathrm{zpf}}(\hat{a}^{\dagger}-\hat{a}),
+\label{eq:zpf_operators}
+\end{equation}
+with zero-point fluctuation amplitudes chosen so as to diagonalize the quadratic part, one may rewrite the Hamiltonian approximately as a weakly nonlinear oscillator,
+\begin{equation}
+\hat{H}_{\mathrm{tr}}
+\approx
+\omega_p \left(\hat{a}^{\dagger}\hat{a}+\frac{1}{2}\right)
++
+\frac{\alpha}{2}\hat{a}^{\dagger}\hat{a}^{\dagger}\hat{a}\hat{a}
++\cdots,
+\label{eq:duffing_hamiltonian}
+\end{equation}
+where
+\begin{equation}
+\omega_p \approx \sqrt{8E_JE_C},
+\label{eq:plasma_frequency}
+\end{equation}
+in units with $\hbar=1$, and where $\alpha$ denotes the anharmonicity. More precisely, perturbation theory yields the well-known large-$E_J/E_C$ approximation for the energy levels
+\begin{equation}
+E_m
+\approx
+- E_J
++
+\sqrt{8E_JE_C}\left(m+\frac{1}{2}\right)
+-
+\frac{E_C}{12}\left(6m^2+6m+3\right),
+\qquad
+m=0,1,2,\dots,
+\label{eq:transmon_energy_levels}
+\end{equation}
+from which the transition frequencies follow as
+\begin{equation}
+\omega_{m,m+1}
+=
+E_{m+1}-E_m
+\approx
+\sqrt{8E_JE_C} - E_C(m+1).
+\label{eq:transition_frequencies}
+\end{equation}
+In particular,
+\begin{equation}
+\omega_{01}
+\approx
+\sqrt{8E_JE_C}-E_C,
+\qquad
+\omega_{12}
+\approx
+\sqrt{8E_JE_C}-2E_C,
+\label{eq:first_two_transitions}
+\end{equation}
+so that the anharmonicity is approximately
+\begin{equation}
+\alpha
+:=
+\omega_{12}-\omega_{01}
+\approx
+- E_C.
+\label{eq:anharmonicity_definition}
+\end{equation}
+Equation~\eqref{eq:anharmonicity_definition} shows explicitly why the transmon is only weakly anharmonic: the nonuniformity of the spectrum is governed by $E_C$, while the overall transition frequency is of order $\sqrt{8E_JE_C}$. In the transmon regime of Eq.~\eqref{eq:transmon_regime}, one therefore has
+\begin{equation}
+|\alpha| \ll \omega_{01},
+\label{eq:weak_anharmonicity_condition}
+\end{equation}
+which is the mathematical expression of the weakly anharmonic limit \cite{Koch2007,Krantz2019}.
+
+The logical qubit is then encoded in the two-dimensional computational subspace
+\begin{equation}
+\mathcal{H}_{\mathrm{comp}}
+=
+\mathrm{span}\left\{\ket{0},\ket{1}\right\},
+\label{eq:single_qubit_computational_subspace}
+\end{equation}
+where $\ket{0}$ and $\ket{1}$ denote the ground and first excited eigenstates of the circuit Hamiltonian. The full device Hilbert space, however, is larger:
+\begin{equation}
+\mathcal{H}_{\mathrm{phys}}
+=
+\mathrm{span}\left\{\ket{0},\ket{1},\ket{2},\ket{3},\dots\right\}.
+\label{eq:physical_hilbert_space_multilevel}
+\end{equation}
+Thus, the qubit approximation is not fundamental but effective: it consists in restricting the dynamics to Eq.~\eqref{eq:single_qubit_computational_subspace} and neglecting population transfer into higher excited states. This approximation is excellent when control pulses are sufficiently weak, spectrally selective, and adiabatic with respect to unwanted transitions, but it is never exact. In particular, short or strong pulses can admix the states $\ket{2},\ket{3},\dots$, making the multilevel structure physically relevant even for nominally two-level gate operations \cite{Krantz2019,Kjaergaard2020}.
+
+For this reason, it is often useful to describe a driven superconducting qubit directly in bosonic language. A generic driven weakly anharmonic mode may be modeled as
+\begin{equation}
+\hat{H}(t)
+=
+\omega_q \hat{a}^{\dagger}\hat{a}
++
+\frac{\alpha}{2}\hat{a}^{\dagger}\hat{a}^{\dagger}\hat{a}\hat{a}
++
+\Omega(t)\left(\hat{a}+\hat{a}^{\dagger}\right),
+\label{eq:driven_weakly_anharmonic_mode}
+\end{equation}
+where $\omega_q$ is the fundamental transition frequency, $\alpha<0$ the weak anharmonicity, and $\Omega(t)$ an externally applied microwave drive. Equation~\eqref{eq:driven_weakly_anharmonic_mode} makes two points transparent. First, the creation and annihilation operators act on the full ladder of states and therefore naturally include higher-level dynamics. Second, the same control field that is intended to drive the $\ket{0}\leftrightarrow\ket{1}$ transition also couples, in principle, to $\ket{1}\leftrightarrow\ket{2}$ and higher transitions, with selectivity arising only because the spectrum is not exactly harmonic. The control task is therefore intrinsically multilevel.
+
+This multilevel perspective is not merely a pedagogical refinement; it is the viewpoint adopted in the reference paper analyzed in this thesis. In its Appendix A, the gmon architecture is modeled by quantizing the circuit degrees of freedom in terms of bosonic modes and then deriving an effective rotating-wave Hamiltonian with explicit anharmonicity, tunable coupling, detuning controls, and microwave drives \cite{Niu2019}. In that formulation, each superconducting qubit is treated as a weakly anharmonic oscillator before projection onto the qubit basis, exactly in line with the general discussion above. This is the correct framework for studying high-performance control, because it preserves the higher excited levels that are responsible for leakage and because it allows one to assess whether a pulse remains confined to the intended logical sector.
+
+When two such devices are coupled, the same principle persists at the multi-qubit level. If each qubit is truncated to $d_{\mathrm{loc}}$ levels, the full two-body Hilbert space has dimension
+\begin{equation}
+\dim \mathcal{H}_{\mathrm{phys}}^{(2)}
+=
+d_{\mathrm{loc}}^{\,2},
+\label{eq:two_qubit_physical_dimension}
+\end{equation}
+whereas the logical computational sector retains dimension
+\begin{equation}
+\dim \mathcal{H}_{\mathrm{comp}}^{(2)} = 4.
+\label{eq:two_qubit_computational_dimension}
+\end{equation}
+Already with $d_{\mathrm{loc}}=3$, one obtains a $9$-dimensional physical space for a nominally two-qubit gate. This illustrates why the multilevel description rapidly becomes unavoidable in realistic control simulations: even if the target gate acts only on the logical subspace, the actual Schr\"odinger evolution takes place in a larger Hilbert space that contains leakage channels.
+
+In summary, superconducting qubits should be viewed as engineered nonlinear oscillators whose weak anharmonicity enables qubit selectivity but does not eliminate the presence of higher excited states. The logical qubit is encoded in the two lowest levels, yet the full control problem is inherently multilevel. This fact underlies the entire structure of modern superconducting quantum control: it explains why one uses bosonic or multilevel Hamiltonians at the modeling stage, why fast control can induce unwanted excitations, and why leakage must later be treated as an explicit optimization objective. The next paragraph will build directly on this point by introducing the computational subspace more carefully and defining leakage as population transfer outside it.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    x=1cm, y=1cm,
+    level/.style={thick},
+    drive/.style={-{Latex[length=2mm]}, very thick},
+    brace/.style={decorate,decoration={brace,amplitude=6pt}},
+    lbl/.style={font=\small}
+]
+
+% Energy levels
+\draw[level] (0,0) -- (3.2,0) node[right,lbl] {$\ket{0}$};
+\draw[level] (0,1.5) -- (3.2,1.5) node[right,lbl] {$\ket{1}$};
+\draw[level] (0,2.75) -- (3.2,2.75) node[right,lbl] {$\ket{2}$};
+\draw[level] (0,3.8) -- (3.2,3.8) node[right,lbl] {$\ket{3}$};
+
+% Braces for transition spacings
+\draw[brace] (-0.25,0) -- (-0.25,1.5)
+    node[midway,left=8pt,lbl] {$\omega_{01}$};
+\draw[brace] (-0.25,1.5) -- (-0.25,2.75)
+    node[midway,left=8pt,lbl] {$\omega_{12}$};
+\draw[brace] (-0.25,2.75) -- (-0.25,3.8)
+    node[midway,left=8pt,lbl] {$\omega_{23}$};
+
+% Computational subspace highlight
+\draw[dashed,rounded corners] (-0.55,-0.25) rectangle (3.55,1.8);
+\node[lbl] at (1.5,-0.65) {computational subspace};
+
+% Anharmonicity annotation
+\node[lbl] at (4.5,2.1) {$\alpha=\omega_{12}-\omega_{01}<0$};
+
+% Intended drive
+\draw[drive] (3.6,0.15) -- (4.9,1.35);
+\node[lbl] at (5.65,0.95) {intended};
+
+% Leakage path
+\draw[drive,dashed] (3.6,1.65) -- (4.9,2.6);
+\node[lbl] at (5.75,2.45) {possible leakage};
+
+\end{tikzpicture}
+\caption{Schematic spectrum of a weakly anharmonic superconducting qubit. The two lowest levels define the computational subspace, while the higher levels remain physically present. Because the transition spacings are unequal but not widely separated, a drive resonant with the logical transition can still weakly couple to higher transitions, especially under strong or short pulses.}
+\label{fig:weakly_anharmonic_ladder}
+\end{figure}
 
 \end{document}
