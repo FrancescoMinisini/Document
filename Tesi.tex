@@ -1633,4 +1633,209 @@ For the purposes of this thesis, the relevance of RL is therefore twofold. First
 \label{fig:rl_quantum_control_loop}
 \end{figure}
 
+\subsection{Policy optimization for continuous-action quantum control}
+\label{subsec:policy_optimization_continuous_actions}
+
+Once a quantum-control task has been formulated as a sequential decision problem, the next issue is how the policy should be represented and optimized. This question is especially important in pulse engineering, because the controls applied to a quantum device are typically \emph{continuous} variables: microwave amplitudes, phases, detunings, and coupler biases take values in subsets of $\mathbb{R}^{m}$ rather than in a small discrete action set. For this reason, many quantum-control problems are more naturally approached with \emph{policy optimization} methods than with purely value-based reinforcement-learning algorithms originally designed for discrete actions \cite{SuttonBarto2018,Silver2014,Giannelli2022}. The reference paper studied in this thesis fits exactly into this setting: at each time step, the agent chooses continuous control values, and the resulting pulse trajectory is optimized through a policy-gradient method, specifically trust-region policy optimization (TRPO) \cite{Niu2019}.
+
+To make this precise, let the control horizon be divided into discrete time steps $t=0,1,\dots,T-1$, and let the action at time $t$ be a continuous vector
+\begin{equation}
+a_t \in \mathcal{A} \subseteq \mathbb{R}^{m}.
+\label{eq:continuous_action_space}
+\end{equation}
+In the context of quantum pulse design, one may identify
+\begin{equation}
+a_t \equiv \bm{u}_t,
+\label{eq:action_as_control_vector}
+\end{equation}
+where $\bm{u}_t$ denotes the set of control amplitudes applied over the next time slice. A parameterized stochastic policy then specifies a probability density over actions conditioned on the current state:
+\begin{equation}
+a_t \sim \pi_{\bm{\theta}}(\,\cdot \mid s_t),
+\label{eq:stochastic_policy_sampling}
+\end{equation}
+with parameters $\bm{\theta}$. In continuous-control applications, a common choice is a Gaussian policy,
+\begin{equation}
+\pi_{\bm{\theta}}(a\mid s)
+=
+\mathcal{N}\!\bigl(a;\,\bm{\mu}_{\bm{\theta}}(s),\,\Sigma_{\bm{\theta}}(s)\bigr),
+\label{eq:gaussian_policy}
+\end{equation}
+where $\bm{\mu}_{\bm{\theta}}(s)$ is the policy mean and $\Sigma_{\bm{\theta}}(s)$ is the covariance matrix. Equation~\eqref{eq:gaussian_policy} is particularly natural for pulse optimization, because it allows the policy to output a mean control action together with an exploration scale, thereby balancing exploitation of already promising pulse shapes with continued sampling of nearby alternatives \cite{SuttonBarto2018,Schulman2015}.
+
+The fundamental reason policy methods are attractive in this setting is that value-based action maximization becomes awkward in continuous spaces. In discrete-action reinforcement learning, a greedy policy can be obtained by choosing
+\begin{equation}
+a^{\star}(s)
+=
+\arg\max_{a\in\mathcal{A}} Q(s,a),
+\label{eq:discrete_greedy_action}
+\end{equation}
+since the maximization involves only finitely many candidate actions. In continuous spaces, however, the analogous operation
+\begin{equation}
+a^{\star}(s)
+=
+\arg\max_{a\in\mathbb{R}^{m}} Q(s,a)
+\label{eq:continuous_action_maximization}
+\end{equation}
+is itself a nontrivial optimization problem that must, in principle, be solved at every time step. This greatly complicates the use of purely value-based methods in continuous-control domains. Policy optimization avoids this issue by directly parameterizing the control law $a=\pi_{\bm{\theta}}(s)$ or the action density $\pi_{\bm{\theta}}(a\mid s)$ and updating its parameters to improve the expected return \cite{Silver2014,SuttonBarto2018}. For quantum control, where the action is already the pulse amplitude vector, this direct parameterization is especially natural.
+
+The objective remains the expected discounted return,
+\begin{equation}
+J(\bm{\theta})
+=
+\mathbb{E}_{\tau\sim\pi_{\bm{\theta}}}
+\left[
+\sum_{t=0}^{T}
+\gamma^{t} r_t
+\right],
+\label{eq:policy_objective_continuous}
+\end{equation}
+where $\tau$ denotes a trajectory sampled under the policy and the system dynamics. Policy-gradient methods optimize Eq.~\eqref{eq:policy_objective_continuous} by differentiating it with respect to the policy parameters. In one of its standard forms, the policy-gradient theorem states that
+\begin{equation}
+\nabla_{\bm{\theta}} J(\bm{\theta})
+=
+\mathbb{E}_{\tau\sim\pi_{\bm{\theta}}}
+\left[
+\sum_{t=0}^{T}
+\nabla_{\bm{\theta}}
+\log \pi_{\bm{\theta}}(a_t\mid s_t)\,
+Q^{\pi_{\bm{\theta}}}(s_t,a_t)
+\right],
+\label{eq:policy_gradient_theorem}
+\end{equation}
+where $Q^{\pi_{\bm{\theta}}}(s,a)$ is the action-value function under the current policy \cite{Sutton2000,SuttonBarto2018}. Equation~\eqref{eq:policy_gradient_theorem} is the central mathematical reason policy optimization is feasible in continuous spaces: one does not need to solve Eq.~\eqref{eq:continuous_action_maximization}; instead, one estimates a gradient that directly tells how to change the policy parameters so as to increase expected return.
+
+In practice, the variance of the estimator in Eq.~\eqref{eq:policy_gradient_theorem} can be large. A standard improvement is to subtract a baseline $b(s_t)$ without changing the expected gradient, yielding
+\begin{equation}
+\nabla_{\bm{\theta}} J(\bm{\theta})
+=
+\mathbb{E}_{\tau\sim\pi_{\bm{\theta}}}
+\left[
+\sum_{t=0}^{T}
+\nabla_{\bm{\theta}}
+\log \pi_{\bm{\theta}}(a_t\mid s_t)\,
+\bigl(
+Q^{\pi_{\bm{\theta}}}(s_t,a_t)-b(s_t)
+\bigr)
+\right].
+\label{eq:policy_gradient_with_baseline}
+\end{equation}
+Choosing the baseline to be the state-value function,
+\begin{equation}
+b(s)=V^{\pi_{\bm{\theta}}}(s),
+\label{eq:value_baseline}
+\end{equation}
+one obtains the \emph{advantage function}
+\begin{equation}
+A^{\pi_{\bm{\theta}}}(s,a)
+=
+Q^{\pi_{\bm{\theta}}}(s,a)-V^{\pi_{\bm{\theta}}}(s),
+\label{eq:advantage_definition}
+\end{equation}
+and the gradient becomes
+\begin{equation}
+\nabla_{\bm{\theta}} J(\bm{\theta})
+=
+\mathbb{E}_{\tau\sim\pi_{\bm{\theta}}}
+\left[
+\sum_{t=0}^{T}
+\nabla_{\bm{\theta}}
+\log \pi_{\bm{\theta}}(a_t\mid s_t)\,
+A^{\pi_{\bm{\theta}}}(s_t,a_t)
+\right].
+\label{eq:advantage_policy_gradient}
+\end{equation}
+This form is especially important because most modern policy-gradient algorithms, including TRPO, are built around advantage estimates rather than raw returns \cite{Schulman2015,SuttonBarto2018}.
+
+For completeness, it is worth noting that continuous-control RL also admits \emph{deterministic} policy gradients. If one uses a deterministic control law
+\begin{equation}
+a=\mu_{\bm{\theta}}(s),
+\label{eq:deterministic_policy}
+\end{equation}
+then, under suitable assumptions, the objective gradient can be written as
+\begin{equation}
+\nabla_{\bm{\theta}} J(\bm{\theta})
+=
+\mathbb{E}_{s\sim\rho^{\mu_{\bm{\theta}}}}
+\left[
+\nabla_{\bm{\theta}}\mu_{\bm{\theta}}(s)\,
+\nabla_{a}Q^{\mu_{\bm{\theta}}}(s,a)
+\big|_{a=\mu_{\bm{\theta}}(s)}
+\right],
+\label{eq:deterministic_policy_gradient}
+\end{equation}
+where $\rho^{\mu_{\bm{\theta}}}$ is the discounted state-visitation distribution under the deterministic policy \cite{Silver2014}. Deterministic methods can be highly effective in continuous control, especially when the action dimension is large. However, the reference paper does not take this route. Instead, it employs a stochastic policy optimized by TRPO, which is particularly attractive when one wants stable learning under noise and controlled exploration in a stochastic environment \cite{Niu2019,Schulman2015}.
+
+This brings us to the main algorithmic idea relevant for the thesis: \emph{trust-region policy optimization}. A naive policy-gradient update of the form
+\begin{equation}
+\bm{\theta}_{r+1}
+=
+\bm{\theta}_{r}
++
+\eta\,\widehat{\nabla_{\bm{\theta}} J(\bm{\theta}_{r})}
+\label{eq:naive_policy_gradient_update}
+\end{equation}
+can be unstable, especially when the policy is represented by a large neural network and the return estimates are noisy. In such cases, a single large step may change the action distribution so drastically that the new policy performs much worse than the old one, even if the local gradient estimate pointed uphill. TRPO addresses this problem by replacing the unconstrained update with a constrained optimization in policy space, built around a local surrogate objective and a Kullback--Leibler (KL) trust-region constraint \cite{Schulman2015}.
+
+Let $\bm{\theta}_{\mathrm{old}}$ denote the current policy parameters. TRPO optimizes the surrogate objective
+\begin{equation}
+\mathcal{L}_{\bm{\theta}_{\mathrm{old}}}(\bm{\theta})
+=
+\mathbb{E}_{(s,a)\sim\pi_{\bm{\theta}_{\mathrm{old}}}}
+\left[
+\frac{\pi_{\bm{\theta}}(a\mid s)}
+{\pi_{\bm{\theta}_{\mathrm{old}}}(a\mid s)}
+\,
+\hat{A}_{\bm{\theta}_{\mathrm{old}}}(s,a)
+\right],
+\label{eq:trpo_surrogate_objective}
+\end{equation}
+subject to the trust-region constraint
+\begin{equation}
+\mathbb{E}_{s\sim\pi_{\bm{\theta}_{\mathrm{old}}}}
+\left[
+D_{\mathrm{KL}}
+\!\left(
+\pi_{\bm{\theta}_{\mathrm{old}}}(\,\cdot\mid s)
+\;\|\;
+\pi_{\bm{\theta}}(\,\cdot\mid s)
+\right)
+\right]
+\leq
+\delta,
+\label{eq:trpo_kl_constraint}
+\end{equation}
+where $\hat{A}_{\bm{\theta}_{\mathrm{old}}}(s,a)$ is an estimate of the advantage function and $\delta>0$ is a prescribed step-size radius in distribution space \cite{Schulman2015}. Equation~\eqref{eq:trpo_surrogate_objective} measures the expected first-order improvement of the new policy relative to the old one, while Eq.~\eqref{eq:trpo_kl_constraint} ensures that the update does not move too far from the current action distribution. In this sense, TRPO does not merely limit parameter changes; it limits changes in the \emph{behavior} of the policy.
+
+The KL constraint is particularly meaningful in continuous-action control. For a Gaussian policy as in Eq.~\eqref{eq:gaussian_policy}, a large parameter step can correspond to a substantial change in both the mean control signal and its exploration variance. In quantum pulse design this can be dangerous: a sudden policy shift may produce control sequences that are wildly different from those already found to be promising, causing catastrophic drops in fidelity or erratic training dynamics. By constraining the expected KL divergence, TRPO enforces a notion of \emph{stable policy improvement}, which is one reason it has historically been effective for nonlinear continuous-control tasks \cite{Schulman2015}. This is directly relevant to the uploaded paper, where the agent must learn pulse trajectories in a stochastic environment and where training instability would make robust gate optimization far more difficult \cite{Niu2019}.
+
+There is also a conceptual reason why policy optimization is a good match for quantum control. In pulse-design problems, the action at each time step is not an isolated move but part of a temporally correlated control trajectory whose final value is only revealed at the end of the episode. The quality of a pulse depends on interference, accumulated phase, transient leakage, and the interaction between early and late parts of the control sequence. Policy-based methods are well suited to this because they optimize the entire action-generating rule rather than treating each action selection as a stand-alone maximization problem. This makes them particularly attractive when the action space is continuous, the rewards are delayed, and the control landscape is highly nonconvex—precisely the regime encountered in robust quantum pulse design \cite{Giannelli2022,Niu2019}.
+
+For the purposes of this thesis, the key message is the following. Once the control amplitudes are treated as continuous actions, reinforcement learning naturally leads to policy-gradient methods rather than to purely value-based discrete-action algorithms. Among policy-gradient methods, TRPO is especially relevant because it combines direct optimization of continuous stochastic policies with a principled mechanism for stabilizing updates through a trust-region constraint. This is why it forms the algorithmic core of the reference paper and why it provides the natural bridge between the general RL background developed so far and the specific deep-RL control framework analyzed in the following chapter.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    box/.style={draw, rounded corners, minimum width=3.0cm, minimum height=1.0cm, align=center},
+    arrow/.style={-{Latex[length=2mm]}, thick},
+    node distance=1.6cm and 1.8cm
+]
+
+\node[box] (state) {state $s_t$};
+\node[box, right=of state] (policy) {stochastic policy\\ $\pi_{\bm{\theta}}(a\mid s)$};
+\node[box, right=of policy] (action) {continuous action\\ $a_t=\bm{u}_t\in\mathbb{R}^m$};
+\node[box, below=of policy] (env) {quantum dynamics\\ + reward};
+\node[box, below=of action] (trpo) {TRPO update\\ maximize \eqref{eq:trpo_surrogate_objective}\\ subject to \eqref{eq:trpo_kl_constraint}};
+
+\draw[arrow] (state) -- (policy);
+\draw[arrow] (policy) -- (action);
+\draw[arrow] (action) -- (env);
+\draw[arrow] (env) -- (state);
+\draw[arrow] (env) -- (trpo);
+\draw[arrow] (trpo) -- (policy);
+
+\end{tikzpicture}
+\caption{Continuous-action policy optimization in quantum control. The policy maps the current state to a distribution over continuous control amplitudes, the quantum system returns the resulting trajectory information and reward, and TRPO updates the policy through a surrogate objective constrained by a KL trust region.}
+\label{fig:continuous_action_trpo}
+\end{figure}
+
 \end{document}
