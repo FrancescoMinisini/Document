@@ -2911,6 +2911,134 @@ In the structure of the thesis, this subsection should be read as the algorithmi
 \label{fig:trpo_trust_region}
 \end{figure}
 
+% Requires in the preamble:
+% \usepackage{amsmath,amssymb,amsfonts,bm}
+% \usepackage{tikz}
+% \usetikzlibrary{positioning,arrows.meta}
+
+\subsection{Training in a stochastic control environment}
+\label{subsec:stochastic_training_environment}
+
+A distinctive feature of the reference paper is that robustness is not treated merely as a post-training diagnostic. Instead, stochastic control errors are inserted directly into the training environment, so that the reinforcement-learning agent is optimized under noisy conditions from the outset \cite{Niu2019}. This is a conceptually important design choice. In a purely nominal training regime, the agent would learn control trajectories that are optimal only for the unperturbed Hamiltonian, and robustness would be assessed only afterward by testing how much the resulting performance degrades under perturbations. The paper adopts the opposite strategy: it places the agent in a stochastic environment during learning and thereby encourages the discovery of pulse sequences whose performance remains good across many noisy realizations.
+
+The stochasticity is introduced at the level of the control amplitudes. At each discrete time step \(t_k\), the ideal control Hamiltonian specified by the policy is modified by random fluctuations representing control noise. Denoting by \(\hat{H}(t_k)\) the intended Hamiltonian and by \(\delta \hat{H}(t_k)\) the perturbation, the noisy one-step propagation used during training takes the form
+\begin{equation}
+U_{k+1}
+=
+\exp\!\left[
+-i\Delta t\,
+\bigl(
+\hat{H}(t_k)+\delta \hat{H}(t_k)
+\bigr)
+\right]
+U_k.
+\label{eq:noisy_environment_update}
+\end{equation}
+Equation~\eqref{eq:noisy_environment_update} is the stochastic counterpart of the noiseless environment update introduced in the previous subsection. The agent therefore does not interact with a single deterministic Hamiltonian trajectory, but with an ensemble of randomly perturbed trajectories generated from the same policy action sequence.
+
+In the implementation described by the paper, the control perturbations are modeled as Gaussian fluctuations added to the control amplitudes \cite{Niu2019}. Writing schematically the ideal control vector at time step \(k\) as
+\begin{equation}
+\bm{u}(t_k)
+=
+\bigl(
+g(t_k),\delta_1(t_k),\delta_2(t_k),f_1(t_k),f_2(t_k),\dots
+\bigr),
+\label{eq:ideal_control_vector_noise_section}
+\end{equation}
+the noisy realization may be represented as
+\begin{equation}
+\bm{u}_{\mathrm{noisy}}(t_k)
+=
+\bm{u}(t_k)
++
+\bm{\xi}(t_k),
+\label{eq:noisy_control_vector}
+\end{equation}
+where
+\begin{equation}
+\bm{\xi}(t_k)
+\sim
+\mathcal{N}\!\left(\bm{0},\,\Sigma_{\xi}\right)
+\label{eq:gaussian_control_noise}
+\end{equation}
+is a Gaussian random vector. In this way, the same deterministic policy can generate different realized control trajectories on different episodes, reflecting the fact that in an experimental setting the nominal pulse sent to the hardware is never reproduced perfectly.
+
+From the viewpoint of reinforcement learning, this changes the optimization target in an essential way. The policy no longer maximizes the return of a single deterministic trajectory, but the \emph{expected} return over both the trajectory distribution induced by the policy and the distribution of control perturbations:
+\begin{equation}
+J(\bm{\theta})
+=
+\mathbb{E}_{\tau,\xi}
+\left[
+\sum_{k=0}^{N-1}\gamma^k r_k
+\right].
+\label{eq:expected_return_under_noise}
+\end{equation}
+Equivalently, if the reward is defined as the negative UFO cost, one may write
+\begin{equation}
+J(\bm{\theta})
+=
+-
+\mathbb{E}_{\tau,\xi}
+\left[
+C(\chi,\beta,\mu,\kappa)
+\right].
+\label{eq:expected_ufo_cost_under_noise}
+\end{equation}
+Thus, training in a stochastic environment directly transforms the control problem into a robust optimization problem: the agent is encouraged to find policies that perform well on average over noisy realizations rather than excelling only in the idealized nominal setting.
+
+This is one of the most elegant aspects of the paper's methodology. Robustness is not introduced through a separate outer-loop procedure or through repeated experimental recalibration, but through the RL environment itself. The environment becomes a sampling mechanism for control uncertainty, and the policy-gradient update uses these noisy rollouts to improve the expected performance of the control strategy. In this sense, stochastic training acts as an implicit regularizer: pulse trajectories that are overly fragile under small perturbations will exhibit poor average return and will therefore be disfavored during learning.
+
+The paper evaluates the success of this strategy through two key diagnostics. The first is the \emph{average gate fidelity} under noisy control realizations,
+\begin{equation}
+\overline{F}_{\mathrm{noisy}}
+=
+\mathbb{E}_{\xi}
+\left[
+F\!\left(U_{\xi}(T),U_{\mathrm{target}}\right)
+\right],
+\label{eq:noisy_average_fidelity}
+\end{equation}
+where \(U_{\xi}(T)\) denotes the final propagator obtained under one sampled noisy trajectory. The second is the fidelity variance,
+\begin{equation}
+\mathrm{Var}_{\xi}[F]
+=
+\mathbb{E}_{\xi}\!\left[F_{\xi}^{2}\right]
+-
+\left(\mathbb{E}_{\xi}[F_{\xi}]\right)^{2},
+\label{eq:fidelity_variance_noise}
+\end{equation}
+which quantifies the consistency of the gate performance across different noise realizations. These two quantities are complementary. A policy with high average fidelity but very large variance may still be experimentally undesirable, because it performs unreliably from shot to shot. By contrast, a policy with slightly lower mean fidelity but much lower variance may be more robust in practice.
+
+The use of fidelity variance is particularly insightful. It reflects the fact that robustness should not be understood only as good \emph{mean} performance, but also as small sensitivity to uncertainty. In other words, a robust control is not merely a control whose expected output is good; it is a control whose performance is also reproducible. This makes the paper's evaluation framework more physically meaningful than one based solely on nominal fidelity or even average fidelity alone \cite{Niu2019}. It also explains why the paper emphasizes reductions in both average noisy gate error and fidelity variance when comparing the RL solutions to baseline methods.
+
+A further conceptual point is that the noisy training environment is aligned with the physical error model of interest. The paper is not injecting arbitrary synthetic stochasticity for machine-learning convenience; it is perturbing the same control amplitudes that are subject to imperfections in actual superconducting hardware. Thus, the stochastic environment serves as a simple but physically interpretable proxy for experimental control uncertainty. This is important, because it distinguishes the methodology from generic noise-augmentation heuristics: the perturbations are chosen specifically to reflect the control channels that matter in the underlying Hamiltonian.
+
+From the perspective of the thesis, this subsection is where robustness fully enters the learning formulation. Earlier subsections introduced robustness as a motivation and the UFO objective as a physically meaningful cost. The present subsection shows how the paper turns that idea into practice: the RL agent is trained on noisy Hamiltonian trajectories, and performance is judged by noisy average fidelity and fidelity variance. The next subsection will complete the framework by specifying the target family of two-qubit gates on which the method is trained and benchmarked.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    box/.style={draw, rounded corners, minimum width=3.0cm, minimum height=1cm, align=center},
+    arrow/.style={-{Latex[length=2mm]}, thick},
+    node distance=1.6cm and 1.6cm
+]
+
+\node[box] (policy) {policy output\\ideal controls \(\bm{u}(t_k)\)};
+\node[box, right=of policy] (noise) {Gaussian noise\\\(\bm{\xi}(t_k)\)};
+\node[box, right=of noise] (env) {noisy Hamiltonian\\\(\hat H+\delta \hat H\)};
+\node[box, below=of noise] (eval) {average fidelity\\variance};
+
+\draw[arrow] (policy) -- (noise);
+\draw[arrow] (noise) -- (env);
+\draw[arrow] (env) -- (eval);
+
+\end{tikzpicture}
+\caption{Training under stochastic control noise. The policy proposes ideal controls, Gaussian perturbations are added to produce a noisy Hamiltonian trajectory, and the resulting performance is evaluated statistically through average fidelity and fidelity variance.}
+\label{fig:stochastic_training_environment}
+\end{figure}
+
+
+
 \newpage
 \bibliographystyle{plain} % oppure unsrt, alpha, ieee
 \bibliography{references}
