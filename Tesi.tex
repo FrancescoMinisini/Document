@@ -3088,6 +3088,107 @@ It is useful to summarize the logic of this choice as follows:
 \end{equation}
 
 
+% Requires in the preamble:
+% \usepackage{amsmath,amssymb,amsfonts,bm}
+
+\subsection{Baselines and comparison strategy}
+\label{subsec:baselines_comparison_strategy}
+
+Once the target gate family \(N(\alpha,\alpha,\gamma)\) has been specified, the next step is to determine how the performance of the proposed control method should be assessed. The reference paper uses a comparison strategy built around two distinct questions \cite{Niu2019}. First, can the RL-based analog control produce target gates more \emph{robustly} than alternative pulse-optimization methods under stochastic control noise? Second, can it realize those gates more \emph{quickly} than their standard circuit-synthesis counterparts? These two questions lead naturally to two complementary classes of baselines: direct control-optimization baselines for robustness, and circuit-synthesis baselines for runtime.
+
+The first baseline is a direct optimization of the control trajectory using stochastic gradient descent (SGD), implemented with the Adam optimizer \cite{Niu2019,Kingma2015}. This baseline is important because it represents the most immediate non-RL alternative: one keeps the same physical control problem and the same general objective structure, but optimizes the control parameters directly rather than through a policy-gradient agent. In the logic of the paper, this baseline tests whether the use of a policy-based second-order learning method such as TRPO actually provides an advantage over simpler first-order optimization of the raw control variables.
+
+The second baseline is a reinforcement-learning control solution trained in a \emph{noise-free} environment. This comparison is conceptually very useful, because it isolates the effect of stochastic training. If the noise-optimized RL controller outperforms the noise-free RL controller under noisy deployment conditions, then the improvement can be attributed not merely to the use of reinforcement learning as such, but specifically to the fact that the agent was trained under stochastic control perturbations. The comparison between these two RL settings therefore answers the question: is robustness really being learned from the noisy environment, or is it simply a generic byproduct of the RL architecture?
+
+The third and most structurally different baseline is the \emph{optimal gate synthesis} benchmark for the target family \(N(\alpha,\alpha,\gamma)\). The paper notes that this family admits an optimal decomposition into a minimum-depth circuit of arbitrary single-qubit rotations and CZ-type entangling gates, giving a depth-seven circuit containing three two-qubit gates and five single-qubit gates \cite{Niu2019}. Using state-of-the-art experimental gate times, the paper sets
+\begin{equation}
+T_{1q} = 20~\mathrm{ns},
+\qquad
+T_{\mathrm{CNOT}} = 45~\mathrm{ns},
+\label{eq:baseline_gate_times}
+\end{equation}
+so that the total runtime of the synthesized implementation is
+\begin{equation}
+T_{\mathrm{syn}} \approx 215~\mathrm{ns}.
+\label{eq:optimal_gate_synthesis_runtime}
+\end{equation}
+Equation~\eqref{eq:optimal_gate_synthesis_runtime} provides the reference against which the analog RL control solutions are compared in terms of runtime. This is a particularly meaningful baseline, because it addresses the core hardware-efficiency claim of the paper: namely, whether direct pulse-level optimization can outperform even an \emph{optimal} discrete circuit decomposition for the same target gate family.
+
+The robustness comparison is based on repeated sampling of noisy control realizations. Let \(\tilde{\bm{c}}\) denote an optimized control trajectory, and let \(\delta \tilde{\bm{c}}\) be a random perturbation sampled from a Gaussian control-noise model,
+\begin{equation}
+\delta \tilde{\bm{c}} \sim \mathcal{N}(0,\sigma_{\mathrm{noise}}).
+\label{eq:gaussian_noise_model_baseline_section}
+\end{equation}
+The paper then evaluates the final gate under the perturbed control \(\tilde{\bm{c}}+\delta \tilde{\bm{c}}\) and computes the corresponding gate fidelity. The primary robustness metric is the average fidelity,
+\begin{equation}
+F_{\mathrm{ave}}
+=
+\mathbb{E}_{\delta \tilde{\bm{c}} \sim \mathcal{N}(0,\sigma_{\mathrm{noise}})}
+\left[
+F\bigl(U(\tilde{\bm{c}}+\delta \tilde{\bm{c}})\bigr)
+\right],
+\label{eq:paper_average_fidelity_metric}
+\end{equation}
+which measures the mean control performance under the chosen stochastic error model. This quantity is central because it asks not how good the pulse is in the idealized nominal setting, but how well it performs when the controls are randomly perturbed in the way expected experimentally.
+
+The second robustness metric is the sampled fidelity variance,
+\begin{equation}
+\sigma_{\mathrm{fidelity}}^{2}
+=
+\mathbb{E}_{\delta \tilde{\bm{c}} \sim \mathcal{N}(0,\sigma_{\mathrm{noise}})}
+\left[
+\left(
+F\bigl(U(\tilde{\bm{c}}+\delta \tilde{\bm{c}})\bigr)
+-
+F_{\mathrm{ave}}
+\right)^{2}
+\right].
+\label{eq:paper_fidelity_variance_metric}
+\end{equation}
+Equation~\eqref{eq:paper_fidelity_variance_metric} complements the average fidelity by measuring the shot-to-shot stability of the control scheme under noise. This distinction is important. A control strategy can have a high mean fidelity but still be experimentally fragile if its output fluctuates strongly across noise realizations. For this reason, the paper uses both Eqs.~\eqref{eq:paper_average_fidelity_metric} and \eqref{eq:paper_fidelity_variance_metric} as robustness diagnostics.
+
+The Gaussian control-noise model itself is varied over a family of noise strengths,
+\begin{equation}
+\sigma_{\mathrm{noise}} \in [0.1,\,3.5]~\mathrm{MHz},
+\label{eq:noise_variance_range}
+\end{equation}
+with \(\sigma_{\mathrm{noise}}=1~\mathrm{MHz}\) treated in the paper as a representative experimentally relevant scale \cite{Niu2019}. This range is useful for two reasons. First, it allows the paper to test robustness across a continuum of increasingly severe perturbation strengths rather than at a single arbitrarily chosen noise value. Second, it makes the resulting fidelity curves and variance curves far more informative: one can see not only which method performs best at one point, but how rapidly each method degrades as the stochastic control error becomes stronger.
+
+The overall comparison strategy can therefore be summarized as follows. For \emph{robustness}, the paper compares three control schemes:
+\begin{enumerate}
+\item noise-optimized RL control,
+\item noise-free RL control,
+\item SGD-based control optimization.
+\end{enumerate}
+For \emph{runtime}, it compares the noise-optimized analog RL control against the optimal gate-synthesis baseline. This division is very sensible. The SGD and noise-free RL baselines answer whether the learning formulation and noisy training genuinely improve robust pulse optimization, while the gate-synthesis baseline answers whether analog control provides a hardware-efficiency advantage over standard circuit compilation.
+
+One of the strengths of this comparison strategy is that it does not rely on a single metric. A weaker paper might have reported only nominal final infidelity, in which case it would have been unclear whether the method improved robustness, runtime, or both. Here, by contrast, each baseline is tied to a specific scientific question:
+\begin{itemize}
+\item \textbf{SGD baseline:} does policy-gradient RL outperform direct pulse optimization?
+\item \textbf{Noise-free RL baseline:} does stochastic training actually improve robustness?
+\item \textbf{Optimal gate synthesis baseline:} does analog control improve hardware efficiency?
+\item \textbf{Average fidelity and variance:} is the resulting control both accurate and stable under noise?
+\end{itemize}
+This makes the numerical results much easier to interpret and gives the paper a clearer argumentative structure.
+
+For the purposes of the thesis, the present subsection should be read as the methodological setup for the results section. It tells the reader what is being compared, why those baselines are the relevant ones, and which metrics are used to judge success. The next subsection can then summarize the principal findings of the paper, now that the comparison framework has been made explicit.
+
+% Optional short summary equation
+In compact form, the evaluation logic of the paper may be summarized as
+\begin{equation}
+\text{performance}
+=
+\bigl(
+\text{runtime},
+\;
+F_{\mathrm{ave}},
+\;
+\sigma_{\mathrm{fidelity}}^{2}
+\bigr),
+\label{eq:evaluation_triplet}
+\end{equation}
+with each baseline probing a different aspect of this performance vector.
+
 \newpage
 \bibliographystyle{plain} % oppure unsrt, alpha, ieee
 \bibliography{references}
