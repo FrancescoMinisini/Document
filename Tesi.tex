@@ -1218,4 +1218,160 @@ For the purposes of this thesis, the most important point is the following. The 
 \label{fig:open_closed_loop_control}
 \end{figure}
 
+\subsection{Classical optimal-control methods for quantum systems}
+\label{subsec:classical_qoc_methods}
+
+Before introducing reinforcement-learning-based control, it is useful to summarize the main families of \emph{classical} optimal-control methods that have shaped modern quantum pulse engineering. In all of them, the basic problem is the same: one specifies a dynamical model, chooses a parameterization of the control fields, defines a cost functional that encodes the target task, and then numerically optimizes the control so as to minimize that cost \cite{Khaneja2005,Palao2003,Reich2012,Caneva2011,Machnes2018}. These methods are typically \emph{open-loop} and \emph{model-based}: they rely on repeated simulation of the controlled Schr\"odinger or Lindblad dynamics, and they assume that the model captures the relevant physics with sufficient fidelity.
+
+A general quantum optimal-control problem can be written as follows. Let the system dynamics be governed by a controlled Hamiltonian
+\begin{equation}
+H(t;\bm{u})
+=
+H_{\mathrm{d}}
++
+\sum_{k=1}^{m} u_k(t)\,H_k,
+\label{eq:qoc_controlled_hamiltonian}
+\end{equation}
+with propagator $U(t)$ satisfying
+\begin{equation}
+i\hbar \frac{d}{dt} U(t)
+=
+H(t;\bm{u})\,U(t),
+\qquad
+U(0)=\mathbb{I}.
+\label{eq:qoc_propagator_equation}
+\end{equation}
+The optimization objective is encoded in a cost functional of the generic form
+\begin{equation}
+\mathcal{J}[\bm{u}]
+=
+\Phi\!\bigl(U(T)\bigr)
++
+\int_{0}^{T} g\!\bigl(\bm{u}(t),t\bigr)\,dt,
+\label{eq:qoc_cost_functional}
+\end{equation}
+where $\Phi$ is a terminal cost, for example a gate-infidelity or state-transfer error, and $g$ is a running cost encoding penalties such as pulse energy, smoothness, boundary conditions, or robustness terms. In practice the control is often discretized on a time grid
+\begin{equation}
+u_k(t)=u_{k,\ell},
+\qquad
+t\in[t_\ell,t_{\ell+1}),
+\qquad
+\ell=0,\dots,N-1,
+\label{eq:qoc_piecewise_constant}
+\end{equation}
+which reduces the infinite-dimensional search problem to a finite-dimensional optimization over the amplitudes $\{u_{k,\ell}\}$.
+
+One of the most influential methods in this setting is \emph{GRAPE} (Gradient Ascent Pulse Engineering), originally developed in the NMR community and later widely adopted in quantum information processing \cite{Khaneja2005,deFouquieres2011}. The central idea of GRAPE is to compute the gradient of the cost functional with respect to each control amplitude $u_{k,\ell}$ efficiently by combining forward propagation of the state or propagator with backward propagation of an adjoint variable. In its simplest gradient-descent or gradient-ascent form, the update reads
+\begin{equation}
+u_{k,\ell}^{(r+1)}
+=
+u_{k,\ell}^{(r)}
+-
+\eta
+\frac{\partial \mathcal{J}}{\partial u_{k,\ell}},
+\label{eq:grape_update}
+\end{equation}
+where $\eta$ is a step size and $r$ indexes the optimization iteration. The practical strength of GRAPE is that all control amplitudes can be optimized simultaneously with gradients that scale efficiently once the forward and backward trajectories have been computed. This makes it especially powerful for high-dimensional pulse optimization with fine time discretization.
+
+For state-transfer objectives, the structure of the GRAPE gradient can be illustrated in a standard bilinear setting. Let $\ket{\psi_\ell}$ be the forward-propagated state at time step $\ell$ and let $\ket{\chi_{\ell+1}}$ be the corresponding backward-propagated adjoint state. Then the gradient contribution of the control amplitude $u_{k,\ell}$ has the generic form
+\begin{equation}
+\frac{\partial \mathcal{J}}{\partial u_{k,\ell}}
+\propto
+-\operatorname{Im}
+\left\langle
+\chi_{\ell+1}
+\middle|
+H_k
+\middle|
+\psi_\ell
+\right\rangle,
+\label{eq:grape_gradient_generic}
+\end{equation}
+up to convention-dependent prefactors and discretization factors. Equation~\eqref{eq:grape_gradient_generic} makes clear why GRAPE is computationally attractive: all gradients are obtained from quantities already available during propagation. Later refinements, such as second-order GRAPE and quasi-Newton acceleration, improve convergence speed and numerical robustness without changing this core adjoint-based structure \cite{deFouquieres2011}.
+
+A second major family is based on \emph{Krotov-type} updates. In the quantum-control literature, Krotov's method is valued for its variational foundation and for the possibility of obtaining \emph{monotonic convergence}, meaning that the objective improves at every iteration under appropriate assumptions \cite{Palao2003,Reich2012}. Instead of viewing the optimization merely as a local gradient step in a large Euclidean parameter space, Krotov's method constructs an update directly from the stationarity conditions of the augmented control functional. In a common first-order setting, one obtains an update of the form
+\begin{equation}
+u_k^{(r+1)}(t)
+=
+u_k^{(r)}(t)
++
+\frac{S_k(t)}{\lambda_k}
+\,\operatorname{Im}
+\left\langle
+\chi^{(r)}(t)
+\middle|
+\frac{\partial H}{\partial u_k}
+\middle|
+\psi^{(r+1)}(t)
+\right\rangle,
+\label{eq:krotov_update}
+\end{equation}
+where $S_k(t)$ is a shape function enforcing boundary smoothness or turn-on/turn-off constraints, $\lambda_k$ is a step-size-like penalty parameter, and $\ket{\chi^{(r)}(t)}$ and $\ket{\psi^{(r+1)}(t)}$ are the adjoint and forward states associated with consecutive iterations. The characteristic feature of Eq.~\eqref{eq:krotov_update} is that the new control depends on the newly propagated state $\ket{\psi^{(r+1)}(t)}$, which is one reason why Krotov-type schemes differ structurally from straightforward GRAPE updates.
+
+While GRAPE and Krotov are both gradient-based, they differ in philosophy and practical use. GRAPE is often especially convenient when the controls are piecewise constant and when one wishes to use standard unconstrained optimization tools such as BFGS or L-BFGS in a high-dimensional parameter space. Krotov's method is often preferred when monotonic convergence, time-dependent constraints, or specific functional forms of the objective are important. Both, however, belong to the same broad class: they optimize a cost functional by exploiting gradient information computed from the controlled dynamics \cite{Khaneja2005,Reich2012}.
+
+A rather different strategy is embodied by \emph{CRAB} (Chopped Random Basis), which reduces the search space by expanding the control in a truncated basis and optimizing only the corresponding coefficients \cite{Caneva2011}. A typical CRAB parameterization reads
+\begin{equation}
+u_k(t)
+=
+u_k^{(0)}(t)
+\left[
+1+
+\sum_{m=1}^{M}
+\left(
+A_{k,m}\sin \omega_{k,m} t
++
+B_{k,m}\cos \omega_{k,m} t
+\right)
+\right],
+\label{eq:crab_ansatz}
+\end{equation}
+where $u_k^{(0)}(t)$ is a reference pulse, the frequencies $\omega_{k,m}$ are chosen or randomized within a suitable range, and the coefficients $A_{k,m},B_{k,m}$ become the optimization variables. The conceptual advantage is clear: instead of optimizing hundreds or thousands of piecewise-constant amplitudes, one works in a much lower-dimensional space of coefficients that can naturally encode smoothness, bandwidth restrictions, and experimental simplicity. Because of this reduced parametrization, CRAB is particularly useful when gradients are expensive or unavailable, and it is often combined with gradient-free optimizers such as Nelder--Mead or simplex-type search strategies \cite{Caneva2011}. This basis-restricted perspective is also attractive in experimental closed-loop refinements, where each additional optimization variable may carry a substantial measurement cost.
+
+A more recent method that addresses some of the limitations of both piecewise-constant gradient methods and purely gradient-free basis search is \emph{GOAT} (Gradient Optimization of Analytic conTrols) \cite{Machnes2018}. The guiding idea of GOAT is to keep the controls in a low-dimensional but analytic parameterization,
+\begin{equation}
+u_k(t)=u_k(t;\bm{\theta}),
+\label{eq:goat_analytic_controls}
+\end{equation}
+and to compute exact gradients with respect to the parameters $\bm{\theta}$ by propagating not only the system evolution but also its derivatives. If $U(t;\bm{\theta})$ denotes the propagator, then differentiation of Eq.~\eqref{eq:qoc_propagator_equation} with respect to a parameter $\theta_j$ yields the coupled evolution equation
+\begin{equation}
+i\hbar \frac{d}{dt}
+\left(
+\frac{\partial U}{\partial \theta_j}
+\right)
+=
+H(t;\bm{\theta})
+\frac{\partial U}{\partial \theta_j}
++
+\frac{\partial H(t;\bm{\theta})}{\partial \theta_j}
+U(t;\bm{\theta}),
+\label{eq:goat_derivative_equation}
+\end{equation}
+with initial condition
+\begin{equation}
+\frac{\partial U(0;\bm{\theta})}{\partial \theta_j}=0.
+\label{eq:goat_derivative_initial}
+\end{equation}
+Thus, once the augmented system formed by $U$ and its derivatives is propagated, one obtains the gradient of the final cost $\partial \mathcal{J}/\partial \theta_j$ directly. The principal appeal of GOAT is that it combines gradient efficiency with flexible, low-dimensional, hardware-friendly pulse parametrizations, making it particularly attractive for superconducting qubits where pulse simplicity and subsequent experimental calibration matter greatly \cite{Machnes2018}.
+
+From a broader perspective, GRAPE, Krotov, CRAB, and GOAT should not be viewed as mutually exclusive competitors so much as different design philosophies for the same underlying problem. GRAPE and Krotov prioritize gradient information and direct optimization in control space; CRAB prioritizes dimensional reduction and basis flexibility; GOAT attempts to retain exact gradients while working in a compact analytic parameter space. The best method depends on the physics, the size of the system, the availability of gradients, the presence of constraints, and whether the pulse will later need to be calibrated on hardware \cite{Khaneja2005,Caneva2011,Machnes2018}. In superconducting circuits, for example, piecewise-constant pulses may be numerically convenient but experimentally awkward, while smooth low-parameter pulses may be easier to calibrate and less sensitive to transfer-function distortions.
+
+For the purposes of this thesis, these methods serve two roles. First, they provide the standard background language of open-loop model-based quantum control: objective functional, parameterization, gradient computation, and iterative pulse improvement. Second, they define the natural baseline against which reinforcement-learning-based methods should be interpreted. Reinforcement learning does not replace the optimal-control problem itself; rather, it offers an alternative way to search the space of control laws, especially in settings where the cost landscape is highly nonconvex, robustness matters strongly, or sequential structure can be exploited. The value of the approach studied in the reference paper is therefore best understood not in isolation, but against the mature backdrop of these classical optimal-control techniques.
+
+% Optional compact summary equation
+It is useful to summarize the common structure of all these methods schematically as
+\begin{equation}
+\text{model}
+\;+\;
+\text{control ansatz}
+\;+\;
+\text{cost functional}
+\;+\;
+\text{numerical optimizer}
+\;\longrightarrow\;
+\text{optimized pulse}.
+\label{eq:qoc_common_pipeline}
+\end{equation}
+What distinguishes GRAPE, Krotov, CRAB, and GOAT is not the overall control objective, but the specific choice of control ansatz, gradient computation, and update rule used to navigate the optimization landscape.
+
 \end{document}
