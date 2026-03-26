@@ -2686,6 +2686,135 @@ For the structure of the thesis, Eq.~\eqref{eq:ufo_cost_function} should be trea
 \label{fig:ufo_cost_structure}
 \end{figure}
 
+% Requires in the preamble:
+% \usepackage{amsmath,amssymb,amsfonts,bm}
+% \usepackage{tikz}
+% \usetikzlibrary{positioning,arrows.meta}
+
+\subsection{Reinforcement-learning formulation of the control problem}
+\label{subsec:paper_rl_formulation}
+
+Once the UFO objective has been defined, the control problem can be recast as a sequential decision problem and solved with reinforcement learning. In the reference paper, the role of the agent is to construct a complete time-dependent control trajectory by proposing control actions step by step, while the environment simulates the resulting quantum evolution and returns the associated control cost \cite{Niu2019}. In this formulation, reinforcement learning is not used to replace the underlying Schr\"odinger dynamics; rather, it provides an optimization strategy for navigating the high-dimensional space of admissible pulse sequences.
+
+The time axis is discretized into control intervals of duration \(\Delta t\), and the quantum gate is built iteratively over these time steps. Let \(U_n\) denote the simulated unitary propagator after the \(n\)-th step of the control trajectory. Then the state used by the RL agent is taken to contain the information of the current simulated gate,
+\begin{equation}
+s_n \sim U_n,
+\label{eq:paper_rl_state}
+\end{equation}
+that is, the policy network receives as input a representation of the quantum evolution accumulated up to time step \(n\). This is a natural choice from the viewpoint of control: the current gate \(U_n\) summarizes the dynamical history relevant for deciding which control action should be applied next.
+
+At each step, the agent proposes a continuous control action corresponding to the Hamiltonian parameters for the next interval. In the notation of the effective gmon Hamiltonian, one may write the action as
+\begin{equation}
+a_n
+=
+\bigl(
+g_n,\;
+\delta_{1,n},\delta_{2,n},\;
+f_{1,n},f_{2,n},\;
+\phi_{1,n},\phi_{2,n}
+\bigr),
+\label{eq:paper_rl_action}
+\end{equation}
+where each component specifies one of the control channels available during the next time slice. Thus, one RL episode is nothing but the sequential construction of a full analog pulse schedule
+\begin{equation}
+\bm{a}
+=
+(a_0,a_1,\dots,a_{N-1}),
+\label{eq:control_trajectory_discrete}
+\end{equation}
+from which the complete time-dependent Hamiltonian trajectory is assembled.
+
+Given the proposed action \(a_n\), the training environment propagates the quantum dynamics for one time step. In schematic form, the paper represents this update as
+\begin{equation}
+U_{n+1}
+=
+\exp\!\left[
+-i\Delta t\,
+\bigl(
+\hat{H}_{n+1}
++
+\delta \hat{H}_{n+1}
+\bigr)
+\right] U_n,
+\label{eq:paper_environment_update}
+\end{equation}
+where \(\hat{H}_{n+1}\) is the Hamiltonian specified by the control action and \(\delta \hat{H}_{n+1}\) denotes a stochastic perturbation used during noisy training \cite{Niu2019}. Equation~\eqref{eq:paper_environment_update} captures the core RL-environment interaction of the paper: the agent proposes a control, the environment applies the corresponding noisy Hamiltonian for one interval, and the propagated gate \(U_{n+1}\) is returned as the next state.
+
+The reward is derived directly from the UFO cost. Since reinforcement learning is naturally formulated as a reward-maximization problem, while the control objective is written as a cost to be minimized, the two are related simply by a sign change:
+\begin{equation}
+r_n = -\,c_n,
+\label{eq:paper_reward_from_cost}
+\end{equation}
+where \(c_n\) denotes the control cost evaluated by the environment at step \(n\), or more generally the increment of the trajectory cost associated with the newly applied control. At the level of a full episode, the return is therefore
+\begin{equation}
+G_0
+=
+\sum_{n=0}^{N-1}\gamma^n r_n,
+\label{eq:paper_discounted_return}
+\end{equation}
+and maximizing expected return is equivalent to minimizing the expected UFO control cost over sampled pulse trajectories. In this way, the entire physics of the problem enters the RL agent only through the environment update in Eq.~\eqref{eq:paper_environment_update} and the reward signal in Eq.~\eqref{eq:paper_reward_from_cost}.
+
+The paper further interprets optimization as a sequence of episodes, each of which contains all the time steps of one complete control trajectory. The episode length is determined by the smaller of:
+\begin{equation}
+T_{\mathrm{episode}}
+=
+\min\!\left(
+T_{\max},\;
+T_{\mathrm{stop}}
+\right),
+\label{eq:episode_termination}
+\end{equation}
+where \(T_{\max}\) is a predefined maximum runtime and \(T_{\mathrm{stop}}\) is the time at which a satisfactory value of the UFO cost is reached \cite{Niu2019}. This means that the learning problem is not only about shaping the pulse amplitudes, but also about discovering sufficiently good controls within a finite horizon. The runtime penalty in the UFO objective and the stopping rule in Eq.~\eqref{eq:episode_termination} therefore work together to encourage short, high-quality trajectories.
+
+An important implementation detail is that the RL agent in the paper uses two neural networks. The first, the \emph{policy network}, maps the current state to a probability distribution over the next control action. The second, the \emph{value network}, estimates the discounted future reward associated with the current state \cite{Niu2019}. Denoting these schematically by
+\begin{equation}
+\pi_{\bm{\theta}}(a_n\mid s_n)
+\qquad \text{and} \qquad
+V_{\bm{\omega}}(s_n),
+\label{eq:paper_policy_value_networks}
+\end{equation}
+one sees that the control problem is implemented in actor--critic form: the policy network generates pulse proposals, while the value network evaluates their long-term quality and stabilizes training. The paper reports that both networks are fully connected with hidden-layer dimensions \(64\), \(32\), and \(32\), respectively \cite{Niu2019}. While this architectural detail is not the conceptual core of the method, it is useful to report it in the thesis because it clarifies the scale and practical implementation of the RL agent.
+
+From a control perspective, the most important conceptual point is that the environment state is not a low-dimensional hand-crafted summary such as ``current pulse amplitude'' or ``elapsed time'' alone. Instead, it contains information about the current simulated unitary gate. This is a strong design choice: it means the agent is trained to reason directly in terms of how much of the target operation has already been built, rather than purely in terms of local control variables. Such a state representation is well matched to gate synthesis, since the desired task is naturally expressed in terms of the evolving unitary transformation rather than a single state vector or observable.
+
+The RL formulation of the paper can therefore be summarized as follows:
+\begin{itemize}
+\item the \emph{state} encodes the current simulated gate \(U_n\),
+\item the \emph{action} specifies the continuous control parameters for the next time interval,
+\item the \emph{environment} propagates the noisy Schr\"odinger dynamics,
+\item the \emph{reward} is the negative UFO control cost,
+\item one \emph{episode} corresponds to a complete pulse trajectory for a target gate.
+\end{itemize}
+This formulation is particularly natural for robust analog quantum control, because it preserves the sequential character of pulse generation while allowing the physical optimization objective to be used directly as the reward signal.
+
+For the structure of the thesis, this subsection is the bridge between the physics of the UFO objective and the algorithmic machinery of policy optimization. The next paragraph will build directly on it by explaining why the paper specifically chooses a continuous-variable policy-gradient method trained with trust-region policy optimization (TRPO), rather than a simpler gradient-descent or value-based RL approach.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    box/.style={draw, rounded corners, minimum width=2.8cm, minimum height=1cm, align=center},
+    arrow/.style={-{Latex[length=2mm]}, thick},
+    node distance=1.6cm and 1.6cm
+]
+
+\node[box] (state) {state \(s_n\)\\current gate \(U_n\)};
+\node[box, right=of state] (policy) {policy network\\proposes action \(a_n\)};
+\node[box, right=of policy] (env) {environment\\propagates Eq.~\eqref{eq:paper_environment_update}};
+\node[box, below=of policy] (reward) {reward / cost\\\(r_n=-c_n\)};
+
+\draw[arrow] (state) -- (policy);
+\draw[arrow] (policy) -- (env);
+\draw[arrow] (env) -- node[right] {\(U_{n+1}\)} (reward);
+\draw[arrow] (reward) -- (state);
+
+\end{tikzpicture}
+\caption{Paper-specific RL formulation. The state is built from the currently simulated gate, the policy proposes continuous control parameters for the next interval, the environment propagates the noisy quantum dynamics, and the resulting control cost is returned as reward.}
+\label{fig:paper_rl_loop}
+\end{figure}
+
+
+
+
 \newpage
 \bibliographystyle{plain} % oppure unsrt, alpha, ieee
 \bibliography{references}
