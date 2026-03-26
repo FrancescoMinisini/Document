@@ -1374,4 +1374,160 @@ It is useful to summarize the common structure of all these methods schematicall
 \end{equation}
 What distinguishes GRAPE, Krotov, CRAB, and GOAT is not the overall control objective, but the specific choice of control ansatz, gradient computation, and update rule used to navigate the optimization landscape.
 
+
+\subsection{Why robustness is difficult in quantum control}
+\label{subsec:why_robustness_is_difficult}
+
+In an idealized optimal-control problem one assumes that the system Hamiltonian, the control transfer function, and the relevant noise model are all known accurately. Under these assumptions, one can optimize a pulse for a \emph{nominal} model and obtain extremely high fidelities in simulation. In practice, however, quantum control is almost never deployed under such perfectly known conditions. Device parameters drift, couplings are incompletely calibrated, control electronics distort the intended waveform, environmental noise is only partially characterized, and higher-level dynamics may not be fully captured by the chosen effective model. As a result, a pulse that is optimal for a nominal model may perform poorly once implemented on the actual device \cite{Koch2022,Weidner2025,Propson2022}. This gap between nominal optimality and physical reliability is the basic reason robustness is difficult.
+
+A convenient way to formalize this point is to write the dynamics as depending not only on the control $\bm{u}(t)$ but also on uncertain parameters $\bm{\delta}$:
+\begin{equation}
+\dot{\rho}(t)
+=
+\mathcal{L}_{\bm{u}(t),\,\bm{\delta}}[\rho(t)].
+\label{eq:uncertain_quantum_dynamics}
+\end{equation}
+Here $\bm{\delta}$ may represent static detuning errors, drift in anharmonicity, imprecise couplings, control-amplitude distortions, fluctuating calibration offsets, or environmental parameters. If one defines a nominal performance functional $\mathcal{J}(\bm{u};\bm{\delta})$, then the standard open-loop optimization problem corresponds to minimizing
+\begin{equation}
+\mathcal{J}_{\mathrm{nom}}(\bm{u})
+:=
+\mathcal{J}(\bm{u};\bm{\delta}_{0}),
+\label{eq:nominal_cost}
+\end{equation}
+for a single reference value $\bm{\delta}_0$. A robust-control problem, by contrast, must account for a whole \emph{set} or \emph{distribution} of possible uncertainties. This immediately makes the problem more difficult, because the optimizer is no longer asked to perform well at one point in parameter space, but over a family of models.
+
+There are several inequivalent ways to formulate robustness. In an \emph{average-case} formulation one assumes that the uncertainty is drawn from a probability distribution $p(\bm{\delta})$ and optimizes the expected cost
+\begin{equation}
+\mathcal{J}_{\mathrm{avg}}(\bm{u})
+=
+\mathbb{E}_{\bm{\delta}\sim p}
+\left[
+\mathcal{J}(\bm{u};\bm{\delta})
+\right]
+=
+\int
+\mathcal{J}(\bm{u};\bm{\delta})\,
+p(\bm{\delta})\,d\bm{\delta}.
+\label{eq:average_case_robustness}
+\end{equation}
+In a \emph{worst-case} or minimax formulation one instead seeks to control the largest possible degradation over an uncertainty set $\Delta$:
+\begin{equation}
+\mathcal{J}_{\mathrm{wc}}(\bm{u})
+=
+\sup_{\bm{\delta}\in\Delta}
+\mathcal{J}(\bm{u};\bm{\delta}).
+\label{eq:worst_case_robustness}
+\end{equation}
+A third common viewpoint is threshold-based, where one requires the fidelity or success probability to remain above a prescribed level with high probability:
+\begin{equation}
+\mathbb{P}_{\bm{\delta}\sim p}
+\!\left(
+F(\bm{u};\bm{\delta}) \geq F_{\min}
+\right)
+\geq 1-\varepsilon.
+\label{eq:chance_constraint_robustness}
+\end{equation}
+These three criteria encode genuinely different priorities. A control that is excellent on average can still fail badly on rare but important perturbations, while a minimax-optimal control may be too conservative for average experimental operation \cite{Weidner2025,Propson2022}. Thus, robustness is not a single scalar property but a design choice that depends on what failure modes one wishes to suppress.
+
+A second source of difficulty is that the uncertainty set itself is often only partially known. In many experiments one does not know the exact noise law $p(\bm{\delta})$, and even if some approximate characterization is available, it may drift in time. This issue is explicitly emphasized in the uploaded paper, where the authors note that the exact model of control errors is often unavailable and may vary over time, so that one should ideally seek control strategies that remain reliable not merely for one precisely specified perturbation model, but across a broader family of experimentally relevant error processes \cite{Niu2019}. Formally, this means that one often trains or optimizes under one distribution $p_{\mathrm{train}}(\bm{\delta})$ while the actual deployment conditions follow another distribution $p_{\mathrm{deploy}}(\bm{\delta})$, with
+\begin{equation}
+p_{\mathrm{train}}(\bm{\delta})
+\neq
+p_{\mathrm{deploy}}(\bm{\delta}).
+\label{eq:distribution_shift}
+\end{equation}
+Equation~\eqref{eq:distribution_shift} is the control-theoretic version of distribution shift: a pulse may appear robust in simulation but degrade under out-of-distribution perturbations that were absent or underrepresented during optimization.
+
+A third difficulty is computational. To evaluate the nominal objective in Eq.~\eqref{eq:nominal_cost}, one usually needs only a single propagation of the system dynamics per iteration. By contrast, evaluating a robust objective typically requires many propagations over different uncertainty realizations or uncertainty-grid points. If one approximates the average-case objective by Monte Carlo sampling with $M$ samples,
+\begin{equation}
+\mathcal{J}_{\mathrm{avg}}(\bm{u})
+\approx
+\frac{1}{M}
+\sum_{j=1}^{M}
+\mathcal{J}(\bm{u};\bm{\delta}^{(j)}),
+\label{eq:monte_carlo_robustness}
+\end{equation}
+then every optimization step becomes roughly $M$ times more expensive than the nominal one. This sampling burden can become severe in multi-qubit systems, especially when the control space is already high-dimensional. The difficulty is compounded when one wishes to include realistic open-system evolution, since each propagation may then require solving a Lindblad master equation rather than a closed-system Schr\"odinger equation \cite{Weidner2025,Propson2022,Goldschmidt2022}. Robustness is therefore not hard only because of physics; it is hard because it is computationally expensive to certify.
+
+A fourth source of difficulty is geometric. The control landscape of a nominal problem is already high-dimensional and nonconvex. Introducing robustness means that the optimizer must now navigate not one landscape, but an \emph{aggregate} landscape produced by averaging or extremizing over many perturbations. Even if each individual cost $\mathcal{J}(\bm{u};\bm{\delta})$ were relatively benign, their superposition can produce a far more intricate structure with flatter regions, competing descent directions, and stronger tradeoffs between objectives. In local sensitivity analysis one may expand the cost around a nominal control $\bm{u}_{0}$ as
+\begin{equation}
+\mathcal{J}(\bm{u}_{0}+\Delta \bm{u})
+\approx
+\mathcal{J}(\bm{u}_{0})
++
+\nabla \mathcal{J}(\bm{u}_{0})^{\top}\Delta \bm{u}
++
+\frac{1}{2}\Delta \bm{u}^{\top}
+H_{\mathcal{J}}(\bm{u}_{0})
+\Delta \bm{u},
+\label{eq:hessian_expansion_robustness}
+\end{equation}
+where $H_{\mathcal{J}}$ is the Hessian of the control objective. Robustness analysis based on such curvature information can be very informative, because it quantifies sensitivity to small perturbations in the controls. But it is also expensive in large systems: as the uploaded paper points out, canonical Hessian-based robustness analysis becomes computationally prohibitive as the number of control degrees of freedom grows, which is one reason the authors adopt a more scalable practical robustness definition \cite{Niu2019}. Thus, even diagnosing whether a pulse is robust can already be difficult, before one attempts to optimize robustness itself.
+
+Another complication is that different sources of robustness may conflict with one another. A control that is robust against amplitude noise may be fragile against detuning error; a control that is robust against quasistatic drift may be more sensitive to bandwidth truncation; a pulse that suppresses leakage may require longer duration and thus suffer more strongly from decoherence. In this sense, robustness is not usually a single-axis improvement but a multidimensional tradeoff problem. A more realistic objective is therefore often of the form
+\begin{equation}
+\mathcal{J}_{\mathrm{rob}}[\bm{u}]
+=
+w_{F}\,\varepsilon_{\mathrm{gate}}
++
+w_{L}\,L
++
+w_{T}\,T
++
+w_{R}\,\mathcal{R}[\bm{u}],
+\label{eq:multiobjective_robustness}
+\end{equation}
+where $\mathcal{R}[\bm{u}]$ denotes a chosen robustness functional and the weights $\{w_F,w_L,w_T,w_R\}$ encode the tradeoff between fidelity, leakage, runtime, and robustness. There is generally no reason for these objectives to be simultaneously minimized by the same pulse. A robust-control problem is therefore often a Pareto problem rather than a single-objective one.
+
+In superconducting qubits, the robustness problem is made sharper by the multilevel character of the hardware. Parameter uncertainty does not merely perturb the logical gate within the computational subspace; it can alter detunings, anharmonicities, and couplings in a way that changes the leakage channels themselves. Thus, robustness against model uncertainty and robustness against leakage are intertwined rather than separable. This is one reason why robust pulse design in weakly anharmonic systems often requires the full multilevel Hamiltonian rather than a simplified two-level approximation \cite{Krantz2019,Propson2022}. The same observation is directly relevant for the reference paper: its robust RL optimization is performed in a stochastic environment where perturbations are injected into physically important control parameters, and the resulting performance is then judged by averaged noisy gate fidelity and fidelity variance rather than by nominal accuracy alone \cite{Niu2019}.
+
+It is therefore useful to distinguish two questions:
+\begin{enumerate}
+\item \emph{Robustness evaluation:} given a control pulse, how sensitive is it to perturbations?
+\item \emph{Robustness optimization:} how should the pulse be modified so as to reduce that sensitivity?
+\end{enumerate}
+The first is already nontrivial because it requires specifying the relevant uncertainty model and computing the corresponding sensitivity metric. The second is harder still because robustness must be optimized jointly with all the other physical criteria of the control problem. In that sense, robustness is difficult not because it is a secondary correction to nominal control, but because it fundamentally changes the optimization problem itself.
+
+For the purposes of this thesis, the most important takeaway is that robustness cannot be treated as an afterthought. A pulse optimized only for nominal gate fidelity may be scientifically interesting, but it is not yet a practically convincing control solution unless one also understands how it behaves under uncertainty, noise, and imperfect modeling. This is precisely why the reference paper moves beyond a purely nominal objective and evaluates control performance under a family of stochastic perturbations, using average fidelity and fidelity variance as practical diagnostics of robustness \cite{Niu2019}. The extension work proposed later in this thesis builds directly on this point by asking whether robustness learned under one uncertainty model generalizes to others.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    axis/.style={thick,->},
+    curve/.style={thick},
+    lbl/.style={font=\small}
+]
+
+% axes
+\draw[axis] (0,0) -- (7.2,0) node[right,lbl] {control parameter / pulse family};
+\draw[axis] (0,0) -- (0,4.5) node[above,lbl] {cost};
+
+% nominal cost
+\draw[curve]
+    plot[smooth] coordinates {(0.6,3.8) (1.3,2.8) (2.0,1.8) (2.8,0.95) (3.5,0.55) (4.2,0.85) (5.0,1.5) (5.8,2.8)};
+\node[lbl] at (4.8,0.55) {nominal cost};
+
+% perturbed cost 1
+\draw[curve,dashed]
+    plot[smooth] coordinates {(0.6,3.2) (1.3,2.2) (2.1,1.2) (3.0,0.95) (3.9,1.2) (4.7,2.0) (5.6,3.1)};
+\node[lbl] at (5.55,2.3) {perturbed model};
+
+% perturbed cost 2
+\draw[curve,dotted]
+    plot[smooth] coordinates {(0.6,4.1) (1.4,3.0) (2.3,1.9) (3.2,1.0) (4.0,0.75) (4.8,1.1) (5.7,2.0)};
+\node[lbl] at (5.25,1.25) {another perturbation};
+
+% markers
+\filldraw (3.5,0.55) circle (1.4pt);
+\node[lbl] at (3.45,0.2) {nominal optimum};
+
+\filldraw (4.0,0.75) circle (1.4pt);
+\node[lbl] at (4.7,0.35) {robust compromise};
+
+\end{tikzpicture}
+\caption{Schematic illustration of why robustness is difficult. A pulse that is optimal for a nominal model need not remain optimal when the Hamiltonian, noise parameters, or control transfer functions are perturbed. Robust optimization must account for an ensemble of such landscapes rather than for a single nominal one.}
+\label{fig:robustness_landscape_shift}
+\end{figure}
+
+
 \end{document}
