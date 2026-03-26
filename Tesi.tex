@@ -2813,7 +2813,103 @@ For the structure of the thesis, this subsection is the bridge between the physi
 \end{figure}
 
 
+% Requires in the preamble:
+% \usepackage{amsmath,amssymb,amsfonts,bm}
+% \usepackage{tikz}
+% \usetikzlibrary{positioning,arrows.meta}
 
+\subsection{Why the paper uses trust-region policy optimization}
+\label{subsec:why_paper_uses_trpo}
+
+Having formulated the control problem as a continuous-variable reinforcement-learning task, the next question is which policy-optimization algorithm should be used. The reference paper chooses \emph{trust-region policy optimization} (TRPO) rather than simpler direct gradient-descent or gradient-free search schemes \cite{Niu2019,Schulman2015}. This choice is not incidental. It reflects the specific structure of the quantum-control landscape considered in the paper: the action space is continuous, the reward depends on a high-dimensional pulse trajectory, the environment is stochastic due to simulated control noise, and the optimization landscape is expected to contain many imperfect local optima and saddle regions. In such a setting, policy updates that are too aggressive can destabilize learning, while updates that are too myopic may fail to exploit nonlocal regularities of good control trajectories.
+
+The paper explicitly argues that applying second-order optimization ideas at the level of the \emph{policy} is superior to simpler optimization strategies such as direct gradient descent or differential evolution on the control parameters themselves \cite{Niu2019}. The intuition is that the policy neural network can encode regularities shared by many successful control trajectories, rather than optimizing each pulse as an unrelated object. In a high-dimensional continuous-control problem, this is potentially a major advantage: instead of performing local descent directly in the raw control space, the algorithm learns a structured distribution over control actions conditioned on the evolving gate state. Such a representation is particularly valuable when nearby target gates or nearby regions of the control landscape share common dynamical patterns.
+
+At the mathematical level, TRPO updates the policy by maximizing a local surrogate objective while constraining the change in policy distribution. If \(\bm{\theta}_{\mathrm{old}}\) denotes the current policy parameters and \(\bm{\theta}\) the updated ones, the standard TRPO step is based on the constrained problem
+\begin{equation}
+\max_{\bm{\theta}}
+\;
+\mathcal{L}_{\bm{\theta}_{\mathrm{old}}}(\bm{\theta})
+=
+\mathbb{E}_{(s,a)\sim\pi_{\bm{\theta}_{\mathrm{old}}}}
+\left[
+\frac{\pi_{\bm{\theta}}(a\mid s)}
+{\pi_{\bm{\theta}_{\mathrm{old}}}(a\mid s)}
+\,
+\hat{A}_{\bm{\theta}_{\mathrm{old}}}(s,a)
+\right],
+\label{eq:trpo_surrogate_objective_paper_section}
+\end{equation}
+subject to the trust-region constraint
+\begin{equation}
+\mathbb{E}_{s\sim\pi_{\bm{\theta}_{\mathrm{old}}}}
+\left[
+D_{\mathrm{KL}}
+\!\left(
+\pi_{\bm{\theta}_{\mathrm{old}}}(\,\cdot\mid s)
+\;\|\;
+\pi_{\bm{\theta}}(\,\cdot\mid s)
+\right)
+\right]
+\le
+\delta_{\mathrm{TR}},
+\label{eq:trpo_constraint_paper_section}
+\end{equation}
+where \(\hat{A}_{\bm{\theta}_{\mathrm{old}}}(s,a)\) is an estimate of the advantage function and \(\delta_{\mathrm{TR}}>0\) fixes the allowed size of the update in distribution space \cite{Schulman2015}. The significance of Eq.~\eqref{eq:trpo_constraint_paper_section} is that it limits how much the policy is allowed to change in one step, thereby reducing the risk that a noisy gradient estimate produces a catastrophic deterioration in control quality.
+
+This trust-region mechanism is especially well suited to the quantum-control problem studied in the paper. The reward depends on the UFO objective, which itself couples fidelity, leakage, boundary conditions, and runtime. Because these terms may compete with one another, the effective reward landscape can be highly irregular and sensitive to policy updates. A naive gradient step could easily move the policy to a region that explores qualitatively different pulse trajectories and thereby destroy previously learned good behavior. By restricting the policy variation through a KL divergence constraint, TRPO encourages \emph{stable policy improvement}, which is particularly valuable when the control trajectory is long and the reward is influenced by stochastic perturbations in the Hamiltonian \cite{Niu2019,Schulman2015}.
+
+Another important reason for the choice of TRPO is that the paper is not simply optimizing one deterministic pulse vector. It is training a stochastic policy in a noisy environment. In this context, the value network estimates the expected discounted future reward, while the policy network proposes distributions over the next continuous control action. The paper reports that after sampling a batch of size
+\begin{equation}
+N_{\mathrm{batch}} = 20000
+\label{eq:paper_batch_size}
+\end{equation}
+episodes, the policy network is updated so as to maximize expected discounted future reward \emph{within the trusted region}, while the value network is updated to fit the new empirical returns \cite{Niu2019}. Thus, the optimization is performed not step by step on a single control trajectory, but statistically over a large ensemble of sampled episodes. This batch-based learning is well matched to TRPO, whose trust-region update is specifically designed to use sampled trajectory information efficiently and robustly.
+
+The paper also gives a conceptual argument for why TRPO should outperform direct optimization of pulse parameters. Direct gradient descent in very high-dimensional nonconvex landscapes is known to struggle with flat saddle regions and poorly conditioned directions, especially when gradients become small \cite{Niu2019}. In the present control problem, these difficulties are exacerbated by leakage, stochastic control noise, and the fact that the control trajectory must satisfy multiple competing objectives simultaneously. TRPO addresses this at the policy level: rather than approximating or computing the full Hessian of the raw control landscape, it performs a model-free second-order policy update that is constrained by the geometry of the policy distribution itself. In this sense, the algorithm imports second-order stabilization ideas into a setting where direct control-Hessian methods would be prohibitively expensive.
+
+There is also a more physical reason why a trust-region policy method is attractive here. Quantum control pulses are not arbitrary vectors; they are temporally correlated objects whose early and late segments interact through phase accumulation, transient leakage, and the final gate constraint. A useful optimizer must therefore capture \emph{nonlocal structure} across the trajectory. The paper emphasizes exactly this point, arguing that the policy neural network can learn nonlocal regularities of effective control solutions, and that these regularities are difficult to exploit with simpler local optimization schemes \cite{Niu2019}. In other words, TRPO is not chosen merely because it is a standard continuous-control RL algorithm; it is chosen because its policy-based formulation is compatible with the trajectory-level structure of analog quantum control.
+
+From the implementation viewpoint, the paper uses TRPO in an actor--critic architecture. Denoting the policy network by \(\pi_{\bm{\theta}}(a\mid s)\) and the value network by \(V_{\bm{\omega}}(s)\), the learning loop alternates between:
+\begin{enumerate}
+\item sampling many episodes under the current stochastic policy,
+\item estimating discounted future rewards and advantages,
+\item updating the policy network by solving the trust-region step,
+\item updating the value network to fit the newly sampled returns.
+\end{enumerate}
+Although these are standard ingredients of modern policy-gradient RL, their role in the paper is highly specific: they provide a scalable optimization engine for a physically structured continuous-control problem in which leakage and stochastic robustness are part of the objective itself.
+
+For the purposes of the thesis, the main message of this subsection is therefore clear. The paper uses TRPO because it combines three properties that are especially desirable in robust analog quantum control:
+\begin{itemize}
+\item it handles \emph{continuous actions} naturally,
+\item it supports \emph{stochastic policy learning} in noisy environments,
+\item it enforces \emph{stable policy updates} through a trust-region constraint.
+\end{itemize}
+This makes it a particularly reasonable choice for the UFO optimization problem, where the policy must learn high-quality pulse trajectories in a multilevel superconducting system under realistic control noise.
+
+In the structure of the thesis, this subsection should be read as the algorithmic complement of the previous one. The earlier subsection explained how the physics problem is cast as an RL environment; the present one explains why TRPO is the specific optimization engine chosen to solve it. The next subsection will complete the learning formulation by explaining how stochastic control noise is injected during training in order to promote robustness.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    box/.style={draw, rounded corners, minimum width=3.2cm, minimum height=1cm, align=center},
+    arrow/.style={-{Latex[length=2mm]}, thick},
+    node distance=1.8cm and 1.8cm
+]
+
+\node[box] (old) {current policy\\$\pi_{\bm{\theta}_{\mathrm{old}}}$};
+\node[box, right=of old] (trust) {trusted region\\$D_{\mathrm{KL}}\le \delta_{\mathrm{TR}}$};
+\node[box, right=of trust] (new) {updated policy\\$\pi_{\bm{\theta}}$};
+
+\draw[arrow] (old) -- (trust);
+\draw[arrow] (trust) -- (new);
+
+\node[below=1.2cm of trust, align=center] (note) {policy improvement is allowed only if the new action distribution\\remains sufficiently close to the old one};
+
+\end{tikzpicture}
+\caption{Geometric intuition behind the TRPO update. Rather than taking an unconstrained gradient step, the policy is improved only within a trust region defined by a KL-divergence constraint, which stabilizes learning in continuous and stochastic control environments.}
+\label{fig:trpo_trust_region}
+\end{figure}
 
 \newpage
 \bibliographystyle{plain} % oppure unsrt, alpha, ieee
