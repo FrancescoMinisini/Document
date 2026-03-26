@@ -1075,4 +1075,147 @@ From the viewpoint of superconducting-qubit physics, one may summarize the trade
 \label{fig:speed_leakage_tradeoff}
 \end{figure}
 
+
+% Requires in the preamble:
+% \usepackage{amsmath,amssymb,amsfonts,bm}
+% \usepackage{tikz}
+% \usetikzlibrary{positioning,arrows.meta,fit}
+
+\subsection{Open-loop and closed-loop quantum control}
+\label{subsec:open_closed_loop_control}
+
+A basic conceptual distinction in control theory is that between \emph{open-loop} and \emph{closed-loop} strategies. In an open-loop protocol, the control fields are prescribed in advance and then applied to the system without using measurement outcomes obtained during the same realization of the dynamics. In a closed-loop protocol, by contrast, the controls are adapted using information returned by the system itself, either continuously or iteratively, through some form of measurement and feedback \cite{Koch2022,Ferrie2015,Feng2018}. This distinction is especially important in quantum systems, because measurement is not a passive readout operation: it can introduce statistical uncertainty, backaction, and experimental latency, all of which influence the practicality of feedback-based control. For this reason, the open-loop/closed-loop dichotomy in quantum engineering is both conceptually rich and experimentally consequential.
+
+In the model-based open-loop setting, one begins from a dynamical model
+\begin{equation}
+\dot{\rho}(t)
+=
+\mathcal{L}_{\bm{u}(t)}[\rho(t)],
+\label{eq:open_loop_dynamics_general}
+\end{equation}
+where $\rho(t)$ is the quantum state (or density matrix), $\mathcal{L}_{\bm{u}(t)}$ is the generator of the dynamics, and $\bm{u}(t)$ denotes the externally chosen controls. For a closed quantum system this reduces to the Schr\"odinger or von Neumann equation,
+\begin{equation}
+\dot{\rho}(t)
+=
+-\frac{i}{\hbar}[H(t;\bm{u}),\rho(t)],
+\label{eq:open_loop_vonneumann}
+\end{equation}
+while in the presence of dissipation one may instead work with a Lindblad generator. The optimization problem is then posed entirely at the level of the model: one selects a parameterized family of controls,
+\begin{equation}
+\bm{u}(t)=\bm{u}(t;\bm{\theta}),
+\label{eq:open_loop_control_parametrization}
+\end{equation}
+and solves
+\begin{equation}
+\bm{\theta}^{\star}
+=
+\arg\min_{\bm{\theta}} \;
+\mathcal{J}_{\mathrm{model}}(\bm{\theta}),
+\label{eq:open_loop_optimization_problem}
+\end{equation}
+where $\mathcal{J}_{\mathrm{model}}$ is a model-based objective such as gate infidelity, leakage, runtime, or some weighted combination thereof. Once $\bm{\theta}^{\star}$ has been found numerically, the resulting pulse is implemented experimentally without any intra-shot adaptation. This is the standard framework of much of quantum optimal control, including GRAPE-, Krotov-, GOAT-, and many reinforcement-learning-based approaches when training is performed in simulation \cite{Koch2022}.
+
+The main advantage of open-loop control is that it can exploit a detailed physical model and powerful numerical optimization tools before any experiment is run. It is therefore well suited to platforms for which the Hamiltonian and noise mechanisms are sufficiently well characterized. Moreover, since no measurements are required during the gate execution itself, open-loop control avoids the complications of quantum backaction and avoids the hardware overhead associated with real-time feedback. However, its main weakness is equally clear: the optimized pulse is only as good as the model on which it is based. If the actual device differs significantly from the assumed Hamiltonian, if transfer functions distort the waveform, or if noise sources are incompletely modeled, then a pulse that appears optimal in simulation may perform suboptimally on hardware \cite{Koch2022,Ferrie2015}. This model mismatch is one of the main reasons why purely open-loop design can become unreliable in realistic experiments.
+
+Closed-loop control is introduced precisely to address this gap between model and hardware. In its most literal form, it means that the control applied at time $t_k$ depends on measurement information gathered at earlier times,
+\begin{equation}
+\bm{u}(t_k)
+=
+\pi_k\!\left(y_0,y_1,\dots,y_{k-1}\right),
+\label{eq:closed_loop_policy}
+\end{equation}
+where $\{y_j\}$ denotes the measurement record and $\pi_k$ is a control law or feedback policy. In this picture, the system is repeatedly observed and the control is updated in real time according to the observed outcomes. Because quantum measurements disturb the state, such feedback must be described together with the measurement backaction. If $\mathcal{M}_{y}$ denotes the measurement operation associated with outcome $y$, then the post-measurement state is
+\begin{equation}
+\rho
+\;\longmapsto\;
+\frac{\mathcal{M}_{y}(\rho)}
+{\mathrm{Tr}\!\left[\mathcal{M}_{y}(\rho)\right]},
+\label{eq:measurement_backaction}
+\end{equation}
+with outcome probability
+\begin{equation}
+p(y)=\mathrm{Tr}\!\left[\mathcal{M}_{y}(\rho)\right].
+\label{eq:measurement_probability}
+\end{equation}
+Thus, unlike in classical control, the act of acquiring information modifies the system whose dynamics one is trying to steer. This makes genuine feedback control more delicate in the quantum regime, especially for fast gate operations where measurement latency and finite measurement fidelity can become serious bottlenecks \cite{Koch2022}.
+
+In quantum-information experiments, however, the phrase \emph{closed-loop optimization} is often used in a broader and more practical sense. Rather than updating the control during a single gate execution, one performs repeated experimental shots with a fixed pulse $\bm{u}(t;\bm{\theta}_r)$, estimates a performance metric from the measurement outcomes, and then updates the pulse parameters between shots according to some classical optimization rule. If $\widehat{\mathcal{J}}_{\mathrm{exp}}(\bm{\theta}_r)$ denotes the experimentally estimated cost at iteration $r$, then the iterative update can be written schematically as
+\begin{equation}
+\bm{\theta}_{r+1}
+=
+\mathcal{A}
+\!\left(
+\bm{\theta}_{r},
+\widehat{\mathcal{J}}_{\mathrm{exp}}(\bm{\theta}_{r}),
+\widehat{\nabla \mathcal{J}}_{\mathrm{exp}}(\bm{\theta}_{r}),
+\dots
+\right),
+\label{eq:iterative_closed_loop_update}
+\end{equation}
+where $\mathcal{A}$ denotes an optimization rule such as gradient descent, finite-difference search, Bayesian optimization, CRAB/dCRAB-style updates, or a reinforcement-learning policy improvement step. In this experimentally relevant sense, the loop is ``closed'' not because the Hamiltonian is modified in real time during the gate, but because the control design is iteratively informed by measured performance on the actual device \cite{Ferrie2015,Feng2018}. This distinction is worth stating explicitly in a thesis, because the words \emph{closed-loop control} may refer either to continuous measurement-based feedback or to shot-to-shot in situ calibration.
+
+The practical strengths of closed-loop approaches are clear. Since the performance metric is measured directly on the physical device, systematic model errors, waveform distortions, and unknown hardware nonlinearities are automatically incorporated into the optimization. This can make closed-loop strategies more robust than purely model-based open-loop methods when the system is imperfectly characterized. Experimental studies indeed show that closed-loop quantum control can outperform open-loop control in settings where model inaccuracies or hardware distortions dominate the error budget \cite{Ferrie2015,Feng2018}. In addition, closed-loop schemes can target figures of merit that are directly operational, such as randomized-benchmarking-based performance estimates or experimentally reconstructed gate fidelities, rather than relying exclusively on idealized simulation objectives.
+
+The price paid for this robustness is experimental cost. Closed-loop methods generally require many repeated measurements, and therefore many experimental iterations, in order to estimate objective functions or gradients with acceptable statistical precision. In fast gate optimization this can become a serious limitation, since readout is often much slower than the gate itself and can perturb subsequent operations. This is exactly the concern emphasized in the uploaded paper: the authors note that many efforts to improve robustness against control errors have focused on closed-loop feedback optimization, but that frequent measurements remain relatively slow and can degrade later fidelities, making such approaches less practical for near-term devices \cite{Niu2019}. In contrast, their approach remains fundamentally open-loop during gate execution, while incorporating robustness and leakage suppression directly into an analytic cost function that can be optimized numerically.
+
+This distinction leads naturally to a hybrid viewpoint. Purely open-loop control is efficient when the model is accurate enough; purely closed-loop control is attractive when the device itself must reveal the relevant imperfections; and many modern workflows combine the two. A common strategy is to first compute a high-quality pulse from a detailed simulation and then refine or calibrate it experimentally through an iterative in situ procedure. Schematically, one may write
+\begin{equation}
+\bm{\theta}_{0}
+=
+\arg\min_{\bm{\theta}} \mathcal{J}_{\mathrm{model}}(\bm{\theta}),
+\qquad
+\bm{\theta}^{\star}
+=
+\mathrm{Refine}\!\left(
+\bm{\theta}_{0},
+\widehat{\mathcal{J}}_{\mathrm{exp}}
+\right),
+\label{eq:hybrid_open_closed_workflow}
+\end{equation}
+where the first step is model-based and the second experimental. This hybrid logic has become increasingly important in quantum control software and experimental practice, precisely because it attempts to combine the numerical efficiency of open-loop design with the hardware realism of closed-loop refinement \cite{Koch2022,Rossignolo2023}.
+
+For the purposes of this thesis, the most important point is the following. The UFO framework analyzed later is an \emph{open-loop} control framework in the sense that the control pulse is optimized from a Hamiltonian model and then applied without measurement-based feedback during the gate. At the same time, its motivation is shaped by the practical limitations of closed-loop techniques: because repeated measurements are slow and because the exact error model is often unavailable, the framework seeks to encode robustness and leakage suppression directly into the cost function rather than outsourcing them to experimental feedback \cite{Niu2019}. The distinction developed in this subsection is therefore not merely terminological; it explains why the thesis focuses on analytic objectives and model-based control design, while still recognizing that future hardware-level implementations may benefit from hybrid or partially closed-loop refinements.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    box/.style={draw, rounded corners, minimum width=2.9cm, minimum height=1cm, align=center},
+    smallbox/.style={draw, rounded corners, minimum width=2.2cm, minimum height=0.9cm, align=center},
+    arrow/.style={-{Latex[length=2mm]}, thick},
+    dashedarrow/.style={-{Latex[length=2mm]}, thick, dashed},
+    node distance=1.4cm and 1.8cm
+]
+
+% OPEN LOOP
+\node[smallbox] (model1) {model / simulator};
+\node[smallbox, right=of model1] (opt1) {optimizer};
+\node[smallbox, right=of opt1] (pulse1) {pulse $\bm{u}(t;\bm{\theta}^{\star})$};
+\node[smallbox, right=of pulse1] (sys1) {quantum system};
+
+\draw[arrow] (model1) -- (opt1);
+\draw[arrow] (opt1) -- (pulse1);
+\draw[arrow] (pulse1) -- (sys1);
+
+\node[above=0.3cm of opt1] {\textbf{Open loop}};
+\node[below=0.35cm of opt1] {\small no measurement-based update during the gate};
+
+% CLOSED LOOP
+\node[smallbox, below=2.3cm of model1] (pulse2) {pulse $\bm{u}(t;\bm{\theta}_r)$};
+\node[smallbox, right=of pulse2] (sys2) {quantum system};
+\node[smallbox, right=of sys2] (meas2) {measurement / cost estimate};
+\node[smallbox, right=of meas2] (opt2) {update rule};
+
+\draw[arrow] (pulse2) -- (sys2);
+\draw[arrow] (sys2) -- (meas2);
+\draw[arrow] (meas2) -- (opt2);
+\draw[dashedarrow] (opt2.north) |- ++(0,1.15) -| (pulse2.north);
+
+\node[above=0.3cm of meas2] {\textbf{Closed loop}};
+\node[below=0.35cm of meas2] {\small measured performance updates the next pulse};
+
+\end{tikzpicture}
+\caption{Schematic distinction between open-loop and closed-loop quantum control. In open-loop control, pulse design is performed from a model and the resulting pulse is applied without feedback during the gate. In closed-loop control, experimental information is fed back to improve the next control decision, either in real time or iteratively between repeated runs.}
+\label{fig:open_closed_loop_control}
+\end{figure}
+
 \end{document}
