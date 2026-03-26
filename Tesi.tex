@@ -2565,6 +2565,127 @@ For the structure of the thesis, Eq.~\eqref{eq:paper_leakage_bound} is the main 
 \end{figure}
 
 
+% Requires in the preamble:
+% \usepackage{amsmath,amssymb,amsfonts,bm}
+% \usepackage{tikz}
+% \usetikzlibrary{positioning,arrows.meta}
+
+\subsection{The Universal cost Function Optimization objective}
+\label{subsec:ufo_cost_function}
+
+The central contribution of the reference paper is the introduction of a control objective that combines, within a single scalar cost function, the main physical requirements of realistic quantum gate design: logical accuracy, suppression of leakage, compatibility with control boundary conditions, and short runtime \cite{Niu2019}. This objective is called \emph{Universal cost Function control Optimization} (UFO). The adjective ``universal'' is important: the aim is not merely to optimize a specific state-transfer task or a particular entangling gate under highly specialized constraints, but to define a general control objective that remains meaningful for arbitrary target unitaries while preserving the controllability of the underlying quantum system.
+
+The first term of the UFO objective is the gate infidelity. If the target unitary is denoted by $U_{\mathrm{target}}$ and the physical control pulse generates the final propagator
+\begin{equation}
+U(T)
+=
+\mathcal{T}
+\exp\!\left(
+-i\int_{0}^{T}\hat{H}_{\mathrm{RWA}}(t)\,dt
+\right),
+\label{eq:paper_final_propagator}
+\end{equation}
+then the paper measures control inaccuracy through
+\begin{equation}
+1-F[U(T)]
+=
+1-
+\frac{1}{16}
+\left|
+\mathrm{Tr}\!\left(
+U^{\dagger}(T)\,U_{\mathrm{target}}
+\right)
+\right|^{2},
+\label{eq:paper_gate_infidelity}
+\end{equation}
+where the factor \(1/16\) reflects the dimension \(d=4\) of the two-qubit computational subspace. Equation~\eqref{eq:paper_gate_infidelity} vanishes exactly when the implemented gate agrees with the target gate up to a global phase. The paper chooses this quantity as the first part of the cost function because it is computationally inexpensive to evaluate and directly linked to the quality of the controlled logical operation \cite{Niu2019}.
+
+The second term is the leakage penalty discussed in the previous subsection. Rather than measuring leakage only after optimization, the paper inserts the analytic leakage bound \(L_{\mathrm{tot}}\) directly into the objective. In this way, leakage suppression becomes a genuine optimization target rather than a posterior diagnostic. Conceptually, this is one of the strongest features of the UFO framework: the control agent is not only rewarded for implementing the correct logical unitary, but also discouraged from exploiting pulse trajectories that are predicted to generate substantial leakage in the full multilevel dynamics.
+
+The third ingredient of the UFO cost function is a boundary-condition penalty. The paper imposes that the microwave control pulses and the tunable coupling pulse vanish at the initial and final times, so that the computational basis and the Fock basis coincide at the boundaries of the gate. This is enforced through the penalty
+\begin{equation}
+P_{\mathrm{bdry}}
+=
+\sum_{t\in\{0,T\}}
+\left[
+g(t)^2 + f(t)^2
+\right],
+\label{eq:paper_boundary_penalty}
+\end{equation}
+where, for compactness, one may write
+\begin{equation}
+f(t)^2 := f_1(t)^2 + f_2(t)^2.
+\label{eq:aggregate_drive_amplitude}
+\end{equation}
+The physical role of Eq.~\eqref{eq:paper_boundary_penalty} is twofold. First, it facilitates convenient gate concatenation by ensuring that the pulse begins and ends in a clean logical basis. Second, as emphasized in the paper, it helps reduce errors associated with deviations from the rotating-wave approximation, since non-RWA oscillatory contributions are less problematic when the control envelopes vanish smoothly at the boundaries \cite{Niu2019}.
+
+The fourth and last ingredient is the runtime penalty. If \(T\) denotes the total duration of the control pulse, then a linear penalty in \(T\) is added to the cost function in order to encourage shorter gates:
+\begin{equation}
+P_{\mathrm{time}} = T.
+\label{eq:paper_runtime_penalty}
+\end{equation}
+This term encodes the physically important idea that long gates are undesirable not only because they are operationally slower, but also because they increase the exposure of the quantum system to decoherence, control drift, and stochastic control errors. In this sense, the runtime penalty is not an arbitrary numerical regularizer; it is a direct expression of the hardware-level desirability of fast control.
+
+Combining these four ingredients, the paper defines the full UFO cost function as
+\begin{equation}
+C(\chi,\beta,\mu,\kappa)
+=
+\chi\bigl[1-F(U(T))\bigr]
++
+\beta L_{\mathrm{tot}}
++
+\mu
+\sum_{t\in\{0,T\}}
+\left[
+g(t)^2 + f(t)^2
+\right]
++
+\kappa T,
+\label{eq:ufo_cost_function}
+\end{equation}
+where \(\chi,\beta,\mu,\kappa > 0\) are adjustable hyperparameters. Equation~\eqref{eq:ufo_cost_function} is the defining equation of the framework. It is the scalar objective minimized throughout the control optimization, and each coefficient controls the relative priority assigned to a different physical desideratum:
+\begin{align}
+\chi &:\ \text{gate accuracy}, \label{eq:weight_chi}\\
+\beta &:\ \text{leakage suppression}, \label{eq:weight_beta}\\
+\mu &:\ \text{boundary-condition enforcement}, \label{eq:weight_mu}\\
+\kappa &:\ \text{runtime reduction}. \label{eq:weight_kappa}
+\end{align}
+
+The conceptual importance of Eq.~\eqref{eq:ufo_cost_function} is not just that it contains several terms, but that it encodes them as \emph{soft constraints} rather than hard restrictions. This is a major design choice of the paper. Much of the previous literature had reduced leakage by turning off certain control channels entirely or by imposing strong structural restrictions on the admissible controls. While such hard constraints may simplify the problem or suppress certain error mechanisms, they can also impair the full controllability of the system. The UFO framework takes the opposite approach: it preserves access to all relevant independent control channels and instead penalizes physically undesirable behavior through tunable cost terms \cite{Niu2019}. This offers the optimizer more flexibility while still discouraging leakage, runtime inflation, and poor boundary behavior.
+
+This soft-constraint philosophy is one of the reasons the objective deserves to be called universal. The framework does not depend on a single special-purpose gate ansatz, nor does it assume that the best strategy is obtained by imposing rigid analytical restrictions on the control. Instead, it defines a physically motivated cost landscape over the full admissible control space. The optimizer is then free to explore that landscape and discover control solutions that balance the competing objectives according to the chosen weights. From a control-theoretic perspective, Eq.~\eqref{eq:ufo_cost_function} is therefore best viewed as a multi-objective scalarization of the realistic gate-design problem.
+
+Another important feature is that the UFO objective is modular. The paper explicitly notes that, when applying the framework to a different quantum-computing platform, the individual terms of the cost function can be modified so as to reflect the relevant underlying physics \cite{Niu2019}. For example, if a different hardware platform required alternative boundary conditions, bandwidth penalties, or noise-aware robustness measures, these could be incorporated by replacing or augmenting the corresponding terms. Thus, universality here should not be interpreted as meaning that one fixed formula solves every platform unchanged; rather, it means that the framework provides a reusable blueprint for constructing a physically meaningful optimization objective.
+
+From the perspective of reinforcement learning, Eq.~\eqref{eq:ufo_cost_function} is the crucial bridge between physics and algorithm. Once this scalar objective has been defined, it can be used directly as the quantity to be minimized, or equivalently as the negative reward to be maximized by the RL agent. This is why the UFO cost function occupies such a central position in the paper: it is the place where all the physics of the control problem is distilled into a form that is both analytically meaningful and numerically optimizable.
+
+For the structure of the thesis, Eq.~\eqref{eq:ufo_cost_function} should be treated as the centerpiece of the paper-specific framework chapter. The earlier subsections prepare its ingredients: the gmon Hamiltonian defines the control model, the subspace decomposition identifies the leakage channels, and the TSWT analysis produces the leakage bound. The later subsections then explain how this cost function is used inside the reinforcement-learning formulation, and how the resulting controls are evaluated on the target gate family studied in the paper.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    box/.style={draw, rounded corners, minimum width=2.9cm, minimum height=1cm, align=center},
+    arrow/.style={-{Latex[length=2mm]}, thick},
+    node distance=1.4cm and 1.5cm
+]
+
+\node[box] (inf) {$\chi\,[1-F(U(T))]$\\gate infidelity};
+\node[box, right=of inf] (leak) {$\beta L_{\mathrm{tot}}$\\leakage penalty};
+\node[box, right=of leak] (bdry) {$\mu P_{\mathrm{bdry}}$\\boundary penalty};
+\node[box, right=of bdry] (time) {$\kappa T$\\runtime penalty};
+
+\node[box, below=1.6cm of leak, minimum width=4.4cm] (ufo) {$C(\chi,\beta,\mu,\kappa)$};
+
+\draw[arrow] (inf) -- (ufo);
+\draw[arrow] (leak) -- (ufo);
+\draw[arrow] (bdry) -- (ufo);
+\draw[arrow] (time) -- (ufo);
+
+\end{tikzpicture}
+\caption{Structure of the UFO objective. The full control cost is obtained by combining four physically motivated penalty terms: gate infidelity, accumulated leakage, violation of boundary conditions, and total runtime.}
+\label{fig:ufo_cost_structure}
+\end{figure}
+
 \newpage
 \bibliographystyle{plain} % oppure unsrt, alpha, ieee
 \bibliography{references}
