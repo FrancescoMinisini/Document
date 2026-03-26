@@ -2468,6 +2468,101 @@ For the structure of the thesis, this subsection therefore plays a purely motiva
 \label{fig:tswt_motivation}
 \end{figure}
 
+% Requires in the preamble:
+% \usepackage{amsmath,amssymb,amsfonts,bm}
+% \usepackage{tikz}
+% \usetikzlibrary{positioning,arrows.meta}
+
+\subsection{The leakage bound and its role as a control penalty}
+\label{subsec:leakage_bound_penalty}
+
+The conceptual role of the time-dependent Schrieffer--Wolff transformation becomes concrete once one asks how leakage should actually be quantified during control optimization. In the reference paper, the key idea is that after applying the second-order TSWT, the leading leakage mechanisms can be organized into two physically distinct contributions: direct coupling leakage caused by the residual block-off-diagonal Hamiltonian, and non-adiabatic leakage caused by the time dependence of the transformed basis itself \cite{Niu2019}. Rather than treating these effects only through full numerical propagation or experimental benchmarking, the paper derives an explicit analytic bound that captures the dominant coherent leakage accumulated during the gate.
+
+The residual inter-subspace coupling after the second-order TSWT is described by an effective block-off-diagonal Hamiltonian $\hat{H}_{\mathrm{od}}(t)$, whose magnitude scales as
+\begin{equation}
+\hat{H}_{\mathrm{od}}(t)
+=
+O\!\left(\frac{\epsilon^{3}}{\Delta^{2}}\right),
+\label{eq:Hod_order_after_tswt}
+\end{equation}
+where $\epsilon$ is the characteristic scale of the inter- and intra-subspace couplings and $\Delta$ is the minimum energy gap separating the computational subspace from the higher subspaces. Equation~\eqref{eq:Hod_order_after_tswt} is crucial: it expresses the fact that the direct leakage-inducing couplings have already been perturbatively suppressed to higher order by the TSWT. Leakage is therefore not controlled by the original raw off-diagonal Hamiltonian, but by the smaller residual coupling that remains after the rotated basis has been chosen appropriately.
+
+Starting from this residual Hamiltonian, the paper derives in Appendix B a practical upper bound for the accumulated coherent leakage,
+\begin{equation}
+L_{\mathrm{tot}}(T)
+\lesssim
+\frac{\|\hat{H}_{\mathrm{od}}(0)\|}{\Delta(0)}
++
+\frac{\|\hat{H}_{\mathrm{od}}(T)\|}{\Delta(T)}
++
+\int_{0}^{T}
+\frac{1}{\Delta(t)^{2}}
+\left\|
+\frac{d^{2}\hat{H}_{\mathrm{od}}(t)}{dt^{2}}
+\right\|
+\,dt.
+\label{eq:paper_leakage_bound}
+\end{equation}
+This is the central leakage-related quantity used in the main text of the paper \cite{Niu2019}. Even though Eq.~\eqref{eq:paper_leakage_bound} is compact, it carries a rich physical interpretation and is particularly well suited to control design.
+
+The first two terms in Eq.~\eqref{eq:paper_leakage_bound},
+\begin{equation}
+\frac{\|\hat{H}_{\mathrm{od}}(0)\|}{\Delta(0)}
+\qquad \text{and} \qquad
+\frac{\|\hat{H}_{\mathrm{od}}(T)\|}{\Delta(T)},
+\label{eq:boundary_leakage_terms}
+\end{equation}
+are boundary contributions. They penalize the presence of residual block-off-diagonal couplings at the initial and final times of the control sequence. Their physical meaning is intuitive: if the control pulse does not start and end in a configuration where the computational basis aligns well with the physical Fock basis, then the gate may begin or terminate with unwanted admixture of leakage components. These terms therefore strongly motivate boundary conditions that force the relevant control pulses to vanish at the beginning and at the end of the gate.
+
+The integral term,
+\begin{equation}
+\int_{0}^{T}
+\frac{1}{\Delta(t)^{2}}
+\left\|
+\frac{d^{2}\hat{H}_{\mathrm{od}}(t)}{dt^{2}}
+\right\|
+\,dt,
+\label{eq:nonadiabatic_leakage_term}
+\end{equation}
+has a different interpretation. It penalizes rapid temporal variation of the residual block-off-diagonal Hamiltonian and is therefore closely connected to non-adiabaticity. In qualitative terms, this contribution says that leakage is not only controlled by how large the unwanted inter-subspace coupling is, but also by how sharply it changes in time. A pulse that is too abruptly modulated may remain acceptable from the point of view of instantaneous amplitude, yet still induce leakage because the time dependence itself excites transitions between subspaces. Equation~\eqref{eq:nonadiabatic_leakage_term} is thus the mathematical expression of the speed--leakage tradeoff discussed earlier in the background chapter.
+
+One of the most attractive features of Eq.~\eqref{eq:paper_leakage_bound} is that it unifies the dominant leakage behavior in both off-resonant and on-resonant regimes. The paper argues that, after comparing the different terms arising from the direct-coupling and generalized adiabatic-theorem analyses, the bound in Eq.~\eqref{eq:paper_leakage_bound} captures the dominant leakage contribution in both regimes \cite{Niu2019}. More specifically, in slowly modulated off-resonant situations the boundary terms may dominate, whereas in faster on-resonant modulation regimes the time-derivative contribution becomes more important. This makes the bound especially valuable for optimization, since it does not apply only to one narrow operational regime.
+
+From a control-theoretic perspective, the importance of Eq.~\eqref{eq:paper_leakage_bound} lies in the fact that it is \emph{optimization-friendly}. Unlike a leakage estimate based purely on final-state population obtained after a full time evolution, the bound is written directly in terms of the effective Hamiltonian and its derivatives. This means that it can be evaluated as a physically meaningful soft penalty during optimization, and it also gives immediate qualitative guidance:
+\begin{itemize}
+\item reduce the magnitude of the residual block-off-diagonal coupling,
+\item enforce smooth temporal modulation,
+\item satisfy appropriate boundary conditions,
+\item keep the relevant energy gap from becoming too small.
+\end{itemize}
+In this sense, the bound is not only a diagnostic; it is also an analytic design principle.
+
+This is precisely why the paper elevates leakage from a post hoc error metric to an explicit optimization target. Instead of relying on randomized benchmarking or brute-force leakage estimation at the end of training, it introduces the bound \(L_{\mathrm{tot}}\) as a penalty term in the control objective. The significance of this move should not be understated. It means that the reinforcement-learning agent is not merely rewarded for producing a good final logical unitary, but is also discouraged, throughout optimization, from exploring pulse trajectories that are predicted to be leakage-prone by the perturbative physics of the full multilevel Hamiltonian \cite{Niu2019}.
+
+For the structure of the thesis, Eq.~\eqref{eq:paper_leakage_bound} is the main mathematical outcome of the paper's leakage analysis. It takes the abstract discussion of TSWT and turns it into a concrete scalar quantity that can be inserted into the cost function. The next subsection will build directly on this result by introducing the full UFO objective, where \(L_{\mathrm{tot}}\) appears alongside gate infidelity, boundary-condition penalties, and total runtime.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    box/.style={draw, rounded corners, minimum width=3.2cm, minimum height=1cm, align=center},
+    arrow/.style={-{Latex[length=2mm]}, thick},
+    node distance=1.5cm and 1.6cm
+]
+
+\node[box] (hod0) {$\|\hat H_{\mathrm{od}}(0)\|/\Delta(0)$\\initial boundary term};
+\node[box, right=of hod0] (int) {$\displaystyle \int_0^T \frac{1}{\Delta(t)^2}\left\|\frac{d^2\hat H_{\mathrm{od}}}{dt^2}\right\|dt$\\modulation / non-adiabatic term};
+\node[box, right=of int] (hodT) {$\|\hat H_{\mathrm{od}}(T)\|/\Delta(T)$\\final boundary term};
+
+\node[box, below=1.4cm of int] (ltot) {$L_{\mathrm{tot}}$};
+
+\draw[arrow] (hod0) -- (ltot);
+\draw[arrow] (int) -- (ltot);
+\draw[arrow] (hodT) -- (ltot);
+
+\end{tikzpicture}
+\caption{Structure of the leakage bound used in the paper. The total leakage penalty \(L_{\mathrm{tot}}\) combines two boundary contributions, associated with residual off-diagonal couplings at the initial and final times, with an integral term that penalizes rapid modulation of the effective block-off-diagonal Hamiltonian.}
+\label{fig:structure_leakage_bound}
+\end{figure}
 
 
 \newpage
