@@ -19,7 +19,7 @@
 
 \usepackage{graphicx}
 \usepackage{float}
-
+\usepackage{cite} % opzionale ma utile
 % Cross-references and links
 \usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
 
@@ -1981,5 +1981,9 @@ This is precisely the conceptual role played by the framework analyzed in the ne
 \caption{Reward design as the interface between physics and learning. The relevant physical control objectives are first encoded into a scalar cost functional, which is then converted into the reward signal used by the RL algorithm to optimize the policy.}
 \label{fig:reward_design_bridge}
 \end{figure}
+
+
+\bibliographystyle{plain} % oppure unsrt, alpha, ieee
+\bibliography{references}
 
 \end{document}
