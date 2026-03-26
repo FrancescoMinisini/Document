@@ -1529,5 +1529,108 @@ For the purposes of this thesis, the most important takeaway is that robustness 
 \label{fig:robustness_landscape_shift}
 \end{figure}
 
+\subsection{Why reinforcement learning is relevant for quantum control}
+\label{subsec:why_rl_is_relevant}
+
+Reinforcement learning (RL) is relevant to quantum control because many pulse-design problems are naturally sequential, stochastic, high-dimensional, and lack labeled training data. In contrast to supervised learning, where one learns from example input-output pairs, RL learns by trial and error through repeated interaction with an environment and by maximizing a scalar reward signal \cite{SuttonBarto2018,Giannelli2022}. This makes it appealing for quantum-control settings in which one can evaluate the quality of a control protocol through simulation or experiment, but cannot provide a database of known optimal pulses in advance. The reference paper studied in this thesis emphasizes precisely this point: in the presence of leakage, control noise, and poorly understood high-dimensional control landscapes, RL offers a flexible framework for learning good control trajectories directly from the optimization objective rather than from labeled data \cite{Niu2019}.
+
+At a formal level, RL models the control task as a Markov decision process (MDP), specified by a state space $\mathcal{S}$, an action space $\mathcal{A}$, a transition kernel $P(s'|s,a)$, and a reward function $r(s,a,s')$. At discrete time step $t$, the agent observes a state $s_t\in\mathcal{S}$, selects an action $a_t\in\mathcal{A}$ according to a policy $\pi_{\bm{\theta}}(a|s)$ parameterized by $\bm{\theta}$, receives a reward $r_t$, and transitions to a new state $s_{t+1}$. The cumulative performance of the policy is quantified through the return
+\begin{equation}
+G_t
+=
+\sum_{k=t}^{T}
+\gamma^{\,k-t} r_k,
+\label{eq:rl_return}
+\end{equation}
+where $\gamma\in[0,1]$ is the discount factor and $T$ is the horizon of an episode. The learning objective is then
+\begin{equation}
+J(\pi_{\bm{\theta}})
+=
+\mathbb{E}_{\tau\sim \pi_{\bm{\theta}},P}
+\left[
+G_0
+\right],
+\label{eq:rl_objective}
+\end{equation}
+where the expectation is taken over trajectories
+\begin{equation}
+\tau
+=
+(s_0,a_0,r_0,s_1,a_1,r_1,\dots,s_T).
+\label{eq:rl_trajectory}
+\end{equation}
+In words, the agent seeks a policy that maximizes expected cumulative reward over entire control episodes \cite{SuttonBarto2018}.
+
+This formalism maps naturally onto quantum control. The \emph{state} may encode the current time step, the propagated wavefunction or density matrix, effective features derived from the system state, or a partial measurement record in a feedback setting. The \emph{action} corresponds to the control values applied over the next time interval, for example a vector of microwave amplitudes, phases, or detunings. The \emph{environment} is the controlled quantum system itself, either simulated numerically or accessed experimentally. The \emph{reward} is derived from the control objective, such as gate fidelity, state-transfer fidelity, leakage suppression, runtime penalties, or some weighted combination thereof. Thus, quantum pulse design can be interpreted as a sequential decision problem in which the agent gradually constructs a control protocol while observing its consequences through the system dynamics \cite{Giannelli2022,Bukov2018,Niu2019}.
+
+A particularly useful feature of the RL perspective is that it unifies open-loop and closed-loop control under the same conceptual language. If the state contains only the time index,
+\begin{equation}
+s_t = t,
+\label{eq:time_only_state}
+\end{equation}
+then the learned policy
+\begin{equation}
+a_t = \pi_{\bm{\theta}}(t)
+\label{eq:open_loop_rl_policy}
+\end{equation}
+defines an effectively open-loop pulse schedule: the action at time $t$ is predetermined once the policy parameters are fixed. If, on the other hand, the state includes a measurement history or experimentally observed features,
+\begin{equation}
+s_t = \bigl(t,y_0,y_1,\dots,y_{t-1}\bigr),
+\label{eq:feedback_state_rl}
+\end{equation}
+then the same policy formalism becomes a closed-loop feedback controller. This flexibility is one reason RL has become attractive in quantum technologies: it can be used both to learn open-loop pulse sequences and, at least in principle, to learn adaptive feedback strategies within a single mathematical framework \cite{SuttonBarto2018,Giannelli2022}.
+
+Another reason RL is relevant is that many quantum-control objectives are naturally \emph{delayed}. A control action applied early in the pulse sequence may only reveal its true value at the final time, when fidelity, leakage, or some other terminal metric is evaluated. In such cases, it is often convenient to use a reward structure of the form
+\begin{equation}
+r_t =
+\begin{cases}
+0, & t<T,\\[0.3em]
+-\mathcal{J}_{\mathrm{final}}, & t=T,
+\end{cases}
+\label{eq:sparse_terminal_reward}
+\end{equation}
+or, equivalently, a positive terminal reward based on fidelity,
+\begin{equation}
+r_T = F_{\mathrm{final}}.
+\label{eq:terminal_fidelity_reward}
+\end{equation}
+This sparse-reward structure is awkward for naive local optimization, but it is entirely natural in RL, where the goal is to learn sequences of actions whose value may only become apparent at the end of the episode. In this sense, RL is well suited to control problems in which the quality of a full pulse sequence matters more than the immediate effect of each individual control action \cite{Bukov2018,Giannelli2022}.
+
+RL is also attractive when stochasticity is intrinsic to the problem. If the environment contains random perturbations, sampled parameter drifts, or control noise, then the transition law becomes stochastic,
+\begin{equation}
+s_{t+1} \sim P(\,\cdot \mid s_t,a_t,\xi_t),
+\label{eq:stochastic_transition_rl}
+\end{equation}
+where $\xi_t$ represents a random disturbance. The policy objective in Eq.~\eqref{eq:rl_objective} then automatically becomes an expectation over noisy trajectories. This is a particularly natural way to formulate robust control: instead of first optimizing a nominal pulse and then testing it under perturbations, one can train the agent directly in a noisy environment and thereby encourage the policy to discover actions that perform well \emph{on average} across many stochastic realizations \cite{Niu2019}. The uploaded paper uses exactly this principle by training RL agents in environments with sampled control noise so as to optimize not only fidelity and runtime, but also robustness against stochastic control errors \cite{Niu2019}.
+
+A further advantage of RL is that it can exploit structure beyond local differential information. Classical gradient-based optimal control methods often update a pulse by using local derivatives of a cost functional with respect to control parameters. RL, by contrast, can treat the control problem as a long-horizon sequential optimization problem and may therefore exploit nonlocal regularities of the trajectory space. This perspective has been particularly fruitful in problems where the control landscape is highly nonconvex or where the action sequence has strong temporal dependencies. The reference paper stresses this point explicitly, arguing that deep RL can harness nonlocal regularities of noisy control trajectories and facilitate transfer learning between related control tasks \cite{Niu2019}. This is especially relevant for families of quantum gates that share common structure, because a learned policy or value representation may generalize across nearby targets better than a pulse optimized from scratch each time.
+
+Of course, RL is not automatically superior to classical optimal control. It introduces its own challenges: large sample requirements, sensitivity to reward shaping, instability during training, and the need to choose a suitable state representation and action parameterization. In addition, many RL algorithms were originally developed for generic machine-learning tasks rather than for the special structure of quantum dynamics. For this reason, a productive viewpoint is not to see RL as replacing optimal control, but rather as providing an alternative search strategy within the same control-theoretic framework \cite{Giannelli2022,Bukov2018}. In deterministic model-based settings, RL may be interpreted as learning to solve the same optimization problem attacked by GRAPE or Krotov, but by optimizing a policy over sequential decisions rather than directly differentiating a cost with respect to a fixed pulse vector.
+
+For the purposes of this thesis, the relevance of RL is therefore twofold. First, it offers a mathematically natural framework for sequential pulse construction in noisy and uncertain environments. Second, it provides a route to incorporating practical objectives such as leakage suppression, robustness to sampled perturbations, and gate-time reduction into a single reward function. This is precisely the role RL plays in the UFO framework analyzed later: the control problem is cast as a sequential decision process, the total objective is encoded into a reward/cost signal, and the agent learns pulse trajectories that balance fidelity, leakage, runtime, and robustness under stochastic control errors \cite{Niu2019}. In this sense, RL is relevant not because quantum control is a machine-learning problem in disguise, but because the structure of many realistic quantum-control tasks already has the architecture of a sequential decision problem.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    box/.style={draw, rounded corners, minimum width=3.0cm, minimum height=1.0cm, align=center},
+    arrow/.style={-{Latex[length=2mm]}, thick},
+    node distance=1.8cm and 1.8cm
+]
+
+\node[box] (agent) {RL agent\\policy $\pi_{\bm{\theta}}(a|s)$};
+\node[box, right=of agent] (env) {quantum environment\\Hamiltonian dynamics + noise};
+\node[box, below=of env] (reward) {reward / cost\\fidelity, leakage, runtime};
+\node[box, below=of agent] (state) {state representation\\time, observables, history};
+
+\draw[arrow] (agent) -- node[above] {$a_t$} (env);
+\draw[arrow] (env) -- node[right] {$r_t$} (reward);
+\draw[arrow] (reward) -- ++(-3.35,0) |- (agent);
+\draw[arrow] (env) -- node[left] {$s_{t+1}$} (state);
+\draw[arrow] (state) -- (agent);
+
+\end{tikzpicture}
+\caption{Agent--environment view of quantum control in reinforcement learning. The agent chooses control actions, the quantum system evolves under those controls and possible noise, and the resulting state and reward are fed back to improve the policy. Depending on the choice of state representation, the same formalism can describe either open-loop pulse generation or closed-loop feedback control.}
+\label{fig:rl_quantum_control_loop}
+\end{figure}
 
 \end{document}
