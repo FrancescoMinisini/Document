@@ -1987,6 +1987,7 @@ This is precisely the conceptual role played by the framework analyzed in the ne
 % \usepackage{tikz}
 % \usetikzlibrary{positioning,arrows.meta,fit}
 
+\section{Physical model and control setting}
 \subsection{The gmon architecture as a platform for robust analog quantum control}
 \label{subsec:gmon_architecture_motivation}
 
@@ -2050,6 +2051,155 @@ For the purposes of the thesis, this subsection therefore plays a mainly motivat
 \caption{Conceptual schematic of the gmon architecture. Two weakly anharmonic superconducting qubits are subject to local controls and coupled through a tunable interaction channel. This combination of local addressability and time-dependent coupling makes the platform particularly suitable for pulse-level optimization of two-qubit gates.}
 \label{fig:gmon_architecture_schematic}
 \end{figure}
+
+% Requires in the preamble:
+% \usepackage{amsmath,amssymb,amsfonts,bm}
+% \usepackage{tikz}
+% \usetikzlibrary{positioning,arrows.meta}
+
+\subsection{Effective Hamiltonian and control channels}
+\label{subsec:gmon_effective_hamiltonian}
+
+Having identified the gmon as the physical platform of interest, the next step is to specify the effective dynamical model used in the control problem. In the reference paper, the starting point is a phenomenological circuit quantization of two coupled nonlinear Josephson L--C oscillators, followed by a transformation to the interaction picture and a rotating-wave approximation (RWA) valid in the regime where the fast oscillating terms average out over the control timescale \cite{Niu2019}. The resulting description is particularly convenient because it retains the multilevel bosonic structure needed to study leakage, while at the same time making the experimentally relevant control channels explicit.
+
+At the bosonic level, the effective two-mode Hamiltonian used in the paper takes the form
+\begin{equation}
+\hat{H}_{\mathrm{RWA}}(t)
+=
+\frac{\eta}{2}
+\sum_{j=1}^{2}
+\hat{n}_{j}\bigl(\hat{n}_{j}-1\bigr)
++
+g(t)\bigl(\hat{a}_{2}^{\dagger}\hat{a}_{1}+\hat{a}_{1}^{\dagger}\hat{a}_{2}\bigr)
++
+\sum_{j=1}^{2}\delta_{j}(t)\hat{n}_{j}
++
+\sum_{j=1}^{2}
+i f_{j}(t)
+\left(
+\hat{a}_{j}e^{i\phi_{j}(t)}
+-
+\hat{a}_{j}^{\dagger}e^{-i\phi_{j}(t)}
+\right),
+\label{eq:gmon_rwa_bosonic_hamiltonian}
+\end{equation}
+where $\hat{a}_{j}$ and $\hat{a}_{j}^{\dagger}$ are the annihilation and creation operators of qubit mode $j$, and
+\begin{equation}
+\hat{n}_{j}=\hat{a}_{j}^{\dagger}\hat{a}_{j}
+\label{eq:gmon_number_operator}
+\end{equation}
+is the corresponding number operator. Equation~\eqref{eq:gmon_rwa_bosonic_hamiltonian} is the central effective Hamiltonian of the control model, and it already makes transparent the physical meaning of the available control knobs.
+
+The first term in Eq.~\eqref{eq:gmon_rwa_bosonic_hamiltonian},
+\begin{equation}
+\frac{\eta}{2}\sum_{j=1}^{2}\hat{n}_{j}(\hat{n}_{j}-1),
+\label{eq:gmon_anharmonic_term}
+\end{equation}
+encodes the weak anharmonicity of the superconducting modes. This is the term that breaks the exact harmonic spacing of the oscillator spectrum and thereby allows the lowest two levels of each mode to function as an effective qubit. At the same time, because $\eta$ is finite rather than infinitely large, the system remains intrinsically multilevel, so the higher excited states cannot be ignored in fast control protocols. For this reason, Eq.~\eqref{eq:gmon_anharmonic_term} is not just a detail of the model: it is the term that makes leakage a meaningful physical issue in the first place.
+
+The second term,
+\begin{equation}
+g(t)\bigl(\hat{a}_{2}^{\dagger}\hat{a}_{1}+\hat{a}_{1}^{\dagger}\hat{a}_{2}\bigr),
+\label{eq:gmon_exchange_term}
+\end{equation}
+represents the tunable inter-qubit coupling. It has the structure of an exchange interaction between the two bosonic modes and is the main source of entangling dynamics in the model. The time dependence of $g(t)$ is particularly important: unlike in fixed-coupling architectures, the interaction strength itself becomes a control parameter that can be modulated during the gate. This is one of the central architectural advantages of the gmon and one of the reasons why it is a natural platform for direct analog gate optimization \cite{Chen2014,Niu2019}.
+
+The third term,
+\begin{equation}
+\sum_{j=1}^{2}\delta_{j}(t)\hat{n}_{j},
+\label{eq:gmon_detuning_term}
+\end{equation}
+describes local detunings of the qubit frequencies. These terms act diagonally in the occupation-number basis and allow one to shift the effective local energies during the pulse. Physically, they correspond to frequency control of the individual qubits and provide an additional mechanism for shaping the relative phase accumulation and resonance conditions throughout the evolution. Together with the coupling pulse $g(t)$, the detunings $\delta_j(t)$ enlarge the set of dynamically accessible unitary transformations.
+
+Finally, the last term in Eq.~\eqref{eq:gmon_rwa_bosonic_hamiltonian},
+\begin{equation}
+\sum_{j=1}^{2}
+i f_{j}(t)
+\left(
+\hat{a}_{j}e^{i\phi_{j}(t)}
+-
+\hat{a}_{j}^{\dagger}e^{-i\phi_{j}(t)}
+\right),
+\label{eq:gmon_drive_term}
+\end{equation}
+models the externally applied microwave drives. Here $f_j(t)$ is the drive amplitude and $\phi_j(t)$ its phase. These controls generate local coherent rotations of each qubit mode and, because of the phase dependence, allow one to address different quadratures of the local dynamics. Thus, the full set of control channels in the effective model consists of:
+\begin{equation}
+\bigl\{
+g(t),\;
+\delta_1(t),\delta_2(t),\;
+f_1(t),f_2(t),\;
+\phi_1(t),\phi_2(t)
+\bigr\}.
+\label{eq:gmon_control_channels}
+\end{equation}
+This explicit decomposition is very useful in the thesis, because it makes clear which physical quantities the learning agent is allowed to shape.
+
+Although Eq.~\eqref{eq:gmon_rwa_bosonic_hamiltonian} is the correct model for studying multilevel dynamics and leakage, it is also helpful to project it onto the logical qubit basis in order to interpret the corresponding two-qubit control structure. After truncation to the qubit subspace, the paper writes the Hamiltonian as
+\begin{equation}
+\hat{H}_{\mathrm{qb}}(t)
+=
+\frac{g(t)}{2}
+\left(
+\sigma_{1}^{x}\sigma_{2}^{x}
++
+\sigma_{1}^{y}\sigma_{2}^{y}
+\right)
++
+\sum_{j=1}^{2}
+\left[
+\frac{\delta_{j}(t)}{2}\sigma_{j}^{z}
+-
+f_{j}(t)
+\Bigl(
+\sin\phi_{j}(t)\,\sigma_{j}^{x}
++
+\cos\phi_{j}(t)\,\sigma_{j}^{y}
+\Bigr)
+\right],
+\label{eq:gmon_qubit_projected_hamiltonian}
+\end{equation}
+where $\sigma_j^{x},\sigma_j^{y},\sigma_j^{z}$ are the Pauli operators acting on qubit $j$ \cite{Niu2019}. Equation~\eqref{eq:gmon_qubit_projected_hamiltonian} gives a clear logical interpretation of the control resources:
+\begin{itemize}
+\item the coupling pulse $g(t)$ generates an \(XY\)-type entangling interaction,
+\item the detuning pulses $\delta_j(t)$ generate local \(Z\)-type control,
+\item the microwave amplitudes and phases generate local rotations in the \(XY\) plane.
+\end{itemize}
+
+From the logical point of view, Eq.~\eqref{eq:gmon_qubit_projected_hamiltonian} already suggests why the architecture is sufficiently expressive for universal two-qubit control: one has access to both entangling interactions and arbitrary local single-qubit rotations. However, the projected model alone is not sufficient for the purposes of this thesis, because the control problem is not only to realize a target logical unitary, but to do so while suppressing population transfer outside the computational subspace. For this reason, the bosonic Hamiltonian in Eq.~\eqref{eq:gmon_rwa_bosonic_hamiltonian} remains the fundamental model, while the projected Hamiltonian in Eq.~\eqref{eq:gmon_qubit_projected_hamiltonian} serves mainly as an interpretive tool.
+
+A further important aspect of the paper is that the control problem is posed under realistic amplitude constraints and experimental limitations. In particular, the magnitudes of the coupling pulse, detuning controls, and microwave amplitudes are chosen to remain substantially smaller than the anharmonicity scale, so as to reduce leakage-inducing transitions, and the modulation bandwidth is restricted to remain compatible with experimental hardware limitations \cite{Niu2019}. This is conceptually important: the Hamiltonian is not introduced as a purely formal theoretical model, but as a realistic effective control model in which both physical accessibility and multilevel errors are taken seriously.
+
+For the structure of the thesis, the main role of the present subsection is therefore to identify the dynamical variables of the problem. Equation~\eqref{eq:gmon_rwa_bosonic_hamiltonian} gives the effective multilevel control model on which the optimization is performed, while Eq.~\eqref{eq:gmon_qubit_projected_hamiltonian} clarifies the corresponding logical meaning of the available controls. The next paragraph will build on this by specializing the computational and leakage subspaces in the notation of the paper, thereby preparing the ground for the analytical leakage treatment that follows.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    box/.style={draw, rounded corners, minimum width=2.6cm, minimum height=1cm, align=center},
+    arrow/.style={-{Latex[length=2mm]}, thick},
+    node distance=1.4cm and 1.5cm
+]
+
+\node[box] (g) {$g(t)$\\tunable coupling};
+\node[box, below left=of g] (d1) {$\delta_1(t)$\\local detuning};
+\node[box, below right=of g] (d2) {$\delta_2(t)$\\local detuning};
+\node[box, below=of d1] (f1) {$f_1(t),\phi_1(t)$\\microwave drive};
+\node[box, below=of d2] (f2) {$f_2(t),\phi_2(t)$\\microwave drive};
+\node[box, right=3.0cm of g, minimum width=4.0cm, minimum height=3.2cm] (ham) {Effective Hamiltonian\\[0.3em]
+Bosonic model: Eq.~\eqref{eq:gmon_rwa_bosonic_hamiltonian}\\
+Qubit projection: Eq.~\eqref{eq:gmon_qubit_projected_hamiltonian}
+};
+
+\draw[arrow] (g) -- (ham);
+\draw[arrow] (d1) -- (ham);
+\draw[arrow] (d2) -- (ham);
+\draw[arrow] (f1) -- (ham);
+\draw[arrow] (f2) -- (ham);
+
+\end{tikzpicture}
+\caption{Control channels entering the effective gmon Hamiltonian. The tunable coupling $g(t)$, local detunings $\delta_j(t)$, and microwave amplitudes/phases $(f_j(t),\phi_j(t))$ together define the time-dependent control resources available for quantum gate optimization.}
+\label{fig:gmon_control_channels}
+\end{figure}
+
 
 \bibliographystyle{plain} % oppure unsrt, alpha, ieee
 \bibliography{references}
