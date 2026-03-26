@@ -3189,6 +3189,102 @@ F_{\mathrm{ave}},
 \end{equation}
 with each baseline probing a different aspect of this performance vector.
 
+
+\subsection{Main findings of the original paper}
+\label{subsec:main_findings_original_paper}
+
+With the physical model, the UFO objective, the reinforcement-learning formulation, and the target gate family all in place, the main findings of the reference paper can now be stated clearly. The paper reports that training a TRPO-based reinforcement-learning agent in a stochastic control environment yields analog gate controls that are simultaneously fast, accurate, and substantially more robust to Gaussian control noise than the baseline methods considered \cite{Niu2019}. In other words, the central claim of the work is not merely that reinforcement learning can find workable controls, but that the combination of the UFO objective with noisy training leads to a qualitatively better balance between fidelity, robustness, and runtime than alternative approaches.
+
+The first major result concerns robustness under stochastic control errors. For the family of Gaussian control-noise models considered in the paper, with variance
+\begin{equation}
+\sigma_{\mathrm{noise}} \in [0.1,\,3.5]~\mathrm{MHz},
+\label{eq:main_result_noise_range}
+\end{equation}
+the noise-optimized RL controller maintains an average fidelity in the range
+\begin{equation}
+\overline{F}_{\mathrm{RL,noisy}}
+\in
+[99.5\%,\,98\%],
+\label{eq:main_result_average_fidelity_range}
+\end{equation}
+across the tested noise interval \cite{Niu2019}. In particular, at the representative value
+\begin{equation}
+\sigma_{\mathrm{noise}} = 1~\mathrm{MHz},
+\label{eq:representative_noise_scale}
+\end{equation}
+the paper states that the obtained control satisfies its robustness criterion
+\begin{equation}
+1-\overline{F} \le \epsilon_0,
+\qquad
+\epsilon_0 = 0.007.
+\label{eq:paper_robustness_criterion}
+\end{equation}
+These results are significant because they show that the optimized controls are not only high-fidelity in the nominal setting, but remain accurate under a broad family of experimentally relevant perturbations.
+
+The second major result is comparative. When evaluated under the same Gaussian control-noise model, the noise-optimized RL solution outperforms both the noise-free RL solution and the SGD baseline. The paper reports up to
+\begin{equation}
+\text{one order of magnitude}
+\label{eq:one_order_magnitude_statement}
+\end{equation}
+improvement in average gate infidelity relative to the RL controller trained without stochastic noise, and around
+\begin{equation}
+\text{two orders of magnitude}
+\label{eq:two_order_magnitude_statement}
+\end{equation}
+improvement in average gate infidelity relative to the SGD baseline \cite{Niu2019}. This is one of the most important conclusions of the paper, because it isolates the source of the improvement: the gain is not due only to the use of RL in general, but specifically to the combination of policy-gradient learning with a noisy training environment.
+
+A third important finding concerns stability. The paper shows that the sampled fidelity variance of the noise-optimized RL solution is consistently about one order of magnitude smaller than that of the two comparison methods throughout the tested noise range \cite{Niu2019}. Since fidelity variance measures the sensitivity of the gate performance to random perturbations, this means that the RL-trained control is not only more accurate on average, but also more reproducible from one noisy realization to another. This is a particularly meaningful notion of robustness from the viewpoint of experimental implementation: a control protocol whose average performance is good but whose shot-to-shot fluctuation is large is much less useful than a protocol with similar mean fidelity but significantly smaller variance.
+
+The fourth major result concerns runtime. For the subfamily
+\begin{equation}
+N(\alpha,\alpha,\pi/2),
+\qquad
+\alpha\in[0,\pi],
+\label{eq:runtime_subfamily}
+\end{equation}
+the paper reports a factor-of-ten improvement in gate runtime relative to the optimal gate-synthesis baseline \cite{Niu2019}. This is a striking claim, because it directly supports the paper's broader thesis that hardware-native analog control can outperform even an optimal discrete circuit decomposition when the target gate is well aligned with the natural interaction structure of the device. In the paper's interpretation, this speedup is not accidental: the gate family in Eq.~\eqref{eq:runtime_subfamily} has a two-qubit entangling structure that is especially compatible with the native gmon Hamiltonian, and the RL optimizer is able to exploit this compatibility automatically.
+
+The paper makes this physical point explicit by observing that the target unitary \(N(\alpha,\alpha,\pi/2)\) can be rewritten so that its entangling part is directly realizable under the gmon Hamiltonian with
+\begin{equation}
+\delta_j(t)=0,
+\qquad
+f_j(t)=0,
+\qquad
+j\in\{1,2\},
+\label{eq:hardware_aligned_subfamily}
+\end{equation}
+that is, essentially through time evolution under the native exchange interaction alone \cite{Niu2019}. This interpretation is extremely important for the thesis, because it shows that the learning agent is not merely producing numerically good pulses by black-box trial and error. Rather, it appears to detect and exploit nontrivial regularities linking the structure of the target unitary to the native interaction channels of the hardware. In this sense, one of the paper's strongest messages is that RL can serve not only as an optimizer, but also as a mechanism for uncovering hardware-efficient control strategies.
+
+At the same time, the paper does not present its results as the final word on the problem. It notes, for example, that isolated peaks in the gate-time curves may be due to control singularities and that the hardness of the analog-control landscape in the presence of leakage and stochastic errors still requires further study \cite{Niu2019}. This is useful for the thesis because it identifies a natural opening for extension: the paper establishes a compelling proof of concept, but it does not exhaust the broader research question of how robust RL-based control generalizes across noise models, target families, and hardware assumptions.
+
+Taken together, the results of the paper may be summarized as follows:
+\begin{equation}
+\text{noise-optimized RL}
+\quad\Longrightarrow\quad
+\begin{cases}
+\text{higher average fidelity under noise},\\
+\text{lower fidelity variance},\\
+\text{shorter runtimes for hardware-aligned targets},
+\end{cases}
+\label{eq:summary_main_findings}
+\end{equation}
+relative to the baseline methods studied in the work. This compact summary captures the three pillars of the paper's contribution: robustness, stability, and hardware efficiency.
+
+For the structure of the thesis, this subsection should function as the closing statement of the framework chapter. Everything up to this point has explained the ingredients of the method; the present subsection states what the paper claims to achieve with them. The natural next step is then a new chapter or section devoted to \emph{reproducing} these original results in your own implementation, before moving on to the new experiments and extensions that constitute your personal contribution.
+
+% Optional concluding summary relation
+In that sense, the logical progression of the thesis becomes
+\begin{equation}
+\text{paper framework}
+\;\longrightarrow\;
+\text{paper claims}
+\;\longrightarrow\;
+\text{your reproduction}
+\;\longrightarrow\;
+\text{your extensions}.
+\label{eq:thesis_progression}
+\end{equation}
+
 \newpage
 \bibliographystyle{plain} % oppure unsrt, alpha, ieee
 \bibliography{references}
