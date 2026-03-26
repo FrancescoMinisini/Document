@@ -1982,6 +1982,74 @@ This is precisely the conceptual role played by the framework analyzed in the ne
 \label{fig:reward_design_bridge}
 \end{figure}
 
+% Requires in the preamble:
+% \usepackage{amsmath,amssymb,amsfonts,bm}
+% \usepackage{tikz}
+% \usetikzlibrary{positioning,arrows.meta,fit}
+
+\subsection{The gmon architecture as a platform for robust analog quantum control}
+\label{subsec:gmon_architecture_motivation}
+
+The control framework studied in this thesis is developed on a superconducting two-qubit platform based on the \emph{gmon} architecture. This choice is physically well motivated. The gmon combines two key features that are particularly desirable for high-performance quantum control: on the one hand, it inherits from transmon- and xmon-like superconducting qubits the advantages of relatively high coherence and convenient microwave addressability; on the other hand, it introduces a \emph{tunable inter-qubit coupling}, which can be varied dynamically during the gate operation \cite{Chen2014,Niu2019,Krantz2019}. This makes the platform especially suitable for studying direct analog realization of two-qubit operations, since both local control and entangling interaction strength can be shaped in time rather than being treated as fixed background resources.
+
+At a conceptual level, the architecture consists of two weakly anharmonic superconducting qubits, each locally driven and frequency-controlled, together with a flux-tunable coupler that mediates their interaction. If one denotes the two qubits by $Q_1$ and $Q_2$, then the controlled dynamics may be viewed schematically as arising from a Hamiltonian of the form
+\begin{equation}
+H(t)
+=
+H_{\mathrm{loc}}^{(1)}(t)
++
+H_{\mathrm{loc}}^{(2)}(t)
++
+H_{\mathrm{int}}(t),
+\label{eq:gmon_schematic_hamiltonian}
+\end{equation}
+where the local terms describe the single-qubit dynamics and the interaction term encodes the tunable coupling between the devices. In a simplified bosonic picture, the coupling contribution may be thought of schematically as
+\begin{equation}
+H_{\mathrm{int}}(t)
+\sim
+g(t)
+\left(
+a_1^\dagger a_2 + a_1 a_2^\dagger
+\right),
+\label{eq:gmon_schematic_interaction}
+\end{equation}
+with $g(t)$ a time-dependent coupling strength and $a_j,a_j^\dagger$ the annihilation and creation operators associated with qubit $Q_j$. Equation~\eqref{eq:gmon_schematic_interaction} is not yet the full model used in the paper, but it already captures the essential architectural feature: the interaction itself is a control resource, rather than a static parameter.
+
+This tunability is one of the main reasons the gmon is an attractive testbed for analog gate design. In architectures with fixed coupling, two-qubit gate synthesis is constrained by the native interaction strength and by the limited set of ways in which that interaction can be modulated indirectly through local controls. In the gmon, by contrast, the coupling can be turned on, suppressed, or reshaped during the control sequence, thereby enlarging the family of dynamically accessible pulse protocols \cite{Chen2014,Kjaergaard2020}. From the viewpoint of optimal control, this additional flexibility is valuable because it may reduce the runtime of entangling operations and improve hardware efficiency relative to purely synthesized gate decompositions. It also makes the architecture particularly relevant for the problem studied in the reference paper, whose aim is precisely to optimize quantum gates directly at the pulse level rather than only at the circuit-compilation level \cite{Niu2019}.
+
+At the same time, the gmon remains a \emph{weakly anharmonic multilevel} superconducting system. Therefore, the extra controllability provided by the tunable coupler does not eliminate the main physical difficulties of fast gate design. On the contrary, the platform naturally exhibits the same speed--leakage tension discussed in the background chapter: stronger and faster controls can shorten the gate time and exploit the tunable interaction more aggressively, but they also increase the risk of population transfer outside the computational subspace \cite{Krantz2019,Niu2019}. For this reason, the gmon is not merely a convenient platform with many knobs; it is a realistic environment in which the competing goals of fidelity, speed, and leakage suppression all appear simultaneously and must be balanced in a quantitatively meaningful way.
+
+This balance is exactly what makes the architecture particularly suitable for the control problem addressed in this thesis. A platform with only fixed interactions would make it harder to study the benefits of direct analog gate optimization, while an idealized two-level system would hide the physically important leakage mechanisms associated with weak anharmonicity. The gmon lies precisely in the interesting middle ground: it is experimentally motivated, it offers enough flexibility to make nontrivial pulse-level optimization worthwhile, and it remains sufficiently realistic that multilevel effects and robustness issues cannot be ignored. In this sense, the platform is not incidental to the paper's contribution; it is an essential part of why the proposed framework is physically meaningful \cite{Chen2014,Niu2019}.
+
+For the purposes of the thesis, this subsection therefore plays a mainly motivational role. It identifies the gmon architecture as the physical stage on which the control problem is posed and explains why it is a natural setting for studying robust analog quantum control. The next paragraph will move from this architectural overview to the explicit mathematical model used in the paper, introducing the effective Hamiltonian and the corresponding control channels in more detail.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    box/.style={draw, rounded corners, minimum width=1.9cm, minimum height=1.2cm, align=center},
+    smallbox/.style={draw, rounded corners, minimum width=1.8cm, minimum height=0.85cm, align=center},
+    arrow/.style={-{Latex[length=2mm]}, thick},
+    node distance=1.5cm and 1.6cm
+]
+
+\node[box] (q1) {$Q_1$\\weakly anharmonic qubit};
+\node[box, right=3.5cm of q1] (q2) {$Q_2$\\weakly anharmonic qubit};
+\node[smallbox, below=1.0cm of $(q1)!0.5!(q2)$] (cpl) {tunable coupler\\$g(t)$};
+
+\node[smallbox, above=1.1cm of q1] (d1) {local controls\\drive, detuning};
+\node[smallbox, above=1.1cm of q2] (d2) {local controls\\drive, detuning};
+
+\draw[arrow] (d1) -- (q1);
+\draw[arrow] (d2) -- (q2);
+\draw[arrow] (q1) -- (cpl);
+\draw[arrow] (q2) -- (cpl);
+
+\draw[thick] (q1.east) -- node[above] {$H_{\mathrm{int}}(t)$} (q2.west);
+
+\end{tikzpicture}
+\caption{Conceptual schematic of the gmon architecture. Two weakly anharmonic superconducting qubits are subject to local controls and coupled through a tunable interaction channel. This combination of local addressability and time-dependent coupling makes the platform particularly suitable for pulse-level optimization of two-qubit gates.}
+\label{fig:gmon_architecture_schematic}
+\end{figure}
 
 \bibliographystyle{plain} % oppure unsrt, alpha, ieee
 \bibliography{references}
