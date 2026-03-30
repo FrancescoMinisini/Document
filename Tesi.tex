@@ -3617,6 +3617,39 @@ T_{\mathrm{Adam}}^{\mathrm{nom}} = 90~\mathrm{ns}.
 \end{equation}
 The horizon search is also informative from a qualitative viewpoint: the best cost is attained at an intermediate duration, while both shorter and longer horizons lead to worse objective values, with the cost increasing from \(0.3413\) at \(60~\mathrm{ns}\) to \(0.4005\) at \(240~\mathrm{ns}\). This behavior is physically consistent with the multi-objective structure of the UFO cost. Extremely short horizons make the control problem more aggressive and therefore harder to solve accurately, whereas overly long horizons are penalized by the runtime term and offer no compensating gain in fidelity. The Adam baseline therefore provides a strong nominal reference solution for this target: it already achieves very high gate fidelity and low leakage, while also revealing that the optimal operating regime is not at the shortest admissible time, but at a moderate horizon where the tradeoff between accuracy, leakage suppression, and runtime is best balanced.
 
+The first reference solution for the target in Eq.~\eqref{eq:representative_single_target} was obtained through direct gradient-based optimization of the control trajectory using the Adam baseline. In this setting, the control problem is optimized independently for a discrete set of candidate horizons, and the best solution is then selected according to the nominal UFO cost. For the present target, the horizon sweep
+\begin{equation}
+T \in \{60,90,120,150,180,210,240\}\ \mathrm{ns}
+\label{eq:adam_horizon_grid}
+\end{equation}
+identified
+\begin{equation}
+T^{\star}_{\mathrm{Adam}} = 90~\mathrm{ns}
+\label{eq:adam_best_horizon}
+\end{equation}
+as the best-performing duration, with objective cost
+\begin{equation}
+C_{\mathrm{Adam}}^{\star} = 0.15468,
+\label{eq:adam_best_cost}
+\end{equation}
+nominal fidelity
+\begin{equation}
+F_{\mathrm{Adam}}^{\mathrm{nom}} = 0.999651,
+\label{eq:adam_nominal_fidelity}
+\end{equation}
+and nominal leakage
+\begin{equation}
+L_{\mathrm{Adam}}^{\mathrm{nom}} = 9.59\times 10^{-5}.
+\label{eq:adam_nominal_leakage}
+\end{equation}
+The corresponding runtime is, by construction,
+\begin{equation}
+T_{\mathrm{Adam}}^{\mathrm{nom}} = 90~\mathrm{ns}.
+\label{eq:adam_nominal_runtime}
+\end{equation}
+The horizon search is also informative from a qualitative viewpoint: the best cost is attained at an intermediate duration, while both shorter and longer horizons lead to worse objective values, with the cost increasing from \(0.3413\) at \(60~\mathrm{ns}\) to \(0.4005\) at \(240~\mathrm{ns}\). This behavior is physically consistent with the multi-objective structure of the UFO cost. Extremely short horizons make the control problem more aggressive and therefore harder to solve accurately, whereas overly long horizons are penalized by the runtime term and offer no compensating gain in fidelity. The Adam baseline therefore provides a strong nominal reference solution for this target: it already achieves very high gate fidelity and low leakage, while also revealing that the optimal operating regime is not at the shortest admissible time, but at a moderate horizon where the tradeoff between accuracy, leakage suppression, and runtime is best balanced.
+
+
 \newpage
 \bibliographystyle{plain} % oppure unsrt, alpha, ieee
 \bibliography{references}
