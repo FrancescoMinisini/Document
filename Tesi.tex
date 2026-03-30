@@ -3285,6 +3285,25 @@ In that sense, the logical progression of the thesis becomes
 \label{eq:thesis_progression}
 \end{equation}
 
+\subsubsection{Light hyperparameter sensitivity study}
+\label{subsubsec:trpo_hyperparameter_search}
+
+Before running the main benchmark experiments, a limited hyperparameter sensitivity study was performed in order to identify a stable and competitive TRPO configuration on a representative target gate. The search was carried out for the single-target problem with \(\alpha = 2.2\) and \(\gamma = \pi/2\), which was used as a reference instance for model selection. Rather than performing an exhaustive search over all training parameters, the study was restricted to a small set of quantities expected to have the strongest effect on policy stability and exploration, namely the trust-region radius \texttt{max\_kl} and the initial policy log-standard deviation \texttt{init\_log\_std}.
+
+The explored configuration space consisted of \(9\) TRPO hyperparameter combinations, each evaluated over \(3\) random seeds, for a total of \(27\) runs. In all runs, training was performed in the stochastic environment with Gaussian control noise of standard deviation \(1\,\mathrm{MHz}\), using \(30\) policy iterations and \(2000\) episodes per batch. The tested values were \(\texttt{max\_kl} \in \{0.005, 0.01, 0.02\}\) and \(\texttt{init\_log\_std} \in \{-1.0,-0.5,0.0\}\), while \(\texttt{termination\_cost}=0.15\), \(\Delta t = 2.0\,\mathrm{ns}\), and \(T_{\max}=180\,\mathrm{ns}\) were kept fixed throughout the search. These runs were aggregated by configuration and ranked according to the mean value of the primary evaluation metric across seeds. 
+
+The best-performing configuration was found to be
+\[
+\texttt{max\_kl}=0.005,\qquad
+\texttt{termination\_cost}=0.15,\qquad
+\texttt{init\_log\_std}=-1.0,\qquad
+\Delta t = 2.0\,\mathrm{ns},\qquad
+T_{\max}=180\,\mathrm{ns}.
+\]
+For this setting, the aggregated results over the three seeds yielded a mean best evaluation cost of \(0.3714\), a mean best evaluation fidelity of \(0.9941\), a mean leakage estimate of \(3.91\times 10^{-4}\), and a mean gate duration of \(180.0\,\mathrm{ns}\). :contentReference[oaicite:4]{index=4}
+
+This configuration was therefore selected as the reference TRPO setup for the subsequent numerical benchmarks. The purpose of this preliminary search was not to claim global hyperparameter optimality, but to ensure that the results reported in the following sections are based on a consistent and reasonably tuned policy-optimization regime rather than on an arbitrary parameter choice.
+
 \newpage
 \bibliographystyle{plain} % oppure unsrt, alpha, ieee
 \bibliography{references}
