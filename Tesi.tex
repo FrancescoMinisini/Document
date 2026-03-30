@@ -3432,6 +3432,70 @@ Finally, all robustness experiments are evaluated in the same stochastic setting
 \end{equation}
 with phases wrapped modulo \(2\pi\). The resulting framework therefore provides a common and internally consistent benchmark setting for all subsequent comparisons: every method is tested on the same multilevel gmon dynamics, under the same bandwidth-constrained control parametrization, and with the same fidelity, leakage, runtime, and robustness diagnostics. :contentReference[oaicite:3]{index=3}
 
+\paragraph{Compared methods.}
+\label{par:validation_compared_methods}
+
+The numerical validation presented in this section is based on the comparison of four complementary control strategies, each of which probes a different aspect of the framework. The first method is a direct pulse-optimization baseline based on Adam. In this case, the control trajectory is parameterized explicitly as a finite sequence of piecewise-constant amplitudes, mapped to the physical control channels through bounded nonlinearities and then filtered to enforce bandwidth constraints. For a fixed target gate \(U_{\mathrm{target}}\) and a fixed time horizon \(T\), the optimization problem is formulated as
+\begin{equation}
+\bm{c}^\star
+=
+\arg\min_{\bm{c}}
+\, C(\bm{c}),
+\label{eq:validation_adam_problem}
+\end{equation}
+where \(C(\bm{c})\) is the UFO-inspired scalar objective defined in Eq.~\eqref{eq:validation_ufo_cost}. In the actual implementation, this baseline performs the optimization independently over a discrete set of candidate horizons and then selects the best resulting pulse. It therefore represents the most direct non-RL analogue of the control problem: the same physical objective is used, but the search is carried out directly in control space rather than through a learned policy.
+
+The second method is a reinforcement-learning controller trained in the \emph{nominal} environment, that is, without stochastic perturbations during training. In this case the policy is optimized with trust-region policy optimization (TRPO), but the environment evolves according to the unperturbed Hamiltonian only. If \(\pi_{\bm{\theta}}(a\mid s)\) denotes the stochastic policy and \(r_t\) the reward associated with the current control decision, the learning objective is
+\begin{equation}
+J_{\mathrm{nom}}(\bm{\theta})
+=
+\mathbb{E}_{\tau\sim\pi_{\bm{\theta}}}
+\left[
+\sum_{t=0}^{T} \gamma^t r_t
+\right],
+\label{eq:validation_nominal_rl_objective}
+\end{equation}
+with no control noise injected into the environment dynamics. This method is important because it isolates the contribution of policy-based optimization itself: it answers whether a sequential RL formulation is already competitive before any explicit robustness mechanism is introduced.
+
+The third method is the noise-optimized reinforcement-learning controller, which is the implementation most closely aligned with the central idea of the original paper. Here the same TRPO-based actor--critic architecture is retained, but the policy is trained in a stochastic control environment where Gaussian perturbations are injected into the relevant Hamiltonian parameters at each time step. The corresponding objective can be written as
+\begin{equation}
+J_{\mathrm{noise}}(\bm{\theta})
+=
+\mathbb{E}_{\tau,\xi}
+\left[
+\sum_{t=0}^{T} \gamma^t r_t
+\right]
+=
+-
+\mathbb{E}_{\tau,\xi}
+\left[
+C(\tau;\xi)
+\right],
+\label{eq:validation_noise_rl_objective}
+\end{equation}
+where \(\xi\) denotes the sampled control noise realization. This method is the key robust-control candidate in the present study: unlike the nominal RL controller, it is explicitly trained to perform well on average under stochastic perturbations, and unlike the Adam baseline, it learns a policy over control trajectories rather than optimizing each pulse independently.
+
+These three methods are compared directly in all experiments concerned with control quality and robustness. Their roles are deliberately distinct. The Adam baseline tests whether a standard first-order optimization of the raw controls is sufficient. The nominal TRPO controller tests whether the RL formulation itself provides an advantage even without noisy training. The noise-optimized TRPO controller tests whether robustness can be actively learned by exposing the policy to stochastic perturbations during training. Structuring the comparison in this way is important, because it allows the source of any observed improvement to be identified more precisely.
+
+A fourth baseline is used only in the runtime analysis. This is the optimal gate-synthesis reference for the target family \(N(\alpha,\alpha,\gamma)\), namely the best known discrete circuit decomposition into single-qubit rotations and entangling gates. This baseline is not a pulse-optimization method and therefore is not directly comparable in the robustness experiments. Its purpose is different: it provides a hardware-efficiency reference against which the duration of the learned analog controls can be judged. In other words, while the first three methods address the question
+\begin{equation}
+\textit{Which optimization strategy yields the most accurate and robust pulse?}
+\label{eq:validation_question_robustness}
+\end{equation}
+the synthesis baseline addresses the separate question
+\begin{equation}
+\textit{Can direct analog control outperform standard compiled implementations in runtime?}
+\label{eq:validation_question_runtime}
+\end{equation}
+
+For clarity, the comparison protocol adopted in this chapter may therefore be summarized as follows:
+\begin{itemize}
+\item \textbf{Adam baseline:} direct optimization in control space;
+\item \textbf{nominal TRPO:} policy optimization without training noise;
+\item \textbf{noise-optimized TRPO:} policy optimization in a stochastic environment;
+\item \textbf{gate-synthesis baseline:} discrete-circuit reference used only for runtime comparison.
+\end{itemize}
+This choice of baselines is intentionally minimal but scientifically meaningful. It separates the effects of optimization strategy, noisy training, and hardware-level implementation efficiency, and thereby provides a clear interpretive structure for the experimental results that follow.
 
 \newpage
 \bibliographystyle{plain} % oppure unsrt, alpha, ieee
