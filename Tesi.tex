@@ -3285,24 +3285,153 @@ In that sense, the logical progression of the thesis becomes
 \label{eq:thesis_progression}
 \end{equation}
 
-\subsubsection{Light hyperparameter sensitivity study}
-\label{subsubsec:trpo_hyperparameter_search}
+% \subsubsection{Light hyperparameter sensitivity study}
+% \label{subsubsec:trpo_hyperparameter_search}
 
-Before running the main benchmark experiments, a limited hyperparameter sensitivity study was performed in order to identify a stable and competitive TRPO configuration on a representative target gate. The search was carried out for the single-target problem with \(\alpha = 2.2\) and \(\gamma = \pi/2\), which was used as a reference instance for model selection. Rather than performing an exhaustive search over all training parameters, the study was restricted to a small set of quantities expected to have the strongest effect on policy stability and exploration, namely the trust-region radius \texttt{max\_kl} and the initial policy log-standard deviation \texttt{init\_log\_std}.
+% Before running the main benchmark experiments, a limited hyperparameter sensitivity study was performed in order to identify a stable and competitive TRPO configuration on a representative target gate. The search was carried out for the single-target problem with \(\alpha = 2.2\) and \(\gamma = \pi/2\), which was used as a reference instance for model selection. Rather than performing an exhaustive search over all training parameters, the study was restricted to a small set of quantities expected to have the strongest effect on policy stability and exploration, namely the trust-region radius \texttt{max\_kl} and the initial policy log-standard deviation \texttt{init\_log\_std}.
 
-The explored configuration space consisted of \(9\) TRPO hyperparameter combinations, each evaluated over \(3\) random seeds, for a total of \(27\) runs. In all runs, training was performed in the stochastic environment with Gaussian control noise of standard deviation \(1\,\mathrm{MHz}\), using \(30\) policy iterations and \(2000\) episodes per batch. The tested values were \(\texttt{max\_kl} \in \{0.005, 0.01, 0.02\}\) and \(\texttt{init\_log\_std} \in \{-1.0,-0.5,0.0\}\), while \(\texttt{termination\_cost}=0.15\), \(\Delta t = 2.0\,\mathrm{ns}\), and \(T_{\max}=180\,\mathrm{ns}\) were kept fixed throughout the search. These runs were aggregated by configuration and ranked according to the mean value of the primary evaluation metric across seeds. 
+% The explored configuration space consisted of \(9\) TRPO hyperparameter combinations, each evaluated over \(3\) random seeds, for a total of \(27\) runs. In all runs, training was performed in the stochastic environment with Gaussian control noise of standard deviation \(1\,\mathrm{MHz}\), using \(30\) policy iterations and \(2000\) episodes per batch. The tested values were \(\texttt{max\_kl} \in \{0.005, 0.01, 0.02\}\) and \(\texttt{init\_log\_std} \in \{-1.0,-0.5,0.0\}\), while \(\texttt{termination\_cost}=0.15\), \(\Delta t = 2.0\,\mathrm{ns}\), and \(T_{\max}=180\,\mathrm{ns}\) were kept fixed throughout the search. These runs were aggregated by configuration and ranked according to the mean value of the primary evaluation metric across seeds. 
 
-The best-performing configuration was found to be
-\[
-\texttt{max\_kl}=0.005,\qquad
-\texttt{termination\_cost}=0.15,\qquad
-\texttt{init\_log\_std}=-1.0,\qquad
-\Delta t = 2.0\,\mathrm{ns},\qquad
-T_{\max}=180\,\mathrm{ns}.
-\]
-For this setting, the aggregated results over the three seeds yielded a mean best evaluation cost of \(0.3714\), a mean best evaluation fidelity of \(0.9941\), a mean leakage estimate of \(3.91\times 10^{-4}\), and a mean gate duration of \(180.0\,\mathrm{ns}\). :contentReference[oaicite:4]{index=4}
+% The best-performing configuration was found to be
+% \[
+% \texttt{max\_kl}=0.005,\qquad
+% \texttt{termination\_cost}=0.15,\qquad
+% \texttt{init\_log\_std}=-1.0,\qquad
+% \Delta t = 2.0\,\mathrm{ns},\qquad
+% T_{\max}=180\,\mathrm{ns}.
+% \]
+% For this setting, the aggregated results over the three seeds yielded a mean best evaluation cost of \(0.3714\), a mean best evaluation fidelity of \(0.9941\), a mean leakage estimate of \(3.91\times 10^{-4}\), and a mean gate duration of \(180.0\,\mathrm{ns}\). :contentReference[oaicite:4]{index=4}
 
-This configuration was therefore selected as the reference TRPO setup for the subsequent numerical benchmarks. The purpose of this preliminary search was not to claim global hyperparameter optimality, but to ensure that the results reported in the following sections are based on a consistent and reasonably tuned policy-optimization regime rather than on an arbitrary parameter choice.
+% This configuration was therefore selected as the reference TRPO setup for the subsequent numerical benchmarks. The purpose of this preliminary search was not to claim global hyperparameter optimality, but to ensure that the results reported in the following sections are based on a consistent and reasonably tuned policy-optimization regime rather than on an arbitrary parameter choice.
+
+% \subsection{Baseline direct pulse optimization with Adam}
+% \label{subsec:adam_baseline_results}
+
+% As a first benchmark, I considered a direct pulse-optimization baseline in which the control parameters are optimized with Adam, without policy learning. The purpose of this experiment is to establish a strong non-RL reference for the same physical control problem, before introducing the TRPO-based framework. The benchmark was performed on the representative target gate with \(\alpha=2.2\) and \(\gamma=\pi/2\), while sweeping over a discrete set of candidate gate horizons and selecting the solution with the lowest final objective value. The best solution was obtained at a gate duration of \(90\,\mathrm{ns}\). For this optimal horizon, the resulting nominal cost was \(0.15468\), with nominal fidelity \(0.999651\), nominal leakage \(9.59\times 10^{-5}\), and total gate time \(90\,\mathrm{ns}\). The optimized objective value and the nominally re-evaluated cost were essentially identical, confirming the internal consistency of the optimization and evaluation pipelines. Overall, these results show that direct gradient-based pulse optimization is already capable of producing a very high-quality nominal solution for the selected target gate, and therefore provides a meaningful classical baseline against which the subsequent reinforcement-learning experiments can be compared. :contentReference[oaicite:0]{index=0}
+
+\paragraph{Physical and numerical model.}
+\label{par:validation_physical_numerical_model}
+
+All numerical experiments reported in this section are carried out within the same multilevel gmon control model introduced in the previous chapter. In particular, the controlled dynamics are generated by the rotating-wave Hamiltonian
+\begin{equation}
+\hat{H}_{\mathrm{RWA}}(t)
+=
+\frac{\eta}{2}\sum_{j=1}^{2}\hat{n}_{j}\bigl(\hat{n}_{j}-1\bigr)
++
+g(t)\bigl(\hat{a}_{2}^{\dagger}\hat{a}_{1}+\hat{a}_{1}^{\dagger}\hat{a}_{2}\bigr)
++
+\sum_{j=1}^{2}\delta_j(t)\hat{n}_j
++
+\sum_{j=1}^{2}
+i f_j(t)
+\left(
+\hat{a}_j e^{i\phi_j(t)}-\hat{a}_j^\dagger e^{-i\phi_j(t)}
+\right),
+\label{eq:validation_rwa_hamiltonian}
+\end{equation}
+which is the same effective bosonic description used in the original paper for the two-qubit gmon architecture. The seven control channels are therefore the tunable coupling \(g(t)\), the local detunings \(\delta_1(t)\) and \(\delta_2(t)\), and the microwave amplitudes and phases \(\{f_j(t),\phi_j(t)\}_{j=1,2}\). The computational subspace is the four-dimensional qubit sector
+\begin{equation}
+\Omega_0=\mathrm{span}\{\ket{00},\ket{10},\ket{01},\ket{11}\},
+\label{eq:validation_computational_subspace}
+\end{equation}
+while the physical dynamics are simulated in a truncated multilevel Hilbert space that retains the lowest three local oscillator levels for each mode, resulting in a total dimension
+\begin{equation}
+\dim\mathcal{H}_{\mathrm{phys}}=3^2=9.
+\label{eq:validation_hilbert_dimension}
+\end{equation}
+This three-level local truncation is sufficient to capture the dominant leakage channels discussed in the paper, in particular the coupling between \(\Omega_0\) and the nearest higher-energy sector. 
+
+From the numerical point of view, the control trajectories are represented in piecewise-constant form on a uniform time grid with step size \(\Delta t\). If \(N\) is the number of time slices, the total pulse duration is
+\begin{equation}
+T=N\Delta t,
+\label{eq:validation_total_time}
+\end{equation}
+and each control trajectory is encoded as a discrete sequence
+\begin{equation}
+\bm{c}
+=
+\bigl\{
+(d_{1,k},d_{2,k},f_{1,k},\phi_{1,k},f_{2,k},\phi_{2,k},g_k)
+\bigr\}_{k=0}^{N-1}.
+\label{eq:validation_control_trajectory}
+\end{equation}
+As in the original paper, the raw piecewise-constant controls are not applied directly, but are passed through a causal low-pass filter in order to suppress unrealistically fast modulation and keep the effective bandwidth in the experimentally relevant regime. In the implementation used here, this is realized through a two-pole normalized double-exponential smoothing rule of the form
+\begin{equation}
+\bm{c}_k
+=
+a_1 \bm{c}^{\mathrm{RL}}_k
+-
+b_1 \bm{c}_{k-1}
+-
+b_2 \bm{c}_{k-2},
+\label{eq:validation_filter_rule}
+\end{equation}
+with coefficients determined by the control bandwidth and sampling rate, in direct analogy with the filter construction described in Appendix C of the paper. Unless stated otherwise, the bandwidth is fixed at \(10\,\mathrm{MHz}\), consistent with the setting adopted in the original study. :contentReference[oaicite:1]{index=1}
+
+Given a filtered control sequence, the unitary evolution is propagated step by step. Denoting by \(U_k\) the full multilevel propagator after \(k\) time steps, the update rule is
+\begin{equation}
+U_{k+1}
+=
+\exp\!\left[-i\hat{H}_k \Delta t\right]U_k,
+\qquad
+U_0=\mathbb{I},
+\label{eq:validation_unitary_update}
+\end{equation}
+where \(\hat{H}_k\) is the Hamiltonian in Eq.~\eqref{eq:validation_rwa_hamiltonian} evaluated at the \(k\)-th filtered control. In the actual implementation, the exponential in Eq.~\eqref{eq:validation_unitary_update} is computed by diagonalizing the Hermitian Hamiltonian at each time step and applying the exact phase evolution in the instantaneous eigenbasis, which avoids the additional discretization error of lower-order integrators. The final gate acting on the logical sector is then obtained by projection of the full multilevel propagator onto \(\Omega_0\).
+
+The target operations considered throughout this section belong to the two-qubit family
+\begin{equation}
+N(\alpha,\alpha,\gamma)
+=
+\exp\!\left[
+i\left(
+\alpha\,\sigma_1^x\sigma_2^x
++
+\alpha\,\sigma_1^y\sigma_2^y
++
+\gamma\,\sigma_1^z\sigma_2^z
+\right)
+\right],
+\label{eq:validation_target_family}
+\end{equation}
+which is the same benchmark family used in the original paper. For a given target gate \(U_{\mathrm{target}}\), the projected gate fidelity is evaluated as
+\begin{equation}
+F_{\mathrm{gate}}
+=
+\frac{1}{16}
+\left|
+\mathrm{Tr}\!\left(
+K^\dagger U_{\mathrm{target}}
+\right)
+\right|^2,
+\label{eq:validation_gate_fidelity}
+\end{equation}
+where \(K\) is the \(4\times4\) projected logical propagator. The experiments further retain the same UFO philosophy as the original framework: fidelity is not assessed in isolation, but jointly with leakage, boundary conditions, and runtime. In the implementation used here, the overall scalar cost is evaluated as
+\begin{equation}
+C
+=
+\chi\bigl(1-F_{\mathrm{gate}}\bigr)
++
+\beta L_{\mathrm{tot}}
++
+\mu P_{\mathrm{bdry}}
++
+\kappa \frac{T}{T_{\mathrm{norm}}},
+\label{eq:validation_ufo_cost}
+\end{equation}
+with \(L_{\mathrm{tot}}\) estimated through a second-order time-dependent Schrieffer--Wolff leakage proxy and with \(P_{\mathrm{bdry}}\) penalizing nonvanishing drive and coupling amplitudes at the initial and final time slices. This mirrors the structure of the original UFO objective, while making its evaluation fully explicit in the present codebase. 
+
+Finally, all robustness experiments are evaluated in the same stochastic setting. Following the original paper, Gaussian amplitude fluctuations are injected into the relevant Hamiltonian parameters at each time step, including the anharmonicity \(\eta\), the coupling pulse \(g\), the detuning amplitudes \(\delta_j\), and the microwave amplitudes \(f_j\). In compact form, if \(\bm{c}_k\) denotes the nominal filtered control at step \(k\), the noisy realization is written as
+\begin{equation}
+\bm{c}^{(\mathrm{noisy})}_k
+=
+\bm{c}_k + \bm{\xi}_k,
+\qquad
+\bm{\xi}_k \sim \mathcal{N}(\bm{0},\Sigma_\xi),
+\label{eq:validation_noise_model}
+\end{equation}
+with phases wrapped modulo \(2\pi\). The resulting framework therefore provides a common and internally consistent benchmark setting for all subsequent comparisons: every method is tested on the same multilevel gmon dynamics, under the same bandwidth-constrained control parametrization, and with the same fidelity, leakage, runtime, and robustness diagnostics. :contentReference[oaicite:3]{index=3}
+
 
 \newpage
 \bibliographystyle{plain} % oppure unsrt, alpha, ieee
