@@ -3574,15 +3574,48 @@ for the representative target in Eq.~\eqref{eq:representative_target_tuning}. Av
 \subsection{Single-target control optimization}
 \label{subsec:single_target_control_optimization}
 
-As a first validation step, the framework was tested on a single representative target gate within the family \(N(\alpha,\alpha,\gamma)\), choosing
+As a first validation step, the framework was tested on a single representative target gate from the family \(N(\alpha,\alpha,\gamma)\). The choice adopted throughout this subsection is
 \begin{equation}
 \alpha = 2.2,
 \qquad
-\gamma = \pi/2.
-\label{eq:single_target_representative}
+\gamma = \pi/2,
+\label{eq:representative_single_target}
 \end{equation}
-This choice serves as a convenient benchmark for three reasons. First, it corresponds to a genuinely nontrivial two-qubit target, and therefore provides a more meaningful test than a gate too closely aligned with the identity or with a particularly simple native interaction. Second, it belongs to the same target family used throughout the original framework, which makes it suitable for validating the numerical implementation against the methodology discussed in the previous chapter. Third, the same target was adopted in the light hyperparameter sensitivity study of Section~\ref{subsec:experimental_protocol_setup}, so that the subsequent comparisons between Adam optimization, nominal TRPO, and noise-optimized TRPO are carried out under a consistent and well-calibrated setting. For these reasons, the gate in Eq.~\eqref{eq:single_target_representative} is used here as the main case study for assessing the nominal optimization behavior of the framework before moving to robustness and runtime analyses on broader families of targets.
+which was also used as the reference target in the light hyperparameter sensitivity study described in Section~\ref{subsec:experimental_protocol_setup}. This choice is convenient for several reasons. First, it provides a nontrivial two-qubit target that is sufficiently far from the identity to make the control problem genuinely meaningful. Second, it belongs to the subfamily with \(\gamma=\pi/2\), which is also the one employed later in the runtime analysis, thereby ensuring continuity between the single-target study and the broader family-level investigation. Finally, the selected target was found to admit stable and reproducible optimization behavior across multiple seeds during the preliminary parameter search, making it a suitable benchmark for comparing the Adam baseline, nominal TRPO, and noise-optimized TRPO under a common and well-controlled setting. 
 
+% :contentReference[oaicite:1]{index=1}
+
+The first reference solution for the target in Eq.~\eqref{eq:representative_single_target} was obtained through direct gradient-based optimization of the control trajectory using the Adam baseline. In this setting, the control problem is optimized independently for a discrete set of candidate horizons, and the best solution is then selected according to the nominal UFO cost. For the present target, the horizon sweep
+\begin{equation}
+T \in \{60,90,120,150,180,210,240\}\ \mathrm{ns}
+\label{eq:adam_horizon_grid}
+\end{equation}
+identified
+\begin{equation}
+T^{\star}_{\mathrm{Adam}} = 90~\mathrm{ns}
+\label{eq:adam_best_horizon}
+\end{equation}
+as the best-performing duration, with objective cost
+\begin{equation}
+C_{\mathrm{Adam}}^{\star} = 0.15468,
+\label{eq:adam_best_cost}
+\end{equation}
+nominal fidelity
+\begin{equation}
+F_{\mathrm{Adam}}^{\mathrm{nom}} = 0.999651,
+\label{eq:adam_nominal_fidelity}
+\end{equation}
+and nominal leakage
+\begin{equation}
+L_{\mathrm{Adam}}^{\mathrm{nom}} = 9.59\times 10^{-5}.
+\label{eq:adam_nominal_leakage}
+\end{equation}
+The corresponding runtime is, by construction,
+\begin{equation}
+T_{\mathrm{Adam}}^{\mathrm{nom}} = 90~\mathrm{ns}.
+\label{eq:adam_nominal_runtime}
+\end{equation}
+The horizon search is also informative from a qualitative viewpoint: the best cost is attained at an intermediate duration, while both shorter and longer horizons lead to worse objective values, with the cost increasing from \(0.3413\) at \(60~\mathrm{ns}\) to \(0.4005\) at \(240~\mathrm{ns}\). This behavior is physically consistent with the multi-objective structure of the UFO cost. Extremely short horizons make the control problem more aggressive and therefore harder to solve accurately, whereas overly long horizons are penalized by the runtime term and offer no compensating gain in fidelity. The Adam baseline therefore provides a strong nominal reference solution for this target: it already achieves very high gate fidelity and low leakage, while also revealing that the optimal operating regime is not at the shortest admissible time, but at a moderate horizon where the tradeoff between accuracy, leakage suppression, and runtime is best balanced.
 
 \newpage
 \bibliographystyle{plain} % oppure unsrt, alpha, ieee
