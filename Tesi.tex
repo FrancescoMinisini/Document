@@ -232,7 +232,7 @@ Equation~\eqref{eq:piecewise_constant_controls} turns the search for an admissib
 ]
 \node[box] (alg) {Quantum circuit\\or algorithm};
 \node[box, right=of alg] (target) {Target logical gate\\$U_{\mathrm{target}}$};
-\node[box, right=of target] (ham) {Controlled Hamiltonian\\$H(t;\mathbf{u})$};
+\node[box, right=of target] (ham) {Controlled\\Hamiltonian $H(t;\mathbf{u})$};
 \node[box, right=of ham] (pulse) {Control fields\\$\mathbf{u}(t)$};
 \node[box, below=of ham] (evol) {Physical evolution\\$U(T,0)$};
 \node[box, left=of evol] (eff) {Effective logical action\\$U_{\mathrm{eff}}(T)$};
@@ -242,7 +242,9 @@ Equation~\eqref{eq:piecewise_constant_controls} turns the search for an admissib
 \draw[arrow] (pulse) -- (ham);
 \draw[arrow] (ham) -- (evol);
 \draw[arrow] (evol) -- (eff);
-\draw[arrow] (eff) |- node[pos=0.25, below] {\small optimize} (target);
+% \draw[arrow] (eff) |- node[pos=0.25, below] {\small optimize} (target);
+% \draw[arrow] (eff) |- node[pos=0.25, left] {\small optimize} (target);
+\draw[arrow] (eff) -- (target);
 \end{tikzpicture}
 \caption{Conceptual relation between the algorithmic description of a quantum task and its physical realization through controlled dynamics. The central inverse problem of quantum control is to determine the control fields $\mathbf{u}(t)$ such that the induced propagator $U(T,0)$ reproduces the target logical gate on the computational subspace.}
 \label{fig:control_dynamics_pipeline}
@@ -788,11 +790,11 @@ In summary, superconducting qubits should be viewed as engineered nonlinear osci
 \node[lbl] at (4.5,2.1) {$\alpha=\omega_{12}-\omega_{01}<0$};
 
 % Intended drive
-\draw[drive] (3.6,0.15) -- (4.9,1.35);
+\draw[drive] (3.7,0.15) -- (4.8,1.30);
 \node[lbl] at (5.65,0.95) {intended};
 
 % Leakage path
-\draw[drive,dashed] (3.6,1.65) -- (4.9,2.6);
+\draw[drive,dashed] (3.7,1.65) -- (4.9,2.5);
 \node[lbl] at (5.75,2.45) {possible leakage};
 
 \end{tikzpicture}
@@ -997,6 +999,7 @@ $\ket{2},\ket{3},\dots$ locally\\
 or higher-excitation sectors
 };
 
+% TODO: Rendere più chiaro il disegno
 \draw[arrow] (comp.east) -- node[above,small] {$H_{\mathrm{off}}(t)$} (leak.west);
 \draw[arrow] (leak.west) -- node[below,small] {$H_{\mathrm{off}}(t)$} (comp.east);
 
@@ -1142,17 +1145,17 @@ From the viewpoint of superconducting-qubit physics, one may summarize the trade
 % coherence cost (decreases with speed)
 \draw[curve1]
     plot[smooth] coordinates {(0.5,3.8) (1.5,2.9) (2.5,2.1) (3.5,1.4) (4.5,0.95) (5.5,0.7) (6.5,0.55)};
-\node[lbl] at (1.8,3.4) {decoherence cost};
+\node[lbl] at (1.8,1.4) {decoherence cost};
 
 % leakage cost (increases with speed)
 \draw[curve2]
     plot[smooth] coordinates {(0.5,0.45) (1.5,0.5) (2.5,0.7) (3.5,1.15) (4.5,1.9) (5.5,3.0) (6.5,4.1)};
-\node[lbl] at (5.4,3.55) {leakage cost};
+\node[lbl] at (6.4,2.0) {leakage cost};
 
 % total cost
 \draw[very thick]
     plot[smooth] coordinates {(0.5,4.25) (1.5,3.4) (2.5,2.8) (3.5,2.55) (4.5,2.85) (5.5,3.7) (6.5,4.65)};
-\node[lbl] at (3.9,2.15) {total error / cost};
+\node[lbl] at (3.9,2.15) {total cost};
 
 % optimum marker
 \draw[dotted] (3.5,0) -- (3.5,2.55);
@@ -1277,7 +1280,8 @@ For the purposes of this thesis, the most important point is the following. The 
 ]
 
 % OPEN LOOP
-\node[smallbox] (model1) {model / simulator};
+% \node[smallbox] (model1) {model / simulator};
+\node[smallbox] (model1) {model};
 \node[smallbox, right=of model1] (opt1) {optimizer};
 \node[smallbox, right=of opt1] (pulse1) {pulse $\bm{u}(t;\bm{\theta}^{\star})$};
 \node[smallbox, right=of pulse1] (sys1) {quantum system};
@@ -1292,7 +1296,7 @@ For the purposes of this thesis, the most important point is the following. The 
 % CLOSED LOOP
 \node[smallbox, below=2.3cm of model1] (pulse2) {pulse $\bm{u}(t;\bm{\theta}_r)$};
 \node[smallbox, right=of pulse2] (sys2) {quantum system};
-\node[smallbox, right=of sys2] (meas2) {measurement and\\ cost estimate};
+\node[smallbox, right=of sys2] (meas2) {measurement \\ and \\ cost estimate};
 \node[smallbox, right=of meas2] (opt2) {update rule};
 
 \draw[arrow] (pulse2) -- (sys2);
@@ -1595,28 +1599,27 @@ For the purposes of this thesis, the most important takeaway is that robustness 
 \draw[axis] (0,0) -- (7.2,0) node[right,lbl] {control parameter / pulse family};
 \draw[axis] (0,0) -- (0,4.5) node[above,lbl] {cost};
 
-% TODO: fix this graph
 % nominal cost
 \draw[curve]
-    plot[smooth] coordinates {(0.6,3.8) (1.3,2.8) (2.0,1.8) (2.8,0.95) (3.5,0.55) (4.2,0.85) (5.0,1.5) (5.8,2.8)};
-\node[lbl] at (4.8,0.55) {nominal cost};
+    plot[smooth] coordinates {(0.6,3.8) (1.3,2.8) (2.0,1.8) (2.8,0.95) (3.5,0.55) (4.2,0.85) (5.0,1.5) (5.9,2.5)}
+    node[right,lbl] {nominal cost};
 
 % perturbed cost 1
 \draw[curve,dashed]
-    plot[smooth] coordinates {(0.6,3.2) (1.3,2.2) (2.1,1.2) (3.0,0.95) (3.9,1.2) (4.7,2.0) (5.6,3.1)};
-\node[lbl] at (5.55,2.3) {perturbed model};
+    plot[smooth] coordinates {(0.6,3.2) (1.3,2.2) (2.1,1.2) (3.0,0.95) (3.9,1.2) (4.7,2.0) (5.5,3.3)}
+    node[right,lbl] {perturbed model};
 
 % perturbed cost 2
 \draw[curve,dotted]
-    plot[smooth] coordinates {(0.6,4.1) (1.4,3.0) (2.3,1.9) (3.2,1.0) (4.0,0.75) (4.8,1.1) (5.7,2.0)};
-\node[lbl] at (5.25,1.25) {another perturbation};
+    plot[smooth] coordinates {(0.6,4.1) (1.4,3.0) (2.3,1.9) (3.2,1.0) (4.0,0.75) (4.8,1.1) (5.8,1.8)}
+    node[right,lbl] {another perturbation};
 
 % markers
 \filldraw (3.5,0.55) circle (1.4pt);
-\node[lbl] at (3.45,0.2) {nominal optimum};
+\draw[thin] (3.45,0.5) -- (2.8,0.2) node[left, lbl] {nominal optimum};
 
 \filldraw (4.0,0.75) circle (1.4pt);
-\node[lbl] at (4.7,0.35) {robust compromise};
+\draw[thin] (4.05,0.7) -- (4.6,0.3) node[right, lbl] {robust compromise};
 
 \end{tikzpicture}
 \caption{Schematic illustration of why robustness is difficult. A pulse that is optimal for a nominal model need not remain optimal when the Hamiltonian, noise parameters, or control transfer functions are perturbed. Robust optimization must account for an ensemble of such landscapes rather than for a single nominal one.}
@@ -2650,7 +2653,8 @@ For the structure of the thesis, Eq.~\eqref{eq:paper_leakage_bound} is the main 
 ]
 
 \node[box] (hod0) {$\|\hat H_{\mathrm{od}}(0)\|/\Delta(0)$\\initial boundary term};
-\node[box, right=of hod0] (int) {$\displaystyle \int_0^T \frac{1}{\Delta(t)^2}\left\|\frac{d^2\hat H_{\mathrm{od}}}{dt^2}\right\|dt$\\modulation / non-adiabatic term};
+\node[box, right=of hod0] (int) {$\displaystyle \int_0^T \frac{1}{\Delta(t)^2}\left\|\frac{d^2\hat H_{\mathrm{od}}}{dt^2}\right\|dt$\\modulation};
+% \node[box, right=of hod0] (int) {$\displaystyle \int_0^T \frac{1}{\Delta(t)^2}\left\|\frac{d^2\hat H_{\mathrm{od}}}{dt^2}\right\|dt$\\modulation / non-adiabatic term};
 \node[box, right=of int] (hodT) {$\|\hat H_{\mathrm{od}}(T)\|/\Delta(T)$\\final boundary term};
 
 \node[box, below=1.4cm of int] (ltot) {$L_{\mathrm{tot}}$};
