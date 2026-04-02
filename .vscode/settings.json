@@ -1,0 +1,29 @@
+{
+    "latex-workshop.latex.outDir": "%DIR%/out",
+    "latex-workshop.latex.recipes": [
+        {
+            "name": "latexmk (PDF + BibTeX)",
+            "tools": ["latexmk"]
+        }
+    ],
+    "latex-workshop.latex.tools": [
+        {
+            "name": "latexmk",
+            "command": "latexmk",
+            "args": [
+                "-synctex=1",
+                "-interaction=nonstopmode",
+                "-file-line-error",
+                "-pdf",
+                "-outdir=%OUTDIR%",
+                "-shell-escape",
+                "%DOC%"
+            ],
+            "env": {}
+        }
+    ],
+    "latex-workshop.latex.autoBuild.run": "onSave",
+    "latex-workshop.latex.clean.subfolder.enabled": true,
+    "latex-workshop.latex.tempDir": "%DIR%/out",
+    "latex-workshop.view.pdf.internal.synctex.keybinding": "double-click"
+}
