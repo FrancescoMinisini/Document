@@ -257,7 +257,8 @@ Policy hidden sizes & \(64\text{-}32\text{-}32\) & paper architecture for both n
 Initial log std & \(-1.0\) & controlled exploration in Gaussian policy \\
 TRPO max\_kl & \(0.01\) & conservative but effective trust-region size \\
 Discount factor \(\gamma_{\mathrm{RL}}\) & \(0.99\) & standard long-horizon on-policy choice \\
-GAE parameter \(\lambda\) & \(0.97\) & bias--variance compromise in advantage estimation \\
+GAE parameter \(\lambda\) & \(0.97\) & bias--variance in advantage estimation \\
+% GAE parameter \(\lambda\) & \(0.97\) & bias--variance trade-off in advantage estimation \\
 CG iterations & \(10\) & standard TRPO curvature solve budget \\
 Damping & \(0.1\) & stabilizes Fisher-vector products \\
 Time step \(\Delta t\) & \(2\,\mathrm{ns}\) & fine temporal mesh for full runs \\
