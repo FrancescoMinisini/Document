@@ -304,3 +304,23 @@ The remaining implementation choices mainly reflect computational trade-offs. Th
 Finally, the neural-network architecture was kept at the paper’s nominal configuration, namely two fully connected three-layer networks of width \(64\), \(32\), and \(32\) for the policy and value functions, respectively. This preserves direct comparability with the reference implementation and avoids conflating architectural changes with control-theoretic conclusions. At the same time, it is well known from the RL literature that network architecture can materially affect performance, especially in on-policy continuous-control settings. For that reason, architectural sensitivity should be regarded as an important follow-up question rather than as fully settled here. 
 
 \textbf{TODO:} add the results of the dedicated neural-network layout search once available.
+
+\section{Single-target control optimization}
+\label{sec:single_target_optimization}
+\subsection{Single-target control optimization}
+\label{subsec:single_target_control_optimization}
+
+As a representative nominal benchmark, this study first focuses on the target gate
+\begin{equation}
+U_{\mathrm{target}}
+=
+N(2.2,2.2,\pi/2),
+\label{eq:representative_target_gate}
+\end{equation}
+which belongs to the two-qubit family \(N(\alpha,\alpha,\gamma)\) introduced in the previous section. This choice is motivated by three considerations. 
+\begin{itemize}
+    \item First, it is a genuinely nontrivial target: it is neither close to the identity nor reducible to a particularly simple limiting case, and therefore provides a meaningful test of the optimizer's ability to coordinate entangling dynamics, local control, and leakage suppression within the full multilevel model. 
+    \item Second, it is directly aligned with the original benchmark logic of the reference paper, which uses the same gate family as the main testbed for robustness and runtime analyses \cite{Niu2019}. For this reason, selecting a target of the form \(N(\alpha,\alpha,\pi/2)\) allows the present study to remain as close as possible to the original physical and algorithmic setting while still isolating one concrete case for detailed discussion. 
+    \item Third, fixing a single representative gate provides a clean comparison between optimization strategies before moving to broader parameter sweeps: by holding the target fixed, differences in final fidelity, leakage, runtime, and training behavior can be attributed more directly to the optimizer itself rather than to variations in target-gate difficulty across the family. 
+\end{itemize}
+In this sense, Eq.~\eqref{eq:representative_target_gate} serves as the natural entry point for the empirical analysis, since it is sufficiently rich to be physically informative while remaining simple enough to support a transparent method-by-method comparison.
