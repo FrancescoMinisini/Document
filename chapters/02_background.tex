@@ -650,16 +650,16 @@ In summary, superconducting qubits should be viewed as engineered nonlinear osci
 \begin{tikzpicture}[
     x=1cm, y=1cm,
     level/.style={thick},
-    drive/.style={-{Latex[length=2mm]}, very thick},
+    drive/.style={-{Latex[length=2.2mm]}, thick},
     brace/.style={decorate,decoration={brace,amplitude=6pt}},
     lbl/.style={font=\small}
 ]
 
 % Energy levels
-\draw[level] (0,0) -- (3.2,0) node[right,lbl] {$\ket{0}$};
-\draw[level] (0,1.5) -- (3.2,1.5) node[right,lbl] {$\ket{1}$};
-\draw[level] (0,2.75) -- (3.2,2.75) node[right,lbl] {$\ket{2}$};
-\draw[level] (0,3.8) -- (3.2,3.8) node[right,lbl] {$\ket{3}$};
+\draw[level] (0,0) -- (3.2,0) node[right, lbl] {$\ket{0}$};
+\draw[level] (0,1.5) -- (3.2,1.5) node[right, lbl] {$\ket{1}$};
+\draw[level] (0,2.75) -- (3.2,2.75) node[right, lbl] {$\ket{2}$};
+\draw[level] (0,3.8) -- (3.2,3.8) node[right, lbl] {$\ket{3}$};
 
 % Braces for transition spacings
 \draw[brace] (-0.25,0) -- (-0.25,1.5)
@@ -670,19 +670,17 @@ In summary, superconducting qubits should be viewed as engineered nonlinear osci
     node[midway,left=8pt,lbl] {$\omega_{23}$};
 
 % Computational subspace highlight
-\draw[dashed,rounded corners] (-0.55,-0.25) rectangle (3.55,1.8);
-\node[lbl] at (1.5,-0.65) {computational subspace};
+\draw[dashed, rounded corners, draw=blue!60!black] (-0.55,-0.3) rectangle (3.75,1.8);
+\node[lbl, blue!60!black] at (1.6,-0.65) {computational subspace};
 
 % Anharmonicity annotation
-\node[lbl] at (4.5,2.1) {$\alpha=\omega_{12}-\omega_{01}<0$};
+\node[lbl] at (1.5,2.12) {$\alpha=\omega_{12}-\omega_{01}<0$};
 
-% Intended drive
-\draw[drive] (3.7,0.15) -- (4.8,1.30);
-\node[lbl] at (5.65,0.95) {intended};
+% Intended drive (solid arc)
+\draw[drive] (4.0, 0.1) to [bend right=45] node[midway, right=6pt, lbl] {intended} (4.0, 1.4);
 
-% Leakage path
-\draw[drive,dashed] (3.7,1.65) -- (4.9,2.5);
-\node[lbl] at (5.75,2.45) {possible leakage};
+% Leakage path (dashed arc)
+\draw[drive, dashed] (4.0, 1.6) to [bend right=45] node[midway, right=6pt, lbl] {possible leakage} (4.0, 2.65);
 
 \end{tikzpicture}
 \caption{Schematic spectrum of a weakly anharmonic superconducting qubit. The two lowest levels define the computational subspace, while the higher levels remain physically present. Because the transition spacings are unequal but not widely separated, a drive resonant with the logical transition can still weakly couple to higher transitions, especially under strong or short pulses.}
