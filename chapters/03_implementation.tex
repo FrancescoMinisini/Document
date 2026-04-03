@@ -686,9 +686,12 @@ For the structure of the thesis, Eq.~\eqref{eq:ufo_cost_function} should be trea
 ]
 
 \node[box] (inf) {$\chi\,[1-F(U(T))]$\\gate infidelity};
-\node[box, right=of inf] (leak) {$\beta L_{\mathrm{tot}}$\\leakage penalty};
-\node[box, right=of leak] (bdry) {$\mu P_{\mathrm{bdry}}$\\boundary penalty};
-\node[box, right=of bdry] (time) {$\kappa T$\\runtime penalty};
+\node[box, right=of inf] (leak) {$\beta L_{\mathrm{tot}}$\\leakage};
+\node[box, right=of leak] (bdry) {$\mu P_{\mathrm{bdry}}$\\boundary};
+\node[box, right=of bdry] (time) {$\kappa T$\\runtime};
+% \node[box, right=of inf] (leak) {$\beta L_{\mathrm{tot}}$\\leakage penalty};
+% \node[box, right=of leak] (bdry) {$\mu P_{\mathrm{bdry}}$\\boundary penalty};
+% \node[box, right=of bdry] (time) {$\kappa T$\\runtime penalty};
 
 \node[box, below=1.6cm of leak, minimum width=4.4cm] (ufo) {$C(\chi,\beta,\mu,\kappa)$};
 
@@ -707,7 +710,8 @@ For the structure of the thesis, Eq.~\eqref{eq:ufo_cost_function} should be trea
 % \usepackage{tikz}
 % \usetikzlibrary{positioning,arrows.meta}
 
-\subsection{Reinforcement-learning formulation of the control problem}
+\section{Reinforcement-learning formulation of the control problem}
+\subsection{Casting the control problem as an RL problem}
 \label{subsec:paper_rl_formulation}
 
 Once the UFO objective has been defined, the control problem can be recast as a sequential decision problem and solved with reinforcement learning. In the reference paper, the role of the agent is to construct a complete time-dependent control trajectory by proposing control actions step by step, while the environment simulates the resulting quantum evolution and returns the associated control cost \cite{Niu2019}. In this formulation, reinforcement learning is not used to replace the underlying Schr\"odinger dynamics; rather, it provides an optimization strategy for navigating the high-dimensional space of admissible pulse sequences.
@@ -887,6 +891,8 @@ The paper also gives a conceptual argument for why TRPO should outperform direct
 There is also a more physical reason why a trust-region policy method is attractive here. Quantum control pulses are not arbitrary vectors; they are temporally correlated objects whose early and late segments interact through phase accumulation, transient leakage, and the final gate constraint. A useful optimizer must therefore capture \emph{nonlocal structure} across the trajectory. The paper emphasizes exactly this point, arguing that the policy neural network can learn nonlocal regularities of effective control solutions, and that these regularities are difficult to exploit with simpler local optimization schemes \cite{Niu2019}. In other words, TRPO is not chosen merely because it is a standard continuous-control RL algorithm; it is chosen because its policy-based formulation is compatible with the trajectory-level structure of analog quantum control.
 
 From the implementation viewpoint, the paper uses TRPO in an actor--critic architecture. Denoting the policy network by \(\pi_{\bm{\theta}}(a\mid s)\) and the value network by \(V_{\bm{\omega}}(s)\), the learning loop alternates between:
+TODO: DA SOSTITUIRE CON SNIPPET/PSEUDOCODE
+% TODO: DA SOSTITUIRE CON SNIPPET
 \begin{enumerate}
 \item sampling many episodes under the current stochastic policy,
 \item estimating discounted future rewards and advantages,
@@ -1055,7 +1061,7 @@ From the perspective of the thesis, this subsection is where robustness fully en
 
 % Requires in the preamble:
 % \usepackage{amsmath,amssymb,amsfonts,bm}
-
+\section{Target gates, baselines, and original results}
 \subsection{The target gate family \(N(\alpha,\alpha,\gamma)\)}
 \label{subsec:target_gate_family}
 
@@ -1090,18 +1096,18 @@ From the control-theoretic viewpoint, the family \(N(\alpha,\alpha,\gamma)\) is 
 
 For the purposes of the thesis, the key role of Eq.~\eqref{eq:target_gate_family} is therefore twofold. First, it defines the class of gates on which the UFO framework is trained and tested. Second, it provides a physically meaningful bridge between the mathematical control problem and applications in quantum simulation and quantum chemistry. The next subsection will build on this by explaining how the paper benchmarks its analog-control solutions against standard circuit-based baselines and which performance metrics are used in the comparison.
 
-% Optional short summary equation
-It is useful to summarize the logic of this choice as follows:
-\begin{equation}
-\text{structured target family}
-\quad+\quad
-\text{hardware-native interaction relevance}
-\quad+\quad
-\text{algorithmic importance in simulation}
-\quad\Longrightarrow\quad
-\text{meaningful benchmark for analog quantum control}.
-\label{eq:target_family_logic}
-\end{equation}
+% % Optional short summary equation
+% It is useful to summarize the logic of this choice as follows:
+% \begin{equation}
+% \text{structured target family}
+% \quad+\quad
+% \text{hardware-native interaction relevance} 
+% \quad+\quad 
+% \text{algorithmic importance in simulation}
+% \quad\Longrightarrow\quad
+% \text{meaningful benchmark for analog quantum control}.
+% \label{eq:target_family_logic}
+% \end{equation}
 
 
 % Requires in the preamble:
