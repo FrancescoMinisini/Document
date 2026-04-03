@@ -177,7 +177,13 @@ that is, when the realized operation agrees with the target up to an irrelevant 
 \end{equation}
 This is the quantity most frequently minimized in practical control optimization, since it vanishes precisely at perfect implementation and is cheap to evaluate numerically. This thesis adopts exactly this form of gate infidelity as the first contribution to its control cost function, emphasizing that it provides a computationally convenient measure of control inaccuracy \cite{Niu2019}.
 
-In realistic devices, however, the implemented operation is not exactly unitary on the logical subspace, since calibration errors, stochastic fluctuations, decoherence, and leakage make the effective map better described by a quantum channel $\mathcal{E}$. In that more general setting, an experimentally meaningful notion of quality is the \emph{average gate fidelity}, defined by averaging over all pure input states with respect to the Haar measure:
+In realistic devices, however, the implemented operation is not exactly unitary on the logical subspace, since calibration errors, stochastic fluctuations, decoherence, and leakage make the effective map better described by a quantum channel $\mathcal{E}$. 
+
+TODO: da inserire qui la definizione di quantum channel 
+
+TODO: footnote sulla norma di haar
+
+In that more general setting, an experimentally meaningful notion of quality is the \emph{average gate fidelity}, defined by averaging over all pure input states with respect to the Haar measure:
 \begin{equation}
 \overline{F}\!\left(\mathcal{E},U_{\mathrm{target}}\right)
 =
@@ -1978,7 +1984,7 @@ TODO: REPLACE WITH SNIPPET
 \subsection{Feed-Forward Neural Network for policy and value function estimation in continuous action spaces}
 \label{subsec:feedforward_neural_network}
 
-TODO: Disegnino dell'agente tipo quello del paper in images, con input, hidden layers, output, ecc.
+TODO: Disegnino dell'agente tipo quello del paper in images, con input, hidden layers, output, ecc. + citare soliti Lecun, Goodfellow, Bengio in deep learning etc
 
 \subsubsection{Policy function}
 \label{subsubsec:policy_function}
