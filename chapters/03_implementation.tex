@@ -1,4 +1,4 @@
-﻿\chapter{Implementation}
+\chapter{Implementation}
 
 \section{Physical model and control setting}
 \subsection{The gmon architecture as a platform for robust analog quantum control}
@@ -342,36 +342,34 @@ From the viewpoint of the thesis, the main importance of the present subsection 
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[
-    x=1cm, y=1cm,
-    level/.style={draw, rounded corners, minimum width=5.8cm, minimum height=0.9cm, align=center},
-    arrow/.style={-{Latex[length=2mm]}, thick},
+    x=1.0cm, y=1.0cm,
+    level/.style={draw, rounded corners, minimum width=6.2cm, minimum height=0.9cm, align=center, thick},
+    comp/.style={level, fill=blue!15, draw=blue!40!black},
+    leak/.style={level, fill=gray!10, draw=gray!40!black},
+    arrow/.style={-{Latex[length=2.5mm]}, thick},
     lbl/.style={font=\small}
 ]
 
-\node[level] (o0) at (0,0) {$\Omega_0 = \mathrm{span}\{\ket{00},\ket{10},\ket{01},\ket{11}\}$};
-\node[level] (o1) at (0,1.8) {$\Omega_1 = \mathrm{span}\{\ket{20},\ket{21},\ket{12},\ket{02}\}$};
-\node[level] (o2) at (0,3.6) {$\Omega_2,\Omega_3,\dots$ higher-energy subspaces};
+% Subspace boxes
+\node[comp] (o0) at (0,0) {$\Omega_0 = \mathrm{span}\bigl\{\ket{00},\ket{10},\ket{01},\ket{11}\bigr\}$};
+\node[leak] (o1) at (0,2.0) {$\Omega_1 = \mathrm{span}\bigl\{\ket{20},\ket{21},\ket{12},\ket{02}\bigr\}$};
+\node[leak] (o2) at (0,4.0) {$\Omega_2, \Omega_3, \dots$ higher-energy subspaces};
 
-% within-subspace arrows
-\draw[arrow] (-3.4,0) -- (-1.6,0);
-\node[lbl] at (-2.5,-0.35) {$\hat H_1(t)$};
+% Intra-subspace terms (self-loops)
+\draw[arrow] (o0.west) .. controls +(-1.2,0.8) and +(-1.2,-0.8) .. (o0.west)
+      node[midway, left=4pt, lbl] {$\hat H_1(t)$};
+\draw[arrow] (o1.west) .. controls +(-1.2,0.8) and +(-1.2,-0.8) .. (o1.west)
+      node[midway, left=4pt, lbl] {$\hat H_1(t)$};
+\draw[arrow] (o2.west) .. controls +(-1.2,0.8) and +(-1.2,-0.8) .. (o2.west)
+      node[midway, left=4pt, lbl] {$\hat H_1(t)$};
 
-\draw[arrow] (-3.4,1.8) -- (-1.6,1.8);
-\node[lbl] at (-2.5,1.45) {$\hat H_1(t)$};
+% Inter-subspace terms (vertical coupling)
+\draw[arrow] (o0.north) -- (o1.south) node[midway, right=10pt, lbl] {$\hat H_2(t)$};
+\draw[arrow] (o1.north) -- (o2.south) node[midway, right=10pt, lbl] {$\hat H_2(t)$};
 
-\draw[arrow] (-3.4,3.6) -- (-1.6,3.6);
-\node[lbl] at (-2.5,3.25) {$\hat H_1(t)$};
-
-% between-subspace arrows
-\draw[arrow] (0,0.45) -- (0,1.35);
-\node[lbl] at (0.55,0.9) {$\hat H_2(t)$};
-
-\draw[arrow] (0,2.25) -- (0,3.15);
-\node[lbl] at (0.55,2.7) {$\hat H_2(t)$};
-
-% braces / energy gap
-\draw[decorate,decoration={brace,amplitude=5pt}] (3.2,0.45) -- (3.2,1.35)
-node[midway,right=8pt,lbl] {$\Delta$};
+% Energy gap (brace)
+\draw[decorate, decoration={brace, amplitude=6pt, mirror}, thick] (3.4, 0.45) -- (3.4, 1.55)
+    node[midway, right=10pt, lbl] {$\Delta$};
 
 \end{tikzpicture}
 \caption{Subspace structure used in the paper. The computational sector is the lowest-energy subspace $\Omega_0$, while $\Omega_1,\Omega_2,\dots$ are higher-energy leakage subspaces. The block-diagonal term $\hat H_1(t)$ acts within each subspace, whereas the block-off-diagonal term $\hat H_2(t)$ couples different subspaces and induces leakage.}
