@@ -1118,7 +1118,7 @@ For the purposes of the thesis, the key role of Eq.~\eqref{eq:target_gate_family
 
 Once the target gate family \(N(\alpha,\alpha,\gamma)\) has been specified, the next step is to determine how the performance of the proposed control method should be assessed. The reference paper uses a comparison strategy built around two distinct questions \cite{Niu2019}. First, can the RL-based analog control produce target gates more \emph{robustly} than alternative pulse-optimization methods under stochastic control noise? Second, can it realize those gates more \emph{quickly} than their standard circuit-synthesis counterparts? These two questions lead naturally to two complementary classes of baselines: direct control-optimization baselines for robustness, and circuit-synthesis baselines for runtime.
 
-The first baseline is a direct optimization of the control trajectory using stochastic gradient descent (SGD), implemented with the Adam optimizer \cite{Niu2019,Kingma2015}. This baseline is important because it represents the most immediate non-RL alternative: one keeps the same physical control problem and the same general objective structure, but optimizes the control parameters directly rather than through a policy-gradient agent. In the logic of the paper, this baseline tests whether the use of a policy-based second-order learning method such as TRPO actually provides an advantage over simpler first-order optimization of the raw control variables.
+The first baseline is a direct optimization of the control trajectory using the GRAPE method, implemented with the Adam optimizer, and an instance of Stochastic Gradient Descent (SGD) \cite{Niu2019,Kingma2015}. This baseline is important because it represents the most immediate non-RL alternative: one keeps the same physical control problem and the same general objective structure, but optimizes the control parameters directly rather than through a policy-gradient agent. In the logic of the paper, this baseline tests whether the use of a policy-based second-order learning method such as TRPO actually provides an advantage over simpler first-order optimization of the raw control variables.
 
 The second baseline is a reinforcement-learning control solution trained in a \emph{noise-free} environment. This comparison is conceptually very useful, because it isolates the effect of stochastic training. If the noise-optimized RL controller outperforms the noise-free RL controller under noisy deployment conditions, then the improvement can be attributed not merely to the use of reinforcement learning as such, but specifically to the fact that the agent was trained under stochastic control perturbations. The comparison between these two RL settings therefore answers the question: is robustness really being learned from the noisy environment, or is it simply a generic byproduct of the RL architecture?
 
@@ -1211,9 +1211,10 @@ F_{\mathrm{ave}},
 \end{equation}
 with each baseline probing a different aspect of this performance vector.
 
-
 \subsection{Main findings of the original paper}
 \label{subsec:main_findings_original_paper}
+
+FOR NOW AI GENERATED THIS SECTION (TO BE INCLUDED THE PAPERS ORIGINAL RESULTS)
 
 With the physical model, the UFO objective, the reinforcement-learning formulation, and the target gate family all in place, the main findings of the reference paper can now be stated clearly. The paper reports that training a TRPO-based reinforcement-learning agent in a stochastic control environment yields analog gate controls that are simultaneously fast, accurate, and substantially more robust to Gaussian control noise than the baseline methods considered \cite{Niu2019}. In other words, the central claim of the work is not merely that reinforcement learning can find workable controls, but that the combination of the UFO objective with noisy training leads to a qualitatively better balance between fidelity, robustness, and runtime than alternative approaches.
 
@@ -1292,20 +1293,20 @@ Taken together, the results of the paper may be summarized as follows:
 \end{equation}
 relative to the baseline methods studied in the work. This compact summary captures the three pillars of the paper's contribution: robustness, stability, and hardware efficiency.
 
-For the structure of the thesis, this subsection should function as the closing statement of the framework chapter. Everything up to this point has explained the ingredients of the method; the present subsection states what the paper claims to achieve with them. The natural next step is then a new chapter or section devoted to \emph{reproducing} these original results in your own implementation, before moving on to the new experiments and extensions that constitute your personal contribution.
+% For the structure of the thesis, this subsection should function as the closing statement of the framework chapter. Everything up to this point has explained the ingredients of the method; the present subsection states what the paper claims to achieve with them. The natural next step is then a new chapter or section devoted to \emph{reproducing} these original results in your own implementation, before moving on to the new experiments and extensions that constitute your personal contribution.
 
-% Optional concluding summary relation
-In that sense, the logical progression of the thesis becomes
-\begin{equation}
-\text{paper framework}
-\;\longrightarrow\;
-\text{paper claims}
-\;\longrightarrow\;
-\text{your reproduction}
-\;\longrightarrow\;
-\text{your extensions}.
-\label{eq:thesis_progression}
-\end{equation}
+% % Optional concluding summary relation
+% In that sense, the logical progression of the thesis becomes
+% \begin{equation}
+% \text{paper framework}
+% \;\longrightarrow\;
+% \text{paper claims}
+% \;\longrightarrow\;
+% \text{your reproduction}
+% \;\longrightarrow\;
+% \text{your extensions}.
+% \label{eq:thesis_progression}
+% \end{equation}
 
 % \subsubsection{Light hyperparameter sensitivity study}
 % \label{subsubsec:trpo_hyperparameter_search}
