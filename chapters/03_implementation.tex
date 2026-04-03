@@ -685,13 +685,13 @@ For the structure of the thesis, Eq.~\eqref{eq:ufo_cost_function} should be trea
     node distance=1.4cm and 1.5cm
 ]
 
-\node[box] (inf) {$\chi\,[1-F(U(T))]$\\gate infidelity};
-\node[box, right=of inf] (leak) {$\beta L_{\mathrm{tot}}$\\leakage};
-\node[box, right=of leak] (bdry) {$\mu P_{\mathrm{bdry}}$\\boundary};
-\node[box, right=of bdry] (time) {$\kappa T$\\runtime};
-% \node[box, right=of inf] (leak) {$\beta L_{\mathrm{tot}}$\\leakage penalty};
-% \node[box, right=of leak] (bdry) {$\mu P_{\mathrm{bdry}}$\\boundary penalty};
-% \node[box, right=of bdry] (time) {$\kappa T$\\runtime penalty};
+% \node[box] (inf) {$\chi\,[1-F(U(T))]$\\gate infidelity};
+% \node[box, right=of inf] (leak) {$\beta L_{\mathrm{tot}}$\\leakage};
+% \node[box, right=of leak] (bdry) {$\mu P_{\mathrm{bdry}}$\\boundary};
+% \node[box, right=of bdry] (time) {$\kappa T$\\runtime};
+\node[box, right=of inf] (leak) {$\beta L_{\mathrm{tot}}$\\leakage penalty};
+\node[box, right=of leak] (bdry) {$\mu P_{\mathrm{bdry}}$\\boundary penalty};
+\node[box, right=of bdry] (time) {$\kappa T$\\runtime penalty};
 
 \node[box, below=1.6cm of leak, minimum width=4.4cm] (ufo) {$C(\chi,\beta,\mu,\kappa)$};
 
