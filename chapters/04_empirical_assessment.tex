@@ -324,3 +324,171 @@ which belongs to the two-qubit family \(N(\alpha,\alpha,\gamma)\) introduced in 
     \item Third, fixing a single representative gate provides a clean comparison between optimization strategies before moving to broader parameter sweeps: by holding the target fixed, differences in final fidelity, leakage, runtime, and training behavior can be attributed more directly to the optimizer itself rather than to variations in target-gate difficulty across the family. 
 \end{itemize}
 In this sense, Eq.~\eqref{eq:representative_target_gate} serves as the natural entry point for the empirical analysis, since it is sufficiently rich to be physically informative while remaining simple enough to support a transparent method-by-method comparison.
+\paragraph{Adam baseline results.}
+As a strong non-RL nominal baseline, the representative target gate \(N(2.2,2.2,\pi/2)\) was optimized by direct pulse search with Adam over a sweep of candidate horizons from \(40\) to \(180\,\mathrm{ns}\), using the same timestep \(\Delta t=2\,\mathrm{ns}\), the same UFO weights \((\chi,\beta,\mu,\kappa)=(10,10,0.2,0.1)\), and no stochastic perturbations during training. This matched setup is important for the later comparison with TRPO, because the physical model, discretization, and scalarized objective are kept fixed and only the optimization strategy is changed. In this sense, Adam plays the role of a conventional open-loop pulse-optimization baseline, conceptually close to standard gradient-based quantum-control workflows \cite{Khaneja2005,Kingma2015}.
+
+The horizon sweep reveals a clear operational threshold around \(70\,\mathrm{ns}\). For very short gates, Adam is unable to satisfy the competing requirements of high fidelity, low leakage, and small boundary penalty simultaneously. At \(40\,\mathrm{ns}\), the optimized pulse remains far from acceptable, with nominal cost \(C=3.142\), fidelity \(F=0.7327\), leakage estimate \(L_{\mathrm{tot}}=3.76\times 10^{-4}\), and a large boundary contribution of \(3.99\times10^{-1}\). Even at \(60\,\mathrm{ns}\), although the fidelity has already risen to \(F=0.9847\), the total cost is still \(C=0.3413\), largely because the boundary contribution remains substantial \((8.51\times10^{-2})\) and the leakage estimate is still \(3.24\times10^{-4}\). Moving from \(60\) to \(70\,\mathrm{ns}\) produces the sharpest qualitative improvement of the whole sweep: the nominal fidelity jumps to \(F=0.999385\), the leakage estimate drops to \(1.98\times10^{-4}\), and the boundary contribution collapses by roughly two orders of magnitude, to \(8.31\times10^{-4}\). The best Adam solution is therefore obtained at \(70\,\mathrm{ns}\), with objective cost \(C=0.12563\), fidelity \(F=0.999385\), leakage estimate \(L_{\mathrm{tot}}=1.98\times10^{-4}\), boundary contribution \(8.31\times10^{-4}\), and weighted runtime contribution \(0.1167\). Moreover, the optimizer cost and the independently re-evaluated nominal cost coincide up to numerical precision, which supports the internal consistency of the optimization and evaluation pipeline.
+
+This behavior is directly consistent with the discussion of the speed--leakage tradeoff in Section~\ref{subsec:speed_leakage_tradeoff}. Below a certain runtime, the control does not have enough temporal freedom to realize the target gate while also turning the pulses on and off smoothly and keeping leakage under control. In this sense, the sharp transition between \(60\) and \(70\,\mathrm{ns}\) can be interpreted as a practical minimum-time threshold under the imposed physical constraints, rather than as a purely numerical accident. It is also noteworthy that the dominant gain in this regime is not only a fidelity improvement, but also a dramatic reduction in the boundary penalty, which indicates that a substantial part of the difficulty of the short-horizon problem comes from satisfying the turn-on/turn-off conditions built into the UFO objective.
+
+A second important pattern is that \(70\,\mathrm{ns}\) is \emph{not} the point of highest nominal fidelity, but the point of lowest \emph{total UFO cost}. For longer horizons, the fidelity keeps improving monotonically, reaching \(F=0.999923\) at \(180\,\mathrm{ns}\), while the leakage estimate decreases to \(1.12\times10^{-5}\). However, these gains are too small to compensate for the linear growth of the runtime term in the scalarized objective. The Adam sweep therefore provides a particularly transparent illustration of the logic of the UFO cost introduced in Section~\ref{subsec:ufo_cost_function}: the preferred solution is not the slowest and cleanest pulse in absolute terms, but the pulse that best balances accuracy, leakage suppression, boundary regularity, and execution time. In this sense, the optimum at \(70\,\mathrm{ns}\) should be interpreted as a \emph{practical multi-objective optimum} rather than as a pure fidelity optimum. The monotonic reduction of leakage with increasing horizon is also physically consistent with the standard picture for weakly anharmonic superconducting qubits, where longer and smoother pulses reduce spectral spillover into higher levels and therefore suppress leakage \cite{Motzoi2009,Gambetta2011}.
+
+From the broader perspective of the thesis, the Adam baseline already establishes two important points. 
+\begin{itemize}  
+\item First, direct analog control itself is highly competitive in the nominal setting: the best Adam pulse at \(70\,\mathrm{ns}\) is approximately a factor of \(3.1\) shorter than the \(215\,\mathrm{ns}\) optimal gate-synthesis estimate reported for the same gate family in Ref.~\cite{Niu2019}. This strongly supports the hardware-efficiency motivation discussed in Sections~\ref{subsec:intro_analog_vs_synthesis} and~\ref{subsec:baselines_comparison_strategy}, and suggests that a substantial part of the runtime advantage comes from the analog-control formulation itself rather than from reinforcement learning alone. 
+\item Second, nominal optimality does not imply robustness. 
+When the best Adam plan is evaluated a posteriori under Gaussian amplitude noise with \(\sigma=1\,\mathrm{MHz}\), its average fidelity drops to \(\overline{F}=0.97956\), with average gate fidelity \(0.97445\) and fidelity variance \(7.88\times10^{-5}\). 
+This gap between excellent nominal performance and noticeably degraded noisy performance is precisely the kind of behavior that motivates the robust RL framework studied in this thesis: a nominal optimizer can already find very fast and accurate analog solutions, but without explicit exposure to stochastic perturbations during training, those solutions need not be robust in the sense emphasized by the original UFO framework \cite{Niu2019}. 
+\end{itemize}
+
+The Adam results therefore provide a meaningful and nontrivial baseline: they confirm that the nominal control problem is solvable at high quality, while simultaneously showing why robustness must be treated as a central objective rather than as a post hoc diagnostic.
+
+\tikzexternaldisable
+\begin{figure}[t]
+\centering
+
+\begin{subfigure}[t]{0.48\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=\linewidth,
+    height=6cm,
+    xlabel={Gate horizon (ns)},
+    ylabel={Nominal cost},
+    grid=both,
+]
+\addplot[mark=*] coordinates {
+(40,3.141822039922047)
+(50,1.5093377740229237)
+(60,0.3412612598925603)
+(70,0.1256267994960814)
+(80,0.13967235762485652)
+(90,0.15467853274961205)
+(100,0.170254340156024)
+(110,0.18616181521109387)
+(120,0.2022780235315035)
+(130,0.21854035103052843)
+(140,0.23491330609079575)
+(150,0.25134635555872886)
+(160,0.2678278739583639)
+(170,0.28434498889574944)
+(180,0.30088906568678486)
+};
+\addplot[only marks, mark=*, mark size=2.5pt] coordinates {(70,0.1256267994960814)};
+\end{axis}
+\end{tikzpicture}
+\caption{Nominal UFO cost versus horizon.}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.48\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=\linewidth,
+    height=6cm,
+    xlabel={Gate horizon (ns)},
+    ylabel={Metric value},
+    grid=both,
+    legend pos=east,
+]
+\addplot[mark=square*] coordinates {
+(40,0.7327242168557685)
+(50,0.8902010972387757)
+(60,0.984706800013239)
+(70,0.9993852469909151)
+(80,0.9995474641502152)
+(90,0.9996513259195826)
+(100,0.9997228196291874)
+(110,0.9997744947256574)
+(120,0.9998131460646205)
+(130,0.9998428594842214)
+(140,0.9998663032378344)
+(150,0.9998849658676662)
+(160,0.9999001395150834)
+(170,0.9999125474776235)
+(180,0.9999229128313194)
+};
+\addlegendentry{Fidelity}
+
+\addplot[mark=triangle*] coordinates {
+(40,0.0003763824627952124)
+(50,0.0004011218892116439)
+(60,0.0003238703392677322)
+(70,0.00019814708030270733)
+(80,0.00013749650150242018)
+(90,0.00009574351487053918)
+(100,0.00006853034615643557)
+(110,0.00004970585988952781)
+(120,0.000036311486792462675)
+(130,0.000027290978318974163)
+(140,0.000022266409203742864)
+(150,0.000018170216355789313)
+(160,0.000015227168096595373)
+(170,0.000012953002677822874)
+(180,0.000011238121264881183)
+};
+\addlegendentry{Leakage}
+\end{axis}
+\end{tikzpicture}
+\caption{Nominal fidelity and leakage versus horizon.}
+\end{subfigure}
+
+\caption{Adam baseline horizon sweep for the target gate \(N(2.2,2.2,\pi/2)\).}
+\label{fig:adam_horizon_sweep}
+\end{figure}
+\tikzexternalenable
+
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.82\textwidth]{chapters/figures/Agent.png}
+    \caption{Adam baseline on the target \(N(2.2,2.2,\pi/2)\). \textbf{TODO:} The figure should report, as a function of the tested horizon, the nominal UFO cost, fidelity, leakage estimate, and optionally the boundary contribution. The minimum of the total cost occurs at \(70\,\mathrm{ns}\), even though nominal fidelity continues to improve for longer gates, highlighting the multi-objective character of the optimization.}}
+    \label{fig:adam_horizon_sweep}
+\end{figure}
+
+\textbf{TODO:} add the other scale on the right for the leakage
+\textbf{TODO:} scegliere tra le due versioni (da far controllare le diff nel contenuto, però nella seconda si può fare una tab piu facilmente)
+
+
+% \paragraph{Adam baseline results.}
+% As a first non-RL reference, the representative target gate \(N(2.2,2.2,\pi/2)\) was optimized by direct pulse search with the Adam optimizer \cite{Kingma2015}, using the same physical model, timestep \(\Delta t = 2\,\mathrm{ns}\), and UFO weights \((\chi,\beta,\mu,\kappa)=(10,10,0.2,0.1)\) adopted in the rest of this chapter. In order to keep the subsequent comparison with TRPO as fair as possible, the optimization was repeated over a discrete set of fixed horizons ranging from \(40\,\mathrm{ns}\) to \(180\,\mathrm{ns}\) in steps of \(10\,\mathrm{ns}\), and the best solution was selected according to the final objective value. The resulting horizon sweep reveals that the best nominal solution is obtained at \(T=70\,\mathrm{ns}\), for which the independently re-evaluated cost is
+% \begin{equation}
+% C_{\mathrm{Adam}}^{\star}=0.1256,
+% \end{equation}
+% with nominal fidelity
+% \begin{equation}
+% F_{\mathrm{nom}}=0.999385,
+% \end{equation}
+% total leakage estimate
+% \begin{equation}
+% L_{\mathrm{tot}} = 1.98\times 10^{-4},
+% \end{equation}
+% boundary contribution
+% \begin{equation}
+% C_{\mathrm{bdry}} = 8.31\times 10^{-4},
+% \end{equation}
+% and weighted runtime contribution
+% \begin{equation}
+% C_{\mathrm{time}} = 0.1167.
+% \end{equation}
+% Importantly, the optimizer-reported objective and the nominal re-evaluation agree to numerical precision for every tested horizon, which provides a useful internal consistency check of the optimization and evaluation pipelines. In this sense, Adam already constitutes a nontrivial baseline: even without policy learning, it is able to reach sub-\(10^{-3}\) nominal infidelity on the selected target.
+
+% The horizon dependence is particularly informative. For very short durations, namely \(40\text{--}60\,\mathrm{ns}\), the optimization remains far from the high-fidelity regime: the nominal fidelity rises from \(0.733\) at \(40\,\mathrm{ns}\) to \(0.985\) at \(60\,\mathrm{ns}\), but the total cost is still large, dropping only from \(3.14\) to \(0.341\). What makes this regime especially interesting is that the degradation is not due to a single metric alone. Besides the fidelity loss, the boundary penalty is still substantial, with
+% \begin{equation}
+% C_{\mathrm{bdry}}(40\,\mathrm{ns}) = 0.399,\qquad
+% C_{\mathrm{bdry}}(50\,\mathrm{ns}) = 0.324,\qquad
+% C_{\mathrm{bdry}}(60\,\mathrm{ns}) = 0.0851,
+% \end{equation}
+% which indicates that, below about \(70\,\mathrm{ns}\), the optimizer struggles not only to synthesize the target gate accurately, but also to satisfy the smooth turn-on/turn-off constraints encoded in the UFO objective. The transition from \(60\,\mathrm{ns}\) to \(70\,\mathrm{ns}\) is therefore the key qualitative feature of the sweep: a modest increase of only \(10\,\mathrm{ns}\) produces a sharp drop in the total cost, from \(0.341\) to \(0.126\), accompanied by a fidelity jump from \(0.9847\) to \(0.9994\) and, most strikingly, by an almost two-orders-of-magnitude collapse of the boundary term. This suggests that \(60\,\mathrm{ns}\) lies below the regime where the pulse can simultaneously realize the required entangling dynamics and remain well behaved at the boundaries.
+
+% Beyond \(70\,\mathrm{ns}\), the behavior changes qualitatively. Both fidelity and leakage continue to improve monotonically as the horizon increases: for instance, the fidelity rises from \(0.999385\) at \(70\,\mathrm{ns}\) to \(0.999923\) at \(180\,\mathrm{ns}\), while the leakage decreases from \(1.98\times 10^{-4}\) to \(1.12\times 10^{-5}\). However, these improvements become increasingly marginal from the viewpoint of the full objective. The cost increases again from \(0.1256\) at \(70\,\mathrm{ns}\) to \(0.3009\) at \(180\,\mathrm{ns}\), because the gain in fidelity and leakage no longer compensates for the steadily growing runtime term. In other words, the optimal Adam solution is not the longest and most accurate pulse, but the shortest pulse for which fidelity, leakage, boundary regularity, and runtime enter a favorable balance. This is exactly the type of multi-objective compromise anticipated by the discussion in Sections~\ref{subsec:speed_leakage_tradeoff} and~\ref{subsec:ufo_cost_function}. It is also qualitatively consistent with the broader literature on superconducting-qubit control, where aggressively short gates in weakly anharmonic devices tend to amplify unwanted leakage channels and pulse-shaping constraints, while longer pulses reduce leakage only at the price of increased runtime \cite{Motzoi2009,Gambetta2011,Koch2022}.
+
+% A further point worth emphasizing is that this nominal analog baseline already operates on a timescale well below the synthesized-gate reference quoted in the original UFO paper for the same target family. Using the gate-synthesis estimate of approximately \(215\,\mathrm{ns}\) reported in Ref.~\cite{Niu2019}, the best Adam solution at \(70\,\mathrm{ns}\) is shorter by roughly a factor of three. This comparison should be interpreted cautiously at this stage, since the present subsection concerns a single nominal target rather than the full runtime benchmark of the paper; nevertheless, it already indicates that hardware-native analog control is competitive in runtime even before reinforcement learning is introduced. At the same time, a post-hoc robustness check under Gaussian control noise with \(\sigma=1\,\mathrm{MHz}\) shows that this strong nominal solution is not automatically robust: the corresponding average fidelity drops to
+% \begin{equation}
+% \overline{F}_{\sigma=1\,\mathrm{MHz}} = 0.9796,
+% \end{equation}
+% with average gate fidelity \(0.9744\) and fidelity variance
+% \begin{equation}
+% \mathrm{Var}(F)=7.88\times 10^{-5}.
+% \end{equation}
+% This observation is important for the logic of the chapter. It shows that direct gradient-based pulse optimization already provides an excellent \emph{nominal} baseline, so any later advantage of TRPO cannot be reduced to the trivial fact that RL finds a reasonable analog pulse. Rather, the real question becomes whether RL can improve upon this baseline precisely in the directions that motivate the UFO framework most strongly, namely robustness under stochastic perturbations and, more generally, the quality of the trade-off between nominal performance and noisy performance.
