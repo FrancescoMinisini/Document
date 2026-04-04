@@ -166,7 +166,7 @@ i\left(
 \end{equation}
 and control quality is assessed through the same UFO cost structure introduced previously, namely a weighted combination of gate infidelity, leakage penalty, boundary penalty, and runtime. This uniform physical and numerical setup is essential for the interpretation of the experiments, because it ensures that all methods are compared within the same multilevel model, under the same control constraints, and against the same class of target gates.
 
-TODO: Aggiungere un diagramma parlante
+\textbf{TODO:} Aggiungere un diagramma parlante
 
 \subsection{Compared methods}
 Within this common framework, four optimization and comparison schemes are considered. 
@@ -225,7 +225,7 @@ All experiments follow a common procedural logic. For a given target gate \(N(\a
 
 % Among the TRPO-specific hyperparameters, two are particularly important: the initial policy dispersion, controlled by \texttt{init\_log\_std}, and the trust-region radius, controlled by \texttt{max\_kl}. The parameter \texttt{init\_log\_std} determines the initial exploration scale of the stochastic policy and therefore affects how broadly the agent samples the continuous control space during the early stages of training. If the initial exploration is too small, the policy may become trapped in a narrow and suboptimal region of the control landscape; if it is too large, the sampled trajectories may become excessively noisy and learning may become unstable. The parameter \texttt{max\_kl}, by contrast, controls the maximum allowed Kullback--Leibler divergence between two consecutive policies in TRPO. It therefore governs a trade-off between speed of improvement and update reliability: larger values permit faster policy movement but increase the risk of overshooting into poor regions of policy space, whereas smaller values produce more conservative and stable updates at the cost of slower progress. In a continuous-control problem such as the present one, where the reward depends on a long pulse trajectory and the environment may be stochastic, both parameters have a direct effect on whether training is exploratory enough to discover good controls while remaining stable enough to refine them. 
 
-% TODO: mention \(init_log_std\) explicitly also in the RL or neural-network introduction.
+% \textbf{TODO:} mention \(init_log_std\) explicitly also in the RL or neural-network introduction.
 
 % A second major set of design choices concerns the temporal discretization of the control problem. The timestep \(\Delta t\) determines the temporal mesh on which the controls are defined, while the maximum duration \(T_{\max}\) determines the largest admissible episode length. These choices involve a clear trade-off. A smaller timestep provides a finer control mesh and therefore a more expressive pulse representation, but it also increases the dimensionality of the action trajectory, the computational cost of simulation, and the difficulty of optimization. A larger timestep reduces computational burden, but may artificially restrict the control space and make it harder to resolve fast but physically meaningful pulse features. Similarly, a longer maximum duration allows the optimizer to discover slower but potentially easier solutions, whereas a shorter horizon encourages time-efficient control but increases the difficulty of the search. The selected values of \(\Delta t\) and \(T_{\max}\) should therefore be understood as compromise choices: they are fine enough to represent nontrivial pulse dynamics and allow meaningful comparison with the reference framework, but coarse enough to keep the experiments computationally tractable.
 
@@ -233,7 +233,7 @@ All experiments follow a common procedural logic. For a given target gate \(N(\a
 
 % % Finally, the choice of neural-network architecture also belongs to this subsection, since network width and depth influence policy expressivity, optimization stability, and generalization across control trajectories. However, as the architecture search is still ongoing, it is preferable at this stage to treat the adopted layout as a reasonable working choice rather than as a final optimized design. 
 
-% TODO: add neural-network layout search results and final architecture comparison once available.
+% \textbf{TODO:} add neural-network layout search results and final architecture comparison once available.
 
 
 \subsection{Parameter selection and practical trade-offs}
@@ -492,3 +492,88 @@ The Adam results therefore provide a meaningful and nontrivial baseline: they co
 % \mathrm{Var}(F)=7.88\times 10^{-5}.
 % \end{equation}
 % This observation is important for the logic of the chapter. It shows that direct gradient-based pulse optimization already provides an excellent \emph{nominal} baseline, so any later advantage of TRPO cannot be reduced to the trivial fact that RL finds a reasonable analog pulse. Rather, the real question becomes whether RL can improve upon this baseline precisely in the directions that motivate the UFO framework most strongly, namely robustness under stochastic perturbations and, more generally, the quality of the trade-off between nominal performance and noisy performance.
+
+
+\paragraph{Nominal TRPO results.}
+I next considered the same representative target gate \(N(2.2,2.2,\pi/2)\) within the reinforcement-learning formulation of the UFO framework, but in a \emph{nominal} training regime, that is, without stochastic control perturbations injected during training. In this experiment, the controller was trained with trust-region policy optimization (TRPO) \cite{Schulman2015}, using the same physical target and the same underlying gmon simulation model as in the Adam baseline, with timestep \(\Delta t = 2\,\mathrm{ns}\), maximum episode duration \(180\,\mathrm{ns}\), and the same UFO weights \((\chi,\beta,\mu,\kappa)=(10,10,0.2,0.1)\). The policy and value networks retained the \(64\text{--}32\text{--}32\) fully connected architecture used in the original UFO paper, while the main TRPO hyperparameters were set to \(\texttt{max\_kl}=0.01\), \(\gamma_{\mathrm{RL}}=0.99\), \(\lambda=0.97\), and \(\texttt{init\_log\_std}=-0.5\). Training was performed for \(100\) policy iterations with batches of \(10^4\) episodes per iteration, using 8 rollout workers.
+
+Under this nominal TRPO setting, the best deterministic evaluation achieved
+\begin{equation}
+C_{\mathrm{TRPO}}^{\star}=0.3676,
+\end{equation}
+with corresponding fidelity
+\begin{equation}
+F_{\mathrm{nom}}=0.99155,
+\end{equation}
+leakage estimate
+\begin{equation}
+L_{\mathrm{tot}}=4.59\times 10^{-4},
+\end{equation}
+and gate time
+\begin{equation}
+T=102\,\mathrm{ns}.
+\end{equation}
+These values show that the RL agent is able to learn a fully viable analog control policy for the target gate in the nominal environment: the resulting pulse remains in the high-fidelity regime, stays well below the synthesized-gate reference time of about \(215\,\mathrm{ns}\) discussed in Ref.~\cite{Niu2019}, and therefore already exhibits nontrivial hardware efficiency. In particular, the achieved duration of \(102\,\mathrm{ns}\) is still roughly a factor of two shorter than the circuit-synthesis reference, which indicates that direct analog control remains competitive at the runtime level even in the absence of noisy-environment training.
+
+At the same time, the comparison with the direct Adam baseline is revealing. On this single fixed target, the nominal TRPO controller does \emph{not} outperform the direct pulse optimizer: the Adam baseline reached lower cost, higher fidelity, lower leakage, and a shorter runtime, with
+\begin{equation}
+C_{\mathrm{Adam}}^{\star}=0.1256,\qquad
+F_{\mathrm{Adam}}=0.999385,\qquad
+L_{\mathrm{Adam}}=1.98\times 10^{-4},\qquad
+T_{\mathrm{Adam}}=70\,\mathrm{ns}.
+\end{equation}
+This difference is substantial enough that it should be interpreted, rather than ignored. In the present nominal single-target setting, the direct gradient-based optimizer appears to be the stronger method for extracting a high-quality pulse from a differentiable simulator. This is not particularly surprising from the viewpoint of the broader quantum optimal-control literature: when the target is fixed, the simulator is known, and the objective is smooth and directly evaluable, strong direct optimizers such as GRAPE-style methods or related gradient-based pulse searches remain very hard to beat on purely nominal performance \cite{Khaneja2005,deFouquieres2011,Machnes2018}.
+
+However, this outcome does not undermine the relevance of the RL formulation; rather, it clarifies what should and should not be claimed at this stage. First, the present run should be interpreted as a \emph{nominal feasibility benchmark}, not as the sharpest possible TRPO optimum, since the stopping rule used here was intentionally looser than in the Adam baseline: the nominal TRPO training employed a termination threshold of \(0.4\), whereas the Adam sweep used \(0.15\). This likely biases the RL agent toward finding an acceptable pulse earlier, rather than continuing to refine the solution toward the lowest attainable nominal cost. Second, and more importantly, the original motivation of the UFO framework is not merely to solve a single deterministic fixed-target optimization problem, but to learn policies that remain meaningful once leakage, runtime, and stochastic control errors are taken into account jointly \cite{Niu2019}. In that broader perspective, the fact that TRPO is already able to produce a \(102\,\mathrm{ns}\) high-fidelity controller in the nominal setting is best viewed as a proof of capability rather than as the final scientific endpoint.
+
+The qualitative lesson of this experiment is therefore twofold. On the one hand, the nominal single-target problem appears to favor direct optimization, which sets a strong baseline and usefully prevents overstating the value of RL in the easiest regime. On the other hand, the nominal TRPO result still shows that the policy-based approach is able to discover a fast analog solution in the relevant region of control space, with fidelity above \(99\%\) and a runtime substantially below the gate-synthesis estimate. This makes the next comparison especially meaningful: once stochastic training and robustness metrics are introduced, the question is no longer whether RL can produce a workable nominal pulse, but whether it can recover an advantage precisely along the dimensions for which the UFO framework was originally designed, namely robustness under control noise and improved stability of the learned control strategy.
+
+\begin{figure}[t]
+\centering
+\fbox{\parbox[c][5.2cm][c]{0.9\linewidth}{\centering
+Placeholder for nominal TRPO training curves:\\
+evaluation cost, fidelity, leakage, and runtime vs iteration.}}
+\caption{Training dynamics of the nominal TRPO controller for the target \(N(2.2,2.2,\pi/2)\). The most useful quantities to visualize are the deterministic evaluation cost, fidelity, leakage, and stopping time as functions of the policy iteration.}
+\label{fig:trpo_nominal_training_curves}
+\end{figure}
+
+As illustrated in Fig.~\ref{fig:trpo_nominal_training_curves}, the nominal TRPO controller should be interpreted primarily through its learning dynamics and final stopping time, rather than through a direct horizon sweep as in the Adam baseline.
+
+\paragraph{Comparative discussion.}
+Taken together, the single-target nominal experiments provide a fairly clear picture of the relative roles of direct pulse optimization and policy-based reinforcement learning in the present setting. On the representative target \(N(2.2,2.2,\pi/2)\), the Adam baseline yields the best overall nominal solution, with
+\begin{equation}
+C_{\mathrm{Adam}}^{\star}=0.1256,\qquad
+F_{\mathrm{Adam}}=0.999385,\qquad
+L_{\mathrm{Adam}}=1.98\times 10^{-4},\qquad
+T_{\mathrm{Adam}}=70\,\mathrm{ns},
+\end{equation}
+while the best nominal TRPO controller achieves
+\begin{equation}
+C_{\mathrm{TRPO}}^{\star}=0.3676,\qquad
+F_{\mathrm{TRPO}}=0.99155,\qquad
+L_{\mathrm{TRPO}}=4.59\times 10^{-4},\qquad
+T_{\mathrm{TRPO}}=102\,\mathrm{ns}.
+\end{equation}
+Therefore, on this fixed deterministic target, Adam outperforms nominal TRPO on all four primary metrics: total objective value, gate fidelity, leakage suppression, and runtime. The difference is not marginal. In particular, the fidelity gap is nearly one percentage point, the leakage of the RL solution is more than twice as large, and the learned TRPO pulse is approximately \(46\%\) longer than the best Adam pulse.
+
+This result is scientifically useful, because it identifies quite sharply what can and cannot be claimed about the RL framework at the nominal level. If the question is whether a policy-gradient agent can discover a valid analog controller for the target gate, then the answer is clearly yes: the nominal TRPO run still reaches a fidelity above \(99\%\), keeps leakage below \(5\times10^{-4}\), and produces a gate duration of only \(102\,\mathrm{ns}\), which is substantially shorter than the approximate \(215\,\mathrm{ns}\) synthesized-gate reference reported in Ref.~\cite{Niu2019}. In that sense, the RL formulation is already \emph{competitive} with respect to the broad hardware-efficiency motivation of the UFO framework, since it finds a fast analog solution well inside the physically relevant regime. However, if the question is whether RL is already the best optimization method for the \emph{single-target nominal problem itself}, the answer from the present data is no: under the present settings, direct gradient-based pulse search remains clearly superior.
+
+This hierarchy is also qualitatively consistent with the broader quantum-control literature. For deterministic fixed-target problems with a differentiable simulator and a fully specified cost function, direct optimization over the pulse parameters is often extremely effective, especially when the task is to extract the best possible nominal solution for one target gate \cite{Khaneja2005,deFouquieres2011,Machnes2018}. By contrast, the main conceptual appeal of the UFO framework is not simply that it replaces a strong optimizer by a weaker one, but that it embeds leakage, runtime, and eventually stochastic robustness into a unified sequential-learning formulation \cite{Niu2019}. From this perspective, the present nominal comparison is best interpreted as a control experiment: it shows that RL should not be justified by claiming a trivial nominal advantage where none is observed, and it motivates shifting the emphasis toward the regimes in which policy-based learning is actually expected to help, namely noisy-environment training, robustness under perturbations, and possibly transfer across related targets.
+
+A further methodological point should also be stated explicitly. The present nominal comparison is deliberately fair in the sense that both methods use the same physical model, timestep, target gate, and UFO weights, but it is not perfectly symmetric in optimization protocol. In particular, the TRPO nominal run employed a looser stopping threshold than the Adam sweep, which likely favors earlier acceptance of a merely satisfactory policy rather than continued refinement toward the sharpest nominal optimum. This caveat should not be used to erase the observed gap, which remains substantial, but it does matter for interpretation: the current result shows that nominal TRPO is \emph{feasible and promising}, not that it has already been pushed to the same degree of local optimality as the direct Adam baseline.
+
+The most balanced conclusion is therefore the following. In the nominal single-target regime, the Adam baseline is the more effective optimizer and provides the stronger reference pulse. Nevertheless, the TRPO controller still demonstrates that the RL-based UFO formulation can discover fast, high-fidelity analog controls that are already hardware-efficient relative to standard gate synthesis. The comparative value of RL, however, does not emerge most strongly in this deterministic benchmark. Its real test is whether the policy-based formulation becomes advantageous once stochastic training, robustness metrics, and more transferable control structure are taken into account. This is precisely the question addressed in the following sections.
+
+\begin{table}[t]
+\centering
+\caption{Nominal single-target comparison on \(N(2.2,2.2,\pi/2)\).}
+\label{tab:single_target_nominal_comparison}
+\begin{tabular}{lcccc}
+\hline
+Method & Cost & Fidelity & Leakage & Time (ns) \\
+\hline
+Adam baseline & 0.1256 & 0.999385 & \(1.98\times10^{-4}\) & 70 \\
+Nominal TRPO & 0.3676 & 0.99155  & \(4.59\times10^{-4}\) & 102 \\
+\hline
+\end{tabular}
+\end{table}

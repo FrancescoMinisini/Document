@@ -891,8 +891,8 @@ The paper also gives a conceptual argument for why TRPO should outperform direct
 There is also a more physical reason why a trust-region policy method is attractive here. Quantum control pulses are not arbitrary vectors; they are temporally correlated objects whose early and late segments interact through phase accumulation, transient leakage, and the final gate constraint. A useful optimizer must therefore capture \emph{nonlocal structure} across the trajectory. The paper emphasizes exactly this point, arguing that the policy neural network can learn nonlocal regularities of effective control solutions, and that these regularities are difficult to exploit with simpler local optimization schemes \cite{Niu2019}. In other words, TRPO is not chosen merely because it is a standard continuous-control RL algorithm; it is chosen because its policy-based formulation is compatible with the trajectory-level structure of analog quantum control.
 
 From the implementation viewpoint, the paper uses TRPO in an actor--critic architecture. Denoting the policy network by \(\pi_{\bm{\theta}}(a\mid s)\) and the value network by \(V_{\bm{\omega}}(s)\), the learning loop alternates between:
-TODO: DA SOSTITUIRE CON SNIPPET/PSEUDOCODE
-% TODO: DA SOSTITUIRE CON SNIPPET
+\textbf{TODO:} DA SOSTITUIRE CON SNIPPET/PSEUDOCODE
+% \textbf{TODO:} DA SOSTITUIRE CON SNIPPET
 \begin{enumerate}
 \item sampling many episodes under the current stochastic policy,
 \item estimating discounted future rewards and advantages,
