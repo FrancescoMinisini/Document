@@ -578,6 +578,9 @@ Nominal TRPO & 0.3676 & 0.99155  & \(4.59\times10^{-4}\) & 102 \\
 \end{tabular}
 \end{table}
 
+
+\section{Robustness under stochastic control noise}
+\label{sec:robustness_under_stochastic_control_noise}
 \subsection{Noise model}
 \label{subsec:noise_model}
 To assess robustness in a physically meaningful and methodologically consistent way, all controllers considered in this section are evaluated under the same stochastic control-error model, following the general logic of the original UFO framework \cite{Niu2019}. At the discrete time-step level, the nominal control trajectory is not implemented exactly, but is perturbed by additive Gaussian amplitude fluctuations. In the notation of the control vector introduced in Eq.~\eqref{eq:validation_control_vector}, this means that the realized control at time step \(t_k\) takes the schematic form
@@ -627,3 +630,19 @@ and
 \label{eq:robustness_fidelity_variance_section}
 \end{equation}
 This evaluation protocol is particularly well suited to the present thesis, because it directly probes the central claim of the UFO framework: a useful control strategy should not only achieve high nominal fidelity, but should remain accurate and stable under realistic stochastic perturbations of the multilevel superconducting-qubit dynamics.
+
+
+\subsection{Average fidelity versus noise strength.}
+The main robustness trend is summarized in Panel~A of Fig.~\ref{fig:robustness_noise_comparison}, where the average fidelity is reported as a function of the Gaussian noise standard deviation \(\sigma_{\mathrm{noise}}\) for the three controllers considered in this study: the Adam baseline, the nominal TRPO controller, and the noise-optimized TRPO controller. For all methods, the average fidelity decreases monotonically as the noise strength is increased from the near-nominal regime up to the strongest perturbations considered in the sweep, which is the expected qualitative behavior for a control protocol subjected to progressively larger stochastic distortions. At very small \(\sigma_{\mathrm{noise}}\), all three curves start in the high-fidelity regime, consistently with the corresponding deterministic evaluations: the Adam plan begins from nominal fidelity \(0.99939\), the noise-optimized TRPO plan from \(0.99876\), and the nominal TRPO plan from \(0.99415\). :contentReference[oaicite:0]{index=0} :contentReference[oaicite:1]{index=1} :contentReference[oaicite:2]{index=2}
+
+As the noise amplitude grows, however, the three methods separate clearly. The Adam baseline remains the best-performing controller over the entire range shown in the figure, preserving the largest average fidelity at every noise level. This is a noteworthy result, because it shows that, for this specific single-target benchmark, the direct pulse optimizer does not only dominate in the deterministic setting discussed in Section~\ref{subsec:single_target_control_optimization}, but also retains the strongest mean performance under stochastic perturbations. Nevertheless, the comparison between the two RL curves is the more important result for the logic of the UFO framework. The noise-optimized TRPO controller consistently outperforms the nominally trained TRPO controller across essentially the whole sweep, and the gap between the two becomes progressively more visible as \(\sigma_{\mathrm{noise}}\) increases. In other words, although noisy-environment RL does not overtake Adam on this target, it does produce a controller whose mean noisy fidelity is systematically better than that of the RL agent trained only in the nominal environment.
+
+This ranking is exactly the one that matters for answering the central question of this subsection: \emph{does noisy training genuinely improve robustness?} At the level of average fidelity, the answer is yes. Since the two RL controllers share the same general policy-based optimization framework and differ primarily in whether stochastic perturbations are present during training, their separation under noisy evaluation cannot be attributed merely to the use of reinforcement learning in general. Rather, it indicates that exposure to the stochastic environment during optimization leads the agent to discover control policies whose performance degrades more slowly under Gaussian perturbations. This conclusion is fully aligned with the intended logic of the original UFO paper, where the noisy training environment is introduced precisely in order to optimize expected performance under control uncertainty rather than nominal fidelity alone \cite{Niu2019}. At the same time, the fact that Adam still traces the highest curve reminds us that, in the present single-target study, robustness gains from noisy RL should be interpreted as \emph{relative to nominal RL}, not yet as an unconditional superiority over all alternative optimization strategies. :contentReference[oaicite:3]{index=3}
+
+\begin{figure}[t]
+\centering
+\fbox{\parbox[c][5.2cm][c]{0.9\linewidth}{\centering
+Placeholder for noise study}}
+\caption{Robustness comparison under Gaussian stochastic control noise for the representative target gate \(N(2.2,2.2,\pi/2)\). Panel~A reports the average fidelity as a function of the noise standard deviation \(\sigma_{\mathrm{noise}}\), while Panel~B reports the corresponding fidelity variance.}
+\label{fig:robustness_noise_comparison}
+\end{figure}
