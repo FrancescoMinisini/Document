@@ -239,6 +239,8 @@ All experiments follow a common procedural logic. For a given target gate \(N(\a
 \subsection{Parameter selection and practical trade-offs}
 \label{subsec:parameter_selection_tradeoffs}
 
+\textbf{TODO:} meaby consider making this just the training parameter paragraph
+
 A dedicated discussion of parameter selection is warranted in the present study because one of the main practical limitations of deep reinforcement learning is its strong sensitivity to hyperparameter choices, initialization strategy, and implementation details. This is especially true for on-policy methods in continuous control, where seemingly secondary design decisions can substantially affect stability, exploration, convergence speed, and final performance. For this reason, the numerical results reported in this thesis should not be interpreted as depending only on the formal UFO objective and on the gmon Hamiltonian, but also on a set of explicit methodological choices that must be documented carefully for reproducibility. Unless otherwise stated, the values reported in Table~\ref{tab:nominal_hyperparameters} are the nominal parameters used in the experiments described in this chapter.
 
 \footnote{\textbf{TODO:} mention \texttt{init\_log\_std} also in the earlier RL / neural-network description, since it is an implementation-level parameter of the Gaussian policy.}
@@ -303,6 +305,12 @@ The remaining implementation choices mainly reflect computational trade-offs. Th
 
 Finally, the neural-network architecture was kept at the paper’s nominal configuration, namely two fully connected three-layer networks of width \(64\), \(32\), and \(32\) for the policy and value functions, respectively. This preserves direct comparability with the reference implementation and avoids conflating architectural changes with control-theoretic conclusions. At the same time, it is well known from the RL literature that network architecture can materially affect performance, especially in on-policy continuous-control settings. For that reason, architectural sensitivity should be regarded as an important follow-up question rather than as fully settled here. 
 
+\subsection{Neural-network architecture}
+\label{subsec:neural_network_architecture}
+\textbf{TODO:} add the results of the dedicated neural-network layout search once available.
+
+\subsection{UFO hyperparameters}
+\label{subsec:ufo_hyperparameters}
 \textbf{TODO:} add the results of the dedicated neural-network layout search once available.
 
 \section{Single-target control optimization}
@@ -633,11 +641,13 @@ This evaluation protocol is particularly well suited to the present thesis, beca
 
 
 \subsection{Average fidelity versus noise strength.}
-The main robustness trend is summarized in Panel~A of Fig.~\ref{fig:robustness_noise_comparison}, where the average fidelity is reported as a function of the Gaussian noise standard deviation \(\sigma_{\mathrm{noise}}\) for the three controllers considered in this study: the Adam baseline, the nominal TRPO controller, and the noise-optimized TRPO controller. For all methods, the average fidelity decreases monotonically as the noise strength is increased from the near-nominal regime up to the strongest perturbations considered in the sweep, which is the expected qualitative behavior for a control protocol subjected to progressively larger stochastic distortions. At very small \(\sigma_{\mathrm{noise}}\), all three curves start in the high-fidelity regime, consistently with the corresponding deterministic evaluations: the Adam plan begins from nominal fidelity \(0.99939\), the noise-optimized TRPO plan from \(0.99876\), and the nominal TRPO plan from \(0.99415\). :contentReference[oaicite:0]{index=0} :contentReference[oaicite:1]{index=1} :contentReference[oaicite:2]{index=2}
+The main robustness trend is summarized in Panel~A of Fig.~\ref{fig:robustness_noise_comparison}, where the average fidelity is reported as a function of the Gaussian noise standard deviation \(\sigma_{\mathrm{noise}}\) for the three controllers considered in this study: the Adam baseline, the nominal TRPO controller, and the noise-optimized TRPO controller. For all methods, the average fidelity decreases monotonically as the noise strength is increased from the near-nominal regime up to the strongest perturbations considered in the sweep, which is the expected qualitative behavior for a control protocol subjected to progressively larger stochastic distortions. At very small \(\sigma_{\mathrm{noise}}\), all three curves start in the high-fidelity regime, consistently with the corresponding deterministic evaluations: the Adam plan begins from nominal fidelity \(0.99939\), the noise-optimized TRPO plan from \(0.99876\), and the nominal TRPO plan from \(0.99415\). 
+% :contentReference[oaicite:0]{index=0} :contentReference[oaicite:1]{index=1} :contentReference[oaicite:2]{index=2}
 
 As the noise amplitude grows, however, the three methods separate clearly. The Adam baseline remains the best-performing controller over the entire range shown in the figure, preserving the largest average fidelity at every noise level. This is a noteworthy result, because it shows that, for this specific single-target benchmark, the direct pulse optimizer does not only dominate in the deterministic setting discussed in Section~\ref{subsec:single_target_control_optimization}, but also retains the strongest mean performance under stochastic perturbations. Nevertheless, the comparison between the two RL curves is the more important result for the logic of the UFO framework. The noise-optimized TRPO controller consistently outperforms the nominally trained TRPO controller across essentially the whole sweep, and the gap between the two becomes progressively more visible as \(\sigma_{\mathrm{noise}}\) increases. In other words, although noisy-environment RL does not overtake Adam on this target, it does produce a controller whose mean noisy fidelity is systematically better than that of the RL agent trained only in the nominal environment.
 
-This ranking is exactly the one that matters for answering the central question of this subsection: \emph{does noisy training genuinely improve robustness?} At the level of average fidelity, the answer is yes. Since the two RL controllers share the same general policy-based optimization framework and differ primarily in whether stochastic perturbations are present during training, their separation under noisy evaluation cannot be attributed merely to the use of reinforcement learning in general. Rather, it indicates that exposure to the stochastic environment during optimization leads the agent to discover control policies whose performance degrades more slowly under Gaussian perturbations. This conclusion is fully aligned with the intended logic of the original UFO paper, where the noisy training environment is introduced precisely in order to optimize expected performance under control uncertainty rather than nominal fidelity alone \cite{Niu2019}. At the same time, the fact that Adam still traces the highest curve reminds us that, in the present single-target study, robustness gains from noisy RL should be interpreted as \emph{relative to nominal RL}, not yet as an unconditional superiority over all alternative optimization strategies. :contentReference[oaicite:3]{index=3}
+This ranking is exactly the one that matters for answering the central question of this subsection: \emph{does noisy training genuinely improve robustness?} At the level of average fidelity, the answer is yes. Since the two RL controllers share the same general policy-based optimization framework and differ primarily in whether stochastic perturbations are present during training, their separation under noisy evaluation cannot be attributed merely to the use of reinforcement learning in general. Rather, it indicates that exposure to the stochastic environment during optimization leads the agent to discover control policies whose performance degrades more slowly under Gaussian perturbations. This conclusion is fully aligned with the intended logic of the original UFO paper, where the noisy training environment is introduced precisely in order to optimize expected performance under control uncertainty rather than nominal fidelity alone \cite{Niu2019}. At the same time, the fact that Adam still traces the highest curve reminds us that, in the present single-target study, robustness gains from noisy RL should be interpreted as \emph{relative to nominal RL}, not yet as an unconditional superiority over all alternative optimization strategies. 
+% :contentReference[oaicite:3]{index=3}
 
 \begin{figure}[t]
 \centering
@@ -648,7 +658,8 @@ Placeholder for noise study}}
 \end{figure}
 
 \subsection{Fidelity variance versus noise strength.}
-A complementary view is provided by Panel~B of Fig.~\ref{fig:robustness_noise_comparison}, which reports the fidelity variance as a function of the same Gaussian noise amplitude \(\sigma_{\mathrm{noise}}\). Whereas the average fidelity quantifies the \emph{mean} degradation of a control protocol under stochastic perturbations, the variance probes its \emph{shot-to-shot stability}: a controller with smaller \(\mathrm{Var}(F)\) is less sensitive to the specific noise realization and therefore more reproducible in practice. This distinction is essential in the present context, because a method may retain an acceptable average fidelity while still being experimentally fragile if its performance fluctuates strongly across noisy rollouts. The use of fidelity variance as a second robustness diagnostic is therefore not incidental, but directly follows the logic of the original UFO framework, which evaluates robustness not only through mean performance but also through the stability of that performance under repeated stochastic perturbations \cite{Niu2019}. :contentReference[oaicite:0]{index=0}
+A complementary view is provided by Panel~B of Fig.~\ref{fig:robustness_noise_comparison}, which reports the fidelity variance as a function of the same Gaussian noise amplitude \(\sigma_{\mathrm{noise}}\). Whereas the average fidelity quantifies the \emph{mean} degradation of a control protocol under stochastic perturbations, the variance probes its \emph{shot-to-shot stability}: a controller with smaller \(\mathrm{Var}(F)\) is less sensitive to the specific noise realization and therefore more reproducible in practice. This distinction is essential in the present context, because a method may retain an acceptable average fidelity while still being experimentally fragile if its performance fluctuates strongly across noisy rollouts. The use of fidelity variance as a second robustness diagnostic is therefore not incidental, but directly follows the logic of the original UFO framework, which evaluates robustness not only through mean performance but also through the stability of that performance under repeated stochastic perturbations \cite{Niu2019}. 
+% :contentReference[oaicite:0]{index=0}
 
 The qualitative trend is clear. For all three controllers, the fidelity variance is essentially negligible in the weak-noise regime and then increases progressively, with a markedly faster growth once the perturbation strength enters the intermediate-to-strong regime. This behavior is physically reasonable: when \(\sigma_{\mathrm{noise}}\) is very small, different noisy realizations remain close to the nominal control trajectory and therefore produce almost indistinguishable fidelities; as the fluctuations become larger, however, the controller begins to sample increasingly different effective Hamiltonian trajectories, and the output fidelity becomes more dispersed from one rollout to the next. In this sense, Panel~B provides a direct measure of sensitivity of the learned or optimized control plan to stochastic deformation of the pulse sequence.
 
@@ -664,4 +675,46 @@ This conclusion is particularly important in light of the comparison with the no
 At the same time, the same figures also show that this learned robustness should not be overinterpreted. On the representative target considered here, the Adam baseline remains superior in absolute terms, both in average fidelity and in fidelity variance, across the full range of tested noise amplitudes. Therefore, the present robustness study does not support the strongest possible claim that noisy-environment TRPO dominates all competing optimization strategies on this single-target benchmark. Rather, it supports a more precise and scientifically more defensible conclusion: within the RL family, stochastic training produces a controller that is genuinely more robust than nominal training, while among the three controllers considered here the direct pulse optimizer still provides the strongest absolute performance on this target. This distinction is important for the overall logic of the thesis. It prevents the empirical analysis from overstating the success of RL in the easiest single-target regime, while at the same time confirming the specific paper-level hypothesis that robustness can be intentionally learned by training in a stochastic environment.
 
 From the viewpoint of the broader thesis, this subsection therefore plays a pivotal role. The nominal single-target study of Section~\ref{subsec:single_target_control_optimization} had shown that direct optimization is already extremely strong when the problem is deterministic and fixed. The present robustness study adds the missing piece: once stochastic perturbations are treated as part of the optimization problem rather than as an afterthought, the noisy-environment RL formulation begins to exhibit its intended advantage, namely a statistically more stable and less noise-sensitive control policy than the one obtained by nominal RL alone. For this reason, even though the absolute best controller in this benchmark remains the Adam baseline, the results of Fig.~\ref{fig:robustness_noise_comparison} should be regarded as a substantive validation of the most characteristic claim of the UFO framework.
+
+
+\section{Runtime analysis on the gate family \(N(\alpha,\alpha,\pi/2)\)}
+\paragraph{Runtime sweep protocol.}
+To investigate the hardware efficiency of analog control beyond the single-target setting, I next considered the one-parameter subfamily
+\begin{equation}
+N(\alpha,\alpha,\pi/2),
+\qquad
+\alpha \in [0,\pi],
+\label{eq:runtime_subfamily_empirical}
+\end{equation}
+which is the most relevant runtime benchmark discussed in the original UFO paper \cite{Niu2019}. In the present implementation, the sweep was performed by fixing \(\gamma=\pi/2\) and varying \(\alpha\) from \(0\) to approximately \(\pi\) with step size \(0.157\), corresponding to a discretization of the target family into a sequence of nearby gates. For each value of \(\alpha\), a noise-optimized TRPO controller was trained and then evaluated deterministically to extract the runtime of the best control plan found for that target. As in the rest of the chapter, the physical model, timestep, and network architecture were kept fixed, with \(\Delta t = 2\,\mathrm{ns}\), maximum admissible gate duration \(180\,\mathrm{ns}\), and the same \(64\text{--}32\text{--}32\) policy/value architecture used throughout the study. The training environment remained stochastic, with Gaussian control noise of standard deviation \(1\,\mathrm{MHz}\), so that the runtime analysis was not performed for purely nominal policies, but for controllers optimized under the same noisy-environment logic that underlies the UFO framework \cite{Niu2019}. :contentReference[oaicite:0]{index=0} :contentReference[oaicite:1]{index=1}
+
+A central methodological ingredient of this runtime study is the use of \emph{curriculum-style transfer} across nearby targets. Rather than training a fresh agent independently for each \(\alpha\), the best controller learned for one value of \(\alpha\) was carried forward through a curriculum checkpoint and used to initialize training for the next point in the sweep. In this way, the agent was not repeatedly asked to rediscover the entire control structure from scratch, but instead exploited the continuity of the gate family in parameter space. This protocol is directly inspired by the strategy described in the original paper, where the same RL agent is advanced through neighboring target gates in order to reduce the overall optimization burden and to exploit transfer between nearby tasks \cite{Niu2019}. In the present codebase, this idea is implemented explicitly through the saving of a curriculum checkpoint after each completed \(\alpha\)-phase and its reuse as the initialization for the next one. Training for a given target was then stopped either when a sufficiently low control cost was reached or when the maximum per-target iteration budget was exhausted, thereby producing a practical runtime sweep with bounded computational cost rather than an independent full optimization at every point. :contentReference[oaicite:2]{index=2}
+
+The quantity of interest in this section is the final analog gate duration extracted from the best deterministic rollout at each \(\alpha\). This runtime is then compared against the standard optimal gate-synthesis reference for the same gate family. Following Ref.~\cite{Niu2019}, the discrete synthesis benchmark is constructed from the minimum-depth decomposition of \(N(\alpha,\alpha,\gamma)\) into three two-qubit entangling gates and five single-qubit rotations, with state-of-the-art experimental gate times \(T_{1q}=20\,\mathrm{ns}\) and \(T_{\mathrm{CNOT}}=45\,\mathrm{ns}\), yielding a total synthesized runtime of approximately
+\begin{equation}
+T_{\mathrm{syn}} \approx 215\,\mathrm{ns}.
+\label{eq:runtime_synthesis_reference_empirical}
+\end{equation}
+This reference plays the role of a fixed hardware-efficiency baseline throughout the subsection. The central question is therefore not whether the learned controls are simply short in absolute terms, but whether, along the family \(N(\alpha,\alpha,\pi/2)\), they can remain shorter than the best known standard discrete implementation. This is exactly the runtime question posed by the original paper, and it provides the natural benchmark for the empirical analysis that follows. 
+% :contentReference[oaicite:3]{index=3} :contentReference[oaicite:4]{index=4}
+
+
+\subsection{Runtime curve}
+\label{subsec:runtime_curve}
+
+\subsection{Comparison with gate synthesis}
+\label{subsec:comparison_gate_synthesis}
+
+\subsection{Physical interpretation}
+\label{subsec:physical_interpretation}
+
+\section{Overall assessment of the validated framework}
+\label{sec:overall_assessment}
+
+\subsection{Summary of empirical evidence}
+\label{subsec:summary_empirical_evidence}
+
+\subsection{Agreement and discrepancies with the original paper}
+\label{subsec:agreement_discrepancies_original_paper}
+
 
