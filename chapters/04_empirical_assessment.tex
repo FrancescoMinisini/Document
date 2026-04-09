@@ -1103,6 +1103,73 @@ transfer mechanism is most and least effective.
 \subsection{Comparison with gate synthesis}
 \label{subsec:comparison_gate_synthesis}
 
+\paragraph{Comparison with gate synthesis.}
+A central question raised by the runtime sweep is whether the analog-control solutions found by the curriculum-trained
+TRPO agent are merely competitive with standard discrete compilation, or whether they actually outperform it in a
+meaningful way. To answer this, the natural reference is the optimal gate-synthesis decomposition of the family
+\(N(\alpha,\alpha,\gamma)\), discussed in the original UFO paper on the basis of the Vatan--Williams two-qubit
+synthesis result \cite{VatanWilliams2004,Niu2019}. In that benchmark, the target unitary is decomposed into a
+minimal-depth circuit over arbitrary one-qubit rotations and entangling gates, yielding an estimated runtime of
+approximately \(215\,\mathrm{ns}\) for the \(N(\alpha,\alpha,\gamma)\) family under the hardware timing assumptions
+adopted in \cite{Niu2019}. Although this is not a pulse-level optimization in the exact same analog-control space
+used in the present work, it is still the correct compilation baseline for assessing whether direct continuous
+control provides a genuine temporal advantage over standard discrete synthesis.
+
+Under that reference, the present runtime sweep shows that the analog-control strategy is not just occasionally
+better: across essentially the entire nontrivial family \(N(\alpha,\alpha,\pi/2)\), it remains below the
+gate-synthesis benchmark. Even the difficult edge points of the sweep, where the learned controller saturates at
+\(180\,\mathrm{ns}\), still remain faster than the synthesis estimate by about \(35\,\mathrm{ns}\), i.e. by roughly
+\(16\%\). This already matters, because those are precisely the hardest regions of the landscape, where nominal
+fidelity and noisy fidelity both deteriorate and where the curriculum no longer finds the clean short-time solutions
+available in the central basin. In other words, the analog approach preserves a runtime advantage even where the
+optimization problem becomes visibly more difficult.
+
+The advantage becomes much more substantial in the broad central part of the family. Around
+\(\alpha \in [1.73,2.36]\), the final learned runtimes lie between \(106\,\mathrm{ns}\) and \(124\,\mathrm{ns}\),
+which corresponds to a reduction of about \(42\%\) to \(51\%\) relative to the \(215\,\mathrm{ns}\) gate-synthesis
+reference. In this regime, the speedup is therefore not marginal but systematic. Importantly, this reduction does
+not come with a collapse in control quality: the same points remain in the high-fidelity regime
+(\(F \approx 0.982\)--\(0.986\)) and maintain robust average fidelity near \(0.955\)--\(0.959\) at
+\(\sigma=1\,\mathrm{MHz}\). The comparison is therefore qualitatively stronger than a bare runtime statement:
+for a substantial subset of the gate family, analog control is simultaneously faster, accurate, and reasonably
+robust, rather than merely trading correctness for speed.
+
+An even stronger discrepancy appears at selected favorable points of the landscape. For instance, at
+\(\alpha \approx 1.10\) the learned runtime drops to \(76\,\mathrm{ns}\), corresponding to a speedup of almost a
+factor \(3\) over the synthesis baseline, while still retaining nominal fidelity above \(0.98\) and robust average
+fidelity above \(0.96\). The singular point \(\alpha=\pi/2\) is more extreme still: the controller terminates after
+\(2\,\mathrm{ns}\), with essentially unit nominal fidelity and negligible leakage. This value should not be treated
+as representative of the entire family, because it reflects a very special alignment between target and native
+Hamiltonian structure; nevertheless, it is conceptually important. It demonstrates that, at least for some targets,
+the compilation overhead implicit in discrete gate synthesis is not a fundamental lower bound on execution time.
+Rather, it is an artifact of expressing the target through a universal discrete gate alphabet instead of exploiting
+the analog structure of the hardware directly.
+
+This distinction is crucial for interpreting the result correctly. The discrete synthesis benchmark is ``optimal''
+within a circuit model based on a prescribed elementary gate library, whereas the analog controller optimizes
+directly in the continuous Hamiltonian-control space. The two are therefore solving related but not identical
+optimization problems. For this reason, the present comparison should not be read as a statement that the analog
+controller has beaten an absolute quantum speed limit. What it does show, however, is that once the hardware admits
+a rich native interaction and sufficiently flexible pulse shaping, the shortest experimentally meaningful
+implementation of a target gate need not coincide with its shortest decomposition over a discrete universal gate set.
+From the point of view of near-term hardware efficiency, this is precisely the relevant notion of improvement.
+
+The comparison also clarifies where the gain is modest and where it is dramatic. In the hard regions near the two
+edges of the sweep, the analog controller is only moderately faster than gate synthesis, and the runtime gap narrows
+precisely when leakage, boundary penalties, and robustness degradation become more pronounced. In the central basin,
+by contrast, the gap widens sharply. This indicates that the benefit of analog control is strongly target-dependent:
+it is largest when the target gate can be realized in a way that is geometrically and dynamically aligned with the
+native couplings of the physical device, and smallest when extra control resources are needed to compensate for a
+less favorable target structure. Thus, the runtime comparison is not only a numerical benchmark, but also a
+diagnostic of how much compilation overhead can be removed by working directly at the Hamiltonian level.
+
+Overall, the results support the same qualitative conclusion reported in the original UFO work, but in a more
+fine-grained family-resolved form. The analog-control solutions found here are broadly faster than the standard
+gate-synthesis reference, often by a large margin, and the strongest gains occur exactly in the regions where the
+control landscape appears most compatible with the underlying gmon interaction. This confirms that the runtime
+advantage of analog control is real, not anecdotal: for this gate family, direct pulse-level optimization can indeed
+surpass standard discrete synthesis as a practically relevant notion of implementation efficiency.
+
 \subsection{Physical interpretation}
 \label{subsec:physical_interpretation}
 
