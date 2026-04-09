@@ -508,7 +508,8 @@ U_{\mathrm{target}} = N(2.2,2.2,\pi/2),
 \end{equation}
 with fidelity above \(99.4\%\) and runtime well below the synthesized-gate reference of about \(215\,\mathrm{ns}\) discussed in the original paper \cite{Niu2019}. However, when the same target is solved by direct gradient-based optimization with a horizon sweep, the Adam baseline achieves a clearly better nominal compromise among the quantities entering the UFO objective.
 
-Using the best deterministic solutions identified in the previous two subsections, the comparison can be summarized as follows. The Adam baseline attains its best nominal solution at
+Using the best deterministic solutions identified in the previous two subsections, the comparison can be summarized as follows. 
+\textbf{TODO:} Tabella riassuntiva con i risultati di Adam e TRPO al posto di questo
 \begin{equation}
 T_{\mathrm{Adam}}^{\star}=70\,\mathrm{ns},
 \qquad
@@ -717,6 +718,8 @@ precisely the mechanism that the UFO framework claims to exploit, and the averag
 first direct validation of that claim in the present implementation \cite{Niu2019}.
 
 \subsection{Fidelity variance versus noise strength.}
+\textbf{TODO:} Da correggere, è stato dato il grafico sbagliato.
+
 % -------------------------------------------------
 % Figure placeholder for Paragraph 3
 % -------------------------------------------------
@@ -999,10 +1002,10 @@ device to outperform standard compiled implementations over a nontrivial family 
 \centering
 \fbox{\parbox[c][5.2cm][c]{0.9\linewidth}{\centering Placeholder }}
     % \includegraphics[width=0.9\textwidth]{figures/fidelity_variance_vs_noise.pdf}
-    \caption{Figura principale: runtime_ns vs alpha, con sulla stessa ascissa anche min_cost_time_ns come seconda curva più sottile o con marker diversi.
-Sottofigura 1: nominal fidelity e robustness average fidelity a sigma uguale a 1 vs alpha.
-Sottofigura 2: leakage e boundary cost vs alpha in scala logaritmica.
-Figura separata opzionale: training convergence globale con separatori verticali tra le fasi del curriculum.}
+%     \caption{Figura principale: runtime_ns vs alpha, con sulla stessa ascissa anche min_cost_time_ns come seconda curva più sottile o con marker diversi.
+% Sottofigura 1: nominal fidelity e robustness average fidelity a sigma uguale a 1 vs alpha.
+% Sottofigura 2: leakage e boundary cost vs alpha in scala logaritmica.
+% Figura separata opzionale: training convergence globale con separatori verticali tra le fasi del curriculum.}
     \label{fig:runtime_vs_alpha_curriculum}
 \end{figure}
 
