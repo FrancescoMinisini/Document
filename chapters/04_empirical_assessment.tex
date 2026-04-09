@@ -1103,7 +1103,6 @@ transfer mechanism is most and least effective.
 \subsection{Comparison with gate synthesis}
 \label{subsec:comparison_gate_synthesis}
 
-\paragraph{Comparison with gate synthesis.}
 A central question raised by the runtime sweep is whether the analog-control solutions found by the curriculum-trained
 TRPO agent are merely competitive with standard discrete compilation, or whether they actually outperform it in a
 meaningful way. To answer this, the natural reference is the optimal gate-synthesis decomposition of the family
@@ -1173,7 +1172,6 @@ surpass standard discrete synthesis as a practically relevant notion of implemen
 \subsection{Physical interpretation}
 \label{subsec:physical_interpretation}
 
-\paragraph{Physical interpretation.}
 The runtime landscape observed in Fig.~\ref{fig:runtime_vs_alpha} is physically meaningful, and should not be read as a purely numerical peculiarity of the optimizer. The key point is that the target family considered here,
 \(N(\alpha,\alpha,\pi/2)\), is not arbitrary with respect to the underlying gmon Hamiltonian. As discussed in the system-model section, the native entangling interaction is generated primarily by the exchange-like coupling term
 \(g(t)\,(\hat a_2^\dagger \hat a_1+\hat a_1^\dagger \hat a_2)\), whose effective action on the computational subspace is naturally aligned with the
