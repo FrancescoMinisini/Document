@@ -750,8 +750,9 @@ introduced in Sec.~\ref{subsec:noise_model}, and therefore serves as a direct pr
 stability under repeated experimental execution \cite{Niu2019}. This interpretation is also fully
 consistent with the robustness estimator implemented in the present code base, where the variance
 is computed over repeated noisy realizations of the same optimized control plan using $60$ Monte
-Carlo samples per value of $\sigma_{\mathrm{noise}}$ :contentReference[oaicite:0]{index=0} :contentReference[oaicite:1]{index=1}
-:contentReference[oaicite:2]{index=2} :contentReference[oaicite:3]{index=3} :contentReference[oaicite:4]{index=4}.
+Carlo samples per value of $\sigma_{\mathrm{noise}}$ 
+% :contentReference[oaicite:0]{index=0} :contentReference[oaicite:1]{index=1}
+% :contentReference[oaicite:2]{index=2} :contentReference[oaicite:3]{index=3} :contentReference[oaicite:4]{index=4}.
 
 The first qualitative feature of the plot is that the fidelity variance increases for all three methods
 as the noise strength grows. This is expected: once the Gaussian perturbations become larger, the
@@ -860,7 +861,7 @@ fluctuations, and under this joint criterion the noise-optimized TRPO controller
 operating point among the three methods tested here.
 
 This distinction is also meaningful from the viewpoint of control theory. The Adam baseline appears to produce a
-``stiffer'' solution: its noisy realizations remain more tightly clustered, but around a lower-fidelity mean.
+"stiffer" solution: its noisy realizations remain more tightly clustered, but around a lower-fidelity mean.
 The noise-optimized TRPO controller, by contrast, occupies a different region of the performance landscape. Its
 output distribution is broader than Adam's, yet it is centered at a consistently better average fidelity across
 the whole family of Gaussian perturbations considered in the robustness sweep. In practical terms, this means
@@ -994,6 +995,110 @@ device to outperform standard compiled implementations over a nontrivial family 
 
 \subsection{Runtime curve}
 \label{subsec:runtime_curve}
+\begin{figure}
+\centering
+\fbox{\parbox[c][5.2cm][c]{0.9\linewidth}{\centering Placeholder }}
+    % \includegraphics[width=0.9\textwidth]{figures/fidelity_variance_vs_noise.pdf}
+    \caption{Figura principale: runtime_ns vs alpha, con sulla stessa ascissa anche min_cost_time_ns come seconda curva più sottile o con marker diversi.
+Sottofigura 1: nominal fidelity e robustness average fidelity a sigma=1 vs alpha.
+Sottofigura 2: leakage e boundary cost vs alpha in scala logaritmica.
+Figura separata opzionale: training convergence globale con separatori verticali tra le fasi del curriculum.}
+    \label{fig:runtime_vs_alpha_curriculum}
+\end{figure}
+
+
+Figure~\ref{fig:runtime_vs_alpha_curriculum} reveals that the runtime profile along the family
+\(N(\alpha,\alpha,\pi/2)\) is highly structured rather than monotonic. Instead of a smooth increase or decrease
+with \(\alpha\), the curriculum sweep exhibits a sequence of distinct regimes: an initial bootstrap region at very
+small \(\alpha\), a broad central basin of comparatively fast solutions, a sharp minimum at
+\(\alpha \approx \pi/2\), and a final degradation region as \(\alpha\) approaches \(\pi\). This already suggests
+that the time required to implement the target gate is strongly dependent on how favorably the target aligns with
+the native controllable dynamics of the gmon system, rather than being set by a uniform compilation overhead across
+the whole family.
+
+A first important point is that the \(\alpha=0\) phase should be interpreted separately from the rest of the
+curve. In the present curriculum protocol, this is the only point that is not warm-started from a previous nearby
+target, and therefore it acts as a genuine cold-start initialization of the whole sweep. Consistently with that
+role, it is also the weakest point of the experiment: the final deterministic fidelity remains only
+\(F \approx 0.558\), the runtime saturates at \(180\,\mathrm{ns}\), the leakage is still
+\(4.8\times 10^{-3}\), and the corresponding \(\sigma=1\,\mathrm{MHz}\) average fidelity is only about \(0.613\).
+For this reason, \(\alpha=0\) is operationally informative, but it should not be overinterpreted as representative
+of the family-level runtime trend. The more meaningful structure of the curve emerges once the curriculum has
+entered its transferable regime, starting already from \(\alpha \approx 0.157\).
+
+Beyond this bootstrap point, the curve shows that the family is not uniformly difficult. A first reasonably good
+region appears already for \(\alpha \approx 0.157\) and \(0.314\), where the controller reaches runtimes of
+\(142\,\mathrm{ns}\) and \(140\,\mathrm{ns}\), with nominal fidelities above \(0.988\) and robust average
+fidelities around \(0.951\) and \(0.953\), respectively. This indicates that the curriculum begins to exploit
+cross-target continuity quite early. However, the next interval, roughly
+\(\alpha \in [0.47,0.79]\), becomes harder again: the final runtime returns to the maximum observed value of
+\(180\,\mathrm{ns}\), while the final fidelities drop to the \(0.948\)--\(0.954\) range and the
+\(\sigma=1\,\mathrm{MHz}\) average fidelity falls to about \(0.906\)--\(0.918\). This is not merely a runtime
+effect: the same region also exhibits visibly larger leakage and boundary-cost levels than the fast central basin,
+which suggests that the controller is using less clean pulse shapes and paying a higher dynamical price to reach
+the target.
+
+The most striking feature of the figure is the central runtime valley around
+\(\alpha \in [1.1,2.4]\), where the controller becomes substantially faster while maintaining very high quality.
+In this interval, several targets are solved in the \(76\)--\(140\,\mathrm{ns}\) range, and the best part of the
+basin lies roughly between \(\alpha \approx 1.884\) and \(\alpha \approx 2.355\), where the observed runtimes are
+\(108\,\mathrm{ns}\), \(106\,\mathrm{ns}\), \(110\,\mathrm{ns}\), and \(118\,\mathrm{ns}\), all with nominal
+fidelity above \(0.982\) and robust average fidelity at \(\sigma=1\,\mathrm{MHz}\) still around
+\(0.954\)--\(0.959\). This is a genuinely important result: the runtime reduction is not obtained by sacrificing
+accuracy, since the same part of the curve also remains in the high-fidelity and high-robustness regime. The curve
+therefore indicates a broad family region in which fast analog implementations are not isolated accidents, but
+repeatable solutions.
+
+At the center of the family, the point \(\alpha=\pi/2\) stands out as an extreme minimum. Here the controller
+terminates after only \(2\,\mathrm{ns}\), with essentially unit nominal fidelity
+(\(F \approx 0.999999\)), negligible leakage (\(\sim 4\times 10^{-10}\)), extremely small boundary cost, and
+average noisy fidelity still equal to \(0.9994\) at \(\sigma=1\,\mathrm{MHz}\). In addition, the corresponding
+phase requires only a single curriculum iteration, making it not only the fastest gate in the sweep but also the
+easiest one to learn. This is not a generic numerical fluctuation: it is a singular point in the empirical
+landscape, and the sharpness of the dip strongly suggests a special dynamical compatibility between the target gate
+at \(\alpha=\pi/2\) and the native interaction structure of the device. The physical interpretation of this point
+will be discussed in detail in Paragraph~4, but already at the level of the curve it is clear that the runtime
+landscape contains a privileged native-alignment point rather than a smooth continuum of equally hard targets.
+
+After this central minimum, the runtime rises again but not immediately catastrophically. The interval
+\(\alpha \in [1.727,2.669]\) still forms a favorable region: runtimes remain between \(124\,\mathrm{ns}\) and
+\(144\,\mathrm{ns}\), fidelities stay in the \(0.982\)--\(0.992\) range, and robustness remains high. Only when
+the sweep enters the final high-\(\alpha\) edge, roughly \(\alpha \gtrsim 2.826\), does the curve degrade more
+clearly. In that last region, the runtime saturates again at \(180\,\mathrm{ns}\), while nominal fidelity falls
+to \(0.922\)--\(0.940\) and robust average fidelity to \(0.887\)--\(0.902\). This suggests that the favorable
+transfer structure exploited by the curriculum over the central basin becomes progressively weaker as the target is
+pushed toward the far end of the family.
+
+A further nontrivial insight emerges when the final runtime is compared with the
+\emph{minimum-cost time} reached within the same phase. For many of the well-converged points, the two coincide,
+which indicates that the controller not only discovers a good time scale but also stabilizes it as the final
+solution. However, in several difficult regions this coincidence breaks down. For example, around
+\(\alpha \approx 0.471\) and \(0.628\), the final runtime is \(180\,\mathrm{ns}\) even though the lowest-cost
+intermediate trajectory is reached already around \(142\)--\(146\,\mathrm{ns}\); similarly, near
+\(\alpha \approx 2.826\), \(2.983\), and \(\pi\), the minimum-cost times lie around \(152\)--\(158\,\mathrm{ns}\)
+while the final rollout still ends at \(180\,\mathrm{ns}\). This indicates that in the hard regions the agent can
+transiently visit faster candidate solutions, but does not consistently stabilize them under the full optimization
+criterion. In other words, the difficult parts of the runtime curve are not simply regions where short solutions do
+not exist at all; rather, they are regions where short solutions appear to be less stable, less robust, or harder
+to preserve throughout training.
+
+The same reading is supported by the auxiliary diagnostics shown in
+Figs.~\ref{fig:runtime_aux_performance_alpha} and \ref{fig:runtime_aux_constraints_alpha}. The fastest phases are
+also the ones with the cleanest constraint profile: lower leakage, lower boundary cost, and, in general, better
+agreement between nominal and noisy fidelity. Conversely, the slowest phases are precisely those where leakage and
+boundary penalties rise again. This coupling between runtime and constraint satisfaction is crucial, because it
+shows that the runtime curve is not an isolated geometric observable; it is embedded in the same control trade-off
+already discussed for the single-target case. Short runtimes are achieved when the controller can simultaneously
+realize the target, suppress leakage, and keep the pulse endpoints under control. Long runtimes reappear when one
+or more of these constraints become harder to satisfy at the same time.
+
+Overall, the runtime curve therefore conveys a richer message than a simple pointwise comparison of gate durations.
+It shows that the family \(N(\alpha,\alpha,\pi/2)\) contains a broad favorable analog-control basin, centered
+around a particularly privileged point at \(\alpha=\pi/2\), but also flanked by regions where the controller
+either needs longer trajectories or fails to stabilize the shorter ones it transiently discovers. This makes the
+curve especially informative for the rest of the subsection: it is not only a record of achieved runtimes, but a
+map of where the analog-control landscape is intrinsically easy, where it is fragile, and where the curriculum
+transfer mechanism is most and least effective.
 
 \subsection{Comparison with gate synthesis}
 \label{subsec:comparison_gate_synthesis}
