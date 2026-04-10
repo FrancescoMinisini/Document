@@ -1,0 +1,35 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{hyperref}
+
+\setstretch{1.1}
+
+\title{Thesis Summary}
+\author{Francesco Giuseppe Minisini}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\noindent
+This thesis studies robust analog quantum control for superconducting qubits through the reproduction and extension of the framework introduced in \textit{Universal Quantum Control through Deep Reinforcement Learning} by Niu \textit{et al.} The work is motivated by a central challenge in near-term quantum computing: logical quantum gates must be implemented on physical hardware where limited coherence times, multilevel dynamics, leakage outside the computational subspace, and stochastic control errors make high-fidelity control intrinsically difficult. In this setting, quantum control must balance several competing objectives, including accuracy, runtime, robustness, and leakage suppression.
+
+The thesis focuses on a two-qubit superconducting gmon architecture, modeled as a weakly anharmonic multilevel system with tunable coupling, local detunings, and microwave drives. Within this setting, the work reconstructs the main ingredients of the reference framework: the effective Hamiltonian, the decomposition into computational and leakage subspaces, the time-dependent Schrieffer--Wolff treatment of leakage, and the Universal cost Function control Optimization (UFO) objective, which combines gate infidelity, leakage penalties, boundary constraints, and runtime into a single optimization target. The control problem is then formulated as a continuous-action reinforcement-learning task and studied through policy optimization in both nominal and stochastic environments.
+
+Beyond reconstructing the original framework, the thesis investigates its numerical behavior on a representative family of two-qubit gates and examines the role of noisy-environment training in shaping robust control strategies. It also places the reinforcement-learning approach in dialogue with more standard quantum optimal-control baselines, with the broader aim of clarifying when policy-based learning provides a meaningful advantage and how the structure of the physical cost function influences the resulting controls. 
+
+% Overall, the thesis is positioned at the intersection of quantum control, superconducting-qubit physics, and machine learning, with the goal of providing both a technically grounded reconstruction of the reference method and a critical assessment of its broader significance for robust gate design in near-term quantum devices.
+
+\end{document}
+
+This thesis studies robust analog quantum control for superconducting qubits through the reproduction and extension of the framework introduced in Universal Quantum Control through Deep Reinforcement Learning by Niu et al. The work is motivated by a central challenge in near-term quantum computing: logical quantum gates must be implemented on physical hardware where limited coherence times, multilevel dynamics, leakage outside the computational subspace, and stochastic control errors make high-fidelity control intrinsically difficult. In this setting, quantum control must balance several competing objectives, including accuracy, runtime, robustness, and leakage suppression.
+
+The thesis focuses on a two-qubit superconducting gmon architecture, modeled as a weakly anharmonic multilevel system with tunable coupling, local detunings, and microwave drives. Within this setting, the work reconstructs the main ingredients of the reference framework: the effective Hamiltonian, the decomposition into computational and leakage subspaces, the time-dependent Schrieffer-Wolff treatment of leakage, and the Universal cost Function control Optimization (UFO) objective, which combines gate infidelity, leakage penalties, boundary constraints, and runtime into a single optimization target. The control problem is then formulated as a continuous-action reinforcement-learning task and studied through policy optimization in both nominal and stochastic environments.
+
+Beyond reconstructing the original framework, the thesis investigates its numerical behavior on a representative family of two-qubit gates and examines the role of noisy-environment training in shaping robust control strategies. It also places the reinforcement-learning approach in dialogue with more standard quantum optimal-control baselines, with the broader aim of clarifying when policy-based learning provides a meaningful advantage and how the structure of the physical cost function influences the resulting controls. 
