@@ -326,3 +326,7 @@ TSWLatexianTemp*
 #*Notes.bib
 Tesi-figure*.pdf
 \out
+# Export codebase artifacts
+codeexport.config.psd1
+codebase.txt
+exported_cb/

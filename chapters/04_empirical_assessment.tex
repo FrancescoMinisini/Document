@@ -989,158 +989,36 @@ first direct validation of that claim in the present implementation \cite{Niu201
     \label{fig:fidelity_variance_vs_noise}
 \end{figure}
 
-A complementary perspective on robustness is provided by Fig.~\ref{fig:fidelity_variance_vs_noise},
-which reports the fidelity variance as a function of the noise strength. While the average fidelity
-curve quantifies the mean degradation induced by stochastic control errors, the variance probes a
-different and equally important aspect: the \emph{shot-to-shot stability} of the control strategy.
-A controller may retain a relatively good average fidelity and yet be operationally fragile if its
-performance fluctuates strongly from one noisy realization to another. In this sense, fidelity
-variance measures the sensitivity of the learned control channel to the random perturbations
-introduced in Sec.~\ref{subsec:noise_model}, and therefore serves as a direct proxy for statistical
-stability under repeated experimental execution \cite{Niu2019}. This interpretation is also fully
-consistent with the robustness estimator implemented in the present code base, where the variance
-is computed over repeated noisy realizations of the same optimized control plan using $60$ Monte
-Carlo samples per value of $\sigma_{\mathrm{noise}}$ 
-% :contentReference[oaicite:0]{index=0} :contentReference[oaicite:1]{index=1}
-% :contentReference[oaicite:2]{index=2} :contentReference[oaicite:3]{index=3} :contentReference[oaicite:4]{index=4}.
+\subsection{Fidelity variance versus noise strength}
+\label{subsec:fidelity_variance_vs_noise}
 
-The first qualitative feature of the plot is that the fidelity variance increases for all three methods
-as the noise strength grows. This is expected: once the Gaussian perturbations become larger, the
-distribution of implemented noisy channels broadens, so that different realizations of the same
-nominal control sequence produce increasingly dispersed final fidelities. However, the three methods
-do not broaden at the same rate. The Adam baseline remains the most stable solution throughout the
-range in the narrow statistical sense of variance, the noise-optimized TRPO controller comes next,
-and the nominal TRPO controller displays the largest fluctuations, with a visibly steeper growth in
-the intermediate-to-high noise regime. The ranking is therefore not the same as in the average-fidelity
-plot, and this nontrivial mismatch is precisely what makes the variance figure informative.
+A complementary perspective on robustness is provided by Fig.~\ref{fig:fidelity_variance_vs_noise}, which reports the fidelity variance as a function of the noise strength. While the average-fidelity curve quantifies the mean degradation induced by stochastic control errors, the variance probes a different and equally important aspect, namely the \emph{shot-to-shot stability} of the control strategy. A controller may retain a relatively good average fidelity and yet remain operationally fragile if its performance fluctuates strongly across different noisy realizations. In this sense, the fidelity variance measures the sensitivity of the optimized control to the Gaussian perturbations introduced in Sec.~\ref{subsec:noise_model}, and therefore provides a natural statistical indicator of robustness under repeated experimental execution \cite{Niu2019}. This interpretation is fully consistent with the evaluation protocol adopted here, where the variance is estimated from repeated Monte Carlo realizations of the same optimized control plan at fixed \(\sigma_{\mathrm{noise}}\).
 
-This point is worth stressing. At $\sigma_{\mathrm{noise}}=1$ MHz, the Adam baseline already exhibits a
-small sampled fidelity variance of about $1.75\times 10^{-4}$, while its average fidelity is
-$0.9686$ 
-% :contentReference[oaicite:5]{index=5}.
-By contrast, the noise-optimized TRPO controller starts from a
-substantially better nominal solution, with nominal fidelity $0.9987648850$ at $90$ ns, whereas the
-nominal TRPO and Adam baseline start from $0.9941508786$ at $116$ ns and $0.9820504069$ at $60$ ns,
-respectively 
-% :contentReference[oaicite:6]{index=6} :contentReference[oaicite:7]{index=7} :contentReference[oaicite:8]{index=8}.
-Accordingly, the variance curve must not be read in isolation: a lower variance does not automatically
-mean a better robust controller if it is achieved around a systematically worse fidelity level. The
-Adam control is comparatively rigid in the sense that its noisy realizations remain more tightly
-clustered, but that cluster is centered around a less accurate gate implementation than the one
-obtained by the noise-optimized TRPO controller. In other words, Adam appears more \emph{consistent},
-but consistently around an inferior robust operating point.
+The first qualitative feature of the figure is that the fidelity variance increases for all three methods as the noise strength grows. This is expected: as the Gaussian perturbations become larger, the distribution of implemented noisy channels broadens, and different realizations of the same nominal pulse generate increasingly dispersed final fidelities. However, the three methods do not broaden at the same rate. The noise-optimized TRPO controller consistently exhibits the lowest variance across the explored range, the Adam baseline occupies an intermediate position, and the nominal TRPO controller displays the largest fluctuations, with a visibly steeper growth in the moderate-to-high noise regime. The ordering is therefore fully consistent with the one observed in the average-fidelity plot: the controller trained in the stochastic environment is not only the one with the best mean noisy performance, but also the one whose performance is least dispersed across repeated noisy realizations.
 
-The comparison between the two TRPO agents is more directly aligned with the central thesis of this
-section. Between these two controllers, the noise-optimized policy shows a clear reduction in variance
-relative to the nominal TRPO solution across most of the explored range, especially once the noise
-strength leaves the perturbative regime and the curves become more clearly separated. This is an
-important result, because the two methods share the same policy-gradient machinery and differ mainly
-in the environment seen during training. The lower variance of the noise-optimized controller therefore
-cannot be explained by the mere use of reinforcement learning; rather, it indicates that exposure to
-stochastic perturbations during training has produced a policy whose final performance is less sensitive
-to random actuation errors from one realization to the next. In statistical terms, the learned policy
-does not only preserve a higher mean performance, but also suppresses part of the dispersion induced
-by the noisy channel.
+This result is particularly important for the interpretation of the framework. The comparison between the two TRPO agents is especially clean, since the nominal and noise-optimized controllers share the same policy-gradient machinery, the same physical model, and the same UFO objective, and differ primarily in the environment used during training. The lower variance of the noise-optimized policy therefore cannot be attributed to reinforcement learning in general, but must be understood as a consequence of stochastic training itself. In other words, exposure to noisy dynamics during optimization does not simply improve the mean fidelity under perturbations; it also produces a control policy whose final performance is statistically more stable from one noisy realization to another. This is precisely the type of effect one would expect if the policy had internalized control strategies that are intrinsically less sensitive to random actuation errors.
 
-From the perspective of the original UFO paper, this is precisely the kind of evidence that should
-accompany the average-fidelity comparison. In the reference study, the noise-optimized RL solution
-was reported to achieve an approximately one-order-of-magnitude reduction in fidelity variance relative
-to both the noise-free RL controller and the gradient baseline throughout the tested noise range
-\cite{Niu2019}. The present implementation reproduces the same qualitative mechanism in a slightly more
-nuanced form: the stochastic TRPO controller is again clearly more stable than the nominal TRPO
-controller, confirming that robustness is indeed learned rather than accidentally inherited from the
-nominal optimizer, but the Adam baseline remains exceptionally compact in variance. This suggests that,
-in the present reproduction, the optimization landscape admits a short and relatively stiff Adam
-solution that is statistically concentrated under noise, even though it sacrifices both nominal quality
-and mean noisy fidelity. For the thesis, this is actually a useful result rather than a problem,
-because it sharpens the interpretation: \emph{robustness} is multi-dimensional, and the most convincing
-controller is not the one minimizing variance alone, but the one achieving the best trade-off between
-high average fidelity and controlled dispersion.
+The comparison with the Adam baseline is also instructive. Although Adam remains clearly more stable than the nominal TRPO controller, it is still systematically outperformed by the noise-optimized TRPO agent in variance across the explored noise range. This means that the advantage of the stochastic RL controller is not limited to average performance alone. Rather, the same method that yields the highest \(\overline{F}(\sigma_{\mathrm{noise}})\) also suppresses the growth of shot-to-shot fluctuations most effectively. From the viewpoint of practical analog quantum control, this is a particularly strong robustness signal, because it shows that the learned controller is not only more accurate on average, but also more reproducible under repeated noisy implementations.
 
-For this reason, Fig.~\ref{fig:fidelity_variance_vs_noise} should be discussed jointly with
-Fig.~\ref{fig:avg_fidelity_vs_noise}. Taken together, the two figures show that the noise-optimized
-TRPO controller occupies the best overall compromise among the tested methods: it consistently attains
-the highest average fidelity under stochastic perturbations, while also keeping the fidelity variance
-well below that of the nominal TRPO controller. The Adam baseline remains an instructive counterexample:
-its variance curve is favorable, but its mean-performance curve is systematically inferior. Hence, the
-statistical evidence does not support the simplistic claim that the most robust controller is merely the
-least fluctuating one; rather, it supports the stronger statement that robustness in the UFO sense is a
-joint property of \emph{accuracy} and \emph{stability}, and that noisy-environment training is what most
-effectively improves that joint property in the present study.
+Taken together with Fig.~\ref{fig:avg_fidelity_vs_noise}, the variance curve therefore strengthens the main conclusion of this subsection. The noise-optimized TRPO controller occupies the most favorable overall robustness regime among the methods considered here: it preserves the highest average fidelity while simultaneously maintaining the lowest fidelity variance. The nominal TRPO controller, by contrast, is inferior in both metrics, which shows that policy optimization alone is not sufficient to guarantee robust behavior. What matters is training the policy in the appropriate stochastic environment. In this sense, the variance analysis provides direct additional evidence for the central claim of the UFO framework, namely that robustness against stochastic control errors is not merely evaluated after training, but can be actively learned through exposure to the relevant noise model during optimization \cite{Niu2019}.
 
 
 \subsection{Interpretation}
 \label{subsec:robustness_interpretation}
+\subsection{Interpretation}
+\label{subsec:robustness_interpretation}
 
-Taken together, the average-fidelity and fidelity-variance curves provide the clearest empirical test of the
-central claim of the present reproduction. The key question of this subsection is not whether noisy control
-perturbations degrade all solutions (which they inevitably do), but whether training in a stochastic environment
-induces a qualitatively different and more robust control strategy than training in a nominal one. From this
-perspective, the most informative comparison is not the one between reinforcement learning and direct pulse
-optimization in the abstract, but the one between the \emph{two} TRPO controllers: the nominal controller and
-the noise-optimized controller. These two methods share the same architecture, the same policy-gradient
-machinery, the same Hamiltonian model, and the same UFO objective; the decisive difference is that only one of
-them is exposed during training to the Gaussian perturbation model described in
-Sec.~\ref{subsec:noise_model}. The fact that the noise-optimized controller systematically attains higher average
-fidelity and lower fidelity variance than the nominal TRPO solution therefore carries a very direct
-interpretation: the observed robustness is not merely an incidental byproduct of the RL formalism, but a
-property that is learned from the stochastic training environment itself \cite{Niu2019}.
+Taken together, the average-fidelity and fidelity-variance curves provide the clearest empirical validation of the central robustness claim of the present study. The key question is not whether all controllers degrade under stochastic control perturbations, which is unavoidable, but whether training in a noisy environment produces a control strategy that degrades \emph{more gracefully} than one trained only in the nominal setting. From this viewpoint, the most informative comparison is the one between the two TRPO agents. Since the nominal and noise-optimized controllers share the same policy architecture, the same physical model, and the same UFO objective, their different behavior under noisy evaluation must be attributed primarily to the environment used during training. The fact that the noise-optimized policy achieves both higher average fidelity and lower fidelity variance across the explored range of \(\sigma_{\mathrm{noise}}\) therefore shows that robustness is not a generic byproduct of reinforcement learning alone, but a property that is effectively learned through stochastic training \cite{Niu2019}.
 
-This point is conceptually important for the thesis. In the nominal single-target benchmark of
-Sec.~\ref{subsec:single_target_control_optimization}, the deterministic TRPO controller was shown to be
-competitive but not superior to a strong direct Adam baseline. In that regime, the use of reinforcement learning
-alone did not guarantee a better pulse. The robustness study changes the picture. Once performance is measured
-under a family of noisy realizations rather than on a single deterministic rollout, the controller trained in the
-stochastic environment becomes the one that preserves the largest average fidelity across the full explored noise
-range, while also reducing the statistical dispersion relative to the nominal TRPO solution. This is exactly the
-type of behaviour one would expect if the policy were not simply fitting one nominal pulse trajectory, but
-instead learning a control strategy that is less sensitive to random perturbations of the underlying
-multilevel Hamiltonian.
+This point is especially important in light of the nominal single-target comparison discussed earlier. In the deterministic setting, TRPO was shown to be competitive but not superior to the Adam baseline on the representative gate \(N(2.2,2.2,\pi/2)\). In that regime, the use of reinforcement learning by itself did not guarantee the best pulse. The robustness analysis changes this picture in a qualitatively meaningful way. Once performance is evaluated over an ensemble of noisy realizations rather than on a single nominal rollout, the controller trained in the stochastic environment becomes the strongest overall solution: it preserves the highest average fidelity while also exhibiting the smallest shot-to-shot fluctuations. This is precisely the setting in which the RL formulation becomes most compelling, since the policy is no longer judged only by how well it fits one deterministic control trajectory, but by how reliably it performs under a physically relevant family of perturbations.
 
-At the same time, the present data suggest a more nuanced conclusion than the strongest formulation reported in
-the original UFO paper. In the reference work, the noise-optimized RL controller was reported to outperform both
-the noise-free RL controller and the gradient-based baseline also in fidelity variance by approximately one order
-of magnitude throughout the tested range \cite{Niu2019}. In the present reproduction, the comparison with the
-Adam baseline is more subtle. The Adam solution remains the narrowest distribution in the strict variance sense,
-that is, the least fluctuating controller under repeated noisy realizations. However, this lower variance is not
-paired with the best mean performance: the same Adam baseline lies systematically below the noise-optimized TRPO
-controller in average fidelity. For this reason, the present results do not support the simplistic conclusion that
-robustness should be identified with variance minimization alone. Rather, they support a more physically relevant
-statement: a robust controller must maintain \emph{both} high mean fidelity and controlled shot-to-shot
-fluctuations, and under this joint criterion the noise-optimized TRPO controller provides the best overall
-operating point among the three methods tested here.
+The comparison with the Adam baseline reinforces this interpretation. Adam remains a meaningful and nontrivial reference, and its performance confirms that direct gradient-based optimization can still produce strong controls in this multilevel setting. However, the present results indicate that the best robust operating point is no longer attained by the direct optimizer once stochastic perturbations are taken into account. Instead, the noise-optimized TRPO controller dominates Adam in both of the robustness metrics considered here: it maintains a higher mean fidelity under noise and, at the same time, suppresses the variance more effectively. This is a particularly strong result, because it shows that the stochastic RL controller does not improve one aspect of robustness at the expense of another. Rather, it improves both the \emph{accuracy} and the \emph{stability} of the noisy implementation.
 
-This distinction is also meaningful from the viewpoint of control theory. The Adam baseline appears to produce a
-"stiffer" solution: its noisy realizations remain more tightly clustered, but around a lower-fidelity mean.
-The noise-optimized TRPO controller, by contrast, occupies a different region of the performance landscape. Its
-output distribution is broader than Adam's, yet it is centered at a consistently better average fidelity across
-the whole family of Gaussian perturbations considered in the robustness sweep. In practical terms, this means
-that the stochastic TRPO agent is not merely learning to reduce dispersion; it is learning to shift the noisy
-performance distribution toward a better robust mean while simultaneously avoiding the large variance growth
-displayed by the nominal TRPO solution. This is arguably the more relevant notion of robustness for analog
-quantum control, where one is not interested in a controller that is merely reproducible, but in one that remains
-reproducibly \emph{accurate} under realistic perturbations.
+From a control-theoretic perspective, this suggests that the policy trained in the noisy environment has internalized pulse strategies that are intrinsically less sensitive to random perturbations of the control channels and of the anharmonicity-related Hamiltonian parameter. In other words, the learned policy appears to avoid control trajectories that are excessively fragile to small stochastic deviations, and instead converges toward solutions that remain effective across a broader ensemble of realizations. This interpretation is fully consistent with the original logic of the UFO framework, where robustness is not treated as a post hoc diagnostic, but as a property to be incorporated directly into the optimization environment \cite{Niu2019}.
 
-A second important implication concerns the role of the stochastic environment itself. Because the evaluation
-noise is not restricted to a single point but is swept continuously over
-\(\sigma_{\mathrm{noise}}\in[0.1,3.5]\,\mathrm{MHz}\), the superiority of the noise-optimized TRPO controller cannot
-be interpreted as a trivial overfitting to one fixed training noise realization. Instead, the controller trained
-at the nominal paper setting of \(1\,\mathrm{MHz}\) displays a more graceful degradation across a broader family of
-Gaussian noise strengths, which is precisely the kind of in-family generalization claimed in the original paper
-\cite{Niu2019}. In this sense, the present results support the methodological thesis that policy-gradient
-optimization in a stochastic environment can internalize useful regularities of noisy control trajectories and
-convert them into improved robust performance at deployment time.
+A further important consequence is that robustness should be understood here as a genuinely multidimensional notion. The average fidelity and the fidelity variance do not probe the same aspect of performance, and neither of them is sufficient on its own. A practically useful controller should remain both accurate \emph{and} statistically stable under repeated noisy executions. The present results show that the noise-optimized TRPO controller is the only method among the three considered that consistently occupies the most favorable region with respect to both criteria. For this reason, the evidence presented in this subsection supports a stronger conclusion than a simple ranking of optimizers: it supports the claim that exposure to the appropriate stochastic environment during training changes the qualitative character of the learned control policy.
 
-For the overall structure of the chapter, this subsection therefore serves as the empirical validation point of
-the framework. The deterministic results of Sec.~\ref{subsec:single_target_control_optimization} established that
-all three methods can produce meaningful high-quality controls on the representative gate
-\(N(2.2,2.2,\pi/2)\), but did not by themselves justify the use of noisy-environment RL. The robustness curves do.
-They show that once the control problem is evaluated in the physically relevant regime of stochastic actuation
-errors, the decisive advantage of the RL framework is not simply that it optimizes a pulse, but that it can learn
-a pulse \emph{distributionally adapted} to the noise model. This is the sense in which the present reproduction
-most directly validates the main scientific message of the UFO framework: robustness against stochastic control
-errors is not an accidental emergent feature of analog optimization, but a trainable property that can be
-improved by embedding the appropriate perturbation model directly into the learning environment.
+For the broader structure of the chapter, this subsection therefore plays a decisive interpretive role. The single-target nominal benchmark established that all methods can produce meaningful high-quality analog controls, but did not by itself justify the additional machinery of noisy-environment reinforcement learning. The robustness study does. It shows that, once the control problem is evaluated in the physically relevant regime of stochastic actuation errors, the decisive advantage of the UFO-inspired RL framework lies not merely in pulse optimization, but in the ability to \emph{learn robustness} directly from the training environment. In this sense, the present reproduction supports one of the main scientific messages of the original paper: robustness against stochastic control errors is not an accidental emergent feature of analog control, but a trainable property that can be significantly improved by embedding the relevant perturbation model into the optimization loop \cite{Niu2019}.
 
 % \paragraph{Recommended figure strategy.}
 % For maximum clarity, I would keep the robustness subsection organized around \emph{two separate main figures}
