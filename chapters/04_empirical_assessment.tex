@@ -216,102 +216,349 @@ These metrics are essential because they distinguish mean robustness from shot-t
 \subsection{Evaluation protocol}
 All experiments follow a common procedural logic. For a given target gate \(N(\alpha,\alpha,\gamma)\), a control method is first trained or optimized under its own learning rule until either a prescribed iteration budget is exhausted or a termination criterion on the UFO cost is satisfied. The resulting best control plan is then stored and re-evaluated in a deterministic nominal setting in order to extract its final cost, fidelity, leakage, and runtime under identical physical assumptions. For robustness studies, the same saved control plan is subsequently subjected to repeated noisy rollouts, in which Gaussian perturbations are independently sampled and injected into the control channels and into the anharmonicity-related parameter of the Hamiltonian. This Monte Carlo evaluation yields the empirical estimates entering Eqs.~\eqref{eq:validation_average_fidelity} and \eqref{eq:validation_fidelity_variance}. In the runtime study, by contrast, the focus is not on statistical robustness but on how the optimized gate duration varies across the target family, especially along the subfamily \(N(\alpha,\alpha,\pi/2)\), where analog control can be meaningfully compared with optimal gate synthesis. The same timestep, control bounds, bandwidth assumptions, and physical truncation are retained throughout, so that differences between methods can be attributed to the optimization strategy rather than to inconsistencies in the simulation model. This common evaluation protocol is particularly important for the interpretation of the results: it ensures that the subsequent comparisons are methodologically fair, while also making the distinction between nominal accuracy, noisy robustness, and runtime efficiency completely explicit.
 
-% \subsection{Parameter selection and practical trade-offs}
-% \label{subsec:parameter_selection_tradeoffs}
-
-% A separate discussion of parameter selection is warranted because, in reinforcement-learning-based quantum control, the numerical setup is not merely an implementation detail but part of the methodology itself. One of the main practical limitations of reinforcement learning is its strong sensitivity to hyperparameter choice, including optimizer settings, exploration scale, rollout horizon, and policy architecture. This issue is compounded by the large dimensionality of the hyperparameter space, which makes a truly exhaustive search computationally expensive and, in many cases, infeasible. For this reason, the parameter choices adopted in this work are not presented as globally optimal in any absolute sense. Rather, they are chosen through a limited but physically informed sensitivity study aimed at identifying settings that are stable, interpretable, and sufficiently effective for the numerical validation of the framework. This point is important for the interpretation of the results: the experiments below should be read as validating the method under a coherent and justified parameter regime, not as claiming that every reported number is the outcome of a provably optimal hyperparameter configuration.
-
-% In order to keep the parameter study computationally manageable, tuning was performed on a representative target gate taken from the family \(N(\alpha,\alpha,\gamma)\), rather than over the full continuous target manifold. This choice is methodologically motivated. As discussed in Section~\ref{subsec:target_gate_family}, the family \(N(\alpha,\alpha,\gamma)\) is broad enough to contain physically and algorithmically relevant two-qubit gates, but sufficiently structured that a single representative point can serve as a useful proxy for hyperparameter selection. The idea is therefore to calibrate the learning dynamics on one nontrivial target and then reuse the resulting settings across the broader validation study. This avoids conflating two distinct sources of variation: changes in optimization behavior caused by hyperparameters, and changes in control difficulty caused by the target gate itself. In this sense, the representative target is not introduced because it is uniquely special, but because it provides a stable reference point from which the rest of the experimental study can be organized.
-
-% Among the TRPO-specific hyperparameters, two are particularly important: the initial policy dispersion, controlled by \texttt{init\_log\_std}, and the trust-region radius, controlled by \texttt{max\_kl}. The parameter \texttt{init\_log\_std} determines the initial exploration scale of the stochastic policy and therefore affects how broadly the agent samples the continuous control space during the early stages of training. If the initial exploration is too small, the policy may become trapped in a narrow and suboptimal region of the control landscape; if it is too large, the sampled trajectories may become excessively noisy and learning may become unstable. The parameter \texttt{max\_kl}, by contrast, controls the maximum allowed Kullback--Leibler divergence between two consecutive policies in TRPO. It therefore governs a trade-off between speed of improvement and update reliability: larger values permit faster policy movement but increase the risk of overshooting into poor regions of policy space, whereas smaller values produce more conservative and stable updates at the cost of slower progress. In a continuous-control problem such as the present one, where the reward depends on a long pulse trajectory and the environment may be stochastic, both parameters have a direct effect on whether training is exploratory enough to discover good controls while remaining stable enough to refine them. 
-
-% \textbf{TODO:} mention \(init_log_std\) explicitly also in the RL or neural-network introduction.
-
-% A second major set of design choices concerns the temporal discretization of the control problem. The timestep \(\Delta t\) determines the temporal mesh on which the controls are defined, while the maximum duration \(T_{\max}\) determines the largest admissible episode length. These choices involve a clear trade-off. A smaller timestep provides a finer control mesh and therefore a more expressive pulse representation, but it also increases the dimensionality of the action trajectory, the computational cost of simulation, and the difficulty of optimization. A larger timestep reduces computational burden, but may artificially restrict the control space and make it harder to resolve fast but physically meaningful pulse features. Similarly, a longer maximum duration allows the optimizer to discover slower but potentially easier solutions, whereas a shorter horizon encourages time-efficient control but increases the difficulty of the search. The selected values of \(\Delta t\) and \(T_{\max}\) should therefore be understood as compromise choices: they are fine enough to represent nontrivial pulse dynamics and allow meaningful comparison with the reference framework, but coarse enough to keep the experiments computationally tractable.
-
-% The remaining parameter choices are tied more directly to the physical modeling assumptions of the framework. The weights of the UFO cost function, \((\chi,\beta,\mu,\kappa)\), determine the relative importance assigned to gate accuracy, leakage suppression, boundary regularity, and runtime reduction, and therefore encode an explicit multi-objective trade-off rather than a purely numerical preference. Likewise, the amplitude and structure of the training noise are chosen in direct reference to the stochastic control model used in the original paper, so that the robustness experiments remain comparable to the intended reference setting rather than introducing an unrelated perturbation model. 
-
-% % Finally, the choice of neural-network architecture also belongs to this subsection, since network width and depth influence policy expressivity, optimization stability, and generalization across control trajectories. However, as the architecture search is still ongoing, it is preferable at this stage to treat the adopted layout as a reasonable working choice rather than as a final optimized design. 
-
-% \textbf{TODO:} add neural-network layout search results and final architecture comparison once available.
 
 
-\subsection{Parameter selection and practical trade-offs}
+
+\section{Parameter-choice study}
+\label{sec:parameter_choice_study}
+
+The empirical performance of the present control framework depends not only on the underlying physical model and on the definition of the UFO objective, but also on a number of methodological choices that must be fixed before a meaningful comparison can be carried out. This is especially true in the reinforcement-learning setting considered in this thesis, where optimization quality is affected simultaneously by the training configuration, by the expressive capacity of the policy and value networks, and by the scalarization adopted in the control cost. For this reason, parameter selection should not be treated as a minor implementation detail. On the contrary, it constitutes an explicit part of the experimental methodology, since different choices may alter convergence stability, final gate quality, robustness under noise, and even the apparent relative performance of the compared optimizers.
+
+A further reason for discussing parameter choice carefully is that the reference framework of Niu \emph{et al.} fixes several ingredients rather explicitly. In particular, the original study adopts a continuous-action TRPO agent with two fully connected neural networks of hidden sizes \(64\), \(32\), and \(32\), updates the policy after batches of \(20000\) episodes, injects Gaussian amplitude fluctuations with a standard deviation of \(1\,\mathrm{MHz}\) during stochastic training, and uses the same UFO weight configuration \(\chi=\beta=10\), \(\mu=0.2\), \(\kappa=0.1\) across the target gates considered. The same paper also evaluates robustness on the representative gate \(N(2.2,2.2,\pi/2)\), which therefore provides a natural reference target for model-selection purposes in the present reproduction. These design choices are important because they define the baseline notion of a \emph{fair comparison} with the original framework: if the thesis changes some of them, this should be done deliberately and justified explicitly, rather than implicitly through undocumented implementation drift. :contentReference[oaicite:0]{index=0} :contentReference[oaicite:1]{index=1} :contentReference[oaicite:2]{index=2} :contentReference[oaicite:3]{index=3}
+
+At the same time, the goal of this section is not to claim a globally exhaustive hyperparameter optimization over the full design space. Such a program would be computationally prohibitive and would add little scientific value to the main questions of the thesis. The objective is instead more focused: to identify a parameter regime that is stable, reproducible, physically sensible, and sufficiently well aligned with the reference paper to support a credible reproduction study. In other words, the purpose of the parameter-choice stage is to reduce arbitrariness, not to optimize every numerical setting in isolation. This distinction is methodologically important. A thesis-level validation study should not depend on a hidden collection of ad hoc choices tuned separately for each experiment; it should rely on a small and transparent set of decisions that are fixed once and then used consistently throughout the empirical chapter.
+
+For clarity, the parameter-selection analysis is therefore decomposed into three separate studies. The first concerns the \emph{training hyperparameters}, such as the timestep, maximum horizon, trust-region radius, exploration scale, batch size, and termination criterion. These parameters primarily affect optimization stability, sample efficiency, and computational cost. The second concerns the \emph{neural-network architecture} used for the policy and value functions. This is treated separately because the expressive capacity of the actor--critic representation is not simply another training detail: it may materially influence the quality of the learned control policy and therefore must be distinguished from purely algorithmic settings. The third concerns the \emph{UFO cost-function weights}, which play an even more special role. Unlike ordinary optimizer hyperparameters, these coefficients are part of the physical definition of the control objective itself, since they determine how gate infidelity, leakage, boundary regularity, and runtime are balanced against one another. For this reason, architecture choice and cost-function choice should not be conflated with the tuning of TRPO-specific parameters.
+
+This separation is also useful from the viewpoint of interpretation. If network size and UFO weights were tuned simultaneously together with training hyperparameters, any later performance difference would become harder to attribute: an observed improvement could arise from a better optimizer configuration, from increased representational capacity, or from a different physical scalarization of the control problem. By isolating the three studies, the empirical discussion becomes much cleaner. The reader can first understand which choices are made for numerical stability, then which are made for representational adequacy, and finally which affect the physical tradeoff structure encoded in the reward. This is particularly important in the present thesis, because one of its goals is not only to reproduce the original framework, but also to clarify which parts of its performance are tied to the learning algorithm and which depend more directly on the structure of the cost function.
+
+The remainder of this section is organized accordingly. Section~\ref{subsec:parameter_selection_tradeoffs} discusses the training hyperparameters and the practical trade-offs that motivate their final selection. The following subsection is devoted to the sweep over policy and value network sizes, with the aim of determining whether the paper architecture is already sufficient for the present implementation or whether a different capacity yields a more stable control regime. After that, a dedicated sensitivity study of the UFO coefficients is introduced, in order to separate the role of the physical objective from that of the optimizer itself. Finally, the section closes by fixing one final parameter configuration for the remainder of the chapter. Unless explicitly stated otherwise, all later experiments will be performed under that single configuration, so that the subsequent comparisons are not biased by experiment-specific retuning.
+
+In this way, the parameter-choice study serves a double purpose. On the one hand, it provides the methodological foundation needed to interpret the numerical results that follow. On the other hand, it establishes the conditions under which the present work can be compared fairly with the original study of Niu \emph{et al.}, whose reported framework combines a stochastic TRPO environment, a fixed actor--critic architecture, a representative robustness benchmark on \(N(2.2,2.2,\pi/2)\), and a uniform UFO scalarization across the tested gate family. The parameter-selection stage is therefore not ancillary to the empirical chapter, but the step that makes its later claims scientifically interpretable. 
+
+% :contentReference[oaicite:4]{index=4} :contentReference[oaicite:5]{index=5} :contentReference[oaicite:6]{index=6}
+\subsection{Training hyperparameters and practical trade-offs}
 \label{subsec:parameter_selection_tradeoffs}
 
-\textbf{TODO:} meaby consider making this just the training parameter paragraph
+A first layer of parameter selection concerns the training hyperparameters of the reinforcement-learning pipeline. These choices do not define the physical control objective itself, but they strongly affect optimization stability, sample efficiency, and computational cost. For this reason, they should be discussed separately from both the neural-network architecture and the UFO cost-function weights, which will be treated in the following subsections. The purpose of the present subsection is therefore not to perform an exhaustive hyperparameter optimization, but to identify a training regime that is sufficiently stable, reproducible, and well aligned with the reference framework to support the experiments reported later in this chapter.
 
-A dedicated discussion of parameter selection is warranted in the present study because one of the main practical limitations of deep reinforcement learning is its strong sensitivity to hyperparameter choices, initialization strategy, and implementation details. This is especially true for on-policy methods in continuous control, where seemingly secondary design decisions can substantially affect stability, exploration, convergence speed, and final performance. For this reason, the numerical results reported in this thesis should not be interpreted as depending only on the formal UFO objective and on the gmon Hamiltonian, but also on a set of explicit methodological choices that must be documented carefully for reproducibility. Unless otherwise stated, the values reported in Table~\ref{tab:nominal_hyperparameters} are the nominal parameters used in the experiments described in this chapter.
-
-\footnote{\textbf{TODO:} mention \texttt{init\_log\_std} also in the earlier RL / neural-network description, since it is an implementation-level parameter of the Gaussian policy.}
-
-\begin{table}[t]
-\centering
-\caption{Nominal parameter values used in the experiments, unless otherwise stated. Values marked as "paper" follow the original reference closely; values marked as "implementation" are thesis-side choices motivated by stability or computational cost.}
-\label{tab:nominal_hyperparameters}
-
-\vspace{0.5em}
-\begin{tabular}{lll}
-\hline
-\textbf{Parameter} & \textbf{Nominal value} & \textbf{Role / rationale} \\
-\hline
-Representative target gate & \(N(2.2,2.2,\pi/2)\) & main robustness benchmark target \\
-UFO weights \((\chi,\beta,\mu,\kappa)\) & \((10.0,10.0,0.2,0.1)\) & paper-based cost scalarization \\
-Policy hidden sizes & \(64\text{-}32\text{-}32\) & paper architecture for both networks \\
-Initial log std & \(-1.0\) & controlled exploration in Gaussian policy \\
-TRPO max\_kl & \(0.01\) & conservative but effective trust-region size \\
-Discount factor \(\gamma_{\mathrm{RL}}\) & \(0.99\) & standard long-horizon on-policy choice \\
-GAE parameter \(\lambda\) & \(0.97\) & bias--variance in advantage estimation \\
-% GAE parameter \(\lambda\) & \(0.97\) & bias--variance trade-off in advantage estimation \\
-CG iterations & \(10\) & standard TRPO curvature solve budget \\
-Damping & \(0.1\) & stabilizes Fisher-vector products \\
-Time step \(\Delta t\) & \(2\,\mathrm{ns}\) & fine temporal mesh for full runs \\
-Maximum duration \(T_{\max}\) & \(180\,\mathrm{ns}\) & manageable horizon for full experiments \\
-Termination cost & \(0.15\) & strict stopping threshold \\
-Control bandwidth & \(10\,\mathrm{MHz}\) & paper-consistent smooth-control filter \\
-Max control amplitude & \(20\,\mathrm{MHz}\) & bounded control range in implementation \\
-Anharmonicity baseline \(\eta\) & \(-200\,\mathrm{MHz}\) & paper/code physical scale \\
-Training noise std & \(1\,\mathrm{MHz}\) & paper’s nominal noisy-training setting \\
-Evaluation noise sweep & \(0.1\)--\(3.5\,\mathrm{MHz}\) & paper’s robustness range \\
-Robustness samples & \(60\) & paper’s Monte Carlo evaluation size \\
-Episodes per batch & \(10{,}000\) or \(20{,}000\) & stability vs wall-time trade-off \\
-Training iterations & \(100\) full / \(5\) search & convergence vs computational budget \\
-\hline
-\end{tabular}
-\end{table}
-
-The choice of target gates follows the logic introduced in the previous section. For the single-target experiments, a representative gate of the form \(N(2.2,2.2,\pi/2)\) is particularly useful because it is nontrivial, lies in the physically relevant family studied by the original paper, and is also the gate used in the paper’s robustness comparison under Gaussian control noise. More broadly, the family \(N(\alpha,\alpha,\gamma)\) remains the natural benchmark because it contains gates of direct relevance to quantum simulation and fermionic algorithms while still being sufficiently aligned with the native interaction structure of the gmon Hamiltonian to make the analog-versus-synthesis comparison meaningful. This is why the same family is retained throughout the thesis both for validation and for later extensions.
-
-Among the RL-specific hyperparameters, the initialization of the stochastic policy deserves separate discussion. In the present implementation, the policy outputs a Gaussian distribution over the raw control actions, followed by a \(\tanh\) squashing map to enforce bounded actions. An initial value \(\texttt{init\_log\_std}=-1.0\) corresponds to an initial standard deviation of approximately \(e^{-1}\approx 0.37\) in the raw action space, which provides non-negligible exploration without immediately saturating the squashing nonlinearity. In practice, this proved to be a good compromise: larger initial values made early exploration too aggressive and frequently pushed actions toward the saturation regime, while smaller values reduced exploration too strongly and slowed discovery of useful control trajectories. This parameter is not specified explicitly in the original paper and should therefore be regarded as an implementation-level design decision rather than a paper-level constant. 
-
-\textbf{TODO:} mention \texttt{init\_log\_std} explicitly in the earlier RL / neural-network section.
-
-A second key RL hyperparameter is the TRPO trust-region radius \(\texttt{max\_kl}\). In TRPO, the KL-divergence constraint controls how far the updated policy is allowed to move from the current one in a single optimization step. A value that is too large may produce unstable updates and overshooting, especially in noisy environments and in nonconvex control landscapes; a value that is too small, on the other hand, yields very conservative learning and may require many more iterations to achieve a comparable solution. For the full runs, a nominal choice \(\texttt{max\_kl}=0.01\) was retained, since this lies close to the standard TRPO setting and provided a good empirical compromise between update speed and update reliability. The related parameters \(\gamma_{\mathrm{RL}}=0.99\), \(\lambda=0.97\), damping \(=0.1\), and 10 conjugate-gradient iterations were kept at stable standard values, as their main role is to regularize the on-policy update rather than to define the physics of the control problem itself.
-
-The temporal discretization also involves a nontrivial trade-off. A fine mesh, such as \(\Delta t=2\,\mathrm{ns}\), allows more detailed pulse shaping and better representation of rapidly varying controls, but it also increases the episode length and therefore the dimensionality of the sequential decision problem. Likewise, a larger maximum duration \(T_{\max}\) expands the reachable control space, but at the cost of substantially longer rollouts and higher training expense. For the main experiments, the pair \((\Delta t,T_{\max})=(2\,\mathrm{ns},180\,\mathrm{ns})\) was adopted as a practical compromise: the mesh remains fine enough to resolve meaningful pulse structure, while the total time horizon stays within a regime that is both computationally manageable and physically interesting for fast two-qubit gate synthesis. Coarser choices, such as \(\Delta t=10\,\mathrm{ns}\), are still useful for rapid exploratory sweeps, but they are less suitable for the final accuracy-oriented runs. This trade-off is closely connected to the broader speed--leakage problem in superconducting-qubit control: finer and longer horizons allow more flexibility, but overly aggressive short-time control can easily increase leakage, while overly long horizons weaken the main hardware-efficiency motivation of the method.
-
-The initial UFO cost-functional weights were taken from the original paper, namely
+The training-parameter study is anchored to a representative gate from the target family \(N(\alpha,\alpha,\gamma)\), namely
 \begin{equation}
-(\chi,\beta,\mu,\kappa)=(10.0,10.0,0.2,0.1),
-\label{eq:chosen_ufo_weights}
+U_{\mathrm{rep}} = N(2.2,2.2,\pi/2).
+\label{eq:representative_gate_training_study}
 \end{equation}
-which reflect a balanced emphasis on logical accuracy and leakage suppression, together with weaker penalties on boundary mismatch and runtime. This choice is not arbitrary: the paper reports these values as the result of a grid search over the cost parameters and uses them uniformly across the target-gate family. In the present thesis, these values are adopted as the default benchmark setting, precisely because they allow the later analysis to distinguish between effects due to the optimizer and effects due to reweighting of the physical objective. A more systematic sweep of the UFO weights is postponed to the later ablation study, where the sensitivity of the method to the cost scalarization can be studied explicitly.
+This choice is natural for two reasons. First, it provides a nontrivial two-qubit target that is sufficiently far from the identity to make the control problem genuinely informative. Second, it matches the representative robustness benchmark used in the original paper, and therefore offers a convenient reference point for tuning the implementation while preserving comparability with the published framework \cite{Niu2019}. In this way, the parameter-selection stage is not performed on an arbitrary auxiliary task, but on a gate that is already central to the main empirical narrative of the thesis.
 
-The stopping threshold, or terminal cost, deserves a particularly explicit justification. In the codebase, this parameter determines whether an episode is terminated early once the running UFO cost falls below a prescribed value. A relatively loose threshold, for example around \(0.4\), makes early stopping easier to trigger and can shorten training time substantially, but it also risks accepting pulse trajectories that are only superficially satisfactory, especially if their low cost is achieved through short runtime rather than genuinely high fidelity and low leakage. By contrast, a stringent threshold such as \(0.15\) is physically more meaningful but much harder to satisfy within a fixed time horizon. In the present work, the stricter value \(0.15\) was retained for the main runs, precisely because it avoids prematurely truncating the search toward easy but uninteresting controls. In practice, this threshold is rarely reached during noisy training. For that reason, a more informative quantity for analysis is often the \emph{minimum cost attained during training} together with the corresponding timestamp or iteration index, since this reveals how low the optimizer can actually drive the cost even when the formal termination criterion is not triggered.
+Within this restricted setting, the main training parameters of interest are the timestep \(\Delta t\), the maximum admissible gate duration \(T_{\max}\), the trust-region radius \texttt{max\_kl}, the initial exploration scale \texttt{init\_log\_std}, the batch size measured in episodes per policy update, the number of training iterations, and the terminal-cost threshold used for early stopping. These quantities affect different aspects of the optimization. The timestep controls the temporal resolution of the pulse and therefore the expressivity of the sequential decision problem. The maximum duration defines the horizon over which the policy is allowed to construct the gate. The trust-region radius determines how aggressively the policy can move in one TRPO update, while the initial log-standard deviation controls the width of the Gaussian policy and therefore the amount of exploration at the beginning of training. Finally, the batch size and iteration budget determine the statistical reliability of the policy-gradient estimate and the total wall-time cost of the experiment.
 
-The robustness-evaluation parameters are chosen to remain as close as possible to the original paper. During training, Gaussian amplitude fluctuations with standard deviation \(1\,\mathrm{MHz}\) are injected into the relevant control channels, corresponding to the paper’s nominal noisy-training environment. During evaluation, the noise amplitude is swept over the interval \(0.1\) to \(3.5\,\mathrm{MHz}\), and each point is estimated from 60 noisy realizations. This setup reflects two complementary goals: first, to retain direct comparability with the original benchmark; second, to avoid drawing conclusions from a single arbitrary noise amplitude. The paper explicitly motivates \(1\,\mathrm{MHz}\) as a reasonable experimentally relevant scale, while also emphasizing that the true noise level is generally uncertain and may drift in time. The use of 60 samples per evaluation point is therefore a compromise between statistical stability and total computational cost.
+The timestep and maximum horizon involve the clearest physical--computational trade-off. A smaller timestep gives the policy access to a finer control mesh and therefore to a richer set of pulse shapes, which is desirable in a multilevel system where the balance between fidelity, leakage suppression, and runtime may depend sensitively on pulse modulation. However, this also increases the episode length and makes the optimization problem higher-dimensional and more expensive. Similarly, a larger value of \(T_{\max}\) enlarges the space of reachable solutions, but it also makes exploration more difficult and weakens the hardware-efficiency motivation of the analog-control framework. In the present implementation, the default choice for the main runs is
+\begin{equation}
+\Delta t = 2\,\mathrm{ns},
+\qquad
+T_{\max}=180\,\mathrm{ns},
+\label{eq:default_time_discretization_training}
+\end{equation}
+which represents a practical compromise between temporal resolution and computational tractability. This mesh is fine enough to support nontrivial pulse shaping, while keeping the horizon short enough for repeated multilevel rollouts to remain feasible.
 
-The remaining implementation choices mainly reflect computational trade-offs. The original paper updates the policy after batches of 20,000 episodes, which is large but consistent with the data-hungry nature of on-policy methods. In the present implementation, full comparison runs may use either 20,000 episodes per batch, to stay as close as possible to the original setup, or 10,000 episodes per batch, as a lighter but still stable alternative when computational budget is more limited. Similarly, around 100 iterations are used for full runs, while much shorter runs, such as 5 iterations, are sufficient for parameter-search sweeps and fast sanity checks. The main trade-off is straightforward: larger batches and more iterations improve the reliability of policy updates and the eventual convergence quality, but the wall-time cost grows very quickly because each batch requires a large number of multilevel Schrödinger rollouts. In addition, the codebase contains several secondary but non-negligible parameters, such as the filter bandwidth \(10\,\mathrm{MHz}\), the maximum control amplitude \(20\,\mathrm{MHz}\), the baseline anharmonicity \(-200\,\mathrm{MHz}\), the Adam learning rate and horizon set for the baseline optimizer, and the parallel rollout configuration. These parameters are not the central scientific objects of the thesis, but they matter in practice because they determine the smoothness of the controls, the degree of physical realism, and the total computational burden of the experiments.
+A second important trade-off concerns policy stability versus exploration. In the present codebase, the stochastic policy is Gaussian in the raw action space, and therefore the parameter \texttt{init\_log\_std} directly controls the initial dispersion of sampled controls. If this value is too large, the early policy explores too broadly and frequently pushes actions into the saturation regime after the squashing map, which makes learning noisy and unstable. If it is too small, the policy explores only weakly and may fail to discover useful pulse trajectories within a reasonable number of iterations. A similar balance appears in the TRPO parameter \texttt{max\_kl}: large trust regions allow faster progress in principle, but also increase the risk of unstable policy jumps, whereas very small trust regions make learning conservative and slow. In the configuration adopted for the main experiments, these considerations lead to the nominal choices
+\begin{equation}
+\texttt{init\_log\_std}=-1.0,
+\qquad
+\texttt{max\_kl}=0.01,
+\label{eq:default_exploration_trustregion}
+\end{equation}
+together with the standard TRPO settings
+\begin{equation}
+\gamma_{\mathrm{RL}}=0.99,
+\qquad
+\lambda=0.97,
+\qquad
+\texttt{cg\_iters}=10,
+\qquad
+\texttt{damping}=0.1.
+\label{eq:default_trpo_auxiliary_parameters}
+\end{equation}
+These values are not presented as globally optimal, but as a stable regime that proved adequate for the representative target and remained close to standard TRPO practice.
 
-Finally, the neural-network architecture was kept at the paper’s nominal configuration, namely two fully connected three-layer networks of width \(64\), \(32\), and \(32\) for the policy and value functions, respectively. This preserves direct comparability with the reference implementation and avoids conflating architectural changes with control-theoretic conclusions. At the same time, it is well known from the RL literature that network architecture can materially affect performance, especially in on-policy continuous-control settings. For that reason, architectural sensitivity should be regarded as an important follow-up question rather than as fully settled here. 
+The stopping threshold and batch size introduce a further methodological compromise. A loose termination criterion reduces training time, but risks accepting controls that are only superficially satisfactory. A stricter threshold is scientifically preferable, since it forces the policy to search for genuinely low-cost solutions, but it is also harder to satisfy consistently within a fixed training budget. In the present study, the default early-stopping threshold is set to
+\begin{equation}
+C_{\mathrm{term}}=0.15,
+\label{eq:default_termination_cost}
+\end{equation}
+which is intentionally demanding and therefore avoids premature convergence toward mediocre solutions. On the data-collection side, the reference paper uses updates based on \(20000\) episodes per batch \cite{Niu2019}. In the present implementation, this value is retained for the main paper-matched runs, while lighter exploratory sweeps may use \(10000\) episodes per batch when computational cost must be reduced. In the same spirit, full comparison runs are allowed to continue for up to \(100\) policy iterations, whereas shorter exploratory searches may use much smaller iteration budgets.
 
-\subsection{Neural-network architecture}
-\label{subsec:neural_network_architecture}
-\textbf{TODO:} add the results of the dedicated neural-network layout search once available.
+The training-noise setting is fixed in direct continuity with the reference framework. During stochastic training, Gaussian control perturbations with standard deviation
+\begin{equation}
+\sigma_{\mathrm{train}} = 1\,\mathrm{MHz}
+\label{eq:default_training_noise}
+\end{equation}
+are injected into the relevant control channels, consistently with the noisy-environment protocol described in the original paper \cite{Niu2019}. This choice is important not only because it preserves comparability with the reference results, but also because it defines the robust-training regime used later in the chapter. The broader robustness evaluation still spans a larger interval of noise strengths, but the value in Eq.~\eqref{eq:default_training_noise} is the default operating point at which the RL controller is exposed to stochastic perturbations during learning.
 
-\subsection{UFO hyperparameters}
-\label{subsec:ufo_hyperparameters}
-\textbf{TODO:} add the results of the dedicated neural-network layout search once available.
+Taken together, these considerations define the default training setup used in the remainder of the empirical chapter:
+\begin{equation}
+\Delta t = 2\,\mathrm{ns},\quad
+T_{\max}=180\,\mathrm{ns},\quad
+\texttt{init\_log\_std}=-1.0,\quad
+\texttt{max\_kl}=0.01,\quad
+C_{\mathrm{term}}=0.15,
+\label{eq:default_training_configuration_summary}
+\end{equation}
+with \(\gamma_{\mathrm{RL}}=0.99\), \(\lambda=0.97\), \(10\) conjugate-gradient iterations, damping \(0.1\), and a stochastic training noise of \(1\,\mathrm{MHz}\). Larger batches of \(20000\) episodes are used when staying as close as possible to the paper is important, while \(10000\)-episode batches are reserved for lighter preliminary sweeps. This configuration is not claimed to be uniquely optimal, but it provides a coherent and transparent operating regime under which later comparisons can be interpreted without ambiguity.
+
+It is worth stressing once more that the present subsection concerns only \emph{training} hyperparameters. The architecture of the policy and value networks is deliberately held fixed here, so that the effect of optimization settings is not confounded with the representational capacity of the actor--critic model. Likewise, the UFO weights are not tuned in this subsection, because they are part of the physical scalarization of the control problem rather than ordinary optimizer settings. These two aspects are therefore deferred to the next subsections, where they can be analyzed on their own terms.
+
+\subsection{Neural-network size sweep for policy and value functions}
+\label{subsec:nn_size_sweep}
+
+In the original UFO framework, both the policy and value functions are represented by fully connected neural networks with three hidden layers of sizes \(64\), \(32\), and \(32\) \cite{Niu2019}. Since the present implementation also relies on a continuous-action actor--critic TRPO pipeline, the architecture of these networks is not a negligible detail. The hidden-layer layout directly affects the representational capacity of the policy, the stability of the value-function approximation, the efficiency of exploration in the continuous control space, and ultimately the quality of the learned gate-control strategy. For this reason, the choice of network size should be treated separately from the tuning of training hyperparameters and from the selection of the UFO cost weights.
+
+The purpose of the present subsection is therefore to assess whether modest changes in network width and depth materially affect performance in the current implementation. Importantly, this study is not intended as an exhaustive architecture search over a large design space. Rather, it is a restricted sweep aimed at answering a narrower question: within a family of architectures of comparable scale, does increasing width or depth improve the learned balance between control quality, leakage suppression, and robustness? This question is especially relevant because the reference paper motivates the use of neural networks as compact representations of non-local regularities in successful control trajectories \cite{Niu2019}. If that interpretation is correct, then architecture should matter, but not necessarily in a monotonic way: larger networks may provide more expressive power, yet also introduce harder optimization and greater seed sensitivity.
+
+The sweep was performed on the same representative target gate used for the training-parameter study,
+\begin{equation}
+U_{\mathrm{rep}} = N(2.2,2.2,\pi/2),
+\label{eq:nn_sweep_representative_target}
+\end{equation}
+and under a fixed reduced-budget training protocol designed for model selection. More precisely, all runs used noise-optimized TRPO with Gaussian training noise of standard deviation \(1\,\mathrm{MHz}\), timestep \(\Delta t=2\,\mathrm{ns}\), maximum gate duration \(T_{\max}=180\,\mathrm{ns}\), trust-region radius \(\texttt{max\_kl}=0.01\), initial exploration scale \(\texttt{init\_log\_std}=-1.0\), termination threshold \(C_{\mathrm{term}}=0.4\), and the nominal UFO weights
+\begin{equation}
+(\chi,\beta,\mu,\kappa)=(10,10,0.2,0.1).
+\label{eq:nn_sweep_default_weights}
+\end{equation}
+Each architecture was trained for \(20\) TRPO iterations with \(5000\) episodes per batch and evaluated over \(3\) random seeds. The tested hidden-layer layouts were
+\begin{equation}
+(64,64,64),\qquad
+(64,64,64,32),\qquad
+(128,64,32),\qquad
+(128,64,32,32).
+\label{eq:tested_hidden_sizes}
+\end{equation}
+It should be noted explicitly that the exact paper architecture \((64,32,32)\) was not part of this restricted sweep. Consequently, the present study should be interpreted as a comparison among nearby thesis-side alternatives rather than as a direct empirical rejection of the reference architecture.
+
+To compare the candidate networks, several criteria were considered simultaneously. The primary selection metric was the best evaluation cost reached during training, since this is the quantity most directly aligned with the UFO objective. However, this scalar alone is not sufficient for a meaningful choice. A network could achieve a favorable total cost by trading leakage against fidelity or by settling into an unnecessarily long runtime. For this reason, the architecture comparison also tracked best evaluation fidelity, best evaluation leakage, effective evaluation runtime, and robustness under noisy deployment through the average fidelity at \(\sigma = 1\,\mathrm{MHz}\). In this way, the architecture was not chosen solely by one scalar score, but by its overall position in the multi-objective trade-off relevant to the control problem.
+
+The results of the restricted sweep show a clear but not entirely trivial pattern. Among the four tested candidates, the architecture
+\begin{equation}
+(64,64,64)
+\label{eq:best_architecture_restricted_sweep}
+\end{equation}
+achieves the best overall mean evaluation cost,
+\begin{equation}
+\overline{C}_{\mathrm{eval}} = 0.3584,
+\label{eq:best_architecture_cost}
+\end{equation}
+and also the highest mean best-evaluation fidelity,
+\begin{equation}
+\overline{F}_{\mathrm{eval}} = 0.9941.
+\label{eq:best_architecture_fidelity}
+\end{equation}
+At the same time, it gives the highest mean robustness score at \(\sigma=1\,\mathrm{MHz}\),
+\begin{equation}
+\overline{F}_{\sigma=1\,\mathrm{MHz}} = 0.9637,
+\label{eq:best_architecture_robustness}
+\end{equation}
+with a mean evaluation runtime of approximately
+\begin{equation}
+\overline{T}_{\mathrm{eval}} = 106.7\,\mathrm{ns}.
+\label{eq:best_architecture_time}
+\end{equation}
+This is an important result because it indicates that, within the explored subset, moderate widening of the network improves the optimization outcome without requiring extra depth.
+
+The deeper alternatives do not improve this picture. The architecture \((64,64,64,32)\) performs slightly worse in all main aggregated metrics, with a higher mean evaluation cost and a lower mean robust fidelity. The architecture \((128,64,32)\) remains close in mean cost, but displays a somewhat less favorable robustness profile and larger seed-to-seed variability. The deepest tested model, \((128,64,32,32)\), is particularly instructive: it achieves the \emph{lowest mean leakage},
+\begin{equation}
+\overline{L}_{\mathrm{eval}} = 3.56\times 10^{-4},
+\label{eq:lowest_leakage_architecture}
+\end{equation}
+but at the price of the \emph{worst} mean evaluation cost, the lowest mean fidelity, the longest mean runtime, and the weakest mean robustness among the tested candidates. This indicates that minimizing leakage in isolation is not an adequate architecture-selection principle. A more expressive or deeper network may learn a comparatively conservative control strategy with slightly cleaner multilevel confinement, yet still fail to produce the best overall balance among the terms entering the UFO objective.
+
+This interpretation is reinforced by the qualitative structure of the trade-off plots. The leakage boxplot is useful because it shows that the lowest-leakage architecture is not the one with the best total control quality. The robustness boxplot shows that the \(64\text{-}64\text{-}64\) architecture is not only strong on average, but also competitive in terms of seed-level consistency. Finally, the Pareto-style scatter plot of leakage versus robustness gives perhaps the clearest visual summary: the architectures do not lie on a simple monotonic frontier where lower leakage automatically implies higher robustness. Instead, the sweep suggests that the best architecture is the one occupying the most favorable compromise region of the leakage--robustness plane, rather than the one that optimizes either axis independently.
+
+A further methodological point should be emphasized. Because the sweep was carried out under a reduced training budget, namely \(20\) policy iterations and \(5000\) episodes per batch, the resulting ranking should be interpreted as a comparison of \emph{practical trainability} under limited optimization time rather than as a proof of asymptotic superiority under full convergence. This distinction matters. A larger architecture may in principle catch up under a much longer training budget, but if it is consistently slower, noisier, or less reliable in the practical regime relevant to the rest of the thesis, then it is still a less attractive default choice. For the purposes of the present empirical chapter, the relevant question is therefore not which architecture might eventually win under unlimited compute, but which one provides the best and most stable control quality under the realistic budget used for the experiments.
+
+On the basis of this restricted sweep, the architecture
+\begin{equation}
+(64,64,64)
+\label{eq:selected_architecture_main_experiments}
+\end{equation}
+is adopted as the default policy/value hidden-layer configuration for the subsequent thesis-side experiments. This choice is motivated by its best mean evaluation cost, best mean fidelity, and strongest average robustness among the tested candidates, together with a competitive runtime and acceptable leakage. At the same time, this conclusion should be phrased carefully. Since the exact paper architecture \((64,32,32)\) was not included in the tested subset, the present result does not establish that the reference layout is suboptimal in absolute terms. It only shows that, within the explored family of nearby alternatives, \((64,64,64)\) is the most effective architecture for the current implementation.
+
+For this reason, the present subsection supports two distinct conclusions. First, architecture choice is not neutral: changes in width and depth do measurably affect the final control trade-off. Second, the dependence on architecture is not monotonic: increasing network size does not automatically improve control quality, and in fact the deepest tested model performs worst in the aggregated objective despite having the lowest mean leakage. This is precisely why the architecture study is useful. It prevents the later experiments from relying on an arbitrary actor--critic layout, while also showing that the dominant effects observed in the rest of the chapter are unlikely to be artifacts of an especially pathological network choice.
+
+\begin{figure}[t]
+\centering
+\fbox{\parbox[c][5.2cm][c]{0.9\linewidth}{\centering Placeholder}}
+\caption{Recommended figure for the architecture sweep: use the boxplot already generated for \emph{Best Eval Leakage across Architectures}. The horizontal axis should report the four tested hidden-layer layouts, while the vertical axis should show the best evaluation leakage on a scientific or logarithmic-friendly scale. Overlay the individual seed points, as in the current plot, so that both the central tendency and the seed-level spread remain visible. The visual purpose of the figure is to show clearly that the architecture with the smallest mean leakage is not the one with the best overall evaluation cost.}
+\label{fig:architecture_sweep_leakage}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\fbox{\parbox[c][5.2cm][c]{0.9\linewidth}{\centering Placeholder}}
+\caption{Recommended figure for the architecture sweep: use the boxplot already generated for \emph{Robustness Fidelity across Architectures}. The horizontal axis should again report the four hidden-layer layouts, while the vertical axis should show the average fidelity under noisy evaluation at \(\sigma=1\,\mathrm{MHz}\). Overlay the individual seed values. This figure is meant to make the robustness ranking immediately visible and to show that the \(64\text{-}64\text{-}64\) architecture occupies the most favorable region in terms of average noisy fidelity.}
+\label{fig:architecture_sweep_robustness}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\fbox{\parbox[c][5.2cm][c]{0.9\linewidth}{\centering Placeholder}}
+\caption{Recommended synthesis figure for the architecture sweep: use the Pareto-style scatter plot already generated for \emph{Leakage vs Robustness by Architecture}. The horizontal axis should show best evaluation leakage and the vertical axis should show average noisy fidelity at \(\sigma=1\,\mathrm{MHz}\), with colors distinguishing the tested hidden-layer layouts and one point per seed. This figure is especially effective because it shows that the architecture comparison is genuinely multi-objective: lower leakage does not automatically imply better robustness, and the preferred architecture should be identified through the overall trade-off rather than through a single metric.}
+\label{fig:architecture_sweep_pareto}
+\end{figure}
+
+\subsection{Sensitivity study of the UFO cost-function weights}
+\label{subsec:ufo_weight_sweep}
+
+The choice of the UFO coefficients deserves a separate study because, unlike ordinary optimizer hyperparameters, these quantities are part of the physical definition of the control problem itself. As mentioned in \ref{subsec:ufo_cost_function}, the total objective is written as
+\begin{equation}
+C(\chi,\beta,\mu,\kappa)
+=
+\chi\bigl[1-F(U(T))\bigr]
++
+\beta L_{\mathrm{tot}}
++
+\mu P_{\mathrm{bdry}}
++
+\kappa T,
+\label{eq:ufo_cost_recalled_weight_sweep}
+\end{equation}
+where \(\chi\) controls the weight of gate infidelity, \(\beta\) penalizes accumulated leakage, \(\mu\) enforces boundary regularity, and \(\kappa\) penalizes runtime \cite{Niu2019}. The reference paper reports that these coefficients were selected by grid search and then fixed uniformly across the target gates considered, with the final choice
+\begin{equation}
+\chi=\beta=10,
+\qquad
+\mu=0.2,
+\qquad
+\kappa=0.1.
+\label{eq:paper_ufo_weights_recalled}
+\end{equation}
+For the purposes of the present thesis, this makes the weight study methodologically important in two complementary senses. On the one hand, it allows one to test whether the balance adopted in the paper is also reasonable in the present independent implementation. On the other hand, it clarifies which aspects of the observed performance are due to the optimizer and which are instead induced directly by the physical scalarization of the control objective. 
+
+The sweep was performed on the same representative target gate used in the previous parameter-selection stages,
+\begin{equation}
+U_{\mathrm{rep}} = N(2.2,2.2,\pi/2),
+\label{eq:ufo_weight_representative_target}
+\end{equation}
+under a fixed reduced-budget noise-optimized TRPO configuration. More precisely, the training setup was
+\begin{equation}
+\Delta t = 2\,\mathrm{ns},
+\qquad
+T_{\max}=180\,\mathrm{ns},
+\qquad
+\texttt{max\_kl}=0.005,
+\qquad
+\texttt{init\_log\_std}=-1.0,
+\label{eq:ufo_weight_fixed_training_setup}
+\end{equation}
+with \(5\) TRPO iterations, \(10000\) episodes per batch, \(8\) workers, termination threshold \(0.15\), Gaussian training noise of standard deviation \(1\,\mathrm{MHz}\), and the paper-matched network architecture \(64\text{-}32\text{-}32\). Two random seeds were used for each configuration. The explored coefficient ranges were
+\begin{equation}
+\chi \in \{5,10,20\},
+\qquad
+\beta = 10,
+\qquad
+\mu \in \{0.1,0.2,0.4\},
+\qquad
+\kappa \in \{0.05,0.1,0.2,0.4\},
+\label{eq:ufo_weight_sweep_ranges}
+\end{equation}
+for a total of \(3\times 1\times 3\times 4 = 36\) weight configurations and \(72\) runs once the two seeds are included.
+
+The choice to keep \(\beta\) fixed deserves an explicit comment. Since the goal of the present experiment is to understand how the optimizer reacts to changing the balance between fidelity, boundary regularity, and runtime \emph{relative} to leakage suppression, it is natural to treat \(\beta\) as a reference scale and vary the other coefficients around it. In this sense, the sweep should be interpreted primarily through the ratios \(\chi/\beta\), \(\mu/\beta\), and \(\kappa/\beta\), rather than as a completely unconstrained four-dimensional search. This restriction also keeps the interpretation manageable: if all four coefficients were varied simultaneously, it would become much harder to isolate which part of the scalarization is actually responsible for a given change in behavior.
+
+A second methodological point is even more important: the \emph{best evaluation cost} is not an informative global selection criterion across this sweep. Indeed, different values of \(\chi\), \(\mu\), and \(\kappa\) define different scalarizations of the same physical control problem, so the numerical value of \(C(\chi,\beta,\mu,\kappa)\) is not directly comparable across configurations. This is not just a formal issue. In the present experiment, all runs terminate at the same evaluation time of \(180\,\mathrm{ns}\), so increasing \(\kappa\) contributes mainly a nearly rigid additive shift to the total cost without necessarily improving the learned control in any physically meaningful sense. For this reason, the search-script primary metric is retained only as an internal bookkeeping quantity, whereas the physically relevant comparison is based instead on nominal fidelity, best evaluation leakage, and robustness average fidelity at \(\sigma=1\,\mathrm{MHz}\).
+
+Under this interpretation, the first clear result concerns the fidelity weight \(\chi\). The robustness boxplot in Fig.~\ref{fig:ufo_weight_sweep_robustness} shows that \(\chi=5\) leads to a visibly broader and lower-performing distribution, with several runs collapsing into a poor-robustness regime around \(0.81\)--\(0.83\). By contrast, \(\chi=10\) and \(\chi=20\) both yield substantially tighter and higher robustness distributions, concentrated around \(0.92\)--\(0.95\). This indicates that the low-fidelity-penalty regime underweights the logical-accuracy term too strongly relative to the other penalties. In other words, if \(\chi\) is chosen too small compared with \(\beta\), the optimizer is allowed to settle into controls that may be acceptable in terms of leakage or boundary behavior, yet remain clearly inferior in actual gate quality. Increasing \(\chi\) to the paper scale already removes most of this failure mode, while a further increase to \(\chi=20\) produces only a marginal additional gain.
+
+The behavior of the boundary weight \(\mu\) is more subtle and, in some sense, more interesting. The sweep reveals a clear non-monotonic pattern. The intermediate value
+\begin{equation}
+\mu = 0.2
+\label{eq:mu_intermediate_best}
+\end{equation}
+produces the most favorable median trade-off, with high robustness and good nominal fidelity. Reducing the penalty to \(\mu=0.1\) remains viable, but leads on average to slightly larger leakage and a somewhat less favorable robustness profile. Increasing it to \(\mu=0.4\), however, makes the distribution strongly bimodal: for some values of \(\chi\) it yields some of the best runs of the entire sweep, while for others it produces a catastrophic degradation in robustness. This is clearly visible in the robustness boxplot, where \(\mu=0.4\) generates the widest spread and the strongest lower-tail failures. The physical interpretation is that boundary regularization is beneficial only up to a point. A moderate boundary penalty encourages smoother pulse endpoints and cleaner logical/Fock basis matching, but an overly strong one can overconstrain the optimizer and distort the balance with the fidelity term, thereby harming the overall control quality rather than improving it.
+
+This interpretation is reinforced when leakage is examined separately. Figure~\ref{fig:ufo_weight_sweep_leakage} shows that larger \(\mu\) tends, on average, to reduce the leakage proxy. In fact, the lowest-leakage region of the sweep is often associated with \(\mu=0.4\). However, this does \emph{not} translate automatically into the best robust controller. The reason is precisely that leakage is only one component of the total physical objective. In several runs, the stronger boundary penalty helps suppress leakage but simultaneously worsens the broader fidelity--robustness trade-off. This is therefore another concrete example of the multi-objective nature of the UFO framework: minimizing one term of the cost more aggressively does not guarantee a better overall control solution.
+
+The runtime coefficient \(\kappa\) has the weakest effect in the present restricted-budget sweep. This is visible both in the robustness sensitivity plot and in the leakage sensitivity plot, where the four tested values
+\(\kappa\in\{0.05,0.1,0.2,0.4\}\) produce distributions that are almost indistinguishable at the level of median performance. This weak dependence is not surprising once the evaluation protocol is taken into account. Since every run reaches the same best evaluation time of \(180\,\mathrm{ns}\), the runtime term does not act here as a strong discriminating mechanism on the learned stopping time, but mainly as a reweighting of the scalar objective. In other words, under this short and fixed-horizon model-selection regime, \(\kappa\) does not yet have enough room to reshape the control strategy as dramatically as \(\chi\) and \(\mu\) do. A stronger effect of \(\kappa\) is more likely to appear in the later runtime-family experiments, where gate duration is itself a central observable rather than an almost fixed boundary condition of the sweep.
+
+The clearest global summary of the experiment is given by the Pareto-style leakage--robustness scatter in Fig.~\ref{fig:ufo_weight_sweep_pareto}. Two clusters stand out. The first corresponds to a favorable region with robustness around \(0.94\) and leakage in the low-\(10^{-4}\) to mid-\(10^{-4}\) range. The second corresponds to a clearly worse region with robustness around \(0.81\)--\(0.83\), associated mainly with the underweighted-fidelity settings. The color coding by \(\chi\) makes the main trend immediately visible: low \(\chi\) is overrepresented in the poor-robustness cluster, whereas the paper-scale and larger-\(\chi\) settings dominate the Pareto-favorable part of the plane. At the same time, the frontier is not determined by \(\chi\) alone. The best region is occupied jointly by configurations near
+\begin{equation}
+(\chi,\mu) \approx (10,0.2)
+\qquad \text{and} \qquad
+(\chi,\mu) \approx (20,0.4),
+\label{eq:ufo_weight_frontier_region}
+\end{equation}
+with only weak dependence on \(\kappa\) within the explored range.
+
+This last observation is crucial for the final choice. The numerically best average robustness is attained by the family of configurations centered around \((\chi,\beta,\mu)=(20,10,0.4)\), but the gain over the paper choice
+\((10,10,0.2)\) is extremely small. In the present sweep, the paper configuration remains essentially on the same Pareto-favorable frontier, with very similar robustness and leakage, while being directly aligned with the scalarization reported in the original study \cite{Niu2019}. Since the improvement offered by the larger-\(\chi\), larger-\(\mu\) corner is marginal and the present sweep is based on only two seeds and a very small training budget, there is no strong methodological reason to abandon the paper weights for the main experiments. On the contrary, keeping the reference choice
+\begin{equation}
+(\chi,\beta,\mu,\kappa)=(10,10,0.2,0.1)
+\label{eq:selected_ufo_weights_final}
+\end{equation}
+is preferable for two reasons: it remains empirically near-optimal in the present implementation, and it preserves the cleanest possible fair-comparison protocol with the original UFO framework.
+
+The main conclusion of this subsection is therefore twofold. First, the cost weights matter, and they matter in a physically interpretable way: too small a fidelity weight degrades robustness substantially, while an excessively strong boundary penalty can reduce leakage at the price of destabilizing the broader control trade-off. Second, the paper scalarization is not only historically motivated, but also empirically reasonable in the present independent implementation. For this reason, the remainder of the empirical chapter will retain the reference UFO coefficients in Eq.~\eqref{eq:selected_ufo_weights_final}, unless explicitly stated otherwise.
+
+\begin{figure}[t]
+\centering
+\fbox{\parbox[c][5.2cm][c]{0.9\linewidth}{\centering Placeholder}}
+\caption{Recommended main sensitivity figure for the UFO-weight sweep: use the four-panel boxplot already generated for \emph{Sensitivity of Robustness Fidelity to Cost Parameters}. The four panels should report the dependence of the noisy average fidelity at \(\sigma=1\,\mathrm{MHz}\) on \(\chi\), \(\beta\), \(\mu\), and \(\kappa\). Since \(\beta\) is fixed in the present experiment, the corresponding panel may either be kept as a visual reminder of the fixed reference scale or omitted in the final thesis version to avoid redundancy. The purpose of the figure is to show immediately that \(\chi\) and \(\mu\) produce the strongest variation in robustness, while \(\kappa\) has only a weak effect under the present fixed-horizon model-selection regime.}
+\label{fig:ufo_weight_sweep_robustness}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\fbox{\parbox[c][5.2cm][c]{0.9\linewidth}{\centering Placeholder}}
+\caption{Recommended companion figure for the UFO-weight sweep: use the four-panel boxplot already generated for \emph{Sensitivity of Best Eval Leakage to Cost Parameters}. The panels should report the dependence of best evaluation leakage on \(\chi\), \(\beta\), \(\mu\), and \(\kappa\), again with the possibility of suppressing the \(\beta\) panel in the final version since \(\beta\) is not varied. This figure is useful because it complements the robustness plot and shows that configurations with lower leakage are not always those with the best overall robustness. In particular, it helps visualize the non-monotonic role of \(\mu\), which may suppress leakage while still worsening the broader control trade-off when chosen too aggressively.}
+\label{fig:ufo_weight_sweep_leakage}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\fbox{\parbox[c][5.2cm][c]{0.9\linewidth}{\centering Placeholder}}
+\caption{Recommended synthesis figure for the UFO-weight sweep: use the already generated Pareto-style scatter plot of leakage versus robustness, with color encoding the value of \(\chi\). The horizontal axis should show best evaluation leakage and the vertical axis should show the noisy average fidelity at \(\sigma=1\,\mathrm{MHz}\). This figure is particularly effective because it makes the multi-objective nature of the sweep immediately visible: lower leakage does not automatically imply better robustness, and the paper choice \((10,10,0.2,0.1)\) can be shown to lie very close to the Pareto-favorable region despite not being the numerically best point in every single metric.}
+\label{fig:ufo_weight_sweep_pareto}
+\end{figure}
+
+\subsection{Final parameter configuration for the remainder of the chapter}
+\label{subsec:final_parameter_configuration}
+
+In light of the parameter studies discussed above, a single reference configuration is now fixed for the remainder of the empirical chapter. The purpose of this final choice is not to claim global optimality over all possible numerical settings, but to define a stable and transparent operating regime under which the subsequent experiments can be compared consistently.
+
+For the training hyperparameters, the default setup is
+\begin{equation}
+\Delta t = 2\,\mathrm{ns},
+\qquad
+T_{\max}=180\,\mathrm{ns},
+\qquad
+\texttt{init\_log\_std}=-1.0,
+\qquad
+\texttt{max\_kl}=0.01,
+\qquad
+C_{\mathrm{term}}=0.15,
+\label{eq:final_training_setup}
+\end{equation}
+with \(\gamma_{\mathrm{RL}}=0.99\), \(\lambda=0.97\), damping \(0.1\), and \(10\) conjugate-gradient iterations. Unless stated otherwise, the noise-optimized runs are trained with Gaussian control noise of standard deviation
+\begin{equation}
+\sigma_{\mathrm{train}} = 1\,\mathrm{MHz},
+\label{eq:final_training_noise}
+\end{equation}
+in direct continuity with the reference framework \cite{Niu2019}.
+
+For the actor--critic representation, the architecture sweep suggests that network choice is not neutral, but also that improvements are not monotonic with increasing width or depth. Since the restricted sweep identified
+\begin{equation}
+(64,64,64)
+\label{eq:final_hidden_sizes_choice}
+\end{equation}
+as the most favorable architecture among the tested alternatives, this layout is adopted as the default thesis-side configuration for the subsequent experiments.
+
+Finally, for the UFO scalarization, the sensitivity study shows that the absolute value of the total cost is not directly comparable across different weight configurations, and that the most meaningful comparison must instead be based on fidelity, leakage, and robustness. Under this interpretation, the reference-paper choice
+\begin{equation}
+(\chi,\beta,\mu,\kappa)=(10,10,0.2,0.1)
+\label{eq:final_ufo_weights_choice}
+\end{equation}
+remains very close to the best trade-off region observed in the present sweep. For this reason, and in order to preserve the cleanest possible comparison with the original UFO framework, these values are retained as the default cost-function weights in the remainder of the chapter \cite{Niu2019}.
+
+Unless explicitly stated otherwise, all later experiments therefore use the combined reference configuration defined by
+Eqs.~\eqref{eq:final_training_setup}--\eqref{eq:final_ufo_weights_choice}. This choice ensures that the empirical comparisons reported in the following sections are not affected by experiment-specific retuning, and that the results remain directly interpretable within the methodological logic established by the reference paper.
 
 \section{Single-target control optimization}
 \label{sec:single_target_optimization}
@@ -742,158 +989,36 @@ first direct validation of that claim in the present implementation \cite{Niu201
     \label{fig:fidelity_variance_vs_noise}
 \end{figure}
 
-A complementary perspective on robustness is provided by Fig.~\ref{fig:fidelity_variance_vs_noise},
-which reports the fidelity variance as a function of the noise strength. While the average fidelity
-curve quantifies the mean degradation induced by stochastic control errors, the variance probes a
-different and equally important aspect: the \emph{shot-to-shot stability} of the control strategy.
-A controller may retain a relatively good average fidelity and yet be operationally fragile if its
-performance fluctuates strongly from one noisy realization to another. In this sense, fidelity
-variance measures the sensitivity of the learned control channel to the random perturbations
-introduced in Sec.~\ref{subsec:noise_model}, and therefore serves as a direct proxy for statistical
-stability under repeated experimental execution \cite{Niu2019}. This interpretation is also fully
-consistent with the robustness estimator implemented in the present code base, where the variance
-is computed over repeated noisy realizations of the same optimized control plan using $60$ Monte
-Carlo samples per value of $\sigma_{\mathrm{noise}}$ 
-% :contentReference[oaicite:0]{index=0} :contentReference[oaicite:1]{index=1}
-% :contentReference[oaicite:2]{index=2} :contentReference[oaicite:3]{index=3} :contentReference[oaicite:4]{index=4}.
+\subsection{Fidelity variance versus noise strength}
+\label{subsec:fidelity_variance_vs_noise}
 
-The first qualitative feature of the plot is that the fidelity variance increases for all three methods
-as the noise strength grows. This is expected: once the Gaussian perturbations become larger, the
-distribution of implemented noisy channels broadens, so that different realizations of the same
-nominal control sequence produce increasingly dispersed final fidelities. However, the three methods
-do not broaden at the same rate. The Adam baseline remains the most stable solution throughout the
-range in the narrow statistical sense of variance, the noise-optimized TRPO controller comes next,
-and the nominal TRPO controller displays the largest fluctuations, with a visibly steeper growth in
-the intermediate-to-high noise regime. The ranking is therefore not the same as in the average-fidelity
-plot, and this nontrivial mismatch is precisely what makes the variance figure informative.
+A complementary perspective on robustness is provided by Fig.~\ref{fig:fidelity_variance_vs_noise}, which reports the fidelity variance as a function of the noise strength. While the average-fidelity curve quantifies the mean degradation induced by stochastic control errors, the variance probes a different and equally important aspect, namely the \emph{shot-to-shot stability} of the control strategy. A controller may retain a relatively good average fidelity and yet remain operationally fragile if its performance fluctuates strongly across different noisy realizations. In this sense, the fidelity variance measures the sensitivity of the optimized control to the Gaussian perturbations introduced in Sec.~\ref{subsec:noise_model}, and therefore provides a natural statistical indicator of robustness under repeated experimental execution \cite{Niu2019}. This interpretation is fully consistent with the evaluation protocol adopted here, where the variance is estimated from repeated Monte Carlo realizations of the same optimized control plan at fixed \(\sigma_{\mathrm{noise}}\).
 
-This point is worth stressing. At $\sigma_{\mathrm{noise}}=1$ MHz, the Adam baseline already exhibits a
-small sampled fidelity variance of about $1.75\times 10^{-4}$, while its average fidelity is
-$0.9686$ 
-% :contentReference[oaicite:5]{index=5}.
-By contrast, the noise-optimized TRPO controller starts from a
-substantially better nominal solution, with nominal fidelity $0.9987648850$ at $90$ ns, whereas the
-nominal TRPO and Adam baseline start from $0.9941508786$ at $116$ ns and $0.9820504069$ at $60$ ns,
-respectively 
-% :contentReference[oaicite:6]{index=6} :contentReference[oaicite:7]{index=7} :contentReference[oaicite:8]{index=8}.
-Accordingly, the variance curve must not be read in isolation: a lower variance does not automatically
-mean a better robust controller if it is achieved around a systematically worse fidelity level. The
-Adam control is comparatively rigid in the sense that its noisy realizations remain more tightly
-clustered, but that cluster is centered around a less accurate gate implementation than the one
-obtained by the noise-optimized TRPO controller. In other words, Adam appears more \emph{consistent},
-but consistently around an inferior robust operating point.
+The first qualitative feature of the figure is that the fidelity variance increases for all three methods as the noise strength grows. This is expected: as the Gaussian perturbations become larger, the distribution of implemented noisy channels broadens, and different realizations of the same nominal pulse generate increasingly dispersed final fidelities. However, the three methods do not broaden at the same rate. The noise-optimized TRPO controller consistently exhibits the lowest variance across the explored range, the Adam baseline occupies an intermediate position, and the nominal TRPO controller displays the largest fluctuations, with a visibly steeper growth in the moderate-to-high noise regime. The ordering is therefore fully consistent with the one observed in the average-fidelity plot: the controller trained in the stochastic environment is not only the one with the best mean noisy performance, but also the one whose performance is least dispersed across repeated noisy realizations.
 
-The comparison between the two TRPO agents is more directly aligned with the central thesis of this
-section. Between these two controllers, the noise-optimized policy shows a clear reduction in variance
-relative to the nominal TRPO solution across most of the explored range, especially once the noise
-strength leaves the perturbative regime and the curves become more clearly separated. This is an
-important result, because the two methods share the same policy-gradient machinery and differ mainly
-in the environment seen during training. The lower variance of the noise-optimized controller therefore
-cannot be explained by the mere use of reinforcement learning; rather, it indicates that exposure to
-stochastic perturbations during training has produced a policy whose final performance is less sensitive
-to random actuation errors from one realization to the next. In statistical terms, the learned policy
-does not only preserve a higher mean performance, but also suppresses part of the dispersion induced
-by the noisy channel.
+This result is particularly important for the interpretation of the framework. The comparison between the two TRPO agents is especially clean, since the nominal and noise-optimized controllers share the same policy-gradient machinery, the same physical model, and the same UFO objective, and differ primarily in the environment used during training. The lower variance of the noise-optimized policy therefore cannot be attributed to reinforcement learning in general, but must be understood as a consequence of stochastic training itself. In other words, exposure to noisy dynamics during optimization does not simply improve the mean fidelity under perturbations; it also produces a control policy whose final performance is statistically more stable from one noisy realization to another. This is precisely the type of effect one would expect if the policy had internalized control strategies that are intrinsically less sensitive to random actuation errors.
 
-From the perspective of the original UFO paper, this is precisely the kind of evidence that should
-accompany the average-fidelity comparison. In the reference study, the noise-optimized RL solution
-was reported to achieve an approximately one-order-of-magnitude reduction in fidelity variance relative
-to both the noise-free RL controller and the gradient baseline throughout the tested noise range
-\cite{Niu2019}. The present implementation reproduces the same qualitative mechanism in a slightly more
-nuanced form: the stochastic TRPO controller is again clearly more stable than the nominal TRPO
-controller, confirming that robustness is indeed learned rather than accidentally inherited from the
-nominal optimizer, but the Adam baseline remains exceptionally compact in variance. This suggests that,
-in the present reproduction, the optimization landscape admits a short and relatively stiff Adam
-solution that is statistically concentrated under noise, even though it sacrifices both nominal quality
-and mean noisy fidelity. For the thesis, this is actually a useful result rather than a problem,
-because it sharpens the interpretation: \emph{robustness} is multi-dimensional, and the most convincing
-controller is not the one minimizing variance alone, but the one achieving the best trade-off between
-high average fidelity and controlled dispersion.
+The comparison with the Adam baseline is also instructive. Although Adam remains clearly more stable than the nominal TRPO controller, it is still systematically outperformed by the noise-optimized TRPO agent in variance across the explored noise range. This means that the advantage of the stochastic RL controller is not limited to average performance alone. Rather, the same method that yields the highest \(\overline{F}(\sigma_{\mathrm{noise}})\) also suppresses the growth of shot-to-shot fluctuations most effectively. From the viewpoint of practical analog quantum control, this is a particularly strong robustness signal, because it shows that the learned controller is not only more accurate on average, but also more reproducible under repeated noisy implementations.
 
-For this reason, Fig.~\ref{fig:fidelity_variance_vs_noise} should be discussed jointly with
-Fig.~\ref{fig:avg_fidelity_vs_noise}. Taken together, the two figures show that the noise-optimized
-TRPO controller occupies the best overall compromise among the tested methods: it consistently attains
-the highest average fidelity under stochastic perturbations, while also keeping the fidelity variance
-well below that of the nominal TRPO controller. The Adam baseline remains an instructive counterexample:
-its variance curve is favorable, but its mean-performance curve is systematically inferior. Hence, the
-statistical evidence does not support the simplistic claim that the most robust controller is merely the
-least fluctuating one; rather, it supports the stronger statement that robustness in the UFO sense is a
-joint property of \emph{accuracy} and \emph{stability}, and that noisy-environment training is what most
-effectively improves that joint property in the present study.
+Taken together with Fig.~\ref{fig:avg_fidelity_vs_noise}, the variance curve therefore strengthens the main conclusion of this subsection. The noise-optimized TRPO controller occupies the most favorable overall robustness regime among the methods considered here: it preserves the highest average fidelity while simultaneously maintaining the lowest fidelity variance. The nominal TRPO controller, by contrast, is inferior in both metrics, which shows that policy optimization alone is not sufficient to guarantee robust behavior. What matters is training the policy in the appropriate stochastic environment. In this sense, the variance analysis provides direct additional evidence for the central claim of the UFO framework, namely that robustness against stochastic control errors is not merely evaluated after training, but can be actively learned through exposure to the relevant noise model during optimization \cite{Niu2019}.
 
 
 \subsection{Interpretation}
 \label{subsec:robustness_interpretation}
+\subsection{Interpretation}
+\label{subsec:robustness_interpretation}
 
-Taken together, the average-fidelity and fidelity-variance curves provide the clearest empirical test of the
-central claim of the present reproduction. The key question of this subsection is not whether noisy control
-perturbations degrade all solutions (which they inevitably do), but whether training in a stochastic environment
-induces a qualitatively different and more robust control strategy than training in a nominal one. From this
-perspective, the most informative comparison is not the one between reinforcement learning and direct pulse
-optimization in the abstract, but the one between the \emph{two} TRPO controllers: the nominal controller and
-the noise-optimized controller. These two methods share the same architecture, the same policy-gradient
-machinery, the same Hamiltonian model, and the same UFO objective; the decisive difference is that only one of
-them is exposed during training to the Gaussian perturbation model described in
-Sec.~\ref{subsec:noise_model}. The fact that the noise-optimized controller systematically attains higher average
-fidelity and lower fidelity variance than the nominal TRPO solution therefore carries a very direct
-interpretation: the observed robustness is not merely an incidental byproduct of the RL formalism, but a
-property that is learned from the stochastic training environment itself \cite{Niu2019}.
+Taken together, the average-fidelity and fidelity-variance curves provide the clearest empirical validation of the central robustness claim of the present study. The key question is not whether all controllers degrade under stochastic control perturbations, which is unavoidable, but whether training in a noisy environment produces a control strategy that degrades \emph{more gracefully} than one trained only in the nominal setting. From this viewpoint, the most informative comparison is the one between the two TRPO agents. Since the nominal and noise-optimized controllers share the same policy architecture, the same physical model, and the same UFO objective, their different behavior under noisy evaluation must be attributed primarily to the environment used during training. The fact that the noise-optimized policy achieves both higher average fidelity and lower fidelity variance across the explored range of \(\sigma_{\mathrm{noise}}\) therefore shows that robustness is not a generic byproduct of reinforcement learning alone, but a property that is effectively learned through stochastic training \cite{Niu2019}.
 
-This point is conceptually important for the thesis. In the nominal single-target benchmark of
-Sec.~\ref{subsec:single_target_control_optimization}, the deterministic TRPO controller was shown to be
-competitive but not superior to a strong direct Adam baseline. In that regime, the use of reinforcement learning
-alone did not guarantee a better pulse. The robustness study changes the picture. Once performance is measured
-under a family of noisy realizations rather than on a single deterministic rollout, the controller trained in the
-stochastic environment becomes the one that preserves the largest average fidelity across the full explored noise
-range, while also reducing the statistical dispersion relative to the nominal TRPO solution. This is exactly the
-type of behaviour one would expect if the policy were not simply fitting one nominal pulse trajectory, but
-instead learning a control strategy that is less sensitive to random perturbations of the underlying
-multilevel Hamiltonian.
+This point is especially important in light of the nominal single-target comparison discussed earlier. In the deterministic setting, TRPO was shown to be competitive but not superior to the Adam baseline on the representative gate \(N(2.2,2.2,\pi/2)\). In that regime, the use of reinforcement learning by itself did not guarantee the best pulse. The robustness analysis changes this picture in a qualitatively meaningful way. Once performance is evaluated over an ensemble of noisy realizations rather than on a single nominal rollout, the controller trained in the stochastic environment becomes the strongest overall solution: it preserves the highest average fidelity while also exhibiting the smallest shot-to-shot fluctuations. This is precisely the setting in which the RL formulation becomes most compelling, since the policy is no longer judged only by how well it fits one deterministic control trajectory, but by how reliably it performs under a physically relevant family of perturbations.
 
-At the same time, the present data suggest a more nuanced conclusion than the strongest formulation reported in
-the original UFO paper. In the reference work, the noise-optimized RL controller was reported to outperform both
-the noise-free RL controller and the gradient-based baseline also in fidelity variance by approximately one order
-of magnitude throughout the tested range \cite{Niu2019}. In the present reproduction, the comparison with the
-Adam baseline is more subtle. The Adam solution remains the narrowest distribution in the strict variance sense,
-that is, the least fluctuating controller under repeated noisy realizations. However, this lower variance is not
-paired with the best mean performance: the same Adam baseline lies systematically below the noise-optimized TRPO
-controller in average fidelity. For this reason, the present results do not support the simplistic conclusion that
-robustness should be identified with variance minimization alone. Rather, they support a more physically relevant
-statement: a robust controller must maintain \emph{both} high mean fidelity and controlled shot-to-shot
-fluctuations, and under this joint criterion the noise-optimized TRPO controller provides the best overall
-operating point among the three methods tested here.
+The comparison with the Adam baseline reinforces this interpretation. Adam remains a meaningful and nontrivial reference, and its performance confirms that direct gradient-based optimization can still produce strong controls in this multilevel setting. However, the present results indicate that the best robust operating point is no longer attained by the direct optimizer once stochastic perturbations are taken into account. Instead, the noise-optimized TRPO controller dominates Adam in both of the robustness metrics considered here: it maintains a higher mean fidelity under noise and, at the same time, suppresses the variance more effectively. This is a particularly strong result, because it shows that the stochastic RL controller does not improve one aspect of robustness at the expense of another. Rather, it improves both the \emph{accuracy} and the \emph{stability} of the noisy implementation.
 
-This distinction is also meaningful from the viewpoint of control theory. The Adam baseline appears to produce a
-"stiffer" solution: its noisy realizations remain more tightly clustered, but around a lower-fidelity mean.
-The noise-optimized TRPO controller, by contrast, occupies a different region of the performance landscape. Its
-output distribution is broader than Adam's, yet it is centered at a consistently better average fidelity across
-the whole family of Gaussian perturbations considered in the robustness sweep. In practical terms, this means
-that the stochastic TRPO agent is not merely learning to reduce dispersion; it is learning to shift the noisy
-performance distribution toward a better robust mean while simultaneously avoiding the large variance growth
-displayed by the nominal TRPO solution. This is arguably the more relevant notion of robustness for analog
-quantum control, where one is not interested in a controller that is merely reproducible, but in one that remains
-reproducibly \emph{accurate} under realistic perturbations.
+From a control-theoretic perspective, this suggests that the policy trained in the noisy environment has internalized pulse strategies that are intrinsically less sensitive to random perturbations of the control channels and of the anharmonicity-related Hamiltonian parameter. In other words, the learned policy appears to avoid control trajectories that are excessively fragile to small stochastic deviations, and instead converges toward solutions that remain effective across a broader ensemble of realizations. This interpretation is fully consistent with the original logic of the UFO framework, where robustness is not treated as a post hoc diagnostic, but as a property to be incorporated directly into the optimization environment \cite{Niu2019}.
 
-A second important implication concerns the role of the stochastic environment itself. Because the evaluation
-noise is not restricted to a single point but is swept continuously over
-\(\sigma_{\mathrm{noise}}\in[0.1,3.5]\,\mathrm{MHz}\), the superiority of the noise-optimized TRPO controller cannot
-be interpreted as a trivial overfitting to one fixed training noise realization. Instead, the controller trained
-at the nominal paper setting of \(1\,\mathrm{MHz}\) displays a more graceful degradation across a broader family of
-Gaussian noise strengths, which is precisely the kind of in-family generalization claimed in the original paper
-\cite{Niu2019}. In this sense, the present results support the methodological thesis that policy-gradient
-optimization in a stochastic environment can internalize useful regularities of noisy control trajectories and
-convert them into improved robust performance at deployment time.
+A further important consequence is that robustness should be understood here as a genuinely multidimensional notion. The average fidelity and the fidelity variance do not probe the same aspect of performance, and neither of them is sufficient on its own. A practically useful controller should remain both accurate \emph{and} statistically stable under repeated noisy executions. The present results show that the noise-optimized TRPO controller is the only method among the three considered that consistently occupies the most favorable region with respect to both criteria. For this reason, the evidence presented in this subsection supports a stronger conclusion than a simple ranking of optimizers: it supports the claim that exposure to the appropriate stochastic environment during training changes the qualitative character of the learned control policy.
 
-For the overall structure of the chapter, this subsection therefore serves as the empirical validation point of
-the framework. The deterministic results of Sec.~\ref{subsec:single_target_control_optimization} established that
-all three methods can produce meaningful high-quality controls on the representative gate
-\(N(2.2,2.2,\pi/2)\), but did not by themselves justify the use of noisy-environment RL. The robustness curves do.
-They show that once the control problem is evaluated in the physically relevant regime of stochastic actuation
-errors, the decisive advantage of the RL framework is not simply that it optimizes a pulse, but that it can learn
-a pulse \emph{distributionally adapted} to the noise model. This is the sense in which the present reproduction
-most directly validates the main scientific message of the UFO framework: robustness against stochastic control
-errors is not an accidental emergent feature of analog optimization, but a trainable property that can be
-improved by embedding the appropriate perturbation model directly into the learning environment.
+For the broader structure of the chapter, this subsection therefore plays a decisive interpretive role. The single-target nominal benchmark established that all methods can produce meaningful high-quality analog controls, but did not by itself justify the additional machinery of noisy-environment reinforcement learning. The robustness study does. It shows that, once the control problem is evaluated in the physically relevant regime of stochastic actuation errors, the decisive advantage of the UFO-inspired RL framework lies not merely in pulse optimization, but in the ability to \emph{learn robustness} directly from the training environment. In this sense, the present reproduction supports one of the main scientific messages of the original paper: robustness against stochastic control errors is not an accidental emergent feature of analog control, but a trainable property that can be significantly improved by embedding the relevant perturbation model into the optimization loop \cite{Niu2019}.
 
 % \paragraph{Recommended figure strategy.}
 % For maximum clarity, I would keep the robustness subsection organized around \emph{two separate main figures}
