@@ -833,10 +833,92 @@ For the structure of the thesis, this subsection is the bridge between the physi
 \end{figure}
 
 
-% Requires in the preamble:
-% \usepackage{amsmath,amssymb,amsfonts,bm}
-% \usepackage{tikz}
-% \usetikzlibrary{positioning,arrows.meta}
+\subsection{Implementation of the policy and value networks}
+\label{subsec:implementation_policy_value_networks}
+
+The previous chapter introduced the policy and value functions as abstract objects of actor--critic reinforcement learning. In the present implementation, these objects are realized through two separate fully connected feed-forward neural networks, one for the stochastic policy and one for the state-value function. Their role is not to replace the physical model of the control problem, which remains entirely specified by the multilevel gmon Hamiltonian and by the UFO cost, but to provide a trainable parametric representation of the control law and of the associated long-term return within the TRPO optimization loop.
+
+The design of these networks follows the structure of the RL environment introduced in Sec.~\ref{subsec:paper_rl_formulation}. At each decision step, the agent receives a state representation encoding the current status of the physical gate-construction process, and must output either a distribution over the next continuous control action or a scalar estimate of the expected future return from that state. Since both tasks are defined on fixed-dimensional vector inputs and no explicit recurrent memory is required beyond the state representation itself, a multilayer perceptron architecture is sufficient for the purposes of the present study.
+
+\paragraph{State representation.}
+The observation supplied to the agent is built from the current simulated propagator of the full truncated multilevel system. In the present implementation, each local superconducting mode is truncated to three levels, so that the total physical Hilbert-space dimension is
+\begin{equation}
+d_{\mathrm{phys}} = 3^2 = 9.
+\label{eq:impl_physical_dimension}
+\end{equation}
+At time step \(t\), let \(U_t \in \mathbb{C}^{9\times 9}\) denote the current full propagator. The state is then constructed by vectorizing this matrix, separating its real and imaginary parts, and appending a scalar encoding the normalized progress through the episode. In compact form,
+\begin{equation}
+s_t
+=
+\Bigl(
+\Re(\mathrm{vec}(U_t)),
+\Im(\mathrm{vec}(U_t)),
+t/T_{\max}
+\Bigr).
+\label{eq:impl_state_representation}
+\end{equation}
+Since \(U_t\) has \(9^2=81\) complex entries, the resulting observation dimension is
+\begin{equation}
+d_{\mathrm{obs}} = 2\cdot 81 + 1 = 163.
+\label{eq:impl_observation_dimension}
+\end{equation}
+This representation is more informative than a purely time-based or control-based state encoding, because it exposes to the agent the currently accumulated physical action of the pulse sequence itself. In this sense, the policy does not act only on a clock variable, but on a compact summary of how much of the desired unitary evolution has already been realized in the full multilevel model.
+
+\paragraph{Policy network.}
+The policy is implemented as a stochastic continuous-action actor. More precisely, the policy network maps the current state \(s_t\) to the mean of a Gaussian distribution in a seven-dimensional raw-action space,
+\begin{equation}
+\mu_{\theta}(s_t) \in \mathbb{R}^{7},
+\label{eq:impl_policy_mean}
+\end{equation}
+while the exploration scale is determined by a learned log-standard-deviation parameter
+\begin{equation}
+\log \sigma \in \mathbb{R}^{7},
+\label{eq:impl_policy_logstd}
+\end{equation}
+which is state-independent in the present implementation. The raw action is therefore sampled according to
+\begin{equation}
+\tilde a_t \sim \mathcal{N}\!\bigl(\mu_{\theta}(s_t),\mathrm{diag}(\sigma^2)\bigr),
+\label{eq:impl_raw_action_distribution}
+\end{equation}
+and is subsequently mapped to the bounded action domain through a componentwise hyperbolic tangent,
+\begin{equation}
+a_t = \tanh(\tilde a_t).
+\label{eq:impl_action_squashing}
+\end{equation}
+The use of the squashing map in Eq.~\eqref{eq:impl_action_squashing} is important because the physical control channels are amplitude-bounded. It allows the Gaussian policy to remain unconstrained in the raw space while ensuring that the actual action presented to the environment lies in the compact interval \([-1,1]^7\).
+
+The squashed action \(a_t\) is not yet the physical control vector entering the Hamiltonian. It must still be mapped to the seven control channels of the gmon model,
+\begin{equation}
+u_t
+=
+\bigl(
+g_t,\,
+\delta_{1,t},\delta_{2,t},\,
+f_{1,t},f_{2,t},\,
+\phi_{1,t},\phi_{2,t}
+\bigr),
+\label{eq:impl_physical_control_vector}
+\end{equation}
+through a deterministic rescaling procedure. In the present code, the linear-amplitude channels \(g_t,\delta_{1,t},\delta_{2,t},f_{1,t},f_{2,t}\) are obtained by multiplying the corresponding action components by the maximum control amplitude, while the phase channels are mapped from \([-1,1]\) to \([0,2\pi]\). In this way, the policy network learns in a normalized action space, whereas the environment receives controls expressed directly in physical units.
+
+\paragraph{Value network.}
+The critic is implemented as a separate feed-forward network that outputs a single scalar,
+\begin{equation}
+V_{\omega}(s_t) \in \mathbb{R},
+\label{eq:impl_value_output}
+\end{equation}
+which approximates the expected discounted future reward from the current state. As in standard actor--critic formulations, this estimate is used to construct advantage signals for the policy update and therefore plays a stabilizing role in the optimization. The value network is trained by regression against empirical returns collected from sampled rollouts, while the policy network is updated through the TRPO step described in Sec.~\ref{subsec:why_paper_uses_trpo}. The two networks are thus optimized jointly but serve distinct purposes: the actor generates candidate control decisions, whereas the critic estimates their long-term usefulness.
+
+% \paragraph{Architecture.}
+Both the policy and the value networks use the same backbone architecture. Each is a multilayer perceptron with \(\tanh\) activation functions between successive affine layers. The policy head is a linear map from the last hidden layer to the seven-dimensional mean vector in Eq.~\eqref{eq:impl_policy_mean}, while the critic head is a linear map from the same hidden representation to the scalar output in Eq.~\eqref{eq:impl_value_output}. This architecture matches the one reported in the original paper and was retained here in order to remain as close as possible to the reference implementation while avoiding additional architectural degrees of freedom in the empirical comparison \cite{Niu2019}.
+
+% \paragraph{Relation to the control problem.}
+It is worth emphasizing that the neural networks introduced here are embedded in a tightly constrained physical loop. The policy does not output an abstract machine-learning action unrelated to the device; it outputs the next candidate control values for the Hamiltonian channels of the multilevel gmon model. Likewise, the value function is not trained against an arbitrary task-dependent label, but against returns generated from the UFO objective, which itself encodes gate fidelity, leakage suppression, boundary regularity, and runtime. For this reason, the actor--critic architecture should be interpreted as an optimization interface between reinforcement learning and the physical control model, rather than as an independent phenomenological model of the quantum dynamics.
+
+
+\textbf{TODO:} fix this paragraph
+ % In summary, the implementation used in this thesis realizes the RL agent through two separate feed-forward neural networks: a stochastic Gaussian policy over seven continuous control channels, and a scalar value estimator defined on the propagator-based state representation of Eq.~\eqref{eq:impl_state_representation}. This parameterization is sufficiently expressive to support TRPO-based optimization in the present continuous-control setting, while remaining simple and transparent enough for a controlled empirical study of the UFO framework.
+
 
 \subsection{Why the paper uses trust-region policy optimization}
 \label{subsec:why_paper_uses_trpo}
