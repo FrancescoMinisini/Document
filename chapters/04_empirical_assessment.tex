@@ -407,7 +407,7 @@ For this reason, the present subsection supports two distinct conclusions. First
 \subsection{Sensitivity study of the UFO cost-function weights}
 \label{subsec:ufo_weight_sweep}
 
-The choice of the UFO coefficients deserves a separate study because, unlike ordinary optimizer hyperparameters, these quantities are part of the physical definition of the control problem itself. In the original framework, the total objective is written as
+The choice of the UFO coefficients deserves a separate study because, unlike ordinary optimizer hyperparameters, these quantities are part of the physical definition of the control problem itself. As mentioned in \ref{subsec:ufo_cost_function}, the total objective is written as
 \begin{equation}
 C(\chi,\beta,\mu,\kappa)
 =
@@ -521,24 +521,9 @@ The main conclusion of this subsection is therefore twofold. First, the cost wei
 \subsection{Final parameter configuration for the remainder of the chapter}
 \label{subsec:final_parameter_configuration}
 
-The previous subsections examined three distinct layers of parameter choice: training hyperparameters, neural-network architecture, and UFO cost-function weights. Taken together, these studies suggest that the empirical behavior of the framework is reasonably stable within a physically sensible region of parameter space, but also that some choices are clearly more defensible than others. It is therefore useful to close the parameter-selection section by fixing one explicit configuration that will be used throughout the remainder of the chapter unless otherwise stated.
+In light of the parameter studies discussed above, a single reference configuration is now fixed for the remainder of the empirical chapter. The purpose of this final choice is not to claim global optimality over all possible numerical settings, but to define a stable and transparent operating regime under which the subsequent experiments can be compared consistently.
 
-A first conclusion concerns the distinction between \emph{paper-faithful} and \emph{thesis-default} settings. For strict methodological comparison with the original framework of Niu \emph{et al.}, the most natural reference remains the configuration reported in the paper itself: three-layer fully connected policy and value networks of size \(64\text{-}32\text{-}32\), Gaussian training noise with standard deviation \(1\,\mathrm{MHz}\), and the UFO scalarization
-\begin{equation}
-(\chi,\beta,\mu,\kappa)=(10,10,0.2,0.1),
-\label{eq:paper_reference_configuration_final}
-\end{equation}
-which the authors report as the result of a grid search and apply uniformly across the target gates considered. 
-This reference configuration remains the correct baseline whenever the goal is to assess agreement with the published study as directly as possible.
-
-At the same time, the thesis-side restricted architecture sweep indicates that, within the family of nearby alternatives explored here, the architecture
-\begin{equation}
-(64,64,64)
-\label{eq:thesis_default_architecture_final}
-\end{equation}
-provides the most favorable practical trade-off between evaluation fidelity, robustness, and overall trainability under the available computational budget. By contrast, the cost-function sensitivity study shows that there is no strong reason to deviate from the paper weights in Eq.~\eqref{eq:paper_reference_configuration_final}: the reference scalarization remains very close to the Pareto-favorable region of the present implementation, while preserving the cleanest possible comparison with the original framework. For this reason, the most coherent compromise for the remainder of the chapter is to retain the \emph{paper} UFO weights while adopting the \emph{thesis-selected} network architecture for the RL agent in those experiments that are not meant to be exact paper-faithful reruns.
-
-The resulting default configuration used in the main experiments is therefore the following:
+For the training hyperparameters, the default setup is
 \begin{equation}
 \Delta t = 2\,\mathrm{ns},
 \qquad
@@ -549,42 +534,31 @@ T_{\max}=180\,\mathrm{ns},
 \texttt{max\_kl}=0.01,
 \qquad
 C_{\mathrm{term}}=0.15,
-\label{eq:final_training_defaults}
+\label{eq:final_training_setup}
 \end{equation}
-with
+with \(\gamma_{\mathrm{RL}}=0.99\), \(\lambda=0.97\), damping \(0.1\), and \(10\) conjugate-gradient iterations. Unless stated otherwise, the noise-optimized runs are trained with Gaussian control noise of standard deviation
 \begin{equation}
-\gamma_{\mathrm{RL}}=0.99,
-\qquad
-\lambda=0.97,
-\qquad
-\texttt{cg\_iters}=10,
-\qquad
-\texttt{damping}=0.1,
-\label{eq:final_trpo_aux_defaults}
+\sigma_{\mathrm{train}} = 1\,\mathrm{MHz},
+\label{eq:final_training_noise}
 \end{equation}
-policy and value hidden sizes
+in direct continuity with the reference framework \cite{Niu2019}.
+
+For the actor--critic representation, the architecture sweep suggests that network choice is not neutral, but also that improvements are not monotonic with increasing width or depth. Since the restricted sweep identified
 \begin{equation}
-(64,64,64),
-\label{eq:final_hidden_sizes_default}
+(64,64,64)
+\label{eq:final_hidden_sizes_choice}
 \end{equation}
-and UFO coefficients
+as the most favorable architecture among the tested alternatives, this layout is adopted as the default thesis-side configuration for the subsequent experiments.
+
+Finally, for the UFO scalarization, the sensitivity study shows that the absolute value of the total cost is not directly comparable across different weight configurations, and that the most meaningful comparison must instead be based on fidelity, leakage, and robustness. Under this interpretation, the reference-paper choice
 \begin{equation}
-(\chi,\beta,\mu,\kappa)=(10,10,0.2,0.1).
-\label{eq:final_ufo_weights_default}
+(\chi,\beta,\mu,\kappa)=(10,10,0.2,0.1)
+\label{eq:final_ufo_weights_choice}
 \end{equation}
-Noise-optimized runs are trained with Gaussian amplitude fluctuations of standard deviation
-\begin{equation}
-\sigma_{\mathrm{train}}=1\,\mathrm{MHz},
-\label{eq:final_training_noise_default}
-\end{equation}
-and robustness under stochastic control noise is evaluated, unless otherwise stated, from \(60\) Monte Carlo realizations per noise level, consistently with the reference paper. 
+remains very close to the best trade-off region observed in the present sweep. For this reason, and in order to preserve the cleanest possible comparison with the original UFO framework, these values are retained as the default cost-function weights in the remainder of the chapter \cite{Niu2019}.
 
-A further practical distinction concerns computational budget. The architecture and weight sweeps discussed above were intentionally performed under reduced training budgets, because their purpose was model selection rather than final benchmarking. In the remainder of the empirical chapter, these exploratory budgets are no longer used as defaults. Instead, the main RL comparison runs adopt the full-training regime whenever feasible, typically using larger episode batches and longer iteration schedules, so that the reported results reflect the quality of the framework itself rather than the artificial limitations of the preliminary sweeps. Reduced-budget settings are retained only where explicitly indicated, for example in fast exploratory scans or sanity-check experiments.
-
-The final interpretation is therefore straightforward. The remainder of the chapter does not rely on arbitrary or hidden implementation choices. Instead, it is built on a parameter regime that is justified in three successive steps: the training hyperparameters are chosen for stability and tractability, the network architecture is chosen from a restricted empirical sweep, and the UFO weights are retained from the reference paper because they remain well supported by the present sensitivity analysis. This makes the subsequent results easier to interpret scientifically. When later improvements or discrepancies are observed, they can be discussed in terms of the control framework itself rather than being attributed to uncontrolled shifts in parameter choice.
-
-Unless explicitly stated otherwise, Eqs.~\eqref{eq:final_training_defaults}--\eqref{eq:final_training_noise_default} define the default configuration used in the rest of this chapter. For experiments whose primary purpose is direct comparison with the original paper, the paper architecture \(64\text{-}32\text{-}32\) is retained as a reference variant; for the broader thesis-side experiments and extensions, the default actor--critic layout is instead taken to be \(64\text{-}64\text{-}64\), while the UFO scalarization remains fixed at the paper values in Eq.~\eqref{eq:final_ufo_weights_default}. In this way, the empirical study preserves comparability with the reference framework without giving up the information gained from the thesis-side parameter sweeps.
-
+Unless explicitly stated otherwise, all later experiments therefore use the combined reference configuration defined by
+Eqs.~\eqref{eq:final_training_setup}--\eqref{eq:final_ufo_weights_choice}. This choice ensures that the empirical comparisons reported in the following sections are not affected by experiment-specific retuning, and that the results remain directly interpretable within the methodological logic established by the reference paper.
 
 \section{Single-target control optimization}
 \label{sec:single_target_optimization}
