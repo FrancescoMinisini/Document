@@ -1,0 +1,47 @@
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.9\linewidth,
+    height=7cm,
+    xmode=log,
+    xlabel={Best Eval Leakage},
+    ylabel={Best Eval Fidelity},
+    legend pos=outer north east,
+    legend entries={128-64-32, 128-64-32-32, 64-64-64, 64-64-64-32},
+    ymajorgrids=true,
+    xmajorgrids=true,
+    grid style={white, line width=1pt},
+    axis background/.style={fill=black!10},
+    axis line style={draw=none},
+    tick style={draw=none},
+]
+
+% 128-64-32
+\addplot[only marks, mark=*, color=blue!70!black, mark size=2.5pt] coordinates {
+(0.0003969165182129, 0.992595356685619)
+(0.0005266035576007, 0.9914086180882922)
+(0.0003420669853937, 0.9919242027994676)
+};
+
+% 128-64-32-32
+\addplot[only marks, mark=*, color=orange!80!black, mark size=2.5pt] coordinates {
+(0.0003451140122527, 0.9910814936901406)
+(0.0004641937104365, 0.985514911362394)
+(0.000257833316119, 0.9951559092180962)
+};
+
+% 64-64-64
+\addplot[only marks, mark=*, color=green!60!black, mark size=2.5pt] coordinates {
+(0.0003861626723643, 0.9950850298203852)
+(0.0004869818030718, 0.99104952271359)
+(0.0003405043154386, 0.996243932479248)
+};
+
+% 64-64-64-32
+\addplot[only marks, mark=*, color=red!70!black, mark size=2.5pt] coordinates {
+(0.0003889041746485, 0.9888990273989104)
+(0.0003657914946194, 0.9940665094292304)
+(0.0004961488017701, 0.9949487889530942)
+};
+
+\end{axis}
+\end{tikzpicture}

@@ -399,8 +399,20 @@ For this reason, the present subsection supports two distinct conclusions. First
 
 \begin{figure}[t]
 \centering
-\input{plots/architecture_sweep_pareto.tex}
-\caption{Recommended synthesis figure for the architecture sweep: use the Pareto-style scatter plot already generated for \emph{Leakage vs Robustness by Architecture}. The horizontal axis should show best evaluation leakage and the vertical axis should show average noisy fidelity at \(\sigma=1\,\mathrm{MHz}\), with colors distinguishing the tested hidden-layer layouts and one point per seed. This figure is especially effective because it shows that the architecture comparison is genuinely multi-objective: lower leakage does not automatically imply better robustness, and the preferred architecture should be identified through the overall trade-off rather than through a single metric.}
+\begin{subfigure}{0.48\textwidth}
+    \centering
+    \input{plots/architecture_sweep_pareto.tex}
+    \caption{Robustness ($\sigma=1$ MHz)}
+    \label{fig:architecture_sweep_pareto_robustness}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.48\textwidth}
+    \centering
+    \input{plots/architecture_sweep_pareto_fidelity.tex}
+    \caption{Nominal Fidelity}
+    \label{fig:architecture_sweep_pareto_fidelity}
+\end{subfigure}
+\caption{Synthesis of the architecture sweep performance trade-offs. The scatter plots show (a) the average fidelity under noise versus evaluation leakage, and (b) the nominal evaluation fidelity versus evaluation leakage. Colors distinguish the tested hidden-layer layouts, with each point representing a separate seed. These figures highlight the multi-objective nature of the architecture selection: lower leakage does not always translate to higher nominal fidelity or better noise robustness.}
 \label{fig:architecture_sweep_pareto}
 \end{figure}
 
@@ -499,22 +511,34 @@ The main conclusion of this subsection is therefore twofold. First, the cost wei
 
 \begin{figure}[t]
 \centering
-\fbox{\parbox[c][5.2cm][c]{0.9\linewidth}{\centering Placeholder}}
+\input{plots/ufo_weight_sweep_robustness.tex}
 \caption{Recommended main sensitivity figure for the UFO-weight sweep: use the four-panel boxplot already generated for \emph{Sensitivity of Robustness Fidelity to Cost Parameters}. The four panels should report the dependence of the noisy average fidelity at \(\sigma=1\,\mathrm{MHz}\) on \(\chi\), \(\beta\), \(\mu\), and \(\kappa\). Since \(\beta\) is fixed in the present experiment, the corresponding panel may either be kept as a visual reminder of the fixed reference scale or omitted in the final thesis version to avoid redundancy. The purpose of the figure is to show immediately that \(\chi\) and \(\mu\) produce the strongest variation in robustness, while \(\kappa\) has only a weak effect under the present fixed-horizon model-selection regime.}
 \label{fig:ufo_weight_sweep_robustness}
 \end{figure}
 
 \begin{figure}[t]
 \centering
-\fbox{\parbox[c][5.2cm][c]{0.9\linewidth}{\centering Placeholder}}
+\input{plots/ufo_weight_sweep_leakage.tex}
 \caption{Recommended companion figure for the UFO-weight sweep: use the four-panel boxplot already generated for \emph{Sensitivity of Best Eval Leakage to Cost Parameters}. The panels should report the dependence of best evaluation leakage on \(\chi\), \(\beta\), \(\mu\), and \(\kappa\), again with the possibility of suppressing the \(\beta\) panel in the final version since \(\beta\) is not varied. This figure is useful because it complements the robustness plot and shows that configurations with lower leakage are not always those with the best overall robustness. In particular, it helps visualize the non-monotonic role of \(\mu\), which may suppress leakage while still worsening the broader control trade-off when chosen too aggressively.}
 \label{fig:ufo_weight_sweep_leakage}
 \end{figure}
 
 \begin{figure}[t]
 \centering
-\fbox{\parbox[c][5.2cm][c]{0.9\linewidth}{\centering Placeholder}}
-\caption{Recommended synthesis figure for the UFO-weight sweep: use the already generated Pareto-style scatter plot of leakage versus robustness, with color encoding the value of \(\chi\). The horizontal axis should show best evaluation leakage and the vertical axis should show the noisy average fidelity at \(\sigma=1\,\mathrm{MHz}\). This figure is particularly effective because it makes the multi-objective nature of the sweep immediately visible: lower leakage does not automatically imply better robustness, and the paper choice \((10,10,0.2,0.1)\) can be shown to lie very close to the Pareto-favorable region despite not being the numerically best point in every single metric.}
+\begin{subfigure}{0.48\textwidth}
+    \centering
+    \input{plots/ufo_weight_sweep_pareto.tex}
+    \caption{Robustness ($\sigma=1$ MHz)}
+    \label{fig:ufo_weight_sweep_pareto_robustness}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.48\textwidth}
+    \centering
+    \input{plots/ufo_weight_sweep_pareto_fidelity.tex}
+    \caption{Nominal Fidelity}
+    \label{fig:ufo_weight_sweep_pareto_fidelity}
+\end{subfigure}
+\caption{Synthesis of the UFO-weight sweep trade-offs. The scatter plots show (a) robustness versus leakage and (b) nominal fidelity versus leakage, with colors encoding the value of $\chi$. This visual representation confirms that the paper choice $(\chi,\beta,\mu,\kappa)=(10,10,0.2,0.1)$ lies on or near the Pareto-optimal frontier for both objectives, justifying its selection as the reference configuration despite not holding the numerical record for every single metric.}
 \label{fig:ufo_weight_sweep_pareto}
 \end{figure}
 
