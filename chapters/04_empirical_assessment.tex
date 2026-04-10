@@ -56,16 +56,16 @@
 % \gamma = \pi/2,
 % \label{eq:representative_target_tuning}
 % \end{equation}
-% and explored a small grid over the most influential TRPO hyperparameters, namely the trust-region radius \(\texttt{max\_kl}\), the stopping threshold \(\texttt{termination\_cost}\), the initial policy exploration scale \(\texttt{init\_log\_std}\), and the temporal discretization / horizon pair \((dt, T_{\max})\). The search was intentionally kept lightweight: it covered \(9\) TRPO configurations and \(27\) total runs, corresponding to \(3\) random seeds per configuration. This limited design is consistent with the methodological role of the study, namely parameter selection rather than a standalone scientific result.
+% and explored a small grid over the most influential TRPO hyperparameters, namely the trust-region radius \(\delta_{\mathrm{KL}}\), the stopping threshold \(\texttt{termination\_cost}\), the initial policy exploration scale \(\log \sigma_{0}\), and the temporal discretization / horizon pair \((dt, T_{\max})\). The search was intentionally kept lightweight: it covered \(9\) TRPO configurations and \(27\) total runs, corresponding to \(3\) random seeds per configuration. This limited design is consistent with the methodological role of the study, namely parameter selection rather than a standalone scientific result.
 % % :contentReference[oaicite:0]{index=0}
 
 % The configuration retained for the main experiments was the one with the lowest aggregated primary metric across seeds. The selected setting corresponds to
 % \begin{equation}
-% \texttt{max\_kl}=0.005,
+% \delta_{\mathrm{KL}}=0.005,
 % \qquad
 % \texttt{termination\_cost}=0.15,
 % \qquad
-% \texttt{init\_log\_std}=-1.0,
+% \log \sigma_{0}=-1.0,
 % \qquad
 % dt=2.0~\mathrm{ns},
 % \qquad
@@ -250,9 +250,10 @@ Finally, the section closes by fixing one final parameter configuration for the 
 
 % :contentReference[oaicite:4]{index=4} :contentReference[oaicite:5]{index=5} :contentReference[oaicite:6]{index=6}
 
-\subsection{Simulation parameters and hyperparameter choices}
+\subsection{Simulation and training parameters choice}
+\label{subsec:simulation_and_training_parameters_choice}
 \paragraph{Simulation parameters.}
-\label{subsec:simulation_parameters_tradeoffs}
+\label{subsec:simulation_parameters}
 
 Before discussing the optimizer-specific settings, it is useful to isolate those numerical choices that belong more directly to the simulation environment itself. These parameters do not define the physical control objective in the same sense as the UFO weights, but neither are they mere training details: they determine the temporal resolution of the control problem, the effective size of the admissible trajectory space, and the computational burden of each rollout. For this reason, they should be discussed separately from the strictly algorithmic hyperparameters of TRPO. As discussed in subsection \ref{subsec:why_this_target_is_representative}, the parameter-selection study is anchored to the representative gate
 \begin{equation}
@@ -287,13 +288,13 @@ Taken together, the choices in Eqs.~\eqref{eq:default_simulation_discretization}
 Once the simulation environment has been fixed, the next layer of parameter selection concerns the hyperparameters of the reinforcement-learning algorithm itself. These do not change the physical control problem, but they strongly affect optimization stability, exploration behavior, statistical efficiency, and wall-time cost. For this reason, they should be distinguished from the simulation-side choices discussed above, even though the two levels are obviously coupled in practice. 
 % The goal of the present subsection is therefore not to perform an exhaustive search over the full TRPO design space, but to identify a regime that is stable, reproducible, and sufficiently well aligned with the reference framework to support the experiments reported later in the chapter.
 
-Within this optimizer-side configuration, the most relevant parameters are the trust-region radius, the initial exploration scale, the batch size measured in episodes per policy update, the number of training iterations, and the terminal-cost threshold used for early stopping. These quantities affect different parts of the learning dynamics. The trust-region radius controls how aggressively the policy is allowed to move in one TRPO update, while the initial log-standard deviation determines the width of the Gaussian exploration policy at the beginning of training. The batch size influences the statistical quality of the policy-gradient estimate, the iteration budget controls how long the optimizer is allowed to refine the policy, and the stopping threshold determines how demanding the convergence criterion should be.
+Within this optimizer-side configuration, the most relevant parameters are the trust-region radius (\(\delta_{\mathrm{KL}}\)), the initial exploration scale (\(\log \sigma_{0}\)), the batch size measured in episodes per policy update, the number of training iterations, and the terminal-cost threshold used for early stopping. These quantities affect different parts of the learning dynamics. The trust-region radius \(\delta_{\mathrm{KL}}\) controls how aggressively the policy is allowed to move in one TRPO update, while the initial exploration scale \(\log \sigma_{0}\) determines the width of the Gaussian exploration policy at the beginning of training. The batch size influences the statistical quality of the policy-gradient estimate, the iteration budget controls how long the optimizer is allowed to refine the policy, and the stopping threshold determines how demanding the convergence criterion should be.
 
-Among these parameters, the clearest trade-off is the one between exploration and stability. If \texttt{init\_log\_std} is chosen too large, early training becomes excessively noisy: the policy explores too broadly, the squashed actions are frequently pushed toward saturation, and the resulting control trajectories become unstable and difficult to refine. If it is chosen too small, however, the controller explores only weakly and may fail to discover useful pulse patterns within a reasonable number of iterations. A similar balance appears in the trust-region radius \texttt{max\_kl}: large values permit faster progress in principle, but also increase the risk of unstable policy jumps, whereas very small values make learning conservative and slow. In the present study, these considerations lead to the nominal optimizer-side choices
+Among these parameters, the clearest trade-off is the one between exploration and stability. If \(\log \sigma_{0}\) is chosen too large, early training becomes excessively noisy: the policy explores too broadly, the squashed actions are frequently pushed toward saturation, and the resulting control trajectories become unstable and difficult to refine. If it is chosen too small, however, the controller explores only weakly and may fail to discover useful pulse patterns within a reasonable number of iterations. A similar balance appears in the trust-region radius \(\delta_{\mathrm{KL}}\): large values permit faster progress in principle, but also increase the risk of unstable policy jumps, whereas very small values make learning conservative and slow. In the present study, these considerations lead to the nominal optimizer-side choices
 \begin{equation}
-\texttt{init\_log\_std}=-1.0,
+\log \sigma_0 = -1.0,
 \qquad
-\texttt{max\_kl}=0.01,
+\delta_{\mathrm{KL}} = 0.01,
 \label{eq:default_training_exploration_trustregion}
 \end{equation}
 together with the standard TRPO settings
@@ -309,23 +310,28 @@ together with the standard TRPO settings
 \end{equation}
 These values are not presented as globally optimal, but as a stable operating regime that proved adequate for the representative target and remained close to standard TRPO practice.
 
+\textbf{TODO:} Controllare eventuali referenze per questi valori (oltre a sutton)
+\textbf{TODO:} Serve piu chiarezza su cosa sono? Magari da riprendere meglio in background e implementation
+
 A further methodological compromise concerns the relation between stopping threshold, batch size, and total iteration budget. A loose termination criterion reduces training time, but risks accepting controls that are only superficially satisfactory. A stricter threshold is scientifically preferable, since it forces the optimizer to search for genuinely low-cost solutions, but it is also harder to satisfy reliably within a finite computational budget. In the present implementation, the default early-stopping threshold is set to
 \begin{equation}
-C_{\mathrm{term}}=0.15,
+C_{\mathrm{term}}=0.2,
 \label{eq:default_training_termination_cost}
 \end{equation}
-which is intentionally demanding and therefore avoids premature convergence toward mediocre solutions. On the data-collection side, the reference paper performs policy updates using \(20000\) episodes per batch \cite{Niu2019}. This value is retained for the main paper-matched runs, while lighter exploratory sweeps may use \(10000\) episodes per batch when computational cost must be reduced. In the same spirit, the full comparison runs are allowed to continue for up to \(100\) policy iterations, whereas shorter exploratory studies may use substantially smaller iteration budgets.
+which is intentionally demanding and therefore avoids premature convergence toward mediocre solutions. 
+While on more extensive sweeps, that relied on a smaller number of iterations, as those one described in sections \ref{subsec:nn_size_sweep} and \ref{subsec:ufo_weight_sweep}, the less strict value of \(0.4\) was used. 
+On the data-collection side, the reference paper performs policy updates using \(20000\) episodes per batch \cite{Niu2019}. This value is retained for the main paper-matched runs, while lighter exploratory sweeps may use \(10000\) episodes per batch when computational cost must be reduced. In the same spirit, the full comparison runs are allowed to continue for up to \(100\) policy iterations, whereas shorter exploratory studies may use substantially smaller iteration budgets.
 
 The resulting default optimizer-side configuration can therefore be summarized as
 \begin{equation}
-\texttt{init\_log\_std}=-1.0,\quad
-\texttt{max\_kl}=0.01,\quad
-C_{\mathrm{term}}=0.15,
+\log \sigma_0 = -1.0,\quad
+\delta_{\mathrm{KL}} = 0.01,\quad
+C_{\mathrm{term}}=0.20,
 \label{eq:default_training_configuration_summary_revised}
 \end{equation}
 with \(\gamma_{\mathrm{RL}}=0.99\), \(\lambda=0.97\), \(10\) conjugate-gradient iterations, damping \(0.1\), and batch sizes of \(20000\) episodes for the main runs or \(10000\) for lighter preliminary sweeps. This configuration is not claimed to be uniquely optimal, but it provides a coherent and transparent training regime under which later comparisons can be interpreted without ambiguity.
 
-It is worth stressing that the present subsection concerns only the optimizer-side hyperparameters of the TRPO pipeline. The architecture of the policy and value networks is held fixed here, so that the effect of training settings is not confounded with changes in representational capacity. Likewise, the UFO coefficients are not tuned in this subsection, because they belong to the physical scalarization of the control problem rather than to the optimizer itself. These two issues are therefore treated separately in the following subsections.
+% It is worth stressing that the present subsection concerns only the optimizer-side hyperparameters of the TRPO pipeline. The architecture of the policy and value networks is held fixed here, so that the effect of training settings is not confounded with changes in representational capacity. Likewise, the UFO coefficients are not tuned in this subsection, because they belong to the physical scalarization of the control problem rather than to the optimizer itself. These two issues are therefore treated separately in the following subsections.
 
 \subsection{Neural-network size sweep for policy and value functions}
 \label{subsec:nn_size_sweep}
@@ -339,12 +345,14 @@ The sweep was performed on the same representative target gate used for the trai
 U_{\mathrm{rep}} = N(2.2,2.2,\pi/2),
 \label{eq:nn_sweep_representative_target}
 \end{equation}
-and under a fixed reduced-budget training protocol designed for model selection. More precisely, all runs used noise-optimized TRPO with Gaussian training noise of standard deviation \(1\,\mathrm{MHz}\), timestep \(\Delta t=2\,\mathrm{ns}\), maximum gate duration \(T_{\max}=180\,\mathrm{ns}\), trust-region radius \(\texttt{max\_kl}=0.01\), initial exploration scale \(\texttt{init\_log\_std}=-1.0\), termination threshold \(C_{\mathrm{term}}=0.4\), and the nominal UFO weights
+and under a fixed reduced-budget training protocol designed for model selection. 
+More precisely, all runs used noise-optimized TRPO, termination threshold \(C_{\mathrm{term}}=0.4\), and the nominal UFO weights
 \begin{equation}
 (\chi,\beta,\mu,\kappa)=(10,10,0.2,0.1).
 \label{eq:nn_sweep_default_weights}
 \end{equation}
-Each architecture was trained for \(20\) TRPO iterations with \(5000\) episodes per batch and evaluated over \(3\) random seeds. The tested hidden-layer layouts were
+Each architecture was trained for \(20\) TRPO iterations with \(5000\) episodes per batch and evaluated over \(3\) random seeds.
+\footnote{The rest of the parameters where set as mentioned in the subsection \ref{subsec:simulation_and_training_parameters_choice}}. The tested hidden-layer layouts were
 \begin{equation}
 (64,64,64),\qquad
 (64,64,64,32),\qquad
@@ -353,6 +361,9 @@ Each architecture was trained for \(20\) TRPO iterations with \(5000\) episodes 
 \label{eq:tested_hidden_sizes}
 \end{equation}
 It should be noted explicitly that the exact paper architecture \((64,32,32)\) was not part of this restricted sweep. Consequently, the present study should be interpreted as a comparison among nearby thesis-side alternatives rather than as a direct empirical rejection of the reference architecture.
+
+\textbf{TODO:} Aggiungere il layout principale mancante (64,32,32) ai risultati, esperimento gia fatto, solo da inserire.
+
 
 To compare the candidate networks, several criteria were considered simultaneously. The primary selection metric was the best evaluation cost reached during training, since this is the quantity most directly aligned with the UFO objective. However, this scalar alone is not sufficient for a meaningful choice. A network could achieve a favorable total cost by trading leakage against fidelity or by settling into an unnecessarily long runtime. For this reason, the architecture comparison also tracked best evaluation fidelity, best evaluation leakage, effective evaluation runtime, and robustness under noisy deployment through the average fidelity at \(\sigma = 1\,\mathrm{MHz}\). In this way, the architecture was not chosen solely by one scalar score, but by its overall position in the multi-objective trade-off relevant to the control problem.
 
@@ -474,10 +485,10 @@ under a fixed reduced-budget noise-optimized TRPO configuration. More precisely,
 \qquad
 T_{\max}=180\,\mathrm{ns},
 \qquad
-\texttt{max\_kl}=0.005,
+\delta_{\mathrm{KL}}=0.005,
 \qquad
-\texttt{init\_log\_std}=-1.0,
-\label{eq:ufo_weight_fixed_training_setup}
+\log \sigma_0 = -1.0,
+    \label{eq:ufo_weight_fixed_training_setup}
 \end{equation}
 with \(5\) TRPO iterations, \(10000\) episodes per batch, \(8\) workers, termination threshold \(0.15\), Gaussian training noise of standard deviation \(1\,\mathrm{MHz}\), and the paper-matched network architecture \(64\text{-}32\text{-}32\). Two random seeds were used for each configuration. The explored coefficient ranges were
 \begin{equation}
@@ -574,9 +585,9 @@ For the training hyperparameters, the default setup is
 \qquad
 T_{\max}=180\,\mathrm{ns},
 \qquad
-\texttt{init\_log\_std}=-1.0,
+\log \sigma_0 = -1.0,
 \qquad
-\texttt{max\_kl}=0.01,
+\delta_{\mathrm{KL}} = 0.01,
 \qquad
 C_{\mathrm{term}}=0.15,
 \label{eq:final_training_setup}
@@ -635,7 +646,8 @@ U_{\mathrm{target}} = N(2.2,2.2,\pi/2)
 \end{equation}
 was optimized by direct gradient-based pulse search using Adam, that is, through a baseline in the spirit of standard direct quantum optimal-control methods acting directly in control space rather than through policy learning \cite{Khaneja2005,Koch2022}.
 The optimization was performed on the same multilevel gmon model and with the same UFO-inspired objective introduced in the previous sections, using a time discretization of \(\Delta t = 2\,\mathrm{ns}\), \(400\) Adam iterations for each candidate horizon, and a sweep over gate durations in the interval \(T\in[40,180]\,\mathrm{ns}\) with \(10\,\mathrm{ns}\) spacing.
-In order to keep the baseline aligned with the robustness-oriented setting of the paper, the optimization was carried out with the same nominal UFO weights \((\chi,\beta,\mu,\kappa)=(10,10,0.2,0.1)\) and with train-time Gaussian control noise of standard deviation \(1\,\mathrm{MHz}\), while the final metrics discussed in this subsection are recomputed in the nominal simulator.\footnote{This distinction is important in the present implementation. The internal optimizer summary selects \(T=60\,\mathrm{ns}\) as the minimum of the noisy optimization objective, whereas the deterministic post-training reevaluation identifies \(T=70\,\mathrm{ns}\) as the best nominal solution. Since the purpose of the present subsection is to establish the \emph{nominal} single-target benchmark, the \(70\,\mathrm{ns}\) solution is taken as the representative Adam baseline in the discussion below.}
+In order to keep the baseline aligned with the robustness-oriented setting of the paper, the optimization was carried out with the same nominal UFO weights \((\chi,\beta,\mu,\kappa)=(10,10,0.2,0.1)\) and with train-time Gaussian control noise of standard deviation \(1\,\mathrm{MHz}\), while the final metrics discussed in this subsection are recomputed in the nominal simulator.
+\footnote{This distinction is important in the present implementation. The internal optimizer summary selects \(T=60\,\mathrm{ns}\) as the minimum of the noisy optimization objective, whereas the deterministic post-training reevaluation identifies \(T=70\,\mathrm{ns}\) as the best nominal solution. Since the purpose of the present subsection is to establish the \emph{nominal} single-target benchmark, the \(70\,\mathrm{ns}\) solution is taken as the representative Adam baseline in the discussion below.}
 
 Under this nominal reevaluation, the best Adam solution is obtained at
 \begin{equation}
@@ -1077,6 +1089,7 @@ For the broader structure of the chapter, this subsection therefore plays a deci
 % interpretation.
 
 \section{Runtime analysis on the gate family \(N(\alpha,\alpha,\pi/2)\)}
+\label{sec:runtime}
 % \subsection{Runtime sweep protocol.}
 % To investigate the hardware efficiency of analog control beyond the single-target setting, I next considered the one-parameter subfamily
 % \begin{equation}
