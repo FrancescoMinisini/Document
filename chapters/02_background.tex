@@ -180,22 +180,26 @@ This is the quantity most frequently minimized in practical control optimization
 In realistic devices, however, the implemented operation is not exactly unitary on the logical subspace, since calibration errors, stochastic fluctuations, decoherence, and leakage make the effective map better described by a quantum channel $\mathcal{E}$. 
 
 % \textbf{TODO:} da inserire qui la definizione di quantum channel 
+\textbf{TODO:} decidere quale usare ( spostare nel caso la seconda frase da un altra parte)
 
 A \emph{quantum channel} is a linear map
 \begin{equation}
 \mathcal{E} : \mathcal{B}(\mathcal{H}) \to \mathcal{B}(\mathcal{H}),
 \label{eq:quantum_channel_map}
 \end{equation}
-acting on density operators, which is \emph{completely positive} and \emph{trace preserving} (CPTP)
-\footnote{Complete positivity means that, for any ancillary Hilbert space \(\mathcal{H}_{\mathrm{anc}}\), the extended map
+which describes the most general physically admissible evolution of a quantum state and is required to be \emph{completely positive} and \emph{trace preserving} (CPTP)\footnote{Complete positivity means that, for any ancillary Hilbert space \(\mathcal{H}_{\mathrm{anc}}\), the extended map
 \(
-\mathcal{E} \otimes \mathbb{I}_{\mathrm{anc}}
+\mathcal{E}\otimes \mathbb{I}_{\mathrm{anc}}
 \)
-maps positive operators to positive operators, while trace preservation requires
+maps positive operators to positive operators. This requirement is stronger than ordinary positivity and is necessary because a physical system may be entangled with an external ancilla; the evolution must therefore remain well defined even when applied only to part of a larger composite system. Trace preservation means that
 \(
-\mathrm{Tr}\!\bigl[\mathcal{E}(\rho)\bigr] = \mathrm{Tr}(\rho)\) for all density operators \(\rho\).
-}.
-Equivalently, every quantum channel admits a Kraus representation of the form
+\mathrm{Tr}\!\bigl[\mathcal{E}(\rho)\bigr]=\mathrm{Tr}(\rho)
+\)
+for every density operator \(\rho\), so that total probability is conserved. The reason one uses a quantum channel rather than a unitary operator in the present context is that the effective action of a realistic gate on the computational subspace is, in general, not exactly unitary. Even when the full dynamics of the enlarged physical system is unitary, the reduced evolution seen on the logical degrees of freedom may become non-unitary because of leakage outside the computational subspace, coupling to uncontrolled degrees of freedom, stochastic control fluctuations, model mismatch, or decoherence. More formally, if the system interacts with an environment initially in state \(\rho_E\), then the effective evolution on the system alone takes the form
+\(
+\mathcal{E}(\rho)=\mathrm{Tr}_E\!\left[U(\rho\otimes\rho_E)U^\dagger\right],
+\)
+which is generally a CPTP map rather than a unitary conjugation. For this reason, the language of quantum channels is the natural one when discussing noisy gates, average gate fidelity, and robustness beyond the ideal closed-system approximation.}. In finite dimension, every quantum channel admits a Kraus representation,
 \begin{equation}
 \mathcal{E}(\rho)
 =
@@ -209,6 +213,35 @@ where the operators \(\{E_k\}\) are the Kraus operators associated with the chan
 \mathcal{E}(\rho)=U\rho U^\dagger.
 \label{eq:unitary_channel_special_case}
 \end{equation}
+
+% A \emph{quantum channel} is a linear map
+% \begin{equation}
+% \mathcal{E} : \mathcal{B}(\mathcal{H}) \to \mathcal{B}(\mathcal{H}),
+% \label{eq:quantum_channel_map}
+% \end{equation}
+% acting on density operators, which is \emph{completely positive} and \emph{trace preserving} (CPTP)
+% \footnote{Complete positivity means that, for any ancillary Hilbert space \(\mathcal{H}_{\mathrm{anc}}\), the extended map
+% \(
+% \mathcal{E} \otimes \mathbb{I}_{\mathrm{anc}}
+% \)
+% maps positive operators to positive operators, while trace preservation requires
+% \(
+% \mathrm{Tr}\!\bigl[\mathcal{E}(\rho)\bigr] = \mathrm{Tr}(\rho)\) for all density operators \(\rho\).
+% }.
+% Equivalently, every quantum channel admits a Kraus representation of the form
+% \begin{equation}
+% \mathcal{E}(\rho)
+% =
+% \sum_{k} E_k \rho E_k^\dagger,
+% \qquad
+% \sum_k E_k^\dagger E_k = \mathbb{I},
+% \label{eq:kraus_representation}
+% \end{equation}
+% where the operators \(\{E_k\}\) are the Kraus operators associated with the channel. The unitary case is recovered as the special situation in which there is a single Kraus operator \(E_1=U\), so that
+% \begin{equation}
+% \mathcal{E}(\rho)=U\rho U^\dagger.
+% \label{eq:unitary_channel_special_case}
+% \end{equation}
 
 \textbf{TODO:} decidere quale footnote usare
 
