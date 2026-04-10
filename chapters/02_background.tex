@@ -2071,15 +2071,89 @@ This is precisely the conceptual role played by the framework analyzed in the ne
 % \usetikzlibrary{positioning,arrows.meta,fit}
 
 
-\subsection{Feed-Forward Neural Network for policy and value function estimation in continuous action spaces}
-\label{subsec:feedforward_neural_network}
+% \subsection{Feed-Forward Neural Network for policy and value function estimation in continuous action spaces}
+% \label{subsec:feedforward_neural_network}
 
-\textbf{TODO:} Disegnino dell'agente tipo quello del paper in images, con input, hidden layers, output, ecc. + citare soliti Lecun, Goodfellow, Bengio in deep learning etc
+% \textbf{TODO:} Disegnino dell'agente tipo quello del paper in images, con input, hidden layers, output, ecc. + citare soliti Lecun, Goodfellow, Bengio in deep learning etc
+
+% \subsubsection{Policy function}
+% \label{subsubsec:policy_function}
+
+
+
+% \subsubsection{Value function}
+% \label{subsubsec:value_function}
+
+\subsection{Neural parameterization of policy and value functions}
+\label{subsec:neural_parameterization_policy_value}
+
+The reinforcement-learning formulation introduced in the previous subsections defines the control problem at the level of states, actions, rewards, and policy updates. In order to make this formulation operational in a continuous-action and high-dimensional setting, one must still specify how the policy and the value function are represented. In simple low-dimensional problems, one could in principle store these objects explicitly in tabular form. In the present control setting, however, such an approach is not feasible. The state space is continuous, the action space is continuous, and the relevant control law must be able to capture highly nonlinear relations between the current dynamical configuration of the system and the next control decision. For this reason, both the policy and the value function are represented by trainable parametric function approximators.
+
+In the framework considered in this thesis, these approximators are implemented as feed-forward neural networks. This choice should be understood in a pragmatic rather than purely algorithmic sense. The goal is not to introduce a separate layer of physical modeling based on machine learning, but to provide a flexible finite-dimensional representation for the two central objects of actor--critic reinforcement learning: the policy
+\begin{equation}
+\pi_{\theta}(a \mid s),
+\label{eq:nn_policy_general}
+\end{equation}
+which determines how control actions are sampled from the current state, and the value function
+\begin{equation}
+V_{\omega}(s),
+\label{eq:nn_value_general}
+\end{equation}
+which estimates the expected discounted future reward associated with that state. In this way, the role of the neural networks is not to redefine the control objective, but to make its optimization tractable in a setting where explicit representations would be impossible.
+
+The use of feed-forward architectures is particularly natural in the present context because the control problem is formulated in discrete time and each decision step is based on a fixed-dimensional state representation. The network is therefore asked to learn a nonlinear map from a vector encoding the current status of the gate-construction process to either a distribution over the next control action or a scalar estimate of future performance. No recurrence is required at this level, since the relevant dynamical history is already encoded in the state variable itself. For this reason, fully connected feed-forward networks provide a sufficiently expressive and conceptually simple parameterization for both the actor and the critic.
 
 \subsubsection{Policy function}
 \label{subsubsec:policy_function}
 
+In continuous-action reinforcement learning, the policy is most naturally represented as a probability distribution over actions conditioned on the current state. A standard choice, and the one relevant for the present framework, is a Gaussian policy of the form
+\begin{equation}
+\pi_{\theta}(\tilde a_t \mid s_t)
+=
+\mathcal{N}\!\bigl(\tilde a_t;\,\mu_{\theta}(s_t),\Sigma_{\theta}(s_t)\bigr),
+\label{eq:gaussian_policy_nn}
+\end{equation}
+where \(\mu_{\theta}(s_t)\) is the state-dependent mean produced by the policy network and \(\Sigma_{\theta}(s_t)\) is the covariance matrix controlling exploration. In practice, one often works with an unconstrained auxiliary action variable \(\tilde a_t\), sampled from the Gaussian distribution in Eq.~\eqref{eq:gaussian_policy_nn}, and then maps it to the admissible action domain through a bounded nonlinear transformation, schematically written as
+\begin{equation}
+a_t = \varphi(\tilde a_t),
+\label{eq:squashed_action_general}
+\end{equation}
+where \(\varphi\) is typically chosen so as to enforce finite action bounds. This construction is especially convenient in control problems, since the physically allowed amplitudes and phases of the control channels are bounded by hardware constraints.
 
+The conceptual role of the policy network is therefore clear: it does not output a complete pulse sequence in one shot, but rather parameterizes a sequential control law that generates the control trajectory step by step. At each decision time, the network receives the current state \(s_t\) and produces the parameters of the distribution from which the next action is sampled. The resulting sequence of actions defines the full control protocol. In this sense, the policy network is the object through which reinforcement learning translates the abstract optimization objective into an adaptive rule for constructing pulse trajectories.
 
 \subsubsection{Value function}
 \label{subsubsec:value_function}
+
+The second neural component is the value network, which represents the state-value function
+\begin{equation}
+V^{\pi}(s_t)
+=
+\mathbb{E}_{\pi}
+\left[
+\sum_{k=t}^{T} \gamma^{\,k-t} r_k
+\,\middle|\,
+s_t
+\right].
+\label{eq:value_function_nn}
+\end{equation}
+Equation~\eqref{eq:value_function_nn} measures the expected discounted future reward obtainable from the current state under the policy \(\pi\). In actor--critic methods, this quantity plays a central auxiliary role: it does not define the physical objective itself, but provides an estimate of how promising a given state is in terms of future return.
+
+This estimate is especially important for policy-gradient optimization. Rather than updating the policy directly from raw returns, one typically uses the value function to construct an advantage estimate, schematically of the form
+\begin{equation}
+A^{\pi}(s_t,a_t) = Q^{\pi}(s_t,a_t) - V^{\pi}(s_t),
+\label{eq:advantage_nn}
+\end{equation}
+so that the policy update depends on whether the chosen action performs better or worse than what is expected on average from that state. The practical consequence is a substantial reduction in gradient variance and a more stable training process. In this sense, the value network acts as a critic: it evaluates the long-term quality of the states visited by the policy and thereby supports the optimization of the actor.
+
+From the viewpoint of the control problem, the distinction between the two networks should be kept conceptually sharp. The policy network is the object that generates candidate control actions. The value network is an auxiliary estimator that improves optimization efficiency by approximating the expected future return. Neither replaces the underlying physical model, the Hamiltonian evolution, or the control objective. Rather, both are embedded within the reinforcement-learning loop as trainable parametric representations that make actor--critic optimization possible in a continuous and nonlinear control landscape.
+
+In the present thesis, this neural parameterization should therefore be viewed as the algorithmic core of the learning agent rather than as the main scientific object of study. The scientific content remains the same as in the previous subsections: the relevant questions concern fidelity, leakage, runtime, robustness, and their combination in the UFO objective. The role of the neural networks is to provide a sufficiently expressive representation of the policy and value functions so that these physically motivated objectives can be optimized effectively. The concrete realization of this parameterization (including the precise choice of inputs, outputs, architecture, and action mapping used in the experiments) will be specified in the implementation chapter.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{images/Agent.png}
+\caption{Actor--critic view of continuous-action quantum control. The policy network maps the current state to a distribution over the next control action, while the value network estimates the expected discounted future reward associated with that state. The environment propagates the controlled quantum dynamics and returns the next state and reward.}
+\label{fig:actor_critic_nn_control}
+\end{figure}
+\textbf{TODO:} Da fare una versione stilizzata con latex di questa figura.
