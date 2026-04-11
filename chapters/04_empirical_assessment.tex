@@ -902,26 +902,6 @@ This evaluation protocol is particularly well suited to the present thesis, beca
 
 
 \subsection{Average fidelity versus noise strength.}
-% -------------------------------------------------
-% Figure placeholder for Paragraph 2
-% -------------------------------------------------
-\begin{figure}[t]
-    \centering
-    \fbox{\parbox[c][5.2cm][c]{0.9\linewidth}{\centering Placeholder }}
-    % \includegraphics[width=0.9\textwidth]{figures/avg_fidelity_vs_noise.pdf}
-    \caption{
-    Average fidelity $\overline{F}(\sigma_{\mathrm{noise}})$ as a function of the Gaussian noise strength
-    for the target gate $N(2.2,2.2,\pi/2)$, comparing the Adam baseline, the nominal TRPO controller,
-    and the noise-optimized TRPO controller. The main panel should display the full range
-    $\sigma_{\mathrm{noise}}\in[0.1,3.5]$ MHz. An inset is recommended to zoom into the low-noise regime
-    (for example $\sigma_{\mathrm{noise}}\in[0.1,1.2]$ MHz), where all methods remain close to unit fidelity
-    and the relative ordering is less visible on the full scale. If a smoothing procedure is used for visual
-    readability, the caption should explicitly state that smoothing is purely graphical and that the underlying
-    robustness metrics are computed from Monte Carlo samples as defined in
-    Eqs.~\eqref{eq:robustness_average_fidelity_section}--\eqref{eq:robustness_fidelity_variance_section}.
-    }
-    \label{fig:avg_fidelity_vs_noise}
-\end{figure}
 
 The main robustness comparison is reported in Fig.~\ref{fig:avg_fidelity_vs_noise}, where the average fidelity
 $\overline{F}(\sigma_{\mathrm{noise}})$ is plotted as a function of the noise strength for the three control strategies
@@ -937,6 +917,22 @@ under noise (which it must), but rather how slowly this degradation occurs for d
 \cite{Niu2019}. The present curves therefore provide a direct operational measure of robustness in the sense of
 Eqs.~\eqref{eq:robustness_average_fidelity_section} and \eqref{eq:robustness_fidelity_variance_section}.
 
+% -------------------------------------------------
+% Figure placeholder for Paragraph 2
+% -------------------------------------------------
+\begin{figure}[t]
+    \centering
+    \input{plots/avg_fidelity_vs_noise.tex}
+    \caption{
+    Average fidelity $\overline{F}(\sigma_{\mathrm{noise}})$ as a function of the Gaussian noise strength
+    for the representative target gate $N(2.2,2.2,\pi/2)$. 
+    The main panel tracks the performance degradation over the full range $\sigma_{\mathrm{noise}}\in[0.1,3.5]$ MHz, comparing the deterministic Adam baseline, the robust TRPO controller, and the nominal TRPO controller. 
+    The inset magnifies the low-noise regime ($\sigma_{\mathrm{noise}}\in[0.0,1.2]$ MHz), highlighting the relative initial ordering prior to the structural divergence. 
+    The smoothed curves (solid lines) are generated via an exponentially weighted moving average (\(\text{span} = 50\)) applied strictly for visual readability; the underlying Monte Carlo scatter evaluations remain faintly visible, capturing the exact noise ensemble response corresponding to Eqs.~\eqref{eq:robustness_average_fidelity_section}--\eqref{eq:robustness_fidelity_variance_section}.
+    }
+    \label{fig:avg_fidelity_vs_noise}
+\end{figure}
+
 Second, the noise-optimized TRPO controller defines the upper envelope of the comparison across essentially the
 entire explored range of $\sigma_{\mathrm{noise}}$. In other words, once the perturbation level moves away from the
 near-deterministic regime, the controller trained under stochastic actuation preserves a larger average fidelity
@@ -948,9 +944,9 @@ spirit of the generalization claim advanced in the original paper \cite{Niu2019}
 
 Third, the low-noise end of the plot is already informative. The three methods start from different nominal
 operating points: the noise-optimized TRPO controller has the highest nominal fidelity
-($0.9987648850$ at $90$ ns), the nominal TRPO controller follows
-($0.9941508786$ at $116$ ns), while the Adam baseline starts lower
-($0.9820504069$ at $60$ ns)
+($0.9988$ at $90$ ns), the nominal TRPO controller follows
+($0.9942$ at $116$ ns), while the Adam baseline starts lower
+($0.9821$ at $60$ ns)
 %  :contentReference[oaicite:0]{index=0} :contentReference[oaicite:1]{index=1} :contentReference[oaicite:2]{index=2}.
 This ordering matters for the interpretation of the robustness curves, because the superiority of the
 noise-optimized controller under finite $\sigma_{\mathrm{noise}}$ is not obtained by sacrificing nominal quality.
@@ -973,33 +969,11 @@ Finally, from the perspective of the thesis narrative, Fig.~\ref{fig:avg_fidelit
 with the previous nominal optimization results rather than in isolation. The earlier paragraphs established that
 TRPO is already competitive as a nominal optimizer for the representative gate $N(2.2,2.2,\pi/2)$. The present
 figure sharpens that conclusion: once robustness becomes the target quantity, the decisive advantage is no longer
-TRPO \emph{per se}, but TRPO trained in the \emph{correct environment}. That is, the crucial ingredient is not
+TRPO \emph{per se}, but TRPO trained in the correct environment. That is, the crucial ingredient is not
 simply policy-gradient optimization, but policy-gradient optimization under explicit stochastic exposure. This is
 precisely the mechanism that the UFO framework claims to exploit, and the average-fidelity curves provide the
 first direct validation of that claim in the present implementation \cite{Niu2019}.
 
-
-% -------------------------------------------------
-% Figure placeholder for Paragraph 3
-% -------------------------------------------------
-\begin{figure}[t]
-    \centering
-    
-    \fbox{\parbox[c][5.2cm][c]{0.9\linewidth}{\centering Placeholder }}
-    % \includegraphics[width=0.9\textwidth]{figures/fidelity_variance_vs_noise.pdf}
-    \caption{
-    Fidelity variance as a function of the Gaussian noise strength for the target gate
-    $N(2.2,2.2,\pi/2)$, comparing the Adam baseline, the nominal TRPO controller, and the
-    noise-optimized TRPO controller. For this figure, a logarithmic scale on the vertical axis
-    is recommended, since the most informative differences appear in the low-variance regime
-    and then widen progressively as $\sigma_{\mathrm{noise}}$ increases. If a smoothed curve is used
-    for readability, the unsmoothed Monte Carlo estimates should remain visible in a faint form
-    or be reported in the appendix. Each point is obtained from repeated noisy realizations of the
-    same optimized control plan, consistently with the robustness protocol of
-    Sec.~\ref{subsec:noise_model}.
-    }
-    \label{fig:fidelity_variance_vs_noise}
-\end{figure}
 
 % \subsection{Fidelity variance versus noise strength.}
 % \textbf{TODO:} Da correggere, è stato dato il grafico sbagliato.
@@ -1012,6 +986,19 @@ A complementary perspective on robustness is provided by Fig.~\ref{fig:fidelity_
 The first qualitative feature of the figure is that the fidelity variance increases for all three methods as the noise strength grows. This is expected: as the Gaussian perturbations become larger, the distribution of implemented noisy channels broadens, and different realizations of the same nominal pulse generate increasingly dispersed final fidelities. However, the three methods do not broaden at the same rate. The noise-optimized TRPO controller consistently exhibits the lowest variance across the explored range, the Adam baseline occupies an intermediate position, and the nominal TRPO controller displays the largest fluctuations, with a visibly steeper growth in the moderate-to-high noise regime. The ordering is therefore fully consistent with the one observed in the average-fidelity plot: the controller trained in the stochastic environment is not only the one with the best mean noisy performance, but also the one whose performance is least dispersed across repeated noisy realizations.
 
 This result is particularly important for the interpretation of the framework. The comparison between the two TRPO agents is especially clean, since the nominal and noise-optimized controllers share the same policy-gradient machinery, the same physical model, and the same UFO objective, and differ primarily in the environment used during training. The lower variance of the noise-optimized policy therefore cannot be attributed to reinforcement learning in general, but must be understood as a consequence of stochastic training itself. In other words, exposure to noisy dynamics during optimization does not simply improve the mean fidelity under perturbations; it also produces a control policy whose final performance is statistically more stable from one noisy realization to another. This is precisely the type of effect one would expect if the policy had internalized control strategies that are intrinsically less sensitive to random actuation errors.
+% -------------------------------------------------
+% Figure placeholder for Paragraph 3
+% -------------------------------------------------
+\begin{figure}[t]
+    \centering
+    \input{plots/fidelity_variance_vs_noise.tex}
+    \caption{
+    Fidelity variance $\mathrm{Var}(F)$ as a function of the Gaussian noise strength 
+    $\sigma_{\mathrm{noise}}$ for the target gate $N(2.2,2.2,\pi/2)$. 
+    A logarithmic vertical scale is employed to highlight critical behavioural differences in the low-noise regime, clearly tracking the widening sensitivity gap as perturbations increase. As with the average fidelity plot, solid lines denote the readable, smoothed trajectory via an exponentially weighted moving average (\(\text{span} = 80\)), while the actual statistical spread acquired through repeated stochastic trajectories spans closely behind, preserving the unsmoothed Monte Carlo estimates.
+    }
+    \label{fig:fidelity_variance_vs_noise}
+\end{figure}
 
 The comparison with the Adam baseline is also instructive. Although Adam remains clearly more stable than the nominal TRPO controller, it is still systematically outperformed by the noise-optimized TRPO agent in variance across the explored noise range. This means that the advantage of the stochastic RL controller is not limited to average performance alone. Rather, the same method that yields the highest \(\overline{F}(\sigma_{\mathrm{noise}})\) also suppresses the growth of shot-to-shot fluctuations most effectively. From the viewpoint of practical analog quantum control, this is a particularly strong robustness signal, because it shows that the learned controller is not only more accurate on average, but also more reproducible under repeated noisy implementations.
 
@@ -1020,6 +1007,8 @@ Taken together with Fig.~\ref{fig:avg_fidelity_vs_noise}, the variance curve the
 
 \subsection{Interpretation}
 \label{subsec:robustness_interpretation}
+
+\textbf{TODO:} Da valutare se inserire l'altro grafico
 
 Taken together, the average-fidelity and fidelity-variance curves provide the clearest empirical validation of the central robustness claim of the present study. The key question is not whether all controllers degrade under stochastic control perturbations, which is unavoidable, but whether training in a noisy environment produces a control strategy that degrades \emph{more gracefully} than one trained only in the nominal setting. From this viewpoint, the most informative comparison is the one between the two TRPO agents. Since the nominal and noise-optimized controllers share the same policy architecture, the same physical model, and the same UFO objective, their different behavior under noisy evaluation must be attributed primarily to the environment used during training. The fact that the noise-optimized policy achieves both higher average fidelity and lower fidelity variance across the explored range of \(\sigma_{\mathrm{noise}}\) therefore shows that robustness is not a generic byproduct of reinforcement learning alone, but a property that is effectively learned through stochastic training \cite{Niu2019}.
 
@@ -1092,12 +1081,9 @@ UFO paper \cite{Niu2019}.
 
 The primary runtime experiment is implemented as a \emph{curriculum TRPO sweep}. More precisely, for fixed
 \(\gamma=\pi/2\), the controller is trained sequentially over increasing values of \(\alpha\), using the best
-checkpoint obtained at one value of \(\alpha\) as the initialization for the next one. In the present code, the
-parameter grid is generated from \(\alpha_{\min}=0\) to \(\alpha_{\max}=\pi\) with step size
-\(\Delta\alpha=0.1\), while each phase is trained for at most \(100\) TRPO iterations, with
-\(20{,}000\) episodes per batch, timestep \(\Delta t=2\,\mathrm{ns}\), maximum allowed duration
-\(T_{\max}=600\,\mathrm{ns}\), and advance criterion based primarily on an evaluation-cost threshold of
-\(0.15\). Operationally, this means that the runtime sweep is not performed by retraining each target completely
+checkpoint obtained at one value of \(\alpha\) as the initialization for the next one. 
+\footnote{The parameter choice is in accordance with Section \ref{subsec:simulation_and_training_parameters_choice}.} 
+Operationally, this means that the runtime sweep is not performed by retraining each target completely
 from scratch, but by exploiting continuity in target space: nearby gates in the family are assumed to admit
 partially transferable control representations, so that the policy learned for one \(\alpha\) provides a useful
 warm start for the next one. This choice is strongly aligned with the policy-based logic of the framework, since
@@ -1105,17 +1091,11 @@ TRPO is specifically designed to perform stable updates of continuous stochastic
 trust-region step \cite{Schulman2015}.
 % :contentReference[oaicite:1]{index=1}
 
-Alongside this curriculum-based RL sweep, a second experiment is carried out with the Adam baseline in order to
+Alongside this curriculum-based RL sweep, a second experiment is considered. The Adam baseline curriculum already discussed in \ref{subsec:adam_baseline_results} in order to
 probe the same gate family without transfer learning. In that case, each target is optimized independently from
-scratch, and the best runtime is selected through a horizon sweep over a discrete set of candidate durations. In
-the implementation used here, the tested horizons are
-\begin{equation}
-T \in \{60,90,120,150,180,210,240\}\,\mathrm{ns},
-\label{eq:adam_runtime_horizons}
-\end{equation}
-with \(400\) Adam iterations per horizon. The role of this second sweep is methodologically useful: it separates
+scratch, and the best runtime is selected through a horizon sweep over a discrete set of candidate durations. The role of this second sweep is methodologically useful: it separates
 the effect of analog controllability across the gate family from the additional benefit that may arise from
-curriculum transfer. In other words, the Adam sweep provides a "from" family-level baseline for how
+curriculum transfer. In other words, the Adam sweep provides a family-level baseline for how
 homogeneous or inhomogeneous the analog optimization problem already is, whereas the curriculum TRPO sweep tests
 whether neighboring gates can be traversed more efficiently by reusing previously learned control structure.
 
@@ -1137,16 +1117,19 @@ device to outperform standard compiled implementations over a nontrivial family 
 
 \subsection{Runtime curve}
 \label{subsec:runtime_curve}
-\begin{figure}
-\centering
-\fbox{\parbox[c][5.2cm][c]{0.9\linewidth}{\centering Placeholder }}
-    % \includegraphics[width=0.9\textwidth]{figures/fidelity_variance_vs_noise.pdf}
-%     \caption{Figura principale: runtime_ns vs alpha, con sulla stessa ascissa anche min_cost_time_ns come seconda curva più sottile o con marker diversi.
-% Sottofigura 1: nominal fidelity e robustness average fidelity a sigma uguale a 1 vs alpha.
-% Sottofigura 2: leakage e boundary cost vs alpha in scala logaritmica.
-% Figura separata opzionale: training convergence globale con separatori verticali tra le fasi del curriculum.}
+\begin{figure}[t]
+    \centering
+    \input{plots/runtime_vs_alpha_curriculum.tex}
+    \caption{
+    Curriculum optimization profile over the family $N(\alpha,\alpha,\pi/2)$.
+    The three stacked panels trace the performance evolution and constraint fulfillment as a function of the target parameter $\alpha$:
+    \textbf{(a)} Evaluation runtime and theoretically identified minimum-cost time. Noticeable bifurcations occur when the optimizer is unable to suppress the overall total cost below the early-termination threshold ($0.4$), forcing the practical runtime to detach from the optimal minimum in favor of a slower, suboptimal horizon;
+    \textbf{(b)} Nominal evaluation fidelity overlaid with the corresponding average fidelity validated under noisy testing conditions ($\sigma_{\mathrm{noise}} = 1.0\text{ MHz}$);
+    \textbf{(c)} Leakage and boundary constraint costs mapped on a logarithmic axis\protect\footnotemark.
+    }
     \label{fig:runtime_vs_alpha_curriculum}
 \end{figure}
+\footnotetext{As established in the single-target assessment, abrupt spikes and saturation in the cost and time curves invariably signal active frustration along the intrinsic speed-leakage trade-off boundaries.}
 
 
 Figure~\ref{fig:runtime_vs_alpha_curriculum} reveals that the runtime profile along the family

@@ -1,0 +1,58 @@
+\begin{tikzpicture}
+    \begin{groupplot}[
+        group style={
+            group size=1 by 3,
+            vertical sep=0.4cm
+        },
+        width=0.9\linewidth,
+        height=4.5cm,
+        xmin=-0.1, xmax=3.3,
+        grid=major,
+        grid style={dashed, gray!30},
+        tick label style={font=\footnotesize},
+        legend style={font=\scriptsize, cells={align=left}},
+        unbounded coords=discard
+    ]
+
+    % Panel A: Time Optimization Trajectory vs Constraint
+    \nextgroupplot[
+        ylabel={Time (ns)},
+        ymin=0, ymax=190,
+        xticklabels={\empty},
+        legend style={at={(0.5,0.05)}, anchor=south, legend columns=2}
+    ]
+        \addplot[color=blue!80!white, mark=square*, thick, mark size=1.5pt] table[x=alpha, y=eval_time_ns, col sep=comma] {data/runtime_results/phase_final_results_log.csv};
+        \addlegendentry{Runtime (ns)}
+        
+        \addplot[color=red!80!black, only marks, mark=*, thick, mark size=1.8pt] table[x=alpha, y expr={abs(\thisrow{eval_min_cost_time_ns} - \thisrow{eval_time_ns}) < 0.1 ? nan : \thisrow{eval_min_cost_time_ns}}, col sep=comma] {data/runtime_results/phase_final_results_log.csv};
+        \addlegendentry{Min Cost Time}
+
+    % Panel B: Performance
+    \nextgroupplot[
+        ylabel={Fidelity},
+        ymin=0.55, ymax=1.05,
+        xticklabels={\empty},
+        legend style={at={(0.98,0.05)}, anchor=south east, legend columns=1}
+    ]
+        \addplot[color=red!80!black, mark=*, thick, mark size=1.5pt] table[x=alpha, y=eval_fidelity, col sep=comma] {data/runtime_results/phase_final_results_log.csv};
+        \addlegendentry{Nominal Eval Fidelity}
+        
+        \addplot[color=blue!80!white, mark=square*, thick, mark size=1.5pt] table[x=alpha, y=robustness_sigma_1p0_average_fidelity, col sep=comma] {data/runtime_results/phase_final_results_log.csv};
+        \addlegendentry{Average Fidelity ($\sigma_{\mathrm{noise}}=1.0$)}
+
+    % Panel C: Constraint Satisfaction (Leakage and Boundary)
+    \nextgroupplot[
+        ymode=log,
+        ylabel={Cost Value},
+        ymin=1e-10, ymax=1e1,
+        xlabel={Curriculum Constraint Parameter $\alpha$},
+        legend style={at={(0.02,0.05)}, anchor=south west, legend columns=1}
+    ]
+        \addplot[color=violet, mark=triangle*, thick, mark size=2pt] table[x=alpha, y=eval_leakage, col sep=comma] {data/runtime_results/phase_final_results_log.csv};
+        \addlegendentry{Eval Leakage}
+        
+        \addplot[color=orange, mark=x, thick, mark size=2.5pt] table[x=alpha, y=avg_boundary_cost, col sep=comma] {data/runtime_results/phase_final_results_log.csv};
+        \addlegendentry{Avg Boundary Cost}
+
+    \end{groupplot}
+\end{tikzpicture}
