@@ -418,7 +418,8 @@ The deeper alternatives do not improve this picture. The architecture \((64,64,6
 \hfill
 \begin{subfigure}{0.48\textwidth}
     \centering
-    \input{plots/architecture_sweep_pareto_fidelity.tex}
+    % \input{plots/architecture_sweep_pareto_fidelity.tex}
+    \fbox{\parbox[c][5.2cm][c]{0.9\linewidth}{\centering Placeholder }}
     \caption{Nominal Fidelity}
     \label{fig:architecture_sweep_pareto_fidelity}
 \end{subfigure}
@@ -473,8 +474,8 @@ A further methodological point should be emphasized. Because the sweep was carri
 \hfill
 \begin{subfigure}{0.48\textwidth}
     \centering
-    \fbox{\parbox[c][5.2cm][c]{0.9\linewidth}{\centering Placeholder }}
-    % \input{plots/ufo_weight_sweep_pareto_fidelity.tex}
+    % \fbox{\parbox[c][5.2cm][c]{0.9\linewidth}{\centering Placeholder }}
+    \input{plots/ufo_weight_sweep_pareto_fidelity.tex}
     \caption{Nominal Fidelity}
     \label{fig:ufo_weight_sweep_pareto_fidelity}
 \end{subfigure}
@@ -605,6 +606,8 @@ remains very close to the best trade-off region observed in the present sweep. F
 
 Unless explicitly stated otherwise, all later experiments therefore use the combined reference configuration defined by
 Eqs.~\eqref{eq:final_training_setup}--\eqref{eq:final_ufo_weights_choice}. This choice ensures that the empirical comparisons reported in the following sections are not affected by experiment-specific retuning, and that the results remain directly interpretable within the methodological logic established by the reference paper.
+
+\textbf{TODO:} Da considerare se farlo tabella
 
 \section{Single-target control optimization}
 \label{sec:single_target_optimization}
