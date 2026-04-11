@@ -751,7 +751,7 @@ which is significant, but far from the order-of-magnitude speedups later reporte
 \begin{figure}[t]
 \centering
 \input{plots/nominal_trpo_training_curves.tex}
-\caption{Training curves for the nominal TRPO run on the representative target \(N(2.2,2.2,\pi/2)\). 
+\caption{Training curves for the nominal TRPO run on the representative target \(N(2.2,2.2,\pi/2)\). }
 \textbf{(a)} evaluation cost versus policy iteration, with the best checkpoint (\(111\)) highlighted;
 \textbf{(b)} evaluation gate time \(T\) and minimum-cost time \(t_{\min}\) versus iteration;
 \textbf{(c)} evaluation fidelity and total leakage versus iteration, shown with dual vertical axes.
@@ -815,10 +815,6 @@ The resulting values show that, on this specific benchmark, the direct gradient 
 
 It should be emphasized, however, that while the target $N(2.2, 2.2, \pi/2)$ is well-chosen for model-selection purposes, this single-target benchmark does not provide a comprehensive test of the framework across its entire operating domain. On the contrary, this representative case captures a relatively restrictive regime where direct-gradient methods such as GRAPE are known to be particularly effective. As will be seen in the following sections, RL performance can fluctuate significantly across different landscapes of a gate family, and the nominal superiority of the Adam baseline here defines a strong reference against which the later robustness gains of the framework must be measured.
 
-A second important lesson concerns the role of the UFO scalarization itself. The single-target comparison makes clear that excellent nominal fidelity alone is not sufficient for a control to be considered preferable. The Adam and nominal-TRPO solutions both lie in a high-fidelity regime, yet they differ substantially in leakage and runtime. This confirms, in a concrete numerical setting, the conceptual point developed earlier in Sections~\ref{subsec:fidelity_runtime_metrics} and \ref{subsec:ufo_cost_function}: the relevant notion of success is not the maximization of one metric in isolation, but the identification of a balanced solution in a multi-objective landscape. In the representative target studied here, the direct optimizer reaches a better balance than nominal TRPO. The RL controller seems to settle into a broader, more conservative basin of acceptable solutions, whereas Adam succeeds in driving the pulse closer to the sharper low-runtime, low-leakage region of the landscape. This difference in optimization behavior will become important later, because noisy training may change which basin is actually preferable once robustness is included explicitly in the evaluation.
-
-From the viewpoint of the overall chapter structure, this comparison also provides a clean logical transition to the next subsection. The question raised by the nominal benchmark is now sharply formulated: if direct gradient optimization already performs better on the deterministic single-target problem, why should one prefer the RL framework at all? The answer, if the main thesis of the reference paper is correct, must come from the behavior under stochastic perturbations. In other words, the present subsection establishes the necessary baseline against which the robustness claims of the framework can be judged. Adam is not a weak reference, but a strong nominal competitor. Therefore, if the noise-optimized RL controller later surpasses it in average fidelity and fidelity variance under control noise, that improvement will constitute meaningful evidence that robustness is not merely a side effect of analog optimization, but a property that is genuinely learned from the stochastic training environment \cite{Niu2019}.
-
 \begin{figure}[t]
 \centering
 \input{plots/single_target_adam_vs_nominal_trpo.tex}
@@ -832,6 +828,11 @@ The key visual message is that nominal TRPO is fully competitive in absolute ter
 
 \label{fig:single_target_adam_vs_nominal_trpo}
 \end{figure}
+
+A second important lesson concerns the role of the UFO scalarization itself. The single-target comparison makes clear that excellent nominal fidelity alone is not sufficient for a control to be considered preferable. The Adam and nominal-TRPO solutions both lie in a high-fidelity regime, yet they differ substantially in leakage and runtime. This confirms, in a concrete numerical setting, the conceptual point developed earlier in Sections~\ref{subsec:fidelity_runtime_metrics} and \ref{subsec:ufo_cost_function}: the relevant notion of success is not the maximization of one metric in isolation, but the identification of a balanced solution in a multi-objective landscape. In the representative target studied here, the direct optimizer reaches a better balance than nominal TRPO. The RL controller seems to settle into a broader, more conservative basin of acceptable solutions, whereas Adam succeeds in driving the pulse closer to the sharper low-runtime, low-leakage region of the landscape. This difference in optimization behavior will become important later, because noisy training may change which basin is actually preferable once robustness is included explicitly in the evaluation.
+
+From the viewpoint of the overall chapter structure, this comparison also provides a clean logical transition to the next subsection. The question raised by the nominal benchmark is now sharply formulated: if direct gradient optimization already performs better on the deterministic single-target problem, why should one prefer the RL framework at all? The answer, if the main thesis of the reference paper is correct, must come from the behavior under stochastic perturbations. In other words, the present subsection establishes the necessary baseline against which the robustness claims of the framework can be judged. Adam is not a weak reference, but a strong nominal competitor. Therefore, if the noise-optimized RL controller later surpasses it in average fidelity and fidelity variance under control noise, that improvement will constitute meaningful evidence that robustness is not merely a side effect of analog optimization, but a property that is genuinely learned from the stochastic training environment \cite{Niu2019}.
+
 
 
 \section{Robustness under stochastic control noise}
