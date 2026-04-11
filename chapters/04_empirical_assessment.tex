@@ -827,17 +827,14 @@ From the viewpoint of the overall chapter structure, this comparison also provid
 
 \begin{figure}[t]
 \centering
-\fbox{\parbox[c][5.2cm][c]{0.9\linewidth}{\centering Placeholder }}
-% PLACEHOLDER FOR FIGURE
-% \caption{Suggested comparison figure for the representative target \(N(2.2,2.2,\pi/2)\).
-% A visually effective layout is a four-panel summary:
-% \textbf{(a)} grouped bars for total nominal cost;
-% \textbf{(b)} grouped bars for nominal fidelity;
-% \textbf{(c)} grouped bars for total leakage on a logarithmic vertical scale;
-% \textbf{(d)} grouped bars for runtime in ns.
-% Only two methods should be shown here: Adam baseline and nominal TRPO.
-% The key visual message should be that nominal TRPO is fully competitive in absolute terms, but Adam dominates on this deterministic single-target benchmark across all four reported metrics.}
-\caption{\textbf{TODO:} Da Fare}
+\input{plots/single_target_adam_vs_nominal_trpo.tex}
+\caption{Comparison of established nominal performance metrics between Adam and nominal TRPO for the representative target $N(2.2,2.2,\pi/2)$.
+A visually effective four-panel summary:
+\textbf{(a)} grouped bars for total nominal cost;
+\textbf{(b)} grouped bars for nominal fidelity;
+\textbf{(c)} grouped bars for total leakage on a logarithmic vertical scale;
+\textbf{(d)} grouped bars for effective runtime.
+The key visual message is that nominal TRPO is fully competitive in absolute terms, producing a highly faithful solution. However, Adam dominates on this deterministic single-target benchmark across all four reported metrics, owing to its ability to sharply exploit the fixed-horizon structure within a fully differentiable landscape.}
 
 \label{fig:single_target_adam_vs_nominal_trpo}
 \end{figure}

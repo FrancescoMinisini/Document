@@ -1,0 +1,87 @@
+\begin{tikzpicture}
+    % Define common options
+    \pgfplotsset{
+        every axis/.append style={
+            scale only axis,
+            height=3.8cm,
+            width=0.15\linewidth,
+            grid=major,
+            grid style={dashed, gray!30},
+            ybar,
+            bar width=14pt,
+            enlarge x limits=0.6,
+            symbolic x coords={Adam, TRPO},
+            xtick=data,
+            x tick label style={font=\footnotesize},
+            tick label style={font=\footnotesize},
+            label style={font=\footnotesize},
+            title style={font=\footnotesize\bfseries, yshift=-1ex},
+            nodes near coords,
+            nodes near coords align={vertical},
+            every node near coord/.append style={font=\tiny},
+        }
+    }
+
+    % Panel (a): Total Cost
+
+    \begin{axis}[
+        name=plot_cost,
+        ylabel={Total Cost},
+        title={(a) Cost},
+        ymin=0, ymax=0.48,
+        every node near coord/.append style={/pgf/number format/fixed, /pgf/number format/precision=3},
+    ]
+    \addplot[fill=cyan!60!black, draw=black!80, bar shift=0pt] coordinates {(Adam, 0.381)};
+    \addplot[fill=yellow!80!orange, draw=black!80, bar shift=0pt] coordinates {(TRPO, 0.298)};
+    \end{axis}
+
+    % Panel (b): Fidelity
+    \begin{axis}[
+        name=plot_fid,
+        at={(plot_cost.south east)},
+        anchor=south west,
+        xshift=1.4cm,
+        ylabel={Fidelity},
+        title={(b) Fidelity},
+        ymin=0.97, ymax=1.002,
+        ytick={0.97, 0.98, 0.99, 1.00},
+        yticklabel style={/pgf/number format/fixed, /pgf/number format/precision=2},
+        every node near coord/.append style={/pgf/number format/fixed, /pgf/number format/precision=3},
+    ]
+    \addplot[fill=cyan!60!black, draw=black!80, bar shift=0pt] coordinates {(Adam, 0.982)};
+    \addplot[fill=yellow!80!orange, draw=black!80, bar shift=0pt] coordinates {(TRPO, 0.994)};
+    \end{axis}
+
+    % Panel (c): Leakage (log scale)
+    \begin{axis}[
+        name=plot_leak,
+        at={(plot_fid.south east)},
+        anchor=south west,
+        xshift=1.4cm,
+        ymode=log,
+        log origin=0.0001,
+        ylabel={Total Leakage},
+        title={(c) Leakage},
+        ymin=0.0001, ymax=0.005,
+        nodes near coords={\pgfmathprintnumber[fixed,fixed zerofill,precision=4]{\pgfplotspointmeta}},
+    ]
+    \addplot[fill=cyan!60!black, draw=black!80, bar shift=0pt] coordinates {(Adam, 0.000367)};
+    \addplot[fill=yellow!80!orange, draw=black!80, bar shift=0pt] coordinates {(TRPO, 0.001599)};
+    \end{axis}
+
+    % Panel (d): Runtime
+    \begin{axis}[
+        name=plot_time,
+        at={(plot_leak.south east)},
+        anchor=south west,
+        xshift=1.4cm,
+        ylabel={Runtime (ns)},
+        title={(d) Runtime},
+        ymin=0, ymax=140,
+        nodes near coords={\pgfmathprintnumber[fixed,precision=0]{\pgfplotspointmeta}},
+    ]
+    \addplot[fill=cyan!60!black, draw=black!80, bar shift=0pt] coordinates {(Adam, 60.0)};
+    \addplot[fill=yellow!80!orange, draw=black!80, bar shift=0pt] coordinates {(TRPO, 116.0)};
+    \end{axis}
+
+\end{tikzpicture}
