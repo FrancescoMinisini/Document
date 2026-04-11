@@ -1,0 +1,99 @@
+\begin{tikzpicture}
+    % Define common options
+    \pgfplotsset{
+        every axis/.append style={
+            scale only axis,
+            height=4cm,
+            grid=major,
+            grid style={dashed, gray!30},
+            xmin=0, xmax=120,
+            xtick={0, 20, 40, 60, 80, 100, 120},
+            tick label style={font=\footnotesize},
+            label style={font=\small},
+            title style={font=\small\bfseries},
+            legend style={font=\footnotesize, inner sep=2pt, rounded corners=2pt},
+            xlabel={Policy Iteration},
+        }
+    }
+
+    % Panel (a): Eval Cost
+    \begin{axis}[
+        name=plot_cost,
+        width=0.35\linewidth,
+        ylabel={Evaluation Cost},
+        title={(a) Evaluation Cost},
+        legend style={at={(0.98,0.98)}, anchor=north east},
+    ]
+    \addplot[
+        color=cyan!60!black, thick
+    ] table[x=iteration, y=eval_cost, col sep=comma] {data/trpo_nominal_results/nominal_trpo_training_curves.csv};
+    \addlegendentry{Cost}
+
+    \addplot[
+        only marks, mark=o, mark size=3pt, color=yellow!80!orange, thick
+    ] coordinates {(111, 0.298200384494671)};
+    \addlegendentry{Best (111)}
+    \end{axis}
+
+    % Panel (b): Eval Times
+    \begin{axis}[
+        name=plot_time,
+        at={(plot_cost.south east)},
+        anchor=south west,
+        xshift=2cm,
+        width=0.35\linewidth,
+        ylabel={Time (ns)},
+        title={(b) Execution Times},
+        legend style={at={(0.98,0.98)}, anchor=north},
+    ]
+    \addplot[
+        color=blue!60!magenta, thick
+    ] table[x=iteration, y=eval_time_ns, col sep=comma] {data/trpo_nominal_results/nominal_trpo_training_curves.csv};
+    \addlegendentry{$T$ (Eval)}
+
+    \addplot[
+        color=green!30!black, thick, densely dashed
+    ] table[x=iteration, y=eval_min_cost_time_ns, col sep=comma] {data/trpo_nominal_results/nominal_trpo_training_curves.csv};
+    \addlegendentry{$t_{\min}$}
+    \end{axis}
+
+    % Panel (c): Eval Fidelity & Leakage
+    \begin{axis}[
+        name=plot_fid,
+        at={($(plot_cost.south east)!0.5!(plot_time.south west)$)},
+        anchor=north,
+        yshift=-1.8cm,
+        width=0.65\linewidth,
+        ylabel=\textcolor{red!70!black}{Evaluation Fidelity},
+        title={(c) Fidelity \& Leakage},
+        axis y line*=left,
+        yticklabel style={font=\footnotesize, color=red!70!black},
+        legend style={at={(0.02,0.45)}, anchor=south west},
+    ]
+    \addplot[
+        color=red!70!black, thick
+    ] table[x=iteration, y=eval_fidelity, col sep=comma] {data/trpo_nominal_results/nominal_trpo_training_curves.csv};
+    \addlegendentry{Fidelity}
+    \end{axis}
+
+    % Panel (c) Leakage (Dual Axis)
+    \begin{axis}[
+        at={($(plot_cost.south east)!0.5!(plot_time.south west)$)},
+        anchor=north,
+        yshift=-1.8cm,
+        width=0.65\linewidth,
+        axis y line*=right,
+        axis x line=none,
+        ylabel=\textcolor{orange!90!black}{Total Leakage},
+        yticklabel style={font=\footnotesize, color=orange!90!black},
+        scaled y ticks=false,
+        yticklabel={\pgfmathprintnumber[fixed,fixed zerofill,precision=4]{\tick}},
+        legend style={at={(0.98,0.45)}, anchor=south east},
+    ]
+    \addplot[
+        color=orange!90!black, thick
+    ] table[x=iteration, y=eval_leakage, col sep=comma] {data/trpo_nominal_results/nominal_trpo_training_curves.csv};
+    \addlegendentry{Leakage}
+    \end{axis}
+
+\end{tikzpicture}
