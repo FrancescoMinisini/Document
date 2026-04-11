@@ -1,0 +1,107 @@
+\begin{tikzpicture}
+    % Define common options
+    \pgfplotsset{
+        every axis/.append style={
+            scale only axis,
+            height=4cm,
+            grid=major,
+            grid style={dashed, gray!30},
+            xmin=35, xmax=185,
+            xtick={40, 60, 80, 100, 120, 140, 160, 180},
+            tick label style={font=\footnotesize},
+            label style={font=\small},
+            title style={font=\small\bfseries},
+            legend style={font=\footnotesize, inner sep=2pt, rounded corners=2pt},
+            xlabel={Horizon (ns)},
+        }
+    }
+
+    % Panel (a): Nominal total cost
+    \begin{axis}[
+        name=plot_cost,
+        width=0.35\linewidth,
+        ylabel={Nominal Total Cost},
+        title={(a) Total Cost},
+        legend style={at={(0.98,0.98)}, anchor=north east},
+    ]
+    \addplot[
+        color=cyan!60!black, mark=*, thick, mark size=1.5pt
+    ] table[x=horizon_ns, y=nominal_cost, col sep=comma] {data/adam/adam_horizon_sweep.csv};
+    \addlegendentry{Cost}
+
+    \addplot[
+        only marks, mark=o, mark size=3pt, color=yellow!80!orange, thick
+    ] coordinates {(70.0, 0.1575751618013395)};
+    \addlegendentry{70 ns (Min)}
+
+    \addplot[
+        only marks, mark=x, mark size=3pt, color=black, thick
+    ] coordinates {(60.0, 0.3806386581722285)};
+    \addlegendentry{60 ns (Sel)}
+    \end{axis}
+
+    % Panel (b): Boundary and Time Penalty
+    \begin{axis}[
+        name=plot_pen,
+        at={(plot_cost.south east)},
+        anchor=south west,
+        xshift=2cm,
+        width=0.35\linewidth,
+        ylabel={Penalty Cost},
+        title={(b) Penalties},
+        legend style={at={(0.98,0.98)}, anchor=north east},
+    ]
+    \addplot[
+        color=blue!60!magenta, mark=diamond*, thick, mark size=1.5pt
+    ] table[x=horizon_ns, y=nominal_boundary_cost, col sep=comma] {data/adam/adam_horizon_sweep.csv};
+    \addlegendentry{Boundary}
+
+    \addplot[
+        color=green!30!black, mark=triangle*, mark options={rotate=180}, thick, mark size=1.5pt
+    ] table[x=horizon_ns, y=nominal_time_cost, col sep=comma] {data/adam/adam_horizon_sweep.csv};
+    \addlegendentry{Time}
+    \end{axis}
+
+    % Panel (c): Nominal fidelity & Leakage (The most important here)
+    \begin{axis}[
+        name=plot_fid,
+        at={($(plot_cost.south east)!0.5!(plot_pen.south west)$)},
+        anchor=north,
+        yshift=-1.8cm,
+        width=0.65\linewidth,
+        ylabel=\textcolor{red!70!black}{Nominal Fidelity},
+        title={(c) Fidelity \& Leakage},
+        axis y line*=left,
+        ymin=0.7, ymax=1.01,
+        ytick={0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 1.00},
+        yticklabel style={font=\footnotesize, color=red!70!black},
+        legend style={at={(0.02,0.45)}, anchor=west},
+    ]
+    \addplot[
+        color=red!70!black, mark=square*, thick, mark size=1.5pt
+    ] table[x=horizon_ns, y=nominal_fidelity, col sep=comma] {data/adam/adam_horizon_sweep.csv};
+    \addlegendentry{Fidelity}
+    \end{axis}
+
+    % Panel (c) Leakage (Dual Axis)
+    \begin{axis}[
+        at={($(plot_cost.south east)!0.5!(plot_pen.south west)$)},
+        anchor=north,
+        yshift=-1.8cm,
+        width=0.65\linewidth,
+        axis y line*=right,
+        axis x line=none,
+        ymin=0.00005, ymax=0.00048,
+        ylabel=\textcolor{orange!90!black}{Total Leakage},
+        yticklabel style={font=\footnotesize, color=orange!90!black},
+        scaled y ticks=false,
+        yticklabel={\pgfmathprintnumber[fixed,fixed zerofill,precision=5]{\tick}},
+        legend style={at={(0.98,0.45)}, anchor=east},
+    ]
+    \addplot[
+        color=orange!90!black, mark=triangle*, thick, mark size=1.5pt
+    ] table[x=horizon_ns, y=nominal_leakage, col sep=comma] {data/adam/adam_horizon_sweep.csv};
+    \addlegendentry{Leakage}
+    \end{axis}
+
+\end{tikzpicture}

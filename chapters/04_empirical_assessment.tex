@@ -662,6 +662,21 @@ Boundary Penalty & \(P_{\mathrm{bdry}}^{\mathrm{Adam}}\) & $4.28\times 10^{-3}$ 
 These values already indicate that direct pulse optimization is capable of finding a high-quality control for the representative target, with gate fidelity comfortably above \(99\%\) and leakage kept in the \(10^{-4}\) regime, which is precisely the scale expected from the leakage-aware control philosophy of the original UFO framework \cite{Niu2019}. At the same time, the result is scientifically useful not only because it is "good" but because the horizon sweep reveals \emph{why} it is good and where the main tradeoffs arise.
 
 The dependence on the gate duration is particularly instructive. Very short horizons, such as \(40\,\mathrm{ns}\) and \(50\,\mathrm{ns}\), perform poorly: the nominal fidelities drop to \(0.7255\) and \(0.8818\), while the corresponding boundary penalties remain very large, respectively \(0.399\) and \(0.357\). By contrast, the leakage itself stays in the same \(10^{-4}\) range throughout this short-time regime. This means that the main failure mode of the ultra-short solutions is \emph{not} an isolated explosion of leakage alone, but the inability to satisfy simultaneously the accuracy and boundary requirements of the UFO objective under a strongly time-compressed pulse. This behavior is fully consistent with the speed--leakage and speed--smoothness tension discussed in Section~\ref{subsec:speed_leakage_tradeoff}: in weakly anharmonic superconducting systems, shortening the pulse too aggressively broadens the effective control spectrum and makes it more difficult to maintain both clean logical evolution and well-behaved pulse boundaries \cite{Motzoi2009,Koch2022}. The sharp transition from \(60\,\mathrm{ns}\) to \(70\,\mathrm{ns}\) is especially revealing in this respect. Over this interval, the fidelity increases from \(0.982\) to \(0.997\), the boundary term collapses from \(9.75\times10^{-2}\) to \(4.28\times10^{-3}\), and the total nominal cost drops from \(0.381\) to \(0.158\), whereas the leakage decreases only moderately. This indicates that, near the optimum, the decisive improvement is not merely "less", but the fact that the pulse becomes sufficiently long to realize the target unitary while also respecting the boundary structure required by the UFO cost.
+% ----------------------------------------------------
+% Suggested figure placeholder for the fixed-target Adam sweep
+% ----------------------------------------------------
+\begin{figure}[t]
+\centering
+\input{plots/adam_single_target_horizon_sweep.tex}
+% \caption{Adam baseline on the representative target \(N(2.2,2.2,\pi/2)\) as a function of the candidate gate horizon.
+% A clean and compact two-row layout:
+% \textbf{(a)} nominal total cost versus horizon, with the minimum at \(70\,\mathrm{ns}\) highlighted and the optimizer-selected \(60\,\mathrm{ns}\) point marked separately;
+% \textbf{(b)} nominal fidelity and total leakage versus horizon, shown with dual vertical axes;
+% \textbf{(c)} boundary penalty and time penalty versus horizon.
+% The purpose of the figure is to show visually that the nominal optimum at \(70\,\mathrm{ns}\) is produced by the simultaneous collapse of the boundary term and the sharp increase in fidelity, whereas the longer-horizon region exhibits fidelity saturation and only marginal further leakage reduction.}
+\caption{\textbf{TODO:} Da Fare}
+\label{fig:adam_single_target_horizon_sweep}
+\end{figure}
 
 The long-horizon side of the sweep is equally informative. Beyond approximately \(70\)--\(90\,\mathrm{ns}\), the fidelity remains uniformly high and varies only weakly; for example, at \(150\,\mathrm{ns}\) the Adam baseline reaches
 \begin{equation}
@@ -678,39 +693,27 @@ even before introducing policy optimization or transfer learning. This does \emp
 
 \textbf{TODO:} Aggiungere le lables ai riferimenti ( Average fidelity etc...)
 
-Although the systematic robustness study is deferred to section \ref{sec:robustness_under_stochastic_control_noise}, the Adam baseline also provides a first quantitative reference point in the noisy setting. For the control plan selected by the noisy training objective at \(60\,\mathrm{ns}\), the robustness evaluation at \(\sigma_{\mathrm{noise}}=1\,\mathrm{MHz}\) yields an average fidelity of \(0.9686\), an average gate fidelity of \(0.9607\), and a fidelity variance of \(1.75\times10^{-4}\). These values are already respectable for a direct gradient baseline, but they also make clear why a stronger robustness-oriented method is desirable: they set the scale that the nominal and noise-optimized TRPO controllers will later be asked to surpass. In this sense, the Adam baseline performs exactly the role it should in the empirical chapter: it is not a strawman, but a meaningful non-RL benchmark that captures the main structure of the control problem while leaving clear room for improvement in robustness and consistency under stochastic perturbations.
-
-A preliminary family-wide Adam sweep with fixed \(\gamma=\pi/2\) further reinforces this interpretation. Even without transfer learning, the performance of the direct optimizer is markedly non-uniform across the gate family \(N(\alpha,\alpha,\pi/2)\). The best results cluster around the central region \(\alpha\approx 1.4\)--\(1.7\), where the optimizer consistently selects \(40\,\mathrm{ns}\) as the best horizon, reaches nominal fidelities above \(0.9987\), and retains noisy average fidelities around \(0.987\)--\(0.989\) with very small fidelity variance of order \(10^{-5}\). By contrast, near the edges of the interval, i.e. for \(\alpha\approx 0\) or \(\alpha\approx \pi\), the best horizon shifts to \(70\,\mathrm{ns}\), the nominal fidelity drops to about \(0.94\), and the noisy average fidelity falls to about \(0.936\)--\(0.938\), with variance increasing by roughly one order of magnitude. This shows that the difficulty of the gate family is highly structured already at the level of direct gradient optimization. Not all members of \(N(\alpha,\alpha,\pi/2)\) are equally easy to realize within the same bandwidth-limited multilevel control ansatz, and this fact will later be important when interpreting the runtime curves obtained with RL and transfer learning. Put differently, the Adam sweep provides a useful "zero" baseline for distinguishing between intrinsic gate-family geometry and genuine algorithmic gains due to policy optimization.
-
-% ----------------------------------------------------
-% Suggested figure placeholder for the fixed-target Adam sweep
-% ----------------------------------------------------
-\begin{figure}[t]
-\centering
-% PLACEHOLDER FOR FIGURE
-\caption{Adam baseline on the representative target \(N(2.2,2.2,\pi/2)\) as a function of the candidate gate horizon.
-A clean and informative layout is a three-panel figure:
-\textbf{(a)} nominal total cost versus horizon, with the minimum at \(70\,\mathrm{ns}\) highlighted and the optimizer-selected \(60\,\mathrm{ns}\) point marked separately;
-\textbf{(b)} nominal fidelity and total leakage versus horizon, shown either with dual vertical axes or as two stacked subplots;
-\textbf{(c)} boundary penalty and time penalty versus horizon.
-The purpose of the figure is to show visually that the nominal optimum at \(70\,\mathrm{ns}\) is produced by the simultaneous collapse of the boundary term and the sharp increase in fidelity, whereas the longer-horizon region exhibits fidelity saturation and only marginal further leakage reduction.}
-\label{fig:adam_single_target_horizon_sweep}
-\end{figure}
-
 % ----------------------------------------------------
 % Suggested figure placeholder for the family-wide Adam sweep
 % ----------------------------------------------------
 \begin{figure}[t]
 \centering
-% PLACEHOLDER FOR FIGURE
-\caption{Preliminary family-wide Adam sweep for the gates \(N(\alpha,\alpha,\pi/2)\), trained from scratch for each \(\alpha\).
-A visually effective design is a three-row figure:
-\textbf{top:} best selected horizon versus \(\alpha\) as a step plot, showing the plateaus at \(40\), \(50\), \(60\), \(70\), and \(80\,\mathrm{ns}\);
-\textbf{middle:} best nominal fidelity and best nominal cost versus \(\alpha\);
-\textbf{bottom:} noisy average fidelity at \(\sigma_{\mathrm{noise}}=1\,\mathrm{MHz}\) and the associated fidelity variance versus \(\alpha\).
-This figure should make explicit that Adam performance is strongly non-uniform across the gate family, with an easier central region and significantly more difficult edge regions.}
+\input{plots/adam_family_sweep.tex}
+% \caption{Preliminary family-wide Adam sweep for the gates \(N(\alpha,\alpha,\pi/2)\), trained from scratch for each \(\alpha\).
+% A visually effective two-row design:
+% \textbf{(a)} best selected horizon versus \(\alpha\) as a step plot, showing plateaus at \(40\), \(50\), \(60\), \(70\), and \(80\,\mathrm{ns}\);
+% \textbf{(b)} best nominal fidelity and best nominal cost versus \(\alpha\);
+% \textbf{(c)} noisy average fidelity at \(\sigma_{\mathrm{noise}}=1\,\mathrm{MHz}\) and the associated fidelity variance versus \(\alpha\).
+% This figure should make explicit that Adam performance is strongly non-uniform across the gate family, with an easier central region and significantly more difficult edge regions.}
+\caption{\textbf{TODO:} Da Fare}
 \label{fig:adam_family_sweep_gamma_pi_over_2}
 \end{figure}
+
+Although the systematic robustness study is deferred to section \ref{sec:robustness_under_stochastic_control_noise}, the Adam baseline also provides a first quantitative reference point in the noisy setting. For the control plan selected by the noisy training objective at \(60\,\mathrm{ns}\), the robustness evaluation at \(\sigma_{\mathrm{noise}}=1\,\mathrm{MHz}\) yields an average fidelity of \(0.9686\), an average gate fidelity of \(0.9607\), and a fidelity variance of \(1.75\times10^{-4}\). These values are already respectable for a direct gradient baseline, but they also make clear why a stronger robustness-oriented method is desirable: they set the scale that the nominal and noise-optimized TRPO controllers will later be asked to surpass. In this sense, the Adam baseline performs exactly the role it should in the empirical chapter: it is not a strawman, but a meaningful non-RL benchmark that captures the main structure of the control problem while leaving clear room for improvement in robustness and consistency under stochastic perturbations.
+
+A preliminary family-wide Adam sweep with fixed \(\gamma=\pi/2\) further reinforces this interpretation. Even without transfer learning, the performance of the direct optimizer is markedly non-uniform across the gate family \(N(\alpha,\alpha,\pi/2)\). The best results cluster around the central region \(\alpha\approx 1.4\)--\(1.7\), where the optimizer consistently selects \(40\,\mathrm{ns}\) as the best horizon, reaches nominal fidelities above \(0.9987\), and retains noisy average fidelities around \(0.987\)--\(0.989\) with very small fidelity variance of order \(10^{-5}\). By contrast, near the edges of the interval, i.e. for \(\alpha\approx 0\) or \(\alpha\approx \pi\), the best horizon shifts to \(70\,\mathrm{ns}\), the nominal fidelity drops to about \(0.94\), and the noisy average fidelity falls to about \(0.936\)--\(0.938\), with variance increasing by roughly one order of magnitude. This shows that the difficulty of the gate family is highly structured already at the level of direct gradient optimization. Not all members of \(N(\alpha,\alpha,\pi/2)\) are equally easy to realize within the same bandwidth-limited multilevel control ansatz, and this fact will later be important when interpreting the runtime curves obtained with RL and transfer learning. Put differently, the Adam sweep provides a useful "zero" baseline for distinguishing between intrinsic gate-family geometry and genuine algorithmic gains due to policy optimization.
+
+
 
 
 
@@ -775,12 +778,13 @@ Finally, the nominal TRPO experiment also motivates a careful reading of trainin
 \begin{figure}[t]
 \centering
 % PLACEHOLDER FOR FIGURE
-\caption{Suggested training-curve figure for the nominal TRPO run on \(N(2.2,2.2,\pi/2)\).
-A clean layout is a three-panel figure:
-\textbf{(a)} evaluation cost versus policy iteration, with the best checkpoint highlighted;
-\textbf{(b)} evaluation fidelity and evaluation leakage versus iteration, either on dual axes or in two aligned stacked panels;
-\textbf{(c)} evaluation gate time \(T\) and minimum-cost time \(t_{\min}\) versus iteration.
-The key visual message should be that the controller rapidly reaches a high-fidelity regime, but the later part of training is mainly a refinement of the leakage/runtime compromise rather than a dramatic improvement in fidelity alone.}
+% \caption{Suggested training-curve figure for the nominal TRPO run on \(N(2.2,2.2,\pi/2)\).
+% A clean layout is a three-panel figure:
+% \textbf{(a)} evaluation cost versus policy iteration, with the best checkpoint highlighted;
+% \textbf{(b)} evaluation fidelity and evaluation leakage versus iteration, either on dual axes or in two aligned stacked panels;
+% \textbf{(c)} evaluation gate time \(T\) and minimum-cost time \(t_{\min}\) versus iteration.
+% The key visual message should be that the controller rapidly reaches a high-fidelity regime, but the later part of training is mainly a refinement of the leakage/runtime compromise rather than a dramatic improvement in fidelity alone.}
+\caption{}\textbf{TODO:} Da Fare
 \label{fig:nominal_trpo_training_curves}
 \end{figure}
 
@@ -851,14 +855,16 @@ From the viewpoint of the overall chapter structure, this comparison also provid
 \centering
 \fbox{\parbox[c][5.2cm][c]{0.9\linewidth}{\centering Placeholder }}
 % PLACEHOLDER FOR FIGURE
-\caption{Suggested comparison figure for the representative target \(N(2.2,2.2,\pi/2)\).
-A visually effective layout is a four-panel summary:
-\textbf{(a)} grouped bars for total nominal cost;
-\textbf{(b)} grouped bars for nominal fidelity;
-\textbf{(c)} grouped bars for total leakage on a logarithmic vertical scale;
-\textbf{(d)} grouped bars for runtime in ns.
-Only two methods should be shown here: Adam baseline and nominal TRPO.
-The key visual message should be that nominal TRPO is fully competitive in absolute terms, but Adam dominates on this deterministic single-target benchmark across all four reported metrics.}
+% \caption{Suggested comparison figure for the representative target \(N(2.2,2.2,\pi/2)\).
+% A visually effective layout is a four-panel summary:
+% \textbf{(a)} grouped bars for total nominal cost;
+% \textbf{(b)} grouped bars for nominal fidelity;
+% \textbf{(c)} grouped bars for total leakage on a logarithmic vertical scale;
+% \textbf{(d)} grouped bars for runtime in ns.
+% Only two methods should be shown here: Adam baseline and nominal TRPO.
+% The key visual message should be that nominal TRPO is fully competitive in absolute terms, but Adam dominates on this deterministic single-target benchmark across all four reported metrics.}
+\caption{\textbf{TODO:} Da Fare}
+
 \label{fig:single_target_adam_vs_nominal_trpo}
 \end{figure}
 
@@ -913,7 +919,7 @@ F\bigl(U(\bm{u}+\delta\bm{u})\bigr)
 \left[
 F\bigl(U(\bm{u}+\delta\bm{u};\,\eta+\delta\eta)\bigr)
 \right],
-\label{eq:robustness_average_fidelity_section}
+\label{eq:robustness_average_fidelity_section_eta}
 \end{equation}
 
 and
