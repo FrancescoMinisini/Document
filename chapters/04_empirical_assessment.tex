@@ -629,7 +629,7 @@ which belongs to the two-qubit family \(N(\alpha,\alpha,\gamma)\) introduced in 
 \end{itemize}
 In this sense, Eq.~\eqref{eq:representative_target_gate} serves as the natural entry point for the empirical analysis, since it is sufficiently rich to be physically informative while remaining simple enough to support a transparent method-by-method comparison.
 
-\subsection{Adam baseline results}
+\subsection{GRAPE + Adam baseline results}
 \label{subsec:adam_baseline_results}
 
 As a first non-RL reference, the representative target
@@ -639,37 +639,29 @@ U_{\mathrm{target}} = N(2.2,2.2,\pi/2)
 \end{equation}
 was optimized by direct gradient-based pulse search using Adam, that is, through a baseline in the spirit of standard direct quantum optimal-control methods acting directly in control space rather than through policy learning \cite{Khaneja2005,Koch2022}.
 The optimization was performed on the same multilevel gmon model and with the same UFO-inspired objective introduced in the previous sections, using a time discretization of \(\Delta t = 2\,\mathrm{ns}\), \(400\) Adam iterations for each candidate horizon, and a sweep over gate durations in the interval \(T\in[40,180]\,\mathrm{ns}\) with \(10\,\mathrm{ns}\) spacing.
-In order to keep the baseline aligned with the robustness-oriented setting of the paper, the optimization was carried out with the same nominal UFO weights \((\chi,\beta,\mu,\kappa)=(10,10,0.2,0.1)\) and with train-time Gaussian control noise of standard deviation \(1\,\mathrm{MHz}\), while the final metrics discussed in this subsection are recomputed in the nominal simulator.
-\footnote{This distinction is important in the present implementation. The internal optimizer summary selects \(T=60\,\mathrm{ns}\) as the minimum of the noisy optimization objective, whereas the deterministic post-training reevaluation identifies \(T=70\,\mathrm{ns}\) as the best nominal solution. Since the purpose of the present subsection is to establish the \emph{nominal} single-target benchmark, the \(70\,\mathrm{ns}\) solution is taken as the representative Adam baseline in the discussion below.}
+In order to keep the baseline aligned with the robustness-oriented setting of the paper, the optimization was carried out with the same nominal UFO weights \((\chi,\beta,\mu,\kappa)=(10,10,0.2,0.1)\) and with train-time Gaussian control noise of standard deviation \(1\,\mathrm{MHz}\), while the final metrics discussed in this subsection are recomputed in the nominal simulator
+\footnote{This distinction is important in the present implementation. The internal optimizer summary selects \(T=60\,\mathrm{ns}\) as the minimum of the noisy optimization objective, whereas the deterministic post-training reevaluation identifies \(T=70\,\mathrm{ns}\) as the best nominal solution. Since the purpose of the present subsection is to establish the \emph{nominal} single-target benchmark, the \(70\,\mathrm{ns}\) solution is taken as the representative Adam baseline in the discussion below.}.
 
-Under this nominal reevaluation, the best Adam solution is obtained at
-\begin{equation}
-T_{\mathrm{Adam}}^{\star}=70\,\mathrm{ns},
-\label{eq:adam_best_nominal_horizon}
-\end{equation}
-for which the final cost is
-\begin{equation}
-C_{\mathrm{Adam}}^{\mathrm{nom}} = 0.1576,
-\label{eq:adam_best_nominal_cost}
-\end{equation}
-with nominal fidelity
-\begin{equation}
-F_{\mathrm{Adam}}^{\mathrm{nom}} = 0.99662,
-\label{eq:adam_best_nominal_fidelity}
-\end{equation}
-total leakage
-\begin{equation}
-L_{\mathrm{Adam}}^{\mathrm{tot}} = 2.82\times 10^{-4},
-\label{eq:adam_best_nominal_leakage}
-\end{equation}
-and boundary contribution
-\begin{equation}
-P_{\mathrm{bdry}}^{\mathrm{Adam}} = 4.28\times 10^{-3}.
-\label{eq:adam_best_nominal_boundary}
-\end{equation}
+Under this nominal reevaluation, the best Adam solution is obtained at \(T_{\mathrm{Adam}}^{\star}=70\,\mathrm{ns}\), with the nominal performance metrics summarized in Table~\ref{tab:adam_best_nominal_results}.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{lcc}
+\hline
+Metric & Label & Value \\
+\hline
+Nominal Cost & \(C_{\mathrm{Adam}}^{\mathrm{nom}}\) & 0.1576 \\
+Nominal Fidelity & \(F_{\mathrm{Adam}}^{\mathrm{nom}}\) & 0.99662 \\
+Total Leakage & \(L_{\mathrm{Adam}}^{\mathrm{tot}}\) & $2.82\times 10^{-4}$ \\
+Boundary Penalty & \(P_{\mathrm{bdry}}^{\mathrm{Adam}}\) & $4.28\times 10^{-3}$ \\
+\hline
+\end{tabular}
+\caption{Performance metrics for the optimal Adam baseline solution at \(T=70\,\mathrm{ns}\) on the representative target $N(2.2, 2.2, \pi/2)$.}
+\label{tab:adam_best_nominal_results}
+\end{table}
 These values already indicate that direct pulse optimization is capable of finding a high-quality control for the representative target, with gate fidelity comfortably above \(99\%\) and leakage kept in the \(10^{-4}\) regime, which is precisely the scale expected from the leakage-aware control philosophy of the original UFO framework \cite{Niu2019}. At the same time, the result is scientifically useful not only because it is "good" but because the horizon sweep reveals \emph{why} it is good and where the main tradeoffs arise.
 
-The dependence on the gate duration is particularly instructive. Very short horizons, such as \(40\,\mathrm{ns}\) and \(50\,\mathrm{ns}\), perform poorly: the nominal fidelities drop to \(0.7255\) and \(0.8818\), while the corresponding boundary penalties remain very large, respectively \(0.399\) and \(0.357\). By contrast, the leakage itself stays in the same \(10^{-4}\) range throughout this short-time regime. This means that the main failure mode of the ultra-short solutions is \emph{not} an isolated explosion of leakage alone, but the inability to satisfy simultaneously the accuracy and boundary requirements of the UFO objective under a strongly time-compressed pulse. This behavior is fully consistent with the speed--leakage and speed--smoothness tension discussed in Section~\ref{subsec:speed_leakage_tradeoff}: in weakly anharmonic superconducting systems, shortening the pulse too aggressively broadens the effective control spectrum and makes it more difficult to maintain both clean logical evolution and well-behaved pulse boundaries \cite{Motzoi2009,Koch2022}. The sharp transition from \(60\,\mathrm{ns}\) to \(70\,\mathrm{ns}\) is especially revealing in this respect. Over this interval, the fidelity increases from \(0.9821\) to \(0.9966\), the boundary term collapses from \(9.75\times10^{-2}\) to \(4.28\times10^{-3}\), and the total nominal cost drops from \(0.3806\) to \(0.1576\), whereas the leakage decreases only moderately. This indicates that, near the optimum, the decisive improvement is not merely "less", but the fact that the pulse becomes sufficiently long to realize the target unitary while also respecting the boundary structure required by the UFO cost.
+The dependence on the gate duration is particularly instructive. Very short horizons, such as \(40\,\mathrm{ns}\) and \(50\,\mathrm{ns}\), perform poorly: the nominal fidelities drop to \(0.7255\) and \(0.8818\), while the corresponding boundary penalties remain very large, respectively \(0.399\) and \(0.357\). By contrast, the leakage itself stays in the same \(10^{-4}\) range throughout this short-time regime. This means that the main failure mode of the ultra-short solutions is \emph{not} an isolated explosion of leakage alone, but the inability to satisfy simultaneously the accuracy and boundary requirements of the UFO objective under a strongly time-compressed pulse. This behavior is fully consistent with the speed--leakage and speed--smoothness tension discussed in Section~\ref{subsec:speed_leakage_tradeoff}: in weakly anharmonic superconducting systems, shortening the pulse too aggressively broadens the effective control spectrum and makes it more difficult to maintain both clean logical evolution and well-behaved pulse boundaries \cite{Motzoi2009,Koch2022}. The sharp transition from \(60\,\mathrm{ns}\) to \(70\,\mathrm{ns}\) is especially revealing in this respect. Over this interval, the fidelity increases from \(0.982\) to \(0.997\), the boundary term collapses from \(9.75\times10^{-2}\) to \(4.28\times10^{-3}\), and the total nominal cost drops from \(0.381\) to \(0.158\), whereas the leakage decreases only moderately. This indicates that, near the optimum, the decisive improvement is not merely "less", but the fact that the pulse becomes sufficiently long to realize the target unitary while also respecting the boundary structure required by the UFO cost.
 
 The long-horizon side of the sweep is equally informative. Beyond approximately \(70\)--\(90\,\mathrm{ns}\), the fidelity remains uniformly high and varies only weakly; for example, at \(150\,\mathrm{ns}\) the Adam baseline reaches
 \begin{equation}
@@ -684,7 +676,9 @@ A further useful benchmark emerges when this nominal Adam runtime is compared to
 \end{equation}
 even before introducing policy optimization or transfer learning. This does \emph{not} yet prove the stronger runtime claims of the RL framework across the whole gate family, but it is a useful early indication that direct analog optimization on the present hardware model can already exploit structure unavailable to a fixed compiled-gate implementation.
 
-Although the systematic robustness study is deferred to Section~\ref{subsec:robustness_under_noise}, the Adam baseline also provides a first quantitative reference point in the noisy setting. For the control plan selected by the noisy training objective at \(60\,\mathrm{ns}\), the robustness evaluation at \(\sigma_{\mathrm{noise}}=1\,\mathrm{MHz}\) yields an average fidelity of \(0.9686\), an average gate fidelity of \(0.9607\), and a fidelity variance of \(1.75\times10^{-4}\). These values are already respectable for a direct gradient baseline, but they also make clear why a stronger robustness-oriented method is desirable: they set the scale that the nominal and noise-optimized TRPO controllers will later be asked to surpass. In this sense, the Adam baseline performs exactly the role it should in the empirical chapter: it is not a strawman, but a meaningful non-RL benchmark that captures the main structure of the control problem while leaving clear room for improvement in robustness and consistency under stochastic perturbations.
+\textbf{TODO:} Aggiungere le lables ai riferimenti ( Average fidelity etc...)
+
+Although the systematic robustness study is deferred to section \ref{sec:robustness_under_stochastic_control_noise}, the Adam baseline also provides a first quantitative reference point in the noisy setting. For the control plan selected by the noisy training objective at \(60\,\mathrm{ns}\), the robustness evaluation at \(\sigma_{\mathrm{noise}}=1\,\mathrm{MHz}\) yields an average fidelity of \(0.9686\), an average gate fidelity of \(0.9607\), and a fidelity variance of \(1.75\times10^{-4}\). These values are already respectable for a direct gradient baseline, but they also make clear why a stronger robustness-oriented method is desirable: they set the scale that the nominal and noise-optimized TRPO controllers will later be asked to surpass. In this sense, the Adam baseline performs exactly the role it should in the empirical chapter: it is not a strawman, but a meaningful non-RL benchmark that captures the main structure of the control problem while leaving clear room for improvement in robustness and consistency under stochastic perturbations.
 
 A preliminary family-wide Adam sweep with fixed \(\gamma=\pi/2\) further reinforces this interpretation. Even without transfer learning, the performance of the direct optimizer is markedly non-uniform across the gate family \(N(\alpha,\alpha,\pi/2)\). The best results cluster around the central region \(\alpha\approx 1.4\)--\(1.7\), where the optimizer consistently selects \(40\,\mathrm{ns}\) as the best horizon, reaches nominal fidelities above \(0.9987\), and retains noisy average fidelities around \(0.987\)--\(0.989\) with very small fidelity variance of order \(10^{-5}\). By contrast, near the edges of the interval, i.e. for \(\alpha\approx 0\) or \(\alpha\approx \pi\), the best horizon shifts to \(70\,\mathrm{ns}\), the nominal fidelity drops to about \(0.94\), and the noisy average fidelity falls to about \(0.936\)--\(0.938\), with variance increasing by roughly one order of magnitude. This shows that the difficulty of the gate family is highly structured already at the level of direct gradient optimization. Not all members of \(N(\alpha,\alpha,\pi/2)\) are equally easy to realize within the same bandwidth-limited multilevel control ansatz, and this fact will later be important when interpreting the runtime curves obtained with RL and transfer learning. Put differently, the Adam sweep provides a useful "zero" baseline for distinguishing between intrinsic gate-family geometry and genuine algorithmic gains due to policy optimization.
 
@@ -731,27 +725,23 @@ U_{\mathrm{target}} = N(2.2,2.2,\pi/2)
 is obtained with the TRPO-based reinforcement-learning controller introduced in Chapter~3, but trained in the \emph{nominal} environment, i.e. without stochastic perturbations injected during training. In the present implementation, this corresponds to setting \texttt{noise\_optimized = false}, so that the policy is optimized against the deterministic multilevel gmon dynamics discussed in Section~\ref{subsec:paper_rl_formulation}, even though the codebase retains the same general training interface used later for the noisy runs. The controller is trained with the same physical model and UFO weights used in the Adam baseline, namely \((\chi,\beta,\mu,\kappa)=(10,10,0.2,0.1)\), a time discretization \(\Delta t = 2\,\mathrm{ns}\), a maximum admissible gate time \(T_{\max}=180\,\mathrm{ns}\), and a termination threshold \(C_{\mathrm{term}}=0.3\). On the algorithmic side, the nominal TRPO run uses batches of \(5000\) episodes, \(115\) policy updates, trust-region radius \(\texttt{max\_kl}=0.01\), discount factor \(\gamma_{\mathrm{RL}}=0.99\), GAE parameter \(\lambda=0.97\), and fully connected policy/value networks with hidden sizes \(64\text{-}32\text{-}32\), consistent with the architecture described by Niu \emph{et al.} \cite{Niu2019}.
 % :contentReference[oaicite:3]{index=3} :contentReference[oaicite:4]{index=4} :contentReference[oaicite:5]{index=5}
 
-Under deterministic evaluation, the best policy found in this nominal setting achieves
-\begin{equation}
-C_{\mathrm{TRPO}}^{\mathrm{nom}} = 0.2982,
-\qquad
-F_{\mathrm{TRPO}}^{\mathrm{nom}} = 0.99415,
-\qquad
-L_{\mathrm{TRPO}}^{\mathrm{nom}} = 1.60\times10^{-3},
-\label{eq:nominal_trpo_main_metrics}
-\end{equation}
-with an effective gate duration
-\begin{equation}
-T_{\mathrm{TRPO}}^{\mathrm{nom}} = 116\,\mathrm{ns}.
-\label{eq:nominal_trpo_time}
-\end{equation}
-The same deterministic rollout also reports
-\begin{equation}
-C_{\min}^{\mathrm{TRPO}} = 0.2982
-\qquad \text{at} \qquad
-t_{\min}^{\mathrm{TRPO}} = 116\,\mathrm{ns},
-\label{eq:nominal_trpo_min_cost_time}
-\end{equation}
+Under deterministic evaluation, the best policy found in this nominal setting reaches the performance summarized in Table~\ref{tab:nominal_trpo_results}.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{lcc}
+\hline
+Metric & Label & Value \\
+\hline
+Nominal Cost & \(C_{\mathrm{TRPO}}^{\mathrm{nom}}\) & 0.2982 \\
+Nominal Fidelity & \(F_{\mathrm{TRPO}}^{\mathrm{nom}}\) & 0.99415 \\
+Nominal Leakage & \(L_{\mathrm{TRPO}}^{\mathrm{nom}}\) & $1.60\times 10^{-3}$ \\
+Effective Runtime & \(T_{\mathrm{TRPO}}^{\mathrm{nom}}\) & 116\,ns \\
+\hline
+\end{tabular}
+\caption{Nominal performance metrics for the TRPO controller trained in the deterministic environment on the representative target $N(2.2, 2.2, \pi/2)$.}
+\label{tab:nominal_trpo_results}
+\end{table}
 which indicates that, unlike the Adam baseline where the horizon is fixed externally and selected by sweep, the nominal TRPO controller learns the control trajectory inside a larger admissible window and reaches its best stopping point well before the hard upper bound of \(180\,\mathrm{ns}\). This is an important structural difference between the two methods: Adam solves a family of fixed-horizon pulse-optimization problems, whereas TRPO explores a variable-length sequential control strategy under a cost-based stopping criterion. In that sense, the nominal TRPO result should not be interpreted simply as "another" point, but as the output of a policy that co-optimizes pulse shape and effective stopping time within the same RL formulation \cite{Niu2019}.
 % :contentReference[oaicite:6]{index=6} :contentReference[oaicite:7]{index=7}
 
@@ -874,6 +864,7 @@ The key visual message should be that nominal TRPO is fully competitive in absol
 
 
 \section{Robustness under stochastic control noise}
+\label{sec:robustness_under_stochastic_control_noise}
 \subsection{Noise model}
 \label{subsec:noise_model}
 To assess robustness in a physically meaningful and methodologically consistent way, all controllers considered in this section are evaluated under the same stochastic control-error model, following the general logic of the original UFO framework \cite{Niu2019}. At the discrete time-step level, the nominal control trajectory is not implemented exactly, but is perturbed by additive Gaussian amplitude fluctuations. In the notation of the control vector introduced in Eq.~\eqref{eq:validation_control_vector}, this means that the realized control at time step \(t_k\) takes the schematic form
