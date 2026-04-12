@@ -960,6 +960,7 @@ It is also useful to distinguish leakage from ordinary logical errors that remai
 
 For this reason, the preservation of the computational subspace should be regarded as a structural requirement of quantum control, not merely as a secondary diagnostic. The goal is not only to approximate a target logical unitary but to do so while keeping the evolution effectively confined to $\mathcal{H}_{\mathrm{comp}}$. In the remainder of the thesis, this idea will reappear in a more quantitative form through explicit leakage penalties and bounds. In particular, the UFO framework studied later augments the gate-infidelity objective by a dedicated leakage term constructed from the block-off-diagonal dynamics of the full multilevel Hamiltonian \cite{Niu2019}.
 
+\textbf{TODO:} Rendere più chiaro il disegno 
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[
@@ -980,7 +981,6 @@ $\ket{2},\ket{3},\dots$ locally\\
 or higher-excitation sectors
 };
 
-\textbf{TODO:} Rendere più chiaro il disegno
 \draw[arrow] (comp.east) -- node[above,small] {$H_{\mathrm{off}}(t)$} (leak.west);
 \draw[arrow] (leak.west) -- node[below,small] {$H_{\mathrm{off}}(t)$} (comp.east);
 
@@ -1920,7 +1920,7 @@ For the purposes of this thesis, the key message is the following. Once the cont
 \node[box] (state) {state $s_t$};
 \node[box, right=of state] (policy) {stochastic policy\\ $\pi_{\bm{\theta}}(a\mid s)$};
 \node[box, right=of policy] (action) {continuous action\\ $a_t=\bm{u}_t\in\mathbb{R}^m$};
-\node[box, below=of policy] (env) {quantum dynamics\\ + reward};
+\node[box, below=of policy] (env) {quantum dynamics\\ + reward}; 
 \node[box, below=of action] (trpo) {TRPO update\\ maximize \eqref{eq:trpo_surrogate_objective}\\ subject to \eqref{eq:trpo_kl_constraint}};
 
 \draw[arrow] (state) -- (policy);

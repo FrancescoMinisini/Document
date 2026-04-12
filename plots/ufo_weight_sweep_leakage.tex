@@ -20,7 +20,7 @@
             solid,
             draw=violet!80!black,
             fill=violet!40!white,
-            median style={thick, draw=black},
+            boxplot/median/.style={thick, draw=black},
             mark=*,
             mark options={fill=violet!80!black, fill opacity=0.7, draw=none, scale=1.3}
         }
@@ -31,28 +31,58 @@
         xlabel={Weight $\chi$},
         xticklabels={5, 10, 20},
     ]
-        \addplot[boxplot, y filter/.code={\pgfmathparse{abs(\thisrow{cost_chi}-5)<1 ? \pgfmathresult : "nan"}}] table[y=best_eval_leakage, col sep=comma] {data/cost_function_sweep_results/sweep_complete_metrics.csv};
-        \addplot[boxplot, y filter/.code={\pgfmathparse{abs(\thisrow{cost_chi}-10)<1 ? \pgfmathresult : "nan"}}] table[y=best_eval_leakage, col sep=comma] {data/cost_function_sweep_results/sweep_complete_metrics.csv};
-        \addplot[boxplot, y filter/.code={\pgfmathparse{abs(\thisrow{cost_chi}-20)<1 ? \pgfmathresult : "nan"}}] table[y=best_eval_leakage, col sep=comma] {data/cost_function_sweep_results/sweep_complete_metrics.csv};
+        \addplot[boxplot,
+            y filter/.expression={abs(\thisrow{cost_chi}-5)<1 ? \pgfmathresult : nan}
+        ] table[y=best_eval_leakage, col sep=comma]
+            {data/cost_function_sweep_results/sweep_complete_metrics.csv};
+        \addplot[boxplot,
+            y filter/.expression={abs(\thisrow{cost_chi}-10)<1 ? \pgfmathresult : nan}
+        ] table[y=best_eval_leakage, col sep=comma]
+            {data/cost_function_sweep_results/sweep_complete_metrics.csv};
+        \addplot[boxplot,
+            y filter/.expression={abs(\thisrow{cost_chi}-20)<1 ? \pgfmathresult : nan}
+        ] table[y=best_eval_leakage, col sep=comma]
+            {data/cost_function_sweep_results/sweep_complete_metrics.csv};
 
     % Panel 2: cost_mu
     \nextgroupplot[
         xlabel={Weight $\mu$},
         xticklabels={0.1, 0.2, 0.4},
     ]
-        \addplot[boxplot, y filter/.code={\pgfmathparse{abs(\thisrow{cost_mu}-0.1)<0.05 ? \pgfmathresult : "nan"}}] table[y=best_eval_leakage, col sep=comma] {data/cost_function_sweep_results/sweep_complete_metrics.csv};
-        \addplot[boxplot, y filter/.code={\pgfmathparse{abs(\thisrow{cost_mu}-0.2)<0.05 ? \pgfmathresult : "nan"}}] table[y=best_eval_leakage, col sep=comma] {data/cost_function_sweep_results/sweep_complete_metrics.csv};
-        \addplot[boxplot, y filter/.code={\pgfmathparse{abs(\thisrow{cost_mu}-0.4)<0.05 ? \pgfmathresult : "nan"}}] table[y=best_eval_leakage, col sep=comma] {data/cost_function_sweep_results/sweep_complete_metrics.csv};
+        \addplot[boxplot,
+            y filter/.expression={abs(\thisrow{cost_mu}-0.1)<0.05 ? \pgfmathresult : nan}
+        ] table[y=best_eval_leakage, col sep=comma]
+            {data/cost_function_sweep_results/sweep_complete_metrics.csv};
+        \addplot[boxplot,
+            y filter/.expression={abs(\thisrow{cost_mu}-0.2)<0.05 ? \pgfmathresult : nan}
+        ] table[y=best_eval_leakage, col sep=comma]
+            {data/cost_function_sweep_results/sweep_complete_metrics.csv};
+        \addplot[boxplot,
+            y filter/.expression={abs(\thisrow{cost_mu}-0.4)<0.05 ? \pgfmathresult : nan}
+        ] table[y=best_eval_leakage, col sep=comma]
+            {data/cost_function_sweep_results/sweep_complete_metrics.csv};
 
     % Panel 3: cost_kappa
     \nextgroupplot[
         xlabel={Weight $\kappa$},
         xticklabels={0.05, 0.1, 0.2, 0.4},
     ]
-        \addplot[boxplot, y filter/.code={\pgfmathparse{abs(\thisrow{cost_kappa}-0.05)<0.02 ? \pgfmathresult : "nan"}}] table[y=best_eval_leakage, col sep=comma] {data/cost_function_sweep_results/sweep_complete_metrics.csv};
-        \addplot[boxplot, y filter/.code={\pgfmathparse{abs(\thisrow{cost_kappa}-0.1)<0.02 ? \pgfmathresult : "nan"}}] table[y=best_eval_leakage, col sep=comma] {data/cost_function_sweep_results/sweep_complete_metrics.csv};
-        \addplot[boxplot, y filter/.code={\pgfmathparse{abs(\thisrow{cost_kappa}-0.2)<0.02 ? \pgfmathresult : "nan"}}] table[y=best_eval_leakage, col sep=comma] {data/cost_function_sweep_results/sweep_complete_metrics.csv};
-        \addplot[boxplot, y filter/.code={\pgfmathparse{abs(\thisrow{cost_kappa}-0.4)<0.02 ? \pgfmathresult : "nan"}}] table[y=best_eval_leakage, col sep=comma] {data/cost_function_sweep_results/sweep_complete_metrics.csv};
+        \addplot[boxplot,
+            y filter/.expression={abs(\thisrow{cost_kappa}-0.05)<0.02 ? \pgfmathresult : nan}
+        ] table[y=best_eval_leakage, col sep=comma]
+            {data/cost_function_sweep_results/sweep_complete_metrics.csv};
+        \addplot[boxplot,
+            y filter/.expression={abs(\thisrow{cost_kappa}-0.1)<0.02 ? \pgfmathresult : nan}
+        ] table[y=best_eval_leakage, col sep=comma]
+            {data/cost_function_sweep_results/sweep_complete_metrics.csv};
+        \addplot[boxplot,
+            y filter/.expression={abs(\thisrow{cost_kappa}-0.2)<0.02 ? \pgfmathresult : nan}
+        ] table[y=best_eval_leakage, col sep=comma]
+            {data/cost_function_sweep_results/sweep_complete_metrics.csv};
+        \addplot[boxplot,
+            y filter/.expression={abs(\thisrow{cost_kappa}-0.4)<0.02 ? \pgfmathresult : nan}
+        ] table[y=best_eval_leakage, col sep=comma]
+            {data/cost_function_sweep_results/sweep_complete_metrics.csv};
 
     \end{groupplot}
 \end{tikzpicture}

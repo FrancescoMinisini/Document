@@ -1,6 +1,7 @@
 $out_dir = 'out';
 $pdf_mode = 1;
-$bibtex_use = 2;
+$bibtex_use = 1;
+# $bibtex_use = 2;
 
 $pdflatex = 'pdflatex -shell-escape %O %S';
 
