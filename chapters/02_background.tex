@@ -1908,7 +1908,7 @@ There is also a conceptual reason why policy optimization is a good match for qu
 
 For the purposes of this thesis, the key message is the following. Once the control amplitudes are treated as continuous actions, reinforcement learning naturally leads to policy-gradient methods rather than to purely value-based discrete-action algorithms. Among policy-gradient methods, TRPO is especially relevant because it combines direct optimization of continuous stochastic policies with a principled mechanism for stabilizing updates through a trust-region constraint. This is why it forms the algorithmic core of the reference paper and why it provides the natural bridge between the general RL background developed so far and the specific deep-RL control framework analyzed in the following chapter.
 
-\textbf{TODO:} replace with snippet
+
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[
@@ -1931,7 +1931,9 @@ For the purposes of this thesis, the key message is the following. Once the cont
 \draw[arrow] (trpo) -- (policy);
 
 \end{tikzpicture}
-\caption{Continuous-action policy optimization in quantum control. The policy maps the current state to a distribution over continuous control amplitudes, the quantum system returns the resulting trajectory information and reward, and TRPO updates the policy through a surrogate objective constrained by a KL trust region.}
+\caption{Continuous-action policy optimization in quantum control. The policy maps the current state to a distribution over continuous control amplitudes, the quantum system returns the resulting trajectory information and reward, and TRPO updates the policy through a surrogate objective constrained by a KL trust region.
+\textbf{TODO:} add snippet
+}
 \label{fig:continuous_action_trpo}
 \end{figure}
 
@@ -2057,27 +2059,28 @@ A useful principle is therefore to start from the \emph{physics} and only then t
 This is precisely the conceptual role played by the framework analyzed in the next chapter. The literature explicitly argues that an effective control cost function is essential for efficient optimization and for meaningful quantum control, and it constructs the UFO objective by combining gate infidelity, leakage penalties, total runtime, and boundary-condition penalties into a single scalar cost \cite{Niu2019}. That cost is then used as the reward signal for a continuous-variable policy-gradient agent trained with TRPO \cite{Niu2019}. In other words, the paper does not first design an RL agent and then ask what to optimize; it begins from the physics of the control problem and uses the reward as the mechanism for injecting that physics into the learning dynamics. This is exactly why reward design is the final and most important conceptual bridge between the generic RL background of this chapter and the paper-specific framework introduced next.
 
 
-\textbf{TODO:} REPLACE WITH SNIPPET
 \begin{figure}[t]
-\centering
-\begin{tikzpicture}[
-    box/.style={draw, rounded corners, minimum width=3.1cm, minimum height=1.0cm, align=center},
-    arrow/.style={-{Latex[length=2mm]}, thick},
-    node distance=1.6cm and 1.7cm
-]
-
-\node[box] (physics) {physical objectives\\ fidelity, leakage, runtime, constraints};
-\node[box, right=of physics] (cost) {control cost\\ $\mathcal{C}[\tau]$};
-\node[box, right=of cost] (reward) {RL reward\\ $r_t,\;G_0$};
-\node[box, below=of cost] (policy) {policy optimization\\ $\pi_{\bm{\theta}}$};
-
-\draw[arrow] (physics) -- (cost);
-\draw[arrow] (cost) -- (reward);
-\draw[arrow] (reward) -- (policy);
-\draw[arrow] (policy.north) -- (cost.south);
-
-\end{tikzpicture}
-\caption{Reward design as the interface between physics and learning. The relevant physical control objectives are first encoded into a scalar cost functional, which is then converted into the reward signal used by the RL algorithm to optimize the policy.}
+    \centering
+    \begin{tikzpicture}[
+        box/.style={draw, rounded corners, minimum width=3.1cm, minimum height=1.0cm, align=center},
+        arrow/.style={-{Latex[length=2mm]}, thick},
+        node distance=1.6cm and 1.7cm
+        ]
+        
+        \node[box] (physics) {physical objectives\\ fidelity, leakage, runtime, constraints};
+        \node[box, right=of physics] (cost) {control cost\\ $\mathcal{C}[\tau]$};
+        \node[box, right=of cost] (reward) {RL reward\\ $r_t,\;G_0$};
+        \node[box, below=of cost] (policy) {policy optimization\\ $\pi_{\bm{\theta}}$};
+        
+        \draw[arrow] (physics) -- (cost);
+        \draw[arrow] (cost) -- (reward);
+        \draw[arrow] (reward) -- (policy);
+        \draw[arrow] (policy.north) -- (cost.south);
+        
+    \end{tikzpicture}
+    \caption{Reward design as the interface between physics and learning. The relevant physical control objectives are first encoded into a scalar cost functional, which is then converted into the reward signal used by the RL algorithm to optimize the policy.
+    \textbf{TODO:} add snippet
+    }
 \label{fig:reward_design_bridge}
 \end{figure}
 
