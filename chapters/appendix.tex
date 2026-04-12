@@ -1,0 +1,510 @@
+\section{Derivation of the TSWT-based coherent leakage bound}
+\label{app:tswt_coherent_leakage_bound}
+
+This appendix derives the time-dependent Schrieffer--Wolff-based coherent leakage bound used in the main text. The derivation follows the logic of Appendix~B of Ref.~\cite{Niu2019}, but is rewritten here in a form adapted to the notation and level of detail of the present thesis.
+
+\subsection{Hamiltonian decomposition and perturbative regime}
+\label{app:tswt_setup}
+
+Let the physical Hilbert space be decomposed into orthogonal subspaces as
+\begin{equation}
+\mathcal{H}_{\mathrm{phys}}
+=
+\bigoplus_{\alpha}\Omega_{\alpha},
+\label{eq:app_tswt_hilbert_decomposition}
+\end{equation}
+with \(\Omega_0\) the computational subspace and \(\Omega_{\alpha}\) for \(\alpha\ge 1\) higher-energy leakage subspaces. Following the notation introduced in Sec.~\ref{subsec:gmon_subspaces_notation}, we write the Hamiltonian as
+\begin{equation}
+\hat{H}(t)
+=
+\hat{H}_0
++
+\hat{H}_1(t)
++
+\hat{H}_2(t),
+\label{eq:app_tswt_hamiltonian_split}
+\end{equation}
+where \(\hat{H}_0\) is block-diagonal and time independent,
+\begin{equation}
+\hat{H}_0
+=
+\sum_{\alpha}\sum_{m\in\Omega_\alpha}
+E_\alpha \ket{m}\bra{m},
+\label{eq:app_tswt_H0}
+\end{equation}
+\(\hat{H}_1(t)\) is block-diagonal and contains intra-subspace couplings, and \(\hat{H}_2(t)\) is block-off-diagonal and couples different subspaces.
+
+We assume a perturbative regime in which the minimum gap
+\begin{equation}
+\Delta
+:=
+\min_{\alpha\neq 0}|E_\alpha-E_0|
+\label{eq:app_tswt_gap}
+\end{equation}
+is much larger than both intra- and inter-subspace couplings. Denoting by \(\epsilon\) the characteristic magnitude of the control-induced terms, this means
+\begin{equation}
+\|\hat{H}_1(t)\|
+\sim
+\|\hat{H}_2(t)\|
+\sim
+\epsilon,
+\qquad
+\frac{\epsilon}{\Delta}\ll 1.
+\label{eq:app_tswt_small_parameter}
+\end{equation}
+This is precisely the scale separation that makes a Schrieffer--Wolff treatment meaningful.
+
+\subsection{Time-dependent Schrieffer--Wolff transformation}
+\label{app:tswt_transformation}
+
+We now introduce a time-dependent anti-Hermitian generator \(\hat{S}(t)\),
+\begin{equation}
+\hat{S}^{\dagger}(t)=-\hat{S}(t),
+\label{eq:app_tswt_antihermitian}
+\end{equation}
+chosen to be block-off-diagonal, and define the rotated state
+\begin{equation}
+\ket{\tilde{\psi}(t)}
+=
+e^{-\hat{S}(t)}\ket{\psi(t)}.
+\label{eq:app_tswt_rotated_state}
+\end{equation}
+Inserting Eq.~\eqref{eq:app_tswt_rotated_state} into the Schr\"odinger equation gives
+\begin{equation}
+i\frac{d}{dt}\ket{\tilde{\psi}(t)}
+=
+\hat{\mathbb{H}}(t)\ket{\tilde{\psi}(t)},
+\label{eq:app_tswt_effective_schrodinger}
+\end{equation}
+with effective Hamiltonian
+\begin{equation}
+\hat{\mathbb{H}}(t)
+=
+-i\,
+\frac{d e^{-\hat{S}(t)}}{dt}e^{\hat{S}(t)}
++
+e^{-\hat{S}(t)}\hat{H}(t)e^{\hat{S}(t)}.
+\label{eq:app_tswt_effective_hamiltonian_exact}
+\end{equation}
+
+Using the Baker--Campbell--Hausdorff expansion, one obtains
+\begin{equation}
+\hat{\mathbb{H}}(t)
+=
+-i\sum_{j=0}^{\infty}\frac{1}{(j+1)!}
+[\dot{\hat{S}}(t),\hat{S}(t)]_{j}
++
+\sum_{j=0}^{\infty}\frac{1}{j!}
+[\hat{H}(t),\hat{S}(t)]_{j},
+\label{eq:app_tswt_bch_expansion}
+\end{equation}
+where
+\begin{equation}
+[A,B]_0:=A,
+\qquad
+[A,B]_{j+1}:=[[A,B]_j,B].
+\label{eq:app_tswt_nested_commutator}
+\end{equation}
+
+Because \(\hat{H}_0\) and \(\hat{H}_1\) are block-diagonal, whereas \(\hat{S}\) and \(\hat{H}_2\) are block-off-diagonal, the transformed Hamiltonian can be decomposed into a block-diagonal part \(\hat{H}_{\mathrm d}\) and a block-off-diagonal part \(\hat{H}_{\mathrm{od}}\). The goal is to choose \(\hat{S}(t)\) so that \(\hat{H}_{\mathrm{od}}\) vanishes order by order in \(\epsilon/\Delta\).
+
+\subsection{Perturbative construction of the generator}
+\label{app:tswt_generator_construction}
+
+We expand the generator as
+\begin{equation}
+\hat{S}(t)=\hat{S}^{(1)}(t)+\hat{S}^{(2)}(t)+O\!\left(\frac{\epsilon^3}{\Delta^3}\right),
+\label{eq:app_tswt_generator_expansion}
+\end{equation}
+with
+\begin{equation}
+\|\hat{S}^{(1)}(t)\|=O\!\left(\frac{\epsilon}{\Delta}\right),
+\qquad
+\|\hat{S}^{(2)}(t)\|=O\!\left(\frac{\epsilon^2}{\Delta^2}\right).
+\label{eq:app_tswt_generator_orders}
+\end{equation}
+Keeping terms up to second order, the block-off-diagonal sector of \(\hat{\mathbb{H}}(t)\) reads
+\begin{equation}
+\hat{H}_{\mathrm{od}}(t)
+=
+\hat{H}_2(t)
++
+[\hat{H}_0,\hat{S}^{(1)}(t)]
++
+[\hat{H}_0,\hat{S}^{(2)}(t)]
++
+[\hat{H}_1(t),\hat{S}^{(1)}(t)]
+-
+i\dot{\hat{S}}^{(1)}(t)
++
+O\!\left(\frac{\epsilon^3}{\Delta^2}\right).
+\label{eq:app_tswt_offdiag_to_second_order}
+\end{equation}
+We now impose cancellation order by order.
+
+At first order,
+\begin{equation}
+[\hat{H}_0,\hat{S}^{(1)}(t)]
++
+\hat{H}_2(t)
+=
+0.
+\label{eq:app_tswt_first_order_condition}
+\end{equation}
+Taking matrix elements between different subspaces \(\Omega_\alpha\) and \(\Omega_{\alpha'}\), with \(\alpha\neq\alpha'\), one finds
+\begin{equation}
+\hat{S}^{(1)}_{\alpha\alpha'}(t)
+=
+\frac{\hat{H}_{2,\alpha\alpha'}(t)}{E_{\alpha'}-E_{\alpha}}.
+\label{eq:app_tswt_S1}
+\end{equation}
+
+At second order, the cancellation condition becomes
+\begin{equation}
+[\hat{H}_0,\hat{S}^{(2)}(t)]
++
+[\hat{H}_1(t),\hat{S}^{(1)}(t)]
+-
+i\dot{\hat{S}}^{(1)}(t)
+=
+0.
+\label{eq:app_tswt_second_order_condition}
+\end{equation}
+Again taking matrix elements between distinct subspaces gives
+\begin{equation}
+\hat{S}^{(2)}_{\alpha\alpha'}(t)
+=
+\frac{
+\hat{H}_{1,\alpha}(t)\hat{H}_{2,\alpha\alpha'}(t)
+-
+\hat{H}_{2,\alpha\alpha'}(t)\hat{H}_{1,\alpha'}(t)
+-
+i\dot{\hat{H}}_{2,\alpha\alpha'}(t)
+}{
+\bigl(E_{\alpha'}-E_{\alpha}\bigr)^2
+}.
+\label{eq:app_tswt_S2}
+\end{equation}
+
+After inserting Eqs.~\eqref{eq:app_tswt_S1} and \eqref{eq:app_tswt_S2} back into the transformed Hamiltonian, all block-off-diagonal terms up to second order cancel. Consequently, the residual block-off-diagonal Hamiltonian satisfies
+\begin{equation}
+\hat{H}_{\mathrm{od}}(t)
+=
+O\!\left(\frac{\epsilon^3}{\Delta^2}\right).
+\label{eq:app_tswt_residual_offdiag_scaling}
+\end{equation}
+This is the central perturbative output of the TSWT construction: direct couplings between the computational sector and leakage sectors are not removed exactly, but are pushed to higher order in the small parameter \(\epsilon/\Delta\).
+
+\subsection{Interaction-picture expression for the leakage amplitude}
+\label{app:tswt_interaction_picture_leakage}
+
+To bound the leakage induced by the residual coupling \(\hat{H}_{\mathrm{od}}(t)\), we now move to the interaction picture with respect to the block-diagonal Hamiltonian \(\hat{H}_{\mathrm d}(t)\). Let
+\begin{equation}
+U_{\mathrm d}(t,\tau)
+=
+\mathcal{T}
+\exp\!\left[
+-i\int_{\tau}^{t}\hat{H}_{\mathrm d}(s)\,ds
+\right]
+\label{eq:app_tswt_Ud}
+\end{equation}
+be the propagator generated by \(\hat{H}_{\mathrm d}(t)\), and define
+\begin{equation}
+\ket{\psi_I(t)}
+=
+U_{\mathrm d}(0,t)\ket{\tilde{\psi}(t)}.
+\label{eq:app_tswt_interaction_state}
+\end{equation}
+Then
+\begin{equation}
+i\frac{d}{dt}\ket{\psi_I(t)}
+=
+U_{\mathrm d}(0,t)\hat{H}_{\mathrm{od}}(t)U_{\mathrm d}(t,0)\ket{\psi_I(t)}.
+\label{eq:app_tswt_interaction_schrodinger}
+\end{equation}
+To leading order in \(\hat{H}_{\mathrm{od}}\), the Dyson expansion gives
+\begin{equation}
+\ket{\psi_I(t)}
+\approx
+\left[
+\mathbb{I}
+-
+i\int_{0}^{t}
+U_{\mathrm d}(0,\tau)\hat{H}_{\mathrm{od}}(\tau)U_{\mathrm d}(\tau,0)\,d\tau
+\right]
+\ket{\psi(0)}.
+\label{eq:app_tswt_dyson_first_order}
+\end{equation}
+
+Suppose the initial state belongs to the computational subspace, \(\ket{\psi(0)}\in\Omega_0\). Since \(U_{\mathrm d}(t,\tau)\) is block-diagonal, it preserves each \(\Omega_\alpha\), so the leakage into higher subspaces comes entirely from the integral term in Eq.~\eqref{eq:app_tswt_dyson_first_order}. Writing \(\Pi_\alpha\) for the projector onto \(\Omega_\alpha\), a natural norm bound is
+\begin{equation}
+L_{\mathrm{dir}}(t)
+\lesssim
+\sum_{\alpha\neq 0}
+\left\|
+\Pi_\alpha
+\int_0^t
+U_{\mathrm d}(t,\tau)\hat{H}_{\mathrm{od}}(\tau)U_{\mathrm d}(\tau,t)\,d\tau
+\Pi_0
+\right\|.
+\label{eq:app_tswt_direct_leakage_start}
+\end{equation}
+
+\subsection{Repeated integration by parts and the coherent leakage bound}
+\label{app:tswt_integration_by_parts}
+
+The remaining task is to bound the integral in Eq.~\eqref{eq:app_tswt_direct_leakage_start}. The key observation is that, on any higher-energy subspace \(\Omega_\alpha\), the inverse of the block-diagonal generator scales as
+\begin{equation}
+\|\hat{H}_{\mathrm d}^{-1}\Pi_\alpha\|
+\sim
+\frac{1}{\Delta_\alpha},
+\qquad
+\Delta_\alpha:=|E_\alpha-E_0|.
+\label{eq:app_tswt_inverse_gap_scaling}
+\end{equation}
+Using
+\begin{equation}
+\frac{d}{d\tau}U_{\mathrm d}(t,\tau)
+=
+i\,U_{\mathrm d}(t,\tau)\hat{H}_{\mathrm d}(\tau),
+\qquad
+\frac{d}{d\tau}U_{\mathrm d}(\tau,t)
+=
+-i\,\hat{H}_{\mathrm d}(\tau)U_{\mathrm d}(\tau,t),
+\label{eq:app_tswt_Ud_derivatives}
+\end{equation}
+one can integrate by parts once to expose an explicit factor \(1/\Delta_\alpha\), and then integrate by parts a second time on the remaining derivative term. After these steps, and using the triangle inequality, one obtains the estimate
+\begin{align}
+L_{\mathrm{dir}}(t)
+\lesssim\;&
+\frac{\|\hat{H}_{\mathrm{od}}(0)\|}{\Delta(0)}
++
+\frac{\|\hat{H}_{\mathrm{od}}(t)\|}{\Delta(t)}
++
+\frac{2\|\dot{\hat{H}}_{\mathrm{od}}(0)\|}{\Delta(0)^2}
++
+\frac{2\|\dot{\hat{H}}_{\mathrm{od}}(t)\|}{\Delta(t)^2}
+\nonumber\\
+&\qquad
++
+\int_0^t
+\frac{1}{\Delta(\tau)^2}
+\left\|
+\ddot{\hat{H}}_{\mathrm{od}}(\tau)
+\right\|
+\,d\tau .
+\label{eq:app_tswt_preliminary_leakage_bound}
+\end{align}
+This is the more explicit intermediate bound from which the expression used in the main text is obtained.
+
+The paper further argues that the two boundary terms containing \(\dot{\hat H}_{\mathrm{od}}\) are subleading, both in the off-resonant and in the on-resonant regime. One is therefore led to the practically relevant coherent leakage bound
+\begin{equation}
+L_{\mathrm{tot}}(t)
+\lesssim
+\frac{\|\hat{H}_{\mathrm{od}}(0)\|}{\Delta(0)}
++
+\frac{\|\hat{H}_{\mathrm{od}}(t)\|}{\Delta(t)}
++
+\int_0^t
+\frac{1}{\Delta(\tau)^2}
+\left\|
+\ddot{\hat{H}}_{\mathrm{od}}(\tau)
+\right\|
+\,d\tau .
+\label{eq:app_tswt_final_leakage_bound}
+\end{equation}
+Equation~\eqref{eq:app_tswt_final_leakage_bound} is precisely the form quoted in the main text and used to motivate the leakage penalty entering the UFO objective.
+
+\subsection{Interpretation of the different terms}
+\label{app:tswt_bound_interpretation}
+
+Equation~\eqref{eq:app_tswt_final_leakage_bound} has an immediate physical interpretation. The two boundary terms penalize residual inter-subspace coupling at the beginning and at the end of the pulse, while the integral term penalizes rapid temporal modulation of that coupling. This is why the bound connects leakage not only to the magnitude of the off-diagonal coupling, but also to pulse smoothness. In particular, the appearance of \(\ddot{\hat H}_{\mathrm{od}}\) explains why fast or sharply varying controls can become leakage-prone even when their instantaneous amplitude is not especially large.
+
+Moreover, since Eq.~\eqref{eq:app_tswt_residual_offdiag_scaling} implies
+\begin{equation}
+\|\hat{H}_{\mathrm{od}}(t)\|
+=
+O\!\left(\frac{\epsilon^3}{\Delta^2}\right),
+\label{eq:app_tswt_residual_offdiag_norm_scaling}
+\end{equation}
+the retained terms in Eq.~\eqref{eq:app_tswt_final_leakage_bound} are of order
+\begin{equation}
+L_{\mathrm{tot}}
+=
+O\!\left(\frac{\epsilon^3}{\Delta^3}\right),
+\label{eq:app_tswt_final_scaling}
+\end{equation}
+up to regime-dependent prefactors associated with the time derivatives of \(\hat{H}_{\mathrm{od}}\). In the off-resonant regime, the endpoint terms dominate; in the on-resonant regime, the integral term becomes the leading contribution. In both cases, however, the coherent leakage remains controlled by the same perturbative scale.
+
+Finally, the paper complements this coherent bound with a generalized adiabatic-theorem estimate for the non-adiabatic contribution and shows that, in the off-resonant regime, that term is parametrically smaller,
+\begin{equation}
+L_{\mathrm{non\text{-}adiabatic}}
+=
+O\!\left(\frac{\epsilon^4}{\Delta^4}\right),
+\label{eq:app_tswt_nonadiabatic_subleading}
+\end{equation}
+so that Eq.~\eqref{eq:app_tswt_final_leakage_bound} captures the dominant leakage contribution relevant to the control cost.
+
+In summary, the role of the TSWT is to construct a rotated computational basis in which direct couplings between \(\Omega_0\) and the higher subspaces are perturbatively suppressed, after which repeated integration by parts yields the bound in Eq.~\eqref{eq:app_tswt_final_leakage_bound}. This is the analytical basis for the leakage penalty used in the UFO framework.
+
+
+\section{Derivation of the effective three-level rotating-frame Hamiltonian}
+\label{app:three_level_rotating_hamiltonian_derivation}
+
+This appendix derives the effective three-level Hamiltonian used in Sec.~\ref{subsec:speed_leakage_tradeoff} to illustrate the speed--leakage tradeoff in a weakly anharmonic superconducting qubit.
+
+\subsection{Three-level truncation of a driven weakly anharmonic mode}
+
+Consider the three lowest energy eigenstates \(\ket{0},\ket{1},\ket{2}\) of a weakly anharmonic superconducting mode. Let the corresponding bare energies be
+\begin{equation}
+E_0 = 0,
+\qquad
+E_1 = \omega_{01},
+\qquad
+E_2 = \omega_{01}+\omega_{12}
+=
+2\omega_{01}+\alpha,
+\label{eq:app_three_level_energies}
+\end{equation}
+where
+\begin{equation}
+\alpha := \omega_{12}-\omega_{01}
+\label{eq:app_three_level_anharmonicity}
+\end{equation}
+is the anharmonicity. For a transmon-like system one has \(\alpha<0\).
+
+A near-resonant drive at frequency \(\omega_d\) couples adjacent levels. In the three-level truncation, a standard lab-frame Hamiltonian is
+\begin{equation}
+\hat H_{\mathrm{lab}}(t)
+=
+\omega_{01}\ket{1}\bra{1}
++
+(2\omega_{01}+\alpha)\ket{2}\bra{2}
++
+\Omega(t)\cos(\omega_d t)
+\Bigl[
+\ket{0}\bra{1}+\ket{1}\bra{0}
++
+\lambda\bigl(\ket{1}\bra{2}+\ket{2}\bra{1}\bigr)
+\Bigr].
+\label{eq:app_three_level_lab_hamiltonian}
+\end{equation}
+Here \(\Omega(t)\) is the drive envelope, while \(\lambda\) denotes the relative matrix element for the \(\ket{1}\leftrightarrow\ket{2}\) transition compared with the \(\ket{0}\leftrightarrow\ket{1}\) one. In an ideal bosonic model one would have \(\lambda=\sqrt{2}\), but it is convenient to keep it explicit.
+
+Using
+\begin{equation}
+\cos(\omega_d t)=\frac{1}{2}\left(e^{i\omega_d t}+e^{-i\omega_d t}\right),
+\label{eq:app_cosine_expansion_drive}
+\end{equation}
+Eq.~\eqref{eq:app_three_level_lab_hamiltonian} becomes
+\begin{align}
+\hat H_{\mathrm{lab}}(t)
+&=
+\omega_{01}\ket{1}\bra{1}
++
+(2\omega_{01}+\alpha)\ket{2}\bra{2}
+\nonumber\\
+&\quad+
+\frac{\Omega(t)}{2}
+\left(e^{i\omega_d t}+e^{-i\omega_d t}\right)
+\Bigl[
+\ket{0}\bra{1}+\ket{1}\bra{0}
++
+\lambda\bigl(\ket{1}\bra{2}+\ket{2}\bra{1}\bigr)
+\Bigr].
+\label{eq:app_three_level_lab_hamiltonian_expanded}
+\end{align}
+
+\subsection{Transformation to the rotating frame}
+
+We now move to the frame rotating at the drive frequency \(\omega_d\) according to
+\begin{equation}
+\hat U_{\mathrm{rf}}(t)
+=
+\exp\!\left[
+-i\omega_d t\left(\ket{1}\bra{1}+2\ket{2}\bra{2}\right)
+\right].
+\label{eq:app_rotating_frame_unitary}
+\end{equation}
+The rotating-frame Hamiltonian is
+\begin{equation}
+\hat H_{\mathrm{rf}}(t)
+=
+\hat U_{\mathrm{rf}}^\dagger(t)\hat H_{\mathrm{lab}}(t)\hat U_{\mathrm{rf}}(t)
+-
+i\hat U_{\mathrm{rf}}^\dagger(t)\dot{\hat U}_{\mathrm{rf}}(t).
+\label{eq:app_rotating_frame_hamiltonian_def}
+\end{equation}
+
+The diagonal part transforms trivially and yields
+\begin{equation}
+(\omega_{01}-\omega_d)\ket{1}\bra{1}
++
+(2\omega_{01}+\alpha-2\omega_d)\ket{2}\bra{2}.
+\label{eq:app_rotating_frame_diagonal_part}
+\end{equation}
+For the drive terms, one finds that the co-rotating contributions become time independent, while the counter-rotating contributions oscillate at frequency \(2\omega_d\). Therefore,
+\begin{align}
+\hat H_{\mathrm{rf}}(t)
+&=
+(\omega_{01}-\omega_d)\ket{1}\bra{1}
++
+(2\omega_{01}+\alpha-2\omega_d)\ket{2}\bra{2}
+\nonumber\\
+&\quad+
+\frac{\Omega(t)}{2}
+\Bigl[
+\ket{0}\bra{1}+\ket{1}\bra{0}
++
+\lambda\bigl(\ket{1}\bra{2}+\ket{2}\bra{1}\bigr)
+\Bigr]
++
+\hat H_{\mathrm{cr}}(t),
+\label{eq:app_rotating_frame_before_rwa}
+\end{align}
+where \(\hat H_{\mathrm{cr}}(t)\) collects the counter-rotating terms oscillating as \(e^{\pm 2i\omega_d t}\).
+
+\subsection{Resonant drive and rotating-wave approximation}
+
+We now assume that the drive is resonant with the logical transition,
+\begin{equation}
+\omega_d=\omega_{01}.
+\label{eq:app_resonant_drive_condition}
+\end{equation}
+Then the \(\ket{1}\) level becomes resonant in the rotating frame, while the \(\ket{2}\) level acquires the detuning
+\begin{equation}
+2\omega_{01}+\alpha-2\omega_d=\alpha.
+\label{eq:app_leakage_level_detuning}
+\end{equation}
+
+If the drive envelope varies slowly on the scale \(1/\omega_d\), the rapidly oscillating counter-rotating contribution \(\hat H_{\mathrm{cr}}(t)\) averages to zero and can be neglected under the rotating-wave approximation. One then obtains
+\begin{equation}
+\hat H_{\mathrm{3lvl}}(t)
+=
+\frac{\Omega(t)}{2}
+\left(
+\ket{0}\bra{1}+\ket{1}\bra{0}
++
+\lambda\ket{1}\bra{2}+\lambda\ket{2}\bra{1}
+\right)
++
+\alpha\ket{2}\bra{2}.
+\label{eq:app_three_level_rotating_hamiltonian_final}
+\end{equation}
+This is exactly the effective Hamiltonian used in Eq.~\eqref{eq:three_level_rotating_hamiltonian} of the main text.
+
+In matrix form, in the ordered basis \(\{\ket{0},\ket{1},\ket{2}\}\), Eq.~\eqref{eq:app_three_level_rotating_hamiltonian_final} reads
+\begin{equation}
+\hat H_{\mathrm{3lvl}}(t)
+=
+\begin{pmatrix}
+0 & \Omega(t)/2 & 0 \\
+\Omega(t)/2 & 0 & \lambda\Omega(t)/2 \\
+0 & \lambda\Omega(t)/2 & \alpha
+\end{pmatrix}.
+\label{eq:app_three_level_rotating_hamiltonian_matrix}
+\end{equation}
+
+\subsection{Physical interpretation}
+
+Equation~\eqref{eq:app_three_level_rotating_hamiltonian_final} makes the origin of leakage transparent. The same drive envelope \(\Omega(t)\) that implements the intended logical transition \(\ket{0}\leftrightarrow\ket{1}\) also couples \(\ket{1}\leftrightarrow\ket{2}\), while the finite anharmonicity \(\alpha\) provides only an imperfect spectral separation between the two transitions. As a result, increasing the drive strength in order to shorten the gate time simultaneously enhances the unwanted coupling to the first leakage level, which is the microscopic origin of the speed--leakage tradeoff discussed in the main text.

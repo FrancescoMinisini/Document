@@ -180,7 +180,7 @@ This is the quantity most frequently minimized in practical control optimization
 In realistic devices, however, the implemented operation is not exactly unitary on the logical subspace, since calibration errors, stochastic fluctuations, decoherence, and leakage make the effective map better described by a quantum channel $\mathcal{E}$. 
 
 % \textbf{TODO:} da inserire qui la definizione di quantum channel 
-\textbf{TODO:} decidere quale usare ( spostare nel caso la seconda frase da un altra parte)
+% \textbf{TODO:} decidere quale usare ( spostare nel caso la seconda frase da un altra parte)
 
 A \emph{quantum channel} is a linear map
 \begin{equation}
@@ -721,7 +721,7 @@ For this reason, it is often useful to describe a driven superconducting qubit d
 \end{equation}
 where $\omega_q$ is the fundamental transition frequency, $\alpha<0$ the weak anharmonicity, and $\Omega(t)$ an externally applied microwave drive. Equation~\eqref{eq:driven_weakly_anharmonic_mode} makes two points transparent. First, the creation and annihilation operators act on the full ladder of states and therefore naturally include higher-level dynamics. Second, the same control field that is intended to drive the $\ket{0}\leftrightarrow\ket{1}$ transition also couples, in principle, to $\ket{1}\leftrightarrow\ket{2}$ and higher transitions, with selectivity arising only because the spectrum is not exactly harmonic. The control task is therefore intrinsically multilevel.
 
-\textbf{TODO:} Riguardare sto paragrafo e come tratta il reference paper, in particolare la eventuale trattazione della appendice
+% \textbf{TODO:} Riguardare sto paragrafo e come tratta il reference paper, in particolare la eventuale trattazione della appendice
 
 This multilevel perspective is not merely a pedagogical refinement; it is the viewpoint adopted in the reference paper analyzed in this thesis. In its Appendix A, the gmon architecture is modeled by quantizing the circuit degrees of freedom in terms of bosonic modes and then deriving an effective rotating-wave Hamiltonian with explicit anharmonicity, tunable coupling, detuning controls, and microwave drives \cite{Niu2019}. In that formulation, each superconducting qubit is treated as a weakly anharmonic oscillator before projection onto the qubit basis, exactly in line with the general discussion above. This is the correct framework for studying high-performance control, because it preserves the higher excited levels that are responsible for leakage and because it allows one to assess whether a pulse remains confined to the intended logical sector.
 
@@ -1006,21 +1006,26 @@ or higher-excitation sectors
 
 A central difficulty of quantum control in weakly anharmonic superconducting devices is that the desire for short gate times competes directly with the need to suppress leakage outside the computational subspace. In principle, faster gates are desirable because they reduce the exposure of the system to decoherence, relaxation, dephasing, and low-frequency calibration drift. In practice, however, the implementation of a shorter gate typically requires either stronger control amplitudes, more abrupt temporal modulation, or both. In multilevel systems, these same features tend to increase the coupling to unwanted transitions and therefore raise the probability of populating non-computational states \cite{Motzoi2009,Gambetta2011,Werninghaus2021}. This tension is one of the defining constraints of pulse engineering in superconducting qubits and is a key reason why realistic control optimization must treat runtime and leakage simultaneously rather than as independent objectives \cite{Niu2019}.
 
-\textbf{TODO:} Demonstrate this
+
 The origin of this tradeoff can already be seen in the simplest driven weakly anharmonic model. Consider a three-level truncation of a superconducting mode, with logical states $\ket{0}$ and $\ket{1}$ and the first leakage level $\ket{2}$. In a frame rotating resonantly with the $\ket{0}\leftrightarrow\ket{1}$ transition, a standard effective Hamiltonian takes the form
 \begin{equation}
-\hat{H}_{\mathrm{3lvl}}(t)
-=
-\frac{\Omega(t)}{2}
-\left(
-\ket{0}\bra{1} + \ket{1}\bra{0}
-+ \lambda \ket{1}\bra{2} + \lambda \ket{2}\bra{1}
-\right)
-+
-\alpha \ket{2}\bra{2},
-\label{eq:three_level_rotating_hamiltonian}
-\end{equation}
-where $\Omega(t)$ is the drive envelope, $\alpha=\omega_{12}-\omega_{01}<0$ is the anharmonicity, and $\lambda$ is the relative matrix element for the $\ket{1}\leftrightarrow\ket{2}$ transition. Equation~\eqref{eq:three_level_rotating_hamiltonian} makes the problem explicit: the same drive that implements logical rotations also couples to the leakage transition, which is only detuned by the finite anharmonicity $\alpha$. Thus, unlike in an ideal two-level system, faster control does not merely accelerate the intended dynamics; it also enhances the unwanted coupling to higher levels \cite{Motzoi2009,Gambetta2011,Krantz2019}.
+    \hat{H}_{\mathrm{3lvl}}(t)
+    =
+    \frac{\Omega(t)}{2}
+    \left(
+        \ket{0}\bra{1} + \ket{1}\bra{0}
+        + \lambda \ket{1}\bra{2} + \lambda \ket{2}\bra{1}
+        \right)
+        +
+        \alpha \ket{2}\bra{2},
+        \label{eq:three_level_rotating_hamiltonian}
+    \end{equation}
+where $\Omega(t)$ is the drive envelope, $\alpha=\omega_{12}-\omega_{01}<0$ is the anharmonicity, and $\lambda$ is the relative matrix element for the $\ket{1}\leftrightarrow\ket{2}$ transition.
+
+\textbf{TODO:} Decidere se mantenere la appendice
+
+The full derivation of equeation \eqref{eq:three_level_rotating_hamiltonian} is documented in the Appendix \ref{app:tswt_coherent_leakage_bound}.
+Equation~\eqref{eq:three_level_rotating_hamiltonian} makes the problem explicit: the same drive that implements logical rotations also couples to the leakage transition, which is only detuned by the finite anharmonicity $\alpha$. Thus, unlike in an ideal two-level system, faster control does not merely accelerate the intended dynamics; it also enhances the unwanted coupling to higher levels \cite{Motzoi2009,Gambetta2011,Krantz2019}.
 
 In the perturbative off-resonant regime,
 \begin{equation}
@@ -1070,9 +1075,20 @@ The same conclusion can be reached from an adiabaticity viewpoint. As discussed 
 \oplus
 \mathcal{H}_{\mathrm{leak}}.
 \)
-The block-off-diagonal term $H_{\mathrm{off}}(t)$ couples the computational and leakage sectors, while rapid temporal modulation enhances non-adiabatic transfer between them. 
-\textbf{TODO:} Write the complete derivation of this expression
-However it is possible to derive analitically a leakage bound through the utilization of the time-dependent Schrieffer--Wolff framework, where the accumulated coherent leakage is controlled not only by the size of the block-off-diagonal Hamiltonian but also by the rate at which it varies in time. In schematic form, their bound reads
+The block-off-diagonal term $H_{\mathrm{off}}(t)$ couples the computational and leakage sectors, while rapid temporal modulation enhances non-adiabatic transfer between them.
+
+
+However it is possible to derive analitically a leakage bound through the utilization of the time-dependent Schrieffer--Wolff framework
+\footnote{
+    The Schrieffer--Wolff transformation is a perturbative unitary change of basis used to decouple a low-energy subspace from higher-energy sectors when the inter-subspace coupling is small compared with the relevant spectral gap. More precisely, if the Hamiltonian is written as a dominant block-diagonal part plus weaker block-off-diagonal couplings, one seeks an anti-Hermitian generator \(\hat S\) such that the rotated Hamiltonian \(e^{-\hat S}\hat H e^{\hat S}\) becomes block-diagonal up to a prescribed order in the small ratio \(\epsilon/\Delta\), where \(\epsilon\) denotes the typical coupling scale and \(\Delta\) the gap between subspaces. In the time-dependent setting used here, the transformation must itself depend on time, and the effective Hamiltonian acquires the additional gauge term \(-i(\partial_t e^{-\hat S})e^{\hat S}\). For this reason, leakage is controlled not only by the size of the off-diagonal couplings, but also by how rapidly they vary in time. In the present framework, the time-dependent Schrieffer--Wolff transformation is used to define a rotated computational basis in which direct couplings between the logical subspace and the higher-energy leakage sectors are suppressed to higher perturbative order, thereby making it possible to derive the leakage bound entering the UFO cost function.
+    }
+    , where the accumulated coherent leakage is controlled not only by the size of the block-off-diagonal Hamiltonian but also by the rate at which it varies in time. 
+    
+
+\textbf{TODO:} Decidere se tenerla o meno. 
+The complete derivation is reported in Appendix~\ref{app:tswt_coherent_leakage_bound}.
+
+In schematic form, their bound reads
 \begin{equation}
 L_{\mathrm{tot}}
 \lesssim
@@ -1212,7 +1228,8 @@ p(y)=\mathrm{Tr}\!\left[\mathcal{M}_{y}(\rho)\right].
 \end{equation}
 Thus, unlike in classical control, the act of acquiring information modifies the system whose dynamics one is trying to steer. This makes genuine feedback control more delicate in the quantum regime, especially for fast gate operations where measurement latency and finite measurement fidelity can become serious bottlenecks \cite{Koch2022}.
 
-\textbf{TODO:} Recheck if I want this in my thesis since
+% \textbf{TODO:} Recheck if I want this in my thesis since
+
 In quantum-information experiments, however, the phrase \emph{closed-loop optimization} is often used in a broader and more practical sense. Rather than updating the control during a single gate execution, one performs repeated experimental shots with a fixed pulse $\bm{u}(t;\bm{\theta}_r)$, estimates a performance metric from the measurement outcomes, and then updates the pulse parameters between shots according to some classical optimization rule. If $\widehat{\mathcal{J}}_{\mathrm{exp}}(\bm{\theta}_r)$ denotes the experimentally estimated cost at iteration $r$, then the iterative update can be written schematically as
 \begin{equation}
 \bm{\theta}_{r+1}
@@ -1226,7 +1243,7 @@ In quantum-information experiments, however, the phrase \emph{closed-loop optimi
 \right),
 \label{eq:iterative_closed_loop_update}
 \end{equation}
-where $\mathcal{A}$ denotes an optimization rule such as gradient descent, finite-difference search, Bayesian optimization, CRAB/dCRAB-style updates, or a reinforcement-learning policy improvement step. In this experimentally relevant sense, the loop is ``closed'' not because the Hamiltonian is modified in real time during the gate, but because the control design is iteratively informed by measured performance on the actual device \cite{Ferrie2015,Feng2018}. This distinction is worth stating explicitly, because the words \emph{closed-loop control} may refer either to continuous measurement-based feedback or to shot-to-shot in situ calibration.
+where $\mathcal{A}$ denotes an optimization rule such as gradient descent, finite-difference search, Bayesian optimization, or a reinforcement-learning policy improvement step. In this experimentally relevant sense, the loop is \emph{closed} not because the Hamiltonian is modified in real time during the gate, but because the control design is iteratively informed by measured performance on the actual device \cite{Ferrie2015,Feng2018}. This distinction is worth stating explicitly, because the words \emph{closed-loop control} may refer either to continuous measurement-based feedback or to shot-to-shot in situ calibration.
 
 The practical strengths of closed-loop approaches are clear. Since the performance metric is measured directly on the physical device, systematic model errors, waveform distortions, and unknown hardware nonlinearities are automatically incorporated into the optimization. This can make closed-loop strategies more robust than purely model-based open-loop methods when the system is imperfectly characterized. Experimental studies indeed show that closed-loop quantum control can outperform open-loop control in settings where model inaccuracies or hardware distortions dominate the error budget \cite{Ferrie2015,Feng2018}. In addition, closed-loop schemes can target figures of merit that are directly operational, such as randomized-benchmarking-based performance estimates or experimentally reconstructed gate fidelities, rather than relying exclusively on idealized simulation objectives.
 
@@ -1403,8 +1420,7 @@ B_{k,m}\cos \omega_{k,m} t
 \end{equation}
 where $u_k^{(0)}(t)$ is a reference pulse, the frequencies $\omega_{k,m}$ are chosen or randomized within a suitable range, and the coefficients $A_{k,m},B_{k,m}$ become the optimization variables. The conceptual advantage is clear: instead of optimizing hundreds or thousands of piecewise-constant amplitudes, one works in a much lower-dimensional space of coefficients that can naturally encode smoothness, bandwidth restrictions, and experimental simplicity. Because of this reduced parametrization, CRAB is particularly useful when gradients are expensive or unavailable, and it is often combined with gradient-free optimizers such as Nelder--Mead or simplex-type search strategies \cite{Caneva2011}. This basis-restricted perspective is also attractive in experimental closed-loop refinements, where each additional optimization variable may carry a substantial measurement cost.
 
-\textbf{TODO:} Deciding if I want to keep this stuff in, since crab and krotov are not the main focus of my thesis
-
+\textbf{TODO:} Decidere se voglio tenere Goat e krotov
 
 A more recent method that addresses some of the limitations of both piecewise-constant gradient methods and purely gradient-free basis search is \emph{GOAT} (Gradient Optimization of Analytic conTrols) \cite{Machnes2018}. The guiding idea of GOAT is to keep the controls in a low-dimensional but analytic parameterization,
 \begin{equation}
@@ -1437,20 +1453,20 @@ From a broader perspective, GRAPE, Krotov, CRAB, and GOAT should not be viewed a
 For the purposes of this thesis, these methods serve two roles. First, they provide the standard background language of open-loop model-based quantum control: objective functional, parameterization, gradient computation, and iterative pulse improvement. Second, they define the natural baseline against which reinforcement-learning-based methods should be interpreted. Reinforcement learning does not replace the optimal-control problem itself; rather, it offers an alternative way to search the space of control laws, especially in settings where the cost landscape is highly nonconvex, robustness matters strongly, or sequential structure can be exploited. The value of the approach studied in the reference paper is therefore best understood not in isolation, but against the mature backdrop of these classical optimal-control techniques.
 
 % Optional compact summary equation
-It is useful to summarize the common structure of all these methods schematically as
-\begin{equation}
-\text{model}
-\;+\;
-\text{control ansatz}
-\;+\;
-\text{cost functional}
-\;+\;
-\text{numerical optimizer}
-\;\longrightarrow\;
-\text{optimized pulse}.
-\label{eq:qoc_common_pipeline}
-\end{equation}
-What distinguishes GRAPE, Krotov, CRAB, and GOAT is not the overall control objective, but the specific choice of control ansatz, gradient computation, and update rule used to navigate the optimization landscape.
+% It is useful to summarize the common structure of all these methods schematically as
+% \begin{equation}
+% \text{model}
+% \;+\;
+% \text{control ansatz}
+% \;+\;
+% \text{cost functional}
+% \;+\;
+% \text{numerical optimizer}
+% \;\longrightarrow\;
+% \text{optimized pulse}.
+% \label{eq:qoc_common_pipeline}
+% \end{equation}
+% What distinguishes GRAPE, Krotov, CRAB, and GOAT is not the overall control objective, but the specific choice of control ansatz, gradient computation, and update rule used to navigate the optimization landscape.
 
 
 \subsection{Why robustness is difficult in quantum control}
