@@ -188,6 +188,7 @@ A further important aspect of the paper is that the control problem is posed und
 
 For the structure of the thesis, the main role of the present subsection is therefore to identify the dynamical variables of the problem. Equation~\eqref{eq:gmon_rwa_bosonic_hamiltonian} gives the effective multilevel control model on which the optimization is performed, while Eq.~\eqref{eq:gmon_qubit_projected_hamiltonian} clarifies the corresponding logical meaning of the available controls. The next paragraph will build on this by specializing the computational and leakage subspaces in the notation of the paper, thereby preparing the ground for the analytical leakage treatment that follows.
 
+\tikzexternaldisable
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[
@@ -216,6 +217,8 @@ Qubit projection: Eq.~\eqref{eq:gmon_qubit_projected_hamiltonian}
 \caption{Control channels entering the effective gmon Hamiltonian. The tunable coupling $g(t)$, local detunings $\delta_j(t)$, and microwave amplitudes/phases $(f_j(t),\phi_j(t))$ together define the time-dependent control resources available for quantum gate optimization.}
 \label{fig:gmon_control_channels}
 \end{figure}
+\tikzexternalenable
+
 
 % Requires in the preamble:
 % \usepackage{amsmath,amssymb,amsfonts,bm}
@@ -810,6 +813,7 @@ This formulation is particularly natural for robust analog quantum control, beca
 
 For the structure of the thesis, this subsection is the bridge between the physics of the UFO objective and the algorithmic machinery of policy optimization. The next paragraph will build directly on it by explaining why the paper specifically chooses a continuous-variable policy-gradient method trained with trust-region policy optimization (TRPO), rather than a simpler gradient-descent or value-based RL approach.
 
+\tikzexternaldisable
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[
@@ -832,7 +836,7 @@ For the structure of the thesis, this subsection is the bridge between the physi
 \caption{Paper-specific RL formulation. The state is built from the currently simulated gate, the policy proposes continuous control parameters for the next interval, the environment propagates the noisy quantum dynamics, and the resulting control cost is returned as reward.}
 \label{fig:paper_rl_loop}
 \end{figure}
-
+\tikzexternalenable
 
 \subsection{Implementation of the policy and value networks}
 \label{subsec:implementation_policy_value_networks}

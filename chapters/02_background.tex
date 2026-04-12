@@ -1909,6 +1909,7 @@ There is also a conceptual reason why policy optimization is a good match for qu
 For the purposes of this thesis, the key message is the following. Once the control amplitudes are treated as continuous actions, reinforcement learning naturally leads to policy-gradient methods rather than to purely value-based discrete-action algorithms. Among policy-gradient methods, TRPO is especially relevant because it combines direct optimization of continuous stochastic policies with a principled mechanism for stabilizing updates through a trust-region constraint. This is why it forms the algorithmic core of the reference paper and why it provides the natural bridge between the general RL background developed so far and the specific deep-RL control framework analyzed in the following chapter.
 
 
+\tikzexternaldisable
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[
@@ -1936,6 +1937,7 @@ For the purposes of this thesis, the key message is the following. Once the cont
 }
 \label{fig:continuous_action_trpo}
 \end{figure}
+\tikzexternalenable
 
 \subsection{Reward design as the bridge between physics and reinforcement learning}
 \label{subsec:reward_design_bridge_physics_rl}
