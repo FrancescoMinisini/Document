@@ -44,7 +44,7 @@
         width=0.35\linewidth,
         ylabel={Time (ns)},
         title={(b) Execution Times},
-        legend style={at={(0.98,0.98)}, anchor=north},
+        legend style={at={(0.55,0.98)}, anchor=north},
     ]
     \addplot[
         color=blue!60!magenta, thick
@@ -68,7 +68,7 @@
         title={(c) Fidelity \& Leakage},
         axis y line*=left,
         yticklabel style={font=\footnotesize, color=red!70!black},
-        legend style={at={(0.02,0.45)}, anchor=south west},
+        legend style={at={(0.48,0.02)}, anchor=south east},
     ]
     \addplot[
         color=red!70!black, thick
@@ -88,7 +88,7 @@
         yticklabel style={font=\footnotesize, color=orange!90!black},
         scaled y ticks=false,
         yticklabel={\pgfmathprintnumber[fixed,fixed zerofill,precision=4]{\tick}},
-        legend style={at={(0.98,0.45)}, anchor=south east},
+        legend style={at={(0.52,0.02)}, anchor=south west},
     ]
     \addplot[
         color=orange!90!black, thick

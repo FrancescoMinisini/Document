@@ -624,14 +624,14 @@ which is significant, but far from the order-of-magnitude speedups later reporte
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.9\textwidth]{chapters/plots/nominal_trpo_training_curves.pdf}
-% \input{plots/nominal_trpo_training_curves.tex}
-\caption{Training curves for the nominal TRPO run on the representative target \(N(2.2,2.2,\pi/2)\). }
+% \includegraphics[width=0.9\textwidth]{chapters/plots/nominal_trpo_training_curves.pdf}
+\input{plots/nominal_trpo_training_curves.tex}
+\caption{Training curves for the nominal TRPO run on the representative target \(N(2.2,2.2,\pi/2)\). 
 \textbf{(a)} evaluation cost versus policy iteration, with the best checkpoint (\(111\)) highlighted;
 \textbf{(b)} evaluation gate time \(T\) and minimum-cost time \(t_{\min}\) versus iteration;
 \textbf{(c)} evaluation fidelity and total leakage versus iteration, shown with dual vertical axes.
 The key visual message is that the controller rapidly reaches a high-fidelity regime, while the later part of training is mainly a refinement of the leakage and runtime tradeoff rather than a dramatic improvement in fidelity alone. 
-\footnote{Notably, the sharp spikes present in the evaluation cost correspond precisely to evaluation trials where the termination condition was not met early enough. Unable to quickly balance the leakage/speed tradeoff mentioned in section \ref{subsec:speed_leakage_tradeoff}, the execution saturates the simulation time boundary (\(180\,\mathrm{ns}\)) and accumulates significant time and boundary penalties.}
+Notably, the sharp spikes present in the evaluation cost correspond precisely to evaluation trials where the termination condition was not met early enough. Unable to quickly balance the leakage/speed tradeoff mentioned in section \ref{subsec:speed_leakage_tradeoff}, the execution saturates the simulation time boundary (\(180\,\mathrm{ns}\)) and accumulates significant time and boundary penalties.}
 \label{fig:nominal_trpo_training_curves}
 \end{figure}
 
