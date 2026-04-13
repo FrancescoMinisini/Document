@@ -189,42 +189,38 @@ A further important aspect of the paper is that the control problem is posed und
 
 For the structure of the thesis, the main role of the present subsection is therefore to identify the dynamical variables of the problem. Equation~\eqref{eq:gmon_rwa_bosonic_hamiltonian} gives the effective multilevel control model on which the optimization is performed, while Eq.~\eqref{eq:gmon_qubit_projected_hamiltonian} clarifies the corresponding logical meaning of the available controls. The next paragraph will build on this by specializing the computational and leakage subspaces in the notation of the paper, thereby preparing the ground for the analytical leakage treatment that follows.
 
-\includegraphics[width=0.8\textwidth]{chapters/plots/gmon_control_channels.pdf}
-% \tikzexternaldisable
-% \begin{figure}[t]
-% \centering
-% \begin{tikzpicture}[
-%     box/.style={draw, rounded corners, minimum width=2.6cm, minimum height=1cm, align=center},
-%     arrow/.style={-{Latex[length=2mm]}, thick},
-%     node distance=1.4cm and 1.5cm
-% ]
+% \includegraphics[width=0.8\textwidth]{chapters/plots/gmon_control_channels.pdf}
+\tikzexternaldisable
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    box/.style={draw, rounded corners, minimum width=2.6cm, minimum height=1cm, align=center},
+    arrow/.style={-{Latex[length=2mm]}, thick},
+    node distance=1.4cm and 1.5cm
+]
 
-% \node[box] (g) {$g(t)$\\tunable coupling};
-% \node[box, below left=of g] (d1) {$\delta_1(t)$\\local detuning};
-% \node[box, below right=of g] (d2) {$\delta_2(t)$\\local detuning};
-% \node[box, below=of d1] (f1) {$f_1(t),\phi_1(t)$\\microwave drive};
-% \node[box, below=of d2] (f2) {$f_2(t),\phi_2(t)$\\microwave drive};
-% \node[box, right=3.0cm of g, minimum width=4.0cm, minimum height=3.2cm] (ham) {Effective Hamiltonian\\[0.3em]
-% Bosonic model: Eq.~\eqref{eq:gmon_rwa_bosonic_hamiltonian}\\
-% Qubit projection: Eq.~\eqref{eq:gmon_qubit_projected_hamiltonian}
-% };
+\node[box] (g) {$g(t)$\\tunable coupling};
+\node[box, below left=of g] (d1) {$\delta_1(t)$\\local detuning};
+\node[box, below right=of g] (d2) {$\delta_2(t)$\\local detuning};
+\node[box, below=of d1] (f1) {$f_1(t),\phi_1(t)$\\microwave drive};
+\node[box, below=of d2] (f2) {$f_2(t),\phi_2(t)$\\microwave drive};
+\node[box, right=3.0cm of g, minimum width=4.0cm, minimum height=3.2cm] (ham) {Effective Hamiltonian\\[0.3em]
+Bosonic model: Eq.~\eqref{eq:gmon_rwa_bosonic_hamiltonian}\\
+Qubit projection: Eq.~\eqref{eq:gmon_qubit_projected_hamiltonian}
+};
 
-% \draw[arrow] (g) -- (ham);
-% \draw[arrow] (d1) -- (ham);
-% \draw[arrow] (d2) -- (ham);
-% \draw[arrow] (f1) -- (ham);
-% \draw[arrow] (f2) -- (ham);
+\draw[arrow] (g) -- (ham);
+\draw[arrow] (d1) -- (ham);
+\draw[arrow] (d2) -- (ham);
+\draw[arrow] (f1) -- (ham);
+\draw[arrow] (f2) -- (ham);
 
-% \end{tikzpicture}
-% \caption{Control channels entering the effective gmon Hamiltonian. The tunable coupling $g(t)$, local detunings $\delta_j(t)$, and microwave amplitudes/phases $(f_j(t),\phi_j(t))$ together define the time-dependent control resources available for quantum gate optimization.}
-% \label{fig:gmon_control_channels}
-% \end{figure}
-% \tikzexternalenable
+\end{tikzpicture}
+\caption{Control channels entering the effective gmon Hamiltonian. The tunable coupling $g(t)$, local detunings $\delta_j(t)$, and microwave amplitudes/phases $(f_j(t),\phi_j(t))$ together define the time-dependent control resources available for quantum gate optimization.}
+\label{fig:gmon_control_channels}
+\end{figure}
+\tikzexternalenable
 
-% Requires in the preamble:
-% \usepackage{amsmath,amssymb,amsfonts,bm}
-% \usepackage{tikz}
-% \usetikzlibrary{positioning,arrows.meta,decorations.pathreplacing}
 
 \subsection{Computational and leakage subspaces in the paper's notation}
 \label{subsec:gmon_subspaces_notation}
@@ -383,10 +379,7 @@ From the viewpoint of the thesis, the main importance of the present subsection 
 \end{figure}
 
 \section{Leakage treatment and control objective}
-% Requires in the preamble:
-% \usepackage{amsmath,amssymb,amsfonts,bm}
-% \usepackage{tikz}
-% \usetikzlibrary{positioning,arrows.meta}
+
 
 \subsection{Why leakage is treated analytically: the role of the time-dependent Schrieffer--Wolff transformation}
 \label{subsec:why_tswt_is_used}
@@ -714,10 +707,6 @@ For the structure of the thesis, Eq.~\eqref{eq:ufo_cost_function} should be trea
 \label{fig:ufo_cost_structure}
 \end{figure}
 
-% Requires in the preamble:
-% \usepackage{amsmath,amssymb,amsfonts,bm}
-% \usepackage{tikz}
-% \usetikzlibrary{positioning,arrows.meta}
 
 \section{Reinforcement-learning formulation of the control problem}
 \subsection{Casting the control problem as an RL problem}
@@ -818,31 +807,31 @@ This formulation is particularly natural for robust analog quantum control, beca
 
 For the structure of the thesis, this subsection is the bridge between the physics of the UFO objective and the algorithmic machinery of policy optimization. The next paragraph will build directly on it by explaining why the paper specifically chooses a continuous-variable policy-gradient method trained with trust-region policy optimization (TRPO), rather than a simpler gradient-descent or value-based RL approach.
 
-\includegraphics[width=0.8\textwidth]{chapters/plots/paper_rl_loop.pdf}
-% \tikzexternaldisable
-% \begin{figure}[t]
-% \centering
-% \begin{tikzpicture}[
-%     box/.style={draw, rounded corners, minimum width=2.8cm, minimum height=1cm, align=center},
-%     arrow/.style={-{Latex[length=2mm]}, thick},
-%     node distance=1.6cm and 1.6cm
-% ]
+\tikzexternaldisable
+\begin{figure}[t]
+\centering
+% \includegraphics[width=0.8\textwidth]{chapters/plots/paper_rl_loop.pdf}
+\begin{tikzpicture}[
+    box/.style={draw, rounded corners, minimum width=2.8cm, minimum height=1cm, align=center},
+    arrow/.style={-{Latex[length=2mm]}, thick},
+    node distance=1.6cm and 1.6cm
+]
 
-% \node[box] (state) {state \(s_n\)\\current gate \(U_n\)};
-% \node[box, right=of state] (policy) {policy network\\proposes action \(a_n\)};
-% \node[box, right=of policy] (env) {environment\\propagates Eq.~\eqref{eq:paper_environment_update}};
-% \node[box, below=of policy] (reward) {reward / cost\\\(r_n=-c_n\)};
+\node[box] (state) {state \(s_n\)\\current gate \(U_n\)};
+\node[box, right=of state] (policy) {policy network\\proposes action \(a_n\)};
+\node[box, right=of policy] (env) {environment\\propagates Eq.~\eqref{eq:paper_environment_update}};
+\node[box, below=of policy] (reward) {reward / cost\\\(r_n=-c_n\)};
 
-% \draw[arrow] (state) -- (policy);
-% \draw[arrow] (policy) -- (env);
-% \draw[arrow] (env) -- node[right] {\(U_{n+1}\)} (reward);
-% \draw[arrow] (reward) -- (state);
+\draw[arrow] (state) -- (policy);
+\draw[arrow] (policy) -- (env);
+\draw[arrow] (env) -- node[right] {\(U_{n+1}\)} (reward);
+\draw[arrow] (reward) -- (state);
 
-% \end{tikzpicture}
-% \caption{Paper-specific RL formulation. The state is built from the currently simulated gate, the policy proposes continuous control parameters for the next interval, the environment propagates the noisy quantum dynamics, and the resulting control cost is returned as reward.}
-% \label{fig:paper_rl_loop}
-% \end{figure}
-% \tikzexternalenable
+\end{tikzpicture}
+\caption{Paper-specific RL formulation. The state is built from the currently simulated gate, the policy proposes continuous control parameters for the next interval, the environment propagates the noisy quantum dynamics, and the resulting control cost is returned as reward.}
+\label{fig:paper_rl_loop}
+\end{figure}
+\tikzexternalenable
 
 \subsection{Implementation of the policy and value networks}
 \label{subsec:implementation_policy_value_networks}
@@ -1005,23 +994,23 @@ In the structure of the thesis, this subsection should be read as the algorithmi
 
 \begin{figure}[t]
 \centering
-% \includegraphics[width=0.8\textwidth]{chapters/plots/trpo_trust_region.pdf}
-\begin{tikzpicture}[
-    box/.style={draw, rounded corners, minimum width=3.2cm, minimum height=1cm, align=center},
-    arrow/.style={-{Latex[length=2mm]}, thick},
-    node distance=1.8cm and 1.8cm
-]
+\includegraphics[width=0.8\textwidth]{chapters/plots/trpo_trust_region.pdf}
+% \begin{tikzpicture}[
+%     box/.style={draw, rounded corners, minimum width=3.2cm, minimum height=1cm, align=center},
+%     arrow/.style={-{Latex[length=2mm]}, thick},
+%     node distance=1.8cm and 1.8cm
+% ]
 
-\node[box] (old) {current policy\\$\pi_{\bm{\theta}_{\mathrm{old}}}$};
-\node[box, right=of old] (trust) {trusted region\\$D_{\mathrm{KL}}\le \delta_{\mathrm{TR}}$};
-\node[box, right=of trust] (new) {updated policy\\$\pi_{\bm{\theta}}$};
+% \node[box] (old) {current policy\\$\pi_{\bm{\theta}_{\mathrm{old}}}$};
+% \node[box, right=of old] (trust) {trusted region\\$D_{\mathrm{KL}}\le \delta_{\mathrm{TR}}$};
+% \node[box, right=of trust] (new) {updated policy\\$\pi_{\bm{\theta}}$};
 
-\draw[arrow] (old) -- (trust);
-\draw[arrow] (trust) -- (new);
+% \draw[arrow] (old) -- (trust);
+% \draw[arrow] (trust) -- (new);
 
-\node[below=1.2cm of trust, align=center] (note) {policy improvement is allowed only if the new action distribution\\remains sufficiently close to the old one};
+% \node[below=1.2cm of trust, align=center] (note) {policy improvement is allowed only if the new action distribution\\remains sufficiently close to the old one};
 
-\end{tikzpicture}
+% \end{tikzpicture}
 \caption{Geometric intuition behind the TRPO update. Rather than taking an unconstrained gradient step, the policy is improved only within a trust region defined by a KL-divergence constraint, which stabilizes learning in continuous and stochastic control environments.}
 \label{fig:trpo_trust_region}
 \end{figure}
@@ -1132,23 +1121,23 @@ From the perspective of the thesis, this subsection is where robustness fully en
 
 \begin{figure}[t]
 \centering
-% \includegraphics[width=0.8\textwidth]{chapters/plots/stochastic_training_environment.pdf}
-\begin{tikzpicture}[
-    box/.style={draw, rounded corners, minimum width=3.0cm, minimum height=1cm, align=center},
-    arrow/.style={-{Latex[length=2mm]}, thick},
-    node distance=1.6cm and 1.6cm
-]
+\includegraphics[width=0.8\textwidth]{chapters/plots/stochastic_training_environment.pdf}
+% \begin{tikzpicture}[
+%     box/.style={draw, rounded corners, minimum width=3.0cm, minimum height=1cm, align=center},
+%     arrow/.style={-{Latex[length=2mm]}, thick},
+%     node distance=1.6cm and 1.6cm
+% ]
 
-\node[box] (policy) {policy output\\ideal controls \(\bm{u}(t_k)\)};
-\node[box, right=of policy] (noise) {Gaussian noise\\\(\bm{\xi}(t_k)\)};
-\node[box, right=of noise] (env) {noisy Hamiltonian\\\(\hat H+\delta \hat H\)};
-\node[box, below=of noise] (eval) {average fidelity\\variance};
+% \node[box] (policy) {policy output\\ideal controls \(\bm{u}(t_k)\)};
+% \node[box, right=of policy] (noise) {Gaussian noise\\\(\bm{\xi}(t_k)\)};
+% \node[box, right=of noise] (env) {noisy Hamiltonian\\\(\hat H+\delta \hat H\)};
+% \node[box, below=of noise] (eval) {average fidelity\\variance};
 
-\draw[arrow] (policy) -- (noise);
-\draw[arrow] (noise) -- (env);
-\draw[arrow] (env) -- (eval);
+% \draw[arrow] (policy) -- (noise);
+% \draw[arrow] (noise) -- (env);
+% \draw[arrow] (env) -- (eval);
 
-\end{tikzpicture}
+% \end{tikzpicture}
 \caption{Training under stochastic control noise. The policy proposes ideal controls, Gaussian perturbations are added to produce a noisy Hamiltonian trajectory, and the resulting performance is evaluated statistically through average fidelity and fidelity variance.}
 \label{fig:stochastic_training_environment}
 \end{figure}
