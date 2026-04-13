@@ -1,9 +1,9 @@
-\section{Derivation of the TSWT-based coherent leakage bound}
+\chapter{Derivation of the TSWT-based coherent leakage bound}
 \label{app:tswt_coherent_leakage_bound}
 
 This appendix derives the time-dependent Schrieffer--Wolff-based coherent leakage bound used in the main text. The derivation follows the logic of Appendix~B of Ref.~\cite{Niu2019}, but is rewritten here in a form adapted to the notation and level of detail of the present thesis.
 
-\subsection{Hamiltonian decomposition and perturbative regime}
+\section{Hamiltonian decomposition and perturbative regime}
 \label{app:tswt_setup}
 
 Let the physical Hilbert space be decomposed into orthogonal subspaces as
@@ -54,7 +54,7 @@ is much larger than both intra- and inter-subspace couplings. Denoting by \(\eps
 \end{equation}
 This is precisely the scale separation that makes a Schrieffer--Wolff treatment meaningful.
 
-\subsection{Time-dependent Schrieffer--Wolff transformation}
+\section{Time-dependent Schrieffer--Wolff transformation}
 \label{app:tswt_transformation}
 
 We now introduce a time-dependent anti-Hermitian generator \(\hat{S}(t)\),
@@ -108,7 +108,7 @@ where
 
 Because \(\hat{H}_0\) and \(\hat{H}_1\) are block-diagonal, whereas \(\hat{S}\) and \(\hat{H}_2\) are block-off-diagonal, the transformed Hamiltonian can be decomposed into a block-diagonal part \(\hat{H}_{\mathrm d}\) and a block-off-diagonal part \(\hat{H}_{\mathrm{od}}\). The goal is to choose \(\hat{S}(t)\) so that \(\hat{H}_{\mathrm{od}}\) vanishes order by order in \(\epsilon/\Delta\).
 
-\subsection{Perturbative construction of the generator}
+\section{Perturbative construction of the generator}
 \label{app:tswt_generator_construction}
 
 We expand the generator as
@@ -195,7 +195,7 @@ O\!\left(\frac{\epsilon^3}{\Delta^2}\right).
 \end{equation}
 This is the central perturbative output of the TSWT construction: direct couplings between the computational sector and leakage sectors are not removed exactly, but are pushed to higher order in the small parameter \(\epsilon/\Delta\).
 
-\subsection{Interaction-picture expression for the leakage amplitude}
+\section{Interaction-picture expression for the leakage amplitude}
 \label{app:tswt_interaction_picture_leakage}
 
 To bound the leakage induced by the residual coupling \(\hat{H}_{\mathrm{od}}(t)\), we now move to the interaction picture with respect to the block-diagonal Hamiltonian \(\hat{H}_{\mathrm d}(t)\). Let
@@ -250,7 +250,7 @@ U_{\mathrm d}(t,\tau)\hat{H}_{\mathrm{od}}(\tau)U_{\mathrm d}(\tau,t)\,d\tau
 \label{eq:app_tswt_direct_leakage_start}
 \end{equation}
 
-\subsection{Repeated integration by parts and the coherent leakage bound}
+\section{Repeated integration by parts and the coherent leakage bound}
 \label{app:tswt_integration_by_parts}
 
 The remaining task is to bound the integral in Eq.~\eqref{eq:app_tswt_direct_leakage_start}. The key observation is that, on any higher-energy subspace \(\Omega_\alpha\), the inverse of the block-diagonal generator scales as
@@ -315,7 +315,7 @@ L_{\mathrm{tot}}(t)
 \end{equation}
 Equation~\eqref{eq:app_tswt_final_leakage_bound} is precisely the form quoted in the main text and used to motivate the leakage penalty entering the UFO objective.
 
-\subsection{Interpretation of the different terms}
+\section{Interpretation of the different terms}
 \label{app:tswt_bound_interpretation}
 
 Equation~\eqref{eq:app_tswt_final_leakage_bound} has an immediate physical interpretation. The two boundary terms penalize residual inter-subspace coupling at the beginning and at the end of the pulse, while the integral term penalizes rapid temporal modulation of that coupling. This is why the bound connects leakage not only to the magnitude of the off-diagonal coupling, but also to pulse smoothness. In particular, the appearance of \(\ddot{\hat H}_{\mathrm{od}}\) explains why fast or sharply varying controls can become leakage-prone even when their instantaneous amplitude is not especially large.
@@ -348,12 +348,12 @@ so that Eq.~\eqref{eq:app_tswt_final_leakage_bound} captures the dominant leakag
 In summary, the role of the TSWT is to construct a rotated computational basis in which direct couplings between \(\Omega_0\) and the higher subspaces are perturbatively suppressed, after which repeated integration by parts yields the bound in Eq.~\eqref{eq:app_tswt_final_leakage_bound}. This is the analytical basis for the leakage penalty used in the UFO framework.
 
 
-\section{Derivation of the effective three-level rotating-frame Hamiltonian}
+\chapter{Derivation of the effective three-level rotating-frame Hamiltonian}
 \label{app:three_level_rotating_hamiltonian_derivation}
 
 This appendix derives the effective three-level Hamiltonian used in Sec.~\ref{subsec:speed_leakage_tradeoff} to illustrate the speed--leakage tradeoff in a weakly anharmonic superconducting qubit.
 
-\subsection{Three-level truncation of a driven weakly anharmonic mode}
+\section{Three-level truncation of a driven weakly anharmonic mode}
 
 Consider the three lowest energy eigenstates \(\ket{0},\ket{1},\ket{2}\) of a weakly anharmonic superconducting mode. Let the corresponding bare energies be
 \begin{equation}
@@ -415,7 +415,7 @@ Eq.~\eqref{eq:app_three_level_lab_hamiltonian} becomes
 \label{eq:app_three_level_lab_hamiltonian_expanded}
 \end{align}
 
-\subsection{Transformation to the rotating frame}
+\section{Transformation to the rotating frame}
 
 We now move to the frame rotating at the drive frequency \(\omega_d\) according to
 \begin{equation}
@@ -464,7 +464,7 @@ For the drive terms, one finds that the co-rotating contributions become time in
 \end{align}
 where \(\hat H_{\mathrm{cr}}(t)\) collects the counter-rotating terms oscillating as \(e^{\pm 2i\omega_d t}\).
 
-\subsection{Resonant drive and rotating-wave approximation}
+\section{Resonant drive and rotating-wave approximation}
 
 We now assume that the drive is resonant with the logical transition,
 \begin{equation}
