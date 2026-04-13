@@ -272,7 +272,7 @@ On the basis of this completed sweep, two conclusions follow. First, architectur
 
 \begin{figure}[t]
 \centering
-% \includegraphics[width=0.8\textwidth]{chapters/plots/architecture_sweep_leakage.pdf}
+\includegraphics[width=0.8\textwidth]{chapters/plots/architecture_sweep_leakage.pdf}
 % \input{plots/architecture_sweep_leakage.tex}
 \caption{Best-evaluation state leakage across the tested structural architectures of the policy and value networks. The boxplots aggregate final evaluation leakages from independent seed trainings for each hidden-layer configuration on the representative target $N(2.2,2.2,\pi/2)$. The central tendency and spread visibly demonstrate that deeper architectures do not uniformly suppress error dynamics, but rather lead to distinct isolation characteristics across independent runs.}
 \label{fig:architecture_sweep_leakage}
@@ -280,7 +280,7 @@ On the basis of this completed sweep, two conclusions follow. First, architectur
 
 \begin{figure}[t]
 \centering
-% \includegraphics[width=0.8\textwidth]{chapters/plots/architecture_sweep_robustness.pdf}
+\includegraphics[width=0.8\textwidth]{chapters/plots/architecture_sweep_robustness.pdf}
 % \input{plots/architecture_sweep_robustness.tex}
 \caption{Distribution of validation robustness mapping $\overline{F}_{\sigma=1.0}$ (average deterministic fidelity across Gaussian noise realizations) among different neural network architectures. The $64\text{-}64\text{-}64$ topology displays consistently stronger robustness with higher median stabilization, suggesting it offers an optimal parameterization scale to capture the desired optimal resilient control regime before hitting overparameterization penalties.}
 \label{fig:architecture_sweep_robustness}
@@ -329,7 +329,7 @@ A further methodological point should be emphasized. Because the sweep was carri
 \label{subsec:ufo_weight_sweep}
 \begin{figure}[t]
 \centering
-% \includegraphics[width=0.9\textwidth]{chapters/plots/ufo_weight_sweep_robustness.pdf}
+\includegraphics[width=0.9\textwidth]{chapters/plots/ufo_weight_sweep_robustness.pdf}
 % \input{plots/ufo_weight_sweep_robustness.tex}
 \caption{Sensitivity of the validation robustness mapping $\overline{F}_{\sigma=1.0}$ to the main UFO cost function components. The three panels report the independent isolated variations triggered individually by $\chi$ (fidelity penalty), $\mu$ (leakage penalty), and $\kappa$ (boundary penalty). Note that $\beta$ is fundamentally fixed globally as a scaling factor, allowing structural sensitivity mapping against the remaining dynamically scaled components.}
 \label{fig:ufo_weight_sweep_robustness}
@@ -337,8 +337,8 @@ A further methodological point should be emphasized. Because the sweep was carri
 
 \begin{figure}[t]
 \centering
-% \includegraphics[width=0.8\textwidth]{chapters/plots/ufo_weight_sweep_leakage.pdf}
-% % \input{plots/ufo_weight_sweep_leakage.tex}
+\includegraphics[width=0.8\textwidth]{chapters/plots/ufo_weight_sweep_leakage.pdf}
+% \input{plots/ufo_weight_sweep_leakage.tex}
 \caption{Sensitivity of best-evaluation state leakage evaluated across the cost weights. Contrasted to robustness, leakage displays heavily non-monotonic behavior with high inverse correlation to $\chi$. This confirms that strictly enforcing minimum leakage does not straightforwardly align with general optimized robustness, leading to necessary compromises in weighting balance.}
 \label{fig:ufo_weight_sweep_leakage}
 \end{figure}
