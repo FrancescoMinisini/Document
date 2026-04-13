@@ -272,14 +272,14 @@ On the basis of this completed sweep, two conclusions follow. First, architectur
 
 \begin{figure}[t]
 \centering
-% \input{plots/architecture_sweep_leakage.tex}
+% % \input{plots/architecture_sweep_leakage.tex}
 \caption{Best-evaluation state leakage across the tested structural architectures of the policy and value networks. The boxplots aggregate final evaluation leakages from independent seed trainings for each hidden-layer configuration on the representative target $N(2.2,2.2,\pi/2)$. The central tendency and spread visibly demonstrate that deeper architectures do not uniformly suppress error dynamics, but rather lead to distinct isolation characteristics across independent runs.}
 \label{fig:architecture_sweep_leakage}
 \end{figure}
 
 \begin{figure}[t]
 \centering
-% \input{plots/architecture_sweep_robustness.tex}
+% % \input{plots/architecture_sweep_robustness.tex}
 \caption{Distribution of validation robustness mapping $\overline{F}_{\sigma=1.0}$ (average deterministic fidelity across Gaussian noise realizations) among different neural network architectures. The $64\text{-}64\text{-}64$ topology displays consistently stronger robustness with higher median stabilization, suggesting it offers an optimal parameterization scale to capture the desired optimal resilient control regime before hitting overparameterization penalties.}
 \label{fig:architecture_sweep_robustness}
 \end{figure}
@@ -288,14 +288,14 @@ On the basis of this completed sweep, two conclusions follow. First, architectur
 \centering
 \begin{subfigure}{0.48\textwidth}
     \centering
-    % \input{plots/architecture_sweep_pareto.tex}
+    % % \input{plots/architecture_sweep_pareto.tex}
     \caption{Robustness ($\sigma=1$ MHz)}
     \label{fig:architecture_sweep_pareto_robustness}
 \end{subfigure}
 \hfill
 \begin{subfigure}{0.48\textwidth}
     \centering
-    % \input{plots/architecture_sweep_pareto_fidelity.tex}
+    % % \input{plots/architecture_sweep_pareto_fidelity.tex}
     \caption{Nominal Fidelity}
     \label{fig:architecture_sweep_pareto_fidelity}
 \end{subfigure}
@@ -323,14 +323,14 @@ A further methodological point should be emphasized. Because the sweep was carri
 \label{subsec:ufo_weight_sweep}
 \begin{figure}[t]
 \centering
-% \input{plots/ufo_weight_sweep_robustness.tex}
+% % \input{plots/ufo_weight_sweep_robustness.tex}
 \caption{Sensitivity of the validation robustness mapping $\overline{F}_{\sigma=1.0}$ to the main UFO cost function components. The three panels report the independent isolated variations triggered individually by $\chi$ (fidelity penalty), $\mu$ (leakage penalty), and $\kappa$ (boundary penalty). Note that $\beta$ is fundamentally fixed globally as a scaling factor, allowing structural sensitivity mapping against the remaining dynamically scaled components.}
 \label{fig:ufo_weight_sweep_robustness}
 \end{figure}
 
 \begin{figure}[t]
 \centering
-% \input{plots/ufo_weight_sweep_leakage.tex}
+% % \input{plots/ufo_weight_sweep_leakage.tex}
 \caption{Sensitivity of best-evaluation state leakage evaluated across the cost weights. Contrasted to robustness, leakage displays heavily non-monotonic behavior with high inverse correlation to $\chi$. This confirms that strictly enforcing minimum leakage does not straightforwardly align with general optimized robustness, leading to necessary compromises in weighting balance.}
 \label{fig:ufo_weight_sweep_leakage}
 \end{figure}
@@ -339,14 +339,14 @@ A further methodological point should be emphasized. Because the sweep was carri
 \centering
 \begin{subfigure}{0.48\textwidth}
     \centering
-    % \input{plots/ufo_weight_sweep_pareto.tex}
+    % % \input{plots/ufo_weight_sweep_pareto.tex}
     \caption{Robustness ($\sigma=1$ MHz)}
     \label{fig:ufo_weight_sweep_pareto_robustness}
 \end{subfigure}
 \hfill
 \begin{subfigure}{0.48\textwidth}
     \centering
-    % \input{plots/ufo_weight_sweep_pareto_fidelity.tex}
+    % % \input{plots/ufo_weight_sweep_pareto_fidelity.tex}
     \caption{Nominal Fidelity}
     \label{fig:ufo_weight_sweep_pareto_fidelity}
 \end{subfigure}
@@ -537,7 +537,7 @@ The dependence on the gate duration is particularly instructive. Very short hori
 % ----------------------------------------------------
 \begin{figure}[t]
 \centering
-\input{plots/adam_single_target_horizon_sweep.tex}
+% \input{plots/adam_single_target_horizon_sweep.tex}
 \caption{Adam baseline on the representative target \(N(2.2,2.2,\pi/2)\) as a function of the gate horizon. \textbf{(a)} Nominal total cost versus horizon, with the optimum at \(70\,\mathrm{ns}\) highlighted. \textbf{(b)} Nominal fidelity and total leakage versus horizon, shown with dual vertical axes. \textbf{(c)} Boundary and time penalties versus horizon. The nominal optimum at \(70\,\mathrm{ns}\) arises from the simultaneous collapse of the boundary term and the sharp increase in fidelity, whereas longer horizons exhibit fidelity saturation and only marginal further leakage reduction.}
 \label{fig:adam_single_target_horizon_sweep}
 \end{figure}
@@ -562,7 +562,7 @@ even before introducing policy optimization or transfer learning. This does \emp
 % ----------------------------------------------------
 \begin{figure}[t]
 \centering
-\input{plots/adam_family_sweep.tex}
+% \input{plots/adam_family_sweep.tex}
 % \caption{Preliminary family-wide Adam sweep for the gates \(N(\alpha,\alpha,\pi/2)\), trained from scratch for each \(\alpha\).
 % A visually effective two-row design:
 % \textbf{(a)} best selected horizon versus \(\alpha\) as a step plot, showing plateaus at \(40\), \(50\), \(60\), \(70\), and \(80\,\mathrm{ns}\);
@@ -620,7 +620,7 @@ which is significant, but far from the order-of-magnitude speedups later reporte
 
 \begin{figure}[t]
 \centering
-% \input{plots/nominal_trpo_training_curves.tex}
+% % \input{plots/nominal_trpo_training_curves.tex}
 \caption{Training curves for the nominal TRPO run on the representative target \(N(2.2,2.2,\pi/2)\). }
 \textbf{(a)} evaluation cost versus policy iteration, with the best checkpoint (\(111\)) highlighted;
 \textbf{(b)} evaluation gate time \(T\) and minimum-cost time \(t_{\min}\) versus iteration;
@@ -687,7 +687,7 @@ It should be emphasized, however, that while the target $N(2.2, 2.2, \pi/2)$ is 
 
 \begin{figure}[t]
 \centering
-\input{plots/single_target_adam_vs_nominal_trpo.tex}
+% \input{plots/single_target_adam_vs_nominal_trpo.tex}
 \caption{Comparison of established nominal performance metrics between Adam and nominal TRPO for the representative target $N(2.2,2.2,\pi/2)$.
 A visually effective four-panel summary:
 \textbf{(a)} grouped bars for total nominal cost;
@@ -792,7 +792,7 @@ Eqs.~\eqref{eq:robustness_average_fidelity_section} and \eqref{eq:robustness_fid
 % -------------------------------------------------
 \begin{figure}[t]
     \centering
-    \input{plots/avg_fidelity_vs_noise.tex}
+    % \input{plots/avg_fidelity_vs_noise.tex}
     \caption{
     Average fidelity $\overline{F}(\sigma_{\mathrm{noise}})$ as a function of the Gaussian noise strength
     for the representative target gate $N(2.2,2.2,\pi/2)$. 
@@ -861,7 +861,7 @@ This result is particularly important for the interpretation of the framework. T
 % -------------------------------------------------
 \begin{figure}[t]
     \centering
-    \input{plots/fidelity_variance_vs_noise.tex}
+    % \input{plots/fidelity_variance_vs_noise.tex}
     \caption{
     Fidelity variance $\mathrm{Var}(F)$ as a function of the Gaussian noise strength 
     $\sigma_{\mathrm{noise}}$ for the target gate $N(2.2,2.2,\pi/2)$. 
@@ -989,7 +989,7 @@ device to outperform standard compiled implementations over a nontrivial family 
 \label{subsec:runtime_curve}
 \begin{figure}[t]
     \centering
-    \input{plots/runtime_vs_alpha_curriculum.tex}
+    % \input{plots/runtime_vs_alpha_curriculum.tex}
     \caption{
     Curriculum optimization profile over the family $N(\alpha,\alpha,\pi/2)$.
     The three stacked panels trace the performance evolution and constraint fulfillment as a function of the target parameter $\alpha$:
