@@ -40,28 +40,29 @@ For the purposes of the thesis, this subsection therefore plays a mainly motivat
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[
-    box/.style={draw, rounded corners, minimum width=1.9cm, minimum height=1.2cm, align=center},
-    smallbox/.style={draw, rounded corners, minimum width=1.8cm, minimum height=0.85cm, align=center},
-    arrow/.style={-{Latex[length=2mm]}, thick},
-    node distance=1.5cm and 1.6cm
-]
+\includegraphics[width=0.8\textwidth]{chapters/plots/gmon_architecture_schematic.pdf}
+% \begin{tikzpicture}[
+%     box/.style={draw, rounded corners, minimum width=1.9cm, minimum height=1.2cm, align=center},
+%     smallbox/.style={draw, rounded corners, minimum width=1.8cm, minimum height=0.85cm, align=center},
+%     arrow/.style={-{Latex[length=2mm]}, thick},
+%     node distance=1.5cm and 1.6cm
+% ]
 
-\node[box] (q1) {$Q_1$\\weakly anharmonic qubit};
-\node[box, right=3.5cm of q1] (q2) {$Q_2$\\weakly anharmonic qubit};
-\node[smallbox, below=1.0cm of $(q1)!0.5!(q2)$] (cpl) {tunable coupler\\$g(t)$};
+% \node[box] (q1) {$Q_1$\\weakly anharmonic qubit};
+% \node[box, right=3.5cm of q1] (q2) {$Q_2$\\weakly anharmonic qubit};
+% \node[smallbox, below=1.0cm of $(q1)!0.5!(q2)$] (cpl) {tunable coupler\\$g(t)$};
 
-\node[smallbox, above=1.1cm of q1] (d1) {local controls\\drive, detuning};
-\node[smallbox, above=1.1cm of q2] (d2) {local controls\\drive, detuning};
+% \node[smallbox, above=1.1cm of q1] (d1) {local controls\\drive, detuning};
+% \node[smallbox, above=1.1cm of q2] (d2) {local controls\\drive, detuning};
 
-\draw[arrow] (d1) -- (q1);
-\draw[arrow] (d2) -- (q2);
-\draw[arrow] (q1) -- (cpl);
-\draw[arrow] (q2) -- (cpl);
+% \draw[arrow] (d1) -- (q1);
+% \draw[arrow] (d2) -- (q2);
+% \draw[arrow] (q1) -- (cpl);
+% \draw[arrow] (q2) -- (cpl);
 
-\draw[thick] (q1.east) -- node[above] {$H_{\mathrm{int}}(t)$} (q2.west);
+% \draw[thick] (q1.east) -- node[above] {$H_{\mathrm{int}}(t)$} (q2.west);
 
-\end{tikzpicture}
+% \end{tikzpicture}
 \caption{Conceptual schematic of the gmon architecture. Two weakly anharmonic superconducting qubits are subject to local controls and coupled through a tunable interaction channel. This combination of local addressability and time-dependent coupling makes the platform particularly suitable for pulse-level optimization of two-qubit gates.}
 \label{fig:gmon_architecture_schematic}
 \end{figure}
@@ -188,37 +189,37 @@ A further important aspect of the paper is that the control problem is posed und
 
 For the structure of the thesis, the main role of the present subsection is therefore to identify the dynamical variables of the problem. Equation~\eqref{eq:gmon_rwa_bosonic_hamiltonian} gives the effective multilevel control model on which the optimization is performed, while Eq.~\eqref{eq:gmon_qubit_projected_hamiltonian} clarifies the corresponding logical meaning of the available controls. The next paragraph will build on this by specializing the computational and leakage subspaces in the notation of the paper, thereby preparing the ground for the analytical leakage treatment that follows.
 
-\tikzexternaldisable
-\begin{figure}[t]
-\centering
-\begin{tikzpicture}[
-    box/.style={draw, rounded corners, minimum width=2.6cm, minimum height=1cm, align=center},
-    arrow/.style={-{Latex[length=2mm]}, thick},
-    node distance=1.4cm and 1.5cm
-]
+\includegraphics[width=0.8\textwidth]{chapters/plots/gmon_control_channels.pdf}
+% \tikzexternaldisable
+% \begin{figure}[t]
+% \centering
+% \begin{tikzpicture}[
+%     box/.style={draw, rounded corners, minimum width=2.6cm, minimum height=1cm, align=center},
+%     arrow/.style={-{Latex[length=2mm]}, thick},
+%     node distance=1.4cm and 1.5cm
+% ]
 
-\node[box] (g) {$g(t)$\\tunable coupling};
-\node[box, below left=of g] (d1) {$\delta_1(t)$\\local detuning};
-\node[box, below right=of g] (d2) {$\delta_2(t)$\\local detuning};
-\node[box, below=of d1] (f1) {$f_1(t),\phi_1(t)$\\microwave drive};
-\node[box, below=of d2] (f2) {$f_2(t),\phi_2(t)$\\microwave drive};
-\node[box, right=3.0cm of g, minimum width=4.0cm, minimum height=3.2cm] (ham) {Effective Hamiltonian\\[0.3em]
-Bosonic model: Eq.~\eqref{eq:gmon_rwa_bosonic_hamiltonian}\\
-Qubit projection: Eq.~\eqref{eq:gmon_qubit_projected_hamiltonian}
-};
+% \node[box] (g) {$g(t)$\\tunable coupling};
+% \node[box, below left=of g] (d1) {$\delta_1(t)$\\local detuning};
+% \node[box, below right=of g] (d2) {$\delta_2(t)$\\local detuning};
+% \node[box, below=of d1] (f1) {$f_1(t),\phi_1(t)$\\microwave drive};
+% \node[box, below=of d2] (f2) {$f_2(t),\phi_2(t)$\\microwave drive};
+% \node[box, right=3.0cm of g, minimum width=4.0cm, minimum height=3.2cm] (ham) {Effective Hamiltonian\\[0.3em]
+% Bosonic model: Eq.~\eqref{eq:gmon_rwa_bosonic_hamiltonian}\\
+% Qubit projection: Eq.~\eqref{eq:gmon_qubit_projected_hamiltonian}
+% };
 
-\draw[arrow] (g) -- (ham);
-\draw[arrow] (d1) -- (ham);
-\draw[arrow] (d2) -- (ham);
-\draw[arrow] (f1) -- (ham);
-\draw[arrow] (f2) -- (ham);
+% \draw[arrow] (g) -- (ham);
+% \draw[arrow] (d1) -- (ham);
+% \draw[arrow] (d2) -- (ham);
+% \draw[arrow] (f1) -- (ham);
+% \draw[arrow] (f2) -- (ham);
 
-\end{tikzpicture}
-\caption{Control channels entering the effective gmon Hamiltonian. The tunable coupling $g(t)$, local detunings $\delta_j(t)$, and microwave amplitudes/phases $(f_j(t),\phi_j(t))$ together define the time-dependent control resources available for quantum gate optimization.}
-\label{fig:gmon_control_channels}
-\end{figure}
-\tikzexternalenable
-
+% \end{tikzpicture}
+% \caption{Control channels entering the effective gmon Hamiltonian. The tunable coupling $g(t)$, local detunings $\delta_j(t)$, and microwave amplitudes/phases $(f_j(t),\phi_j(t))$ together define the time-dependent control resources available for quantum gate optimization.}
+% \label{fig:gmon_control_channels}
+% \end{figure}
+% \tikzexternalenable
 
 % Requires in the preamble:
 % \usepackage{amsmath,amssymb,amsfonts,bm}
@@ -345,37 +346,38 @@ From the viewpoint of the thesis, the main importance of the present subsection 
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[
-    x=1.0cm, y=1.0cm,
-    level/.style={draw, rounded corners, minimum width=6.2cm, minimum height=0.9cm, align=center, thick},
-    comp/.style={level, fill=blue!15, draw=blue!40!black},
-    leak/.style={level, fill=gray!10, draw=gray!40!black},
-    arrow/.style={-{Latex[length=2.5mm]}, thick},
-    lbl/.style={font=\small}
-]
+\includegraphics[width=0.85\textwidth]{chapters/plots/paper_subspace_structure.pdf}
+% \begin{tikzpicture}[
+%     x=1.0cm, y=1.0cm,
+%     level/.style={draw, rounded corners, minimum width=6.2cm, minimum height=0.9cm, align=center, thick},
+%     comp/.style={level, fill=blue!15, draw=blue!40!black},
+%     leak/.style={level, fill=gray!10, draw=gray!40!black},
+%     arrow/.style={-{Latex[length=2.5mm]}, thick},
+%     lbl/.style={font=\small}
+% ]
 
-% Subspace boxes
-\node[comp] (o0) at (0,0) {$\Omega_0 = \mathrm{span}\bigl\{\ket{00},\ket{10},\ket{01},\ket{11}\bigr\}$};
-\node[leak] (o1) at (0,2.0) {$\Omega_1 = \mathrm{span}\bigl\{\ket{20},\ket{21},\ket{12},\ket{02}\bigr\}$};
-\node[leak] (o2) at (0,4.0) {$\Omega_2, \Omega_3, \dots$ higher-energy subspaces};
+% % Subspace boxes
+% \node[comp] (o0) at (0,0) {$\Omega_0 = \mathrm{span}\bigl\{\ket{00},\ket{10},\ket{01},\ket{11}\bigr\}$};
+% \node[leak] (o1) at (0,2.0) {$\Omega_1 = \mathrm{span}\bigl\{\ket{20},\ket{21},\ket{12},\ket{02}\bigr\}$};
+% \node[leak] (o2) at (0,4.0) {$\Omega_2, \Omega_3, \dots$ higher-energy subspaces};
 
-% Intra-subspace terms (self-loops)
-\draw[arrow] (o0.west) .. controls +(-1.2,0.8) and +(-1.2,-0.8) .. (o0.west)
-      node[midway, left=4pt, lbl] {$\hat H_1(t)$};
-\draw[arrow] (o1.west) .. controls +(-1.2,0.8) and +(-1.2,-0.8) .. (o1.west)
-      node[midway, left=4pt, lbl] {$\hat H_1(t)$};
-\draw[arrow] (o2.west) .. controls +(-1.2,0.8) and +(-1.2,-0.8) .. (o2.west)
-      node[midway, left=4pt, lbl] {$\hat H_1(t)$};
+% % Intra-subspace terms (self-loops)
+% \draw[arrow] (o0.west) .. controls +(-1.2,0.8) and +(-1.2,-0.8) .. (o0.west)
+%       node[midway, left=4pt, lbl] {$\hat H_1(t)$};
+% \draw[arrow] (o1.west) .. controls +(-1.2,0.8) and +(-1.2,-0.8) .. (o1.west)
+%       node[midway, left=4pt, lbl] {$\hat H_1(t)$};
+% \draw[arrow] (o2.west) .. controls +(-1.2,0.8) and +(-1.2,-0.8) .. (o2.west)
+%       node[midway, left=4pt, lbl] {$\hat H_1(t)$};
 
-% Inter-subspace terms (vertical coupling)
-\draw[arrow] (o0.north) -- (o1.south) node[midway, right=10pt, lbl] {$\hat H_2(t)$};
-\draw[arrow] (o1.north) -- (o2.south) node[midway, right=10pt, lbl] {$\hat H_2(t)$};
+% % Inter-subspace terms (vertical coupling)
+% \draw[arrow] (o0.north) -- (o1.south) node[midway, right=10pt, lbl] {$\hat H_2(t)$};
+% \draw[arrow] (o1.north) -- (o2.south) node[midway, right=10pt, lbl] {$\hat H_2(t)$};
 
-% Energy gap (brace)
-\draw[decorate, decoration={brace, amplitude=6pt, mirror}, thick] (3.4, 0.45) -- (3.4, 1.55)
-    node[midway, right=10pt, lbl] {$\Delta$};
+% % Energy gap (brace)
+% \draw[decorate, decoration={brace, amplitude=6pt, mirror}, thick] (3.4, 0.45) -- (3.4, 1.55)
+%     node[midway, right=10pt, lbl] {$\Delta$};
 
-\end{tikzpicture}
+% \end{tikzpicture}
 \caption{Subspace structure used in the paper. The computational sector is the lowest-energy subspace $\Omega_0$, while $\Omega_1,\Omega_2,\dots$ are higher-energy leakage subspaces. The block-diagonal term $\hat H_1(t)$ acts within each subspace, whereas the block-off-diagonal term $\hat H_2(t)$ couples different subspaces and induces leakage.}
 \label{fig:paper_subspace_structure}
 \end{figure}
@@ -467,22 +469,23 @@ For the structure of the thesis, this subsection therefore plays a purely motiva
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[
-    box/.style={draw, rounded corners, minimum width=3.1cm, minimum height=1cm, align=center},
-    arrow/.style={-{Latex[length=2mm]}, thick},
-    node distance=1.8cm and 1.8cm
-]
+\includegraphics[width=0.8\textwidth]{chapters/plots/tswt_motivation.pdf}
+% \begin{tikzpicture}[
+%     box/.style={draw, rounded corners, minimum width=3.1cm, minimum height=1cm, align=center},
+%     arrow/.style={-{Latex[length=2mm]}, thick},
+%     node distance=1.8cm and 1.8cm
+% ]
 
-\node[box] (bare) {bare basis\\direct leakage couplings};
-\node[box, right=of bare] (rot) {rotated basis\\$e^{-\hat S(t)}$};
-\node[box, right=of rot] (eff) {effective Hamiltonian\\block-off-diagonal terms suppressed};
+% \node[box] (bare) {bare basis\\direct leakage couplings};
+% \node[box, right=of bare] (rot) {rotated basis\\$e^{-\hat S(t)}$};
+% \node[box, right=of rot] (eff) {effective Hamiltonian\\block-off-diagonal terms suppressed};
 
-\draw[arrow] (bare) -- node[above] {TSWT} (rot);
-\draw[arrow] (rot) -- node[above] {$\hat{\mathbb H}(t)$} (eff);
+% \draw[arrow] (bare) -- node[above] {TSWT} (rot);
+% \draw[arrow] (rot) -- node[above] {$\hat{\mathbb H}(t)$} (eff);
 
-\node[below=1.2cm of rot, align=center] (note) {time dependence of $\hat S(t)$ produces additional\\non-adiabatic terms that must also be controlled};
+% \node[below=1.2cm of rot, align=center] (note) {time dependence of $\hat S(t)$ produces additional\\non-adiabatic terms that must also be controlled};
 
-\end{tikzpicture}
+% \end{tikzpicture}
 \caption{Conceptual role of the time-dependent Schrieffer--Wolff transformation. The original multilevel Hamiltonian is transformed to a rotated basis in which direct inter-subspace couplings are perturbatively suppressed. Because the transformation is time dependent, one must also account for non-adiabatic contributions generated by the motion of the basis itself.}
 \label{fig:tswt_motivation}
 \end{figure}
@@ -562,24 +565,25 @@ For the structure of the thesis, Eq.~\eqref{eq:paper_leakage_bound} is the main 
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[
-    box/.style={draw, rounded corners, minimum width=3.2cm, minimum height=1cm, align=center},
-    arrow/.style={-{Latex[length=2mm]}, thick},
-    node distance=1.5cm and 1.6cm
-]
+\includegraphics[width=0.9\textwidth]{chapters/plots/structure_leakage_bound.pdf}
+% \begin{tikzpicture}[
+%     box/.style={draw, rounded corners, minimum width=3.2cm, minimum height=1cm, align=center},
+%     arrow/.style={-{Latex[length=2mm]}, thick},
+%     node distance=1.5cm and 1.6cm
+% ]
 
-\node[box] (hod0) {$\|\hat H_{\mathrm{od}}(0)\|/\Delta(0)$\\initial boundary term};
-\node[box, right=of hod0] (int) {$\displaystyle \int_0^T \frac{1}{\Delta(t)^2}\left\|\frac{d^2\hat H_{\mathrm{od}}}{dt^2}\right\|dt$\\modulation};
-% \node[box, right=of hod0] (int) {$\displaystyle \int_0^T \frac{1}{\Delta(t)^2}\left\|\frac{d^2\hat H_{\mathrm{od}}}{dt^2}\right\|dt$\\modulation / non-adiabatic term};
-\node[box, right=of int] (hodT) {$\|\hat H_{\mathrm{od}}(T)\|/\Delta(T)$\\final boundary term};
+% \node[box] (hod0) {$\|\hat H_{\mathrm{od}}(0)\|/\Delta(0)$\\initial boundary term};
+% \node[box, right=of hod0] (int) {$\displaystyle \int_0^T \frac{1}{\Delta(t)^2}\left\|\frac{d^2\hat H_{\mathrm{od}}}{dt^2}\right\|dt$\\modulation};
+% % \node[box, right=of hod0] (int) {$\displaystyle \int_0^T \frac{1}{\Delta(t)^2}\left\|\frac{d^2\hat H_{\mathrm{od}}}{dt^2}\right\|dt$\\modulation / non-adiabatic term};
+% \node[box, right=of int] (hodT) {$\|\hat H_{\mathrm{od}}(T)\|/\Delta(T)$\\final boundary term};
 
-\node[box, below=1.4cm of int] (ltot) {$L_{\mathrm{tot}}$};
+% \node[box, below=1.4cm of int] (ltot) {$L_{\mathrm{tot}}$};
 
-\draw[arrow] (hod0) -- (ltot);
-\draw[arrow] (int) -- (ltot);
-\draw[arrow] (hodT) -- (ltot);
+% \draw[arrow] (hod0) -- (ltot);
+% \draw[arrow] (int) -- (ltot);
+% \draw[arrow] (hodT) -- (ltot);
 
-\end{tikzpicture}
+% \end{tikzpicture}
 \caption{Structure of the leakage bound used in the paper. The total leakage penalty \(L_{\mathrm{tot}}\) combines two boundary contributions, associated with residual off-diagonal couplings at the initial and final times, with an integral term that penalizes rapid modulation of the effective block-off-diagonal Hamiltonian.}
 \label{fig:structure_leakage_bound}
 \end{figure}
@@ -683,28 +687,29 @@ For the structure of the thesis, Eq.~\eqref{eq:ufo_cost_function} should be trea
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[
-    box/.style={draw, rounded corners, minimum width=2.9cm, minimum height=1cm, align=center},
-    arrow/.style={-{Latex[length=2mm]}, thick},
-    node distance=1.4cm and 1.5cm
-]
+\includegraphics[width=0.9\textwidth]{chapters/plots/ufo_cost_structure.pdf}
+% \begin{tikzpicture}[
+%     box/.style={draw, rounded corners, minimum width=2.9cm, minimum height=1cm, align=center},
+%     arrow/.style={-{Latex[length=2mm]}, thick},
+%     node distance=1.4cm and 1.5cm
+% ]
 
-\node[box] (inf) {$\chi\,[1-F(U(T))]$\\gate infidelity};
-% \node[box, right=of inf] (leak) {$\beta L_{\mathrm{tot}}$\\leakage};
-% \node[box, right=of leak] (bdry) {$\mu P_{\mathrm{bdry}}$\\boundary};
-% \node[box, right=of bdry] (time) {$\kappa T$\\runtime};
-\node[box, right=of inf] (leak) {$\beta L_{\mathrm{tot}}$\\leakage penalty};
-\node[box, right=of leak] (bdry) {$\mu P_{\mathrm{bdry}}$\\boundary penalty};
-\node[box, right=of bdry] (time) {$\kappa T$\\runtime penalty};
+% \node[box] (inf) {$\chi\,[1-F(U(T))]$\\gate infidelity};
+% % \node[box, right=of inf] (leak) {$\beta L_{\mathrm{tot}}$\\leakage};
+% % \node[box, right=of leak] (bdry) {$\mu P_{\mathrm{bdry}}$\\boundary};
+% % \node[box, right=of bdry] (time) {$\kappa T$\\runtime};
+% \node[box, right=of inf] (leak) {$\beta L_{\mathrm{tot}}$\\leakage penalty};
+% \node[box, right=of leak] (bdry) {$\mu P_{\mathrm{bdry}}$\\boundary penalty};
+% \node[box, right=of bdry] (time) {$\kappa T$\\runtime penalty};
 
-\node[box, below=1.6cm of leak, minimum width=4.4cm] (ufo) {$C(\chi,\beta,\mu,\kappa)$};
+% \node[box, below=1.6cm of leak, minimum width=4.4cm] (ufo) {$C(\chi,\beta,\mu,\kappa)$};
 
-\draw[arrow] (inf) -- (ufo);
-\draw[arrow] (leak) -- (ufo);
-\draw[arrow] (bdry) -- (ufo);
-\draw[arrow] (time) -- (ufo);
+% \draw[arrow] (inf) -- (ufo);
+% \draw[arrow] (leak) -- (ufo);
+% \draw[arrow] (bdry) -- (ufo);
+% \draw[arrow] (time) -- (ufo);
 
-\end{tikzpicture}
+% \end{tikzpicture}
 \caption{Structure of the UFO objective. The full control cost is obtained by combining four physically motivated penalty terms: gate infidelity, accumulated leakage, violation of boundary conditions, and total runtime.}
 \label{fig:ufo_cost_structure}
 \end{figure}
@@ -813,30 +818,31 @@ This formulation is particularly natural for robust analog quantum control, beca
 
 For the structure of the thesis, this subsection is the bridge between the physics of the UFO objective and the algorithmic machinery of policy optimization. The next paragraph will build directly on it by explaining why the paper specifically chooses a continuous-variable policy-gradient method trained with trust-region policy optimization (TRPO), rather than a simpler gradient-descent or value-based RL approach.
 
-\tikzexternaldisable
-\begin{figure}[t]
-\centering
-\begin{tikzpicture}[
-    box/.style={draw, rounded corners, minimum width=2.8cm, minimum height=1cm, align=center},
-    arrow/.style={-{Latex[length=2mm]}, thick},
-    node distance=1.6cm and 1.6cm
-]
+\includegraphics[width=0.8\textwidth]{chapters/plots/paper_rl_loop.pdf}
+% \tikzexternaldisable
+% \begin{figure}[t]
+% \centering
+% \begin{tikzpicture}[
+%     box/.style={draw, rounded corners, minimum width=2.8cm, minimum height=1cm, align=center},
+%     arrow/.style={-{Latex[length=2mm]}, thick},
+%     node distance=1.6cm and 1.6cm
+% ]
 
-\node[box] (state) {state \(s_n\)\\current gate \(U_n\)};
-\node[box, right=of state] (policy) {policy network\\proposes action \(a_n\)};
-\node[box, right=of policy] (env) {environment\\propagates Eq.~\eqref{eq:paper_environment_update}};
-\node[box, below=of policy] (reward) {reward / cost\\\(r_n=-c_n\)};
+% \node[box] (state) {state \(s_n\)\\current gate \(U_n\)};
+% \node[box, right=of state] (policy) {policy network\\proposes action \(a_n\)};
+% \node[box, right=of policy] (env) {environment\\propagates Eq.~\eqref{eq:paper_environment_update}};
+% \node[box, below=of policy] (reward) {reward / cost\\\(r_n=-c_n\)};
 
-\draw[arrow] (state) -- (policy);
-\draw[arrow] (policy) -- (env);
-\draw[arrow] (env) -- node[right] {\(U_{n+1}\)} (reward);
-\draw[arrow] (reward) -- (state);
+% \draw[arrow] (state) -- (policy);
+% \draw[arrow] (policy) -- (env);
+% \draw[arrow] (env) -- node[right] {\(U_{n+1}\)} (reward);
+% \draw[arrow] (reward) -- (state);
 
-\end{tikzpicture}
-\caption{Paper-specific RL formulation. The state is built from the currently simulated gate, the policy proposes continuous control parameters for the next interval, the environment propagates the noisy quantum dynamics, and the resulting control cost is returned as reward.}
-\label{fig:paper_rl_loop}
-\end{figure}
-\tikzexternalenable
+% \end{tikzpicture}
+% \caption{Paper-specific RL formulation. The state is built from the currently simulated gate, the policy proposes continuous control parameters for the next interval, the environment propagates the noisy quantum dynamics, and the resulting control cost is returned as reward.}
+% \label{fig:paper_rl_loop}
+% \end{figure}
+% \tikzexternalenable
 
 \subsection{Implementation of the policy and value networks}
 \label{subsec:implementation_policy_value_networks}
@@ -999,6 +1005,7 @@ In the structure of the thesis, this subsection should be read as the algorithmi
 
 \begin{figure}[t]
 \centering
+% \includegraphics[width=0.8\textwidth]{chapters/plots/trpo_trust_region.pdf}
 \begin{tikzpicture}[
     box/.style={draw, rounded corners, minimum width=3.2cm, minimum height=1cm, align=center},
     arrow/.style={-{Latex[length=2mm]}, thick},
@@ -1125,6 +1132,7 @@ From the perspective of the thesis, this subsection is where robustness fully en
 
 \begin{figure}[t]
 \centering
+% \includegraphics[width=0.8\textwidth]{chapters/plots/stochastic_training_environment.pdf}
 \begin{tikzpicture}[
     box/.style={draw, rounded corners, minimum width=3.0cm, minimum height=1cm, align=center},
     arrow/.style={-{Latex[length=2mm]}, thick},

@@ -106,33 +106,34 @@ Equation~\eqref{eq:piecewise_constant_controls} turns the search for an admissib
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[
-    node distance=1.7cm and 1.5cm,
-    box/.style={
-        draw,
-        rounded corners,
-        align=center,
-        minimum width=2.8cm,
-        minimum height=1.0cm
-    },
-    arrow/.style={-{Latex[length=2.2mm]}, thick}
-]
-\node[box] (alg) {Quantum circuit\\or algorithm};
-\node[box, right=of alg] (target) {Target logical gate\\$U_{\mathrm{target}}$};
-\node[box, right=of target] (ham) {Controlled\\Hamiltonian $H(t;\mathbf{u})$};
-\node[box, right=of ham] (pulse) {Control fields\\$\mathbf{u}(t)$};
-\node[box, below=of ham] (evol) {Physical evolution\\$U(T,0)$};
-\node[box, left=of evol] (eff) {Effective logical action\\$U_{\mathrm{eff}}(T)$};
+\includegraphics[width=\textwidth]{chapters/plots/control_dynamics_pipeline.pdf}
+% \begin{tikzpicture}[
+%     node distance=1.7cm and 1.5cm,
+%     box/.style={
+%         draw,
+%         rounded corners,
+%         align=center,
+%         minimum width=2.8cm,
+%         minimum height=1.0cm
+%     },
+%     arrow/.style={-{Latex[length=2.2mm]}, thick}
+% ]
+% \node[box] (alg) {Quantum circuit\\or algorithm};
+% \node[box, right=of alg] (target) {Target logical gate\\$U_{\mathrm{target}}$};
+% \node[box, right=of target] (ham) {Controlled\\Hamiltonian $H(t;\mathbf{u})$};
+% \node[box, right=of ham] (pulse) {Control fields\\$\mathbf{u}(t)$};
+% \node[box, below=of ham] (evol) {Physical evolution\\$U(T,0)$};
+% \node[box, left=of evol] (eff) {Effective logical action\\$U_{\mathrm{eff}}(T)$};
 
-\draw[arrow] (alg) -- (target);
-\draw[arrow] (target) -- (ham);
-\draw[arrow] (pulse) -- (ham);
-\draw[arrow] (ham) -- (evol);
-\draw[arrow] (evol) -- (eff);
-% \draw[arrow] (eff) |- node[pos=0.25, below] {\small optimize} (target);
-% \draw[arrow] (eff) |- node[pos=0.25, left] {\small optimize} (target);
-\draw[arrow] (eff) -- (target);
-\end{tikzpicture}
+% \draw[arrow] (alg) -- (target);
+% \draw[arrow] (target) -- (ham);
+% \draw[arrow] (pulse) -- (ham);
+% \draw[arrow] (ham) -- (evol);
+% \draw[arrow] (evol) -- (eff);
+% % \draw[arrow] (eff) |- node[pos=0.25, below] {\small optimize} (target);
+% % \draw[arrow] (eff) |- node[pos=0.25, left] {\small optimize} (target);
+% \draw[arrow] (eff) -- (target);
+% \end{tikzpicture}
 \caption{Conceptual relation between the algorithmic description of a quantum task and its physical realization through controlled dynamics. The central inverse problem of quantum control is to determine the control fields $\mathbf{u}(t)$ such that the induced propagator $U(T,0)$ reproduces the target logical gate on the computational subspace.}
 \label{fig:control_dynamics_pipeline}
 \end{figure}
@@ -509,58 +510,59 @@ It is important, however, not to overstate the case. Direct analog control does 
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[
-    node distance=1.5cm and 1.2cm,
-    box/.style={
-        draw,
-        rounded corners,
-        align=center,
-        minimum width=3.0cm,
-        minimum height=0.95cm
-    },
-    smallbox/.style={
-        draw,
-        rounded corners,
-        align=center,
-        minimum width=1.25cm,
-        minimum height=0.75cm
-    },
-    arrow/.style={-{Latex[length=2.2mm]}, thick}
-]
+\includegraphics[width=\textwidth]{chapters/plots/synthesis_vs_analog_control.pdf}
+% \begin{tikzpicture}[
+%     node distance=1.5cm and 1.2cm,
+%     box/.style={
+%         draw,
+%         rounded corners,
+%         align=center,
+%         minimum width=3.0cm,
+%         minimum height=0.95cm
+%     },
+%     smallbox/.style={
+%         draw,
+%         rounded corners,
+%         align=center,
+%         minimum width=1.25cm,
+%         minimum height=0.75cm
+%     },
+%     arrow/.style={-{Latex[length=2.2mm]}, thick}
+% ]
 
-% Top row: synthesis
-\node[box] (target1) {$U_{\mathrm{target}}$};
-\node[box, right=of target1] (compiler) {gate compiler\\ / synthesis};
-\node[smallbox, right=of compiler, xshift=0.2cm] (g1) {$G_{1}$};
-\node[smallbox, right=0.15cm of g1] (g2) {$G_{2}$};
-\node[smallbox, right=0.15cm of g2] (g3) {$\cdots$};
-\node[smallbox, right=0.15cm of g3] (g4) {$G_{L}$};
+% % Top row: synthesis
+% \node[box] (target1) {$U_{\mathrm{target}}$};
+% \node[box, right=of target1] (compiler) {gate compiler\\ / synthesis};
+% \node[smallbox, right=of compiler, xshift=0.2cm] (g1) {$G_{1}$};
+% \node[smallbox, right=0.15cm of g1] (g2) {$G_{2}$};
+% \node[smallbox, right=0.15cm of g2] (g3) {$\cdots$};
+% \node[smallbox, right=0.15cm of g3] (g4) {$G_{L}$};
 
-\draw[arrow] (target1) -- (compiler);
-\draw[arrow] (compiler) -- (g1);
-\draw[arrow] (g1) -- (g2);
-\draw[arrow] (g2) -- (g3);
-\draw[arrow] (g3) -- (g4);
+% \draw[arrow] (target1) -- (compiler);
+% \draw[arrow] (compiler) -- (g1);
+% \draw[arrow] (g1) -- (g2);
+% \draw[arrow] (g2) -- (g3);
+% \draw[arrow] (g3) -- (g4);
 
-\node[below=0.25cm of g2] (toptext) {\small $U_{\mathrm{syn}} = G_L \cdots G_2 G_1$};
+% \node[below=0.25cm of g2] (toptext) {\small $U_{\mathrm{syn}} = G_L \cdots G_2 G_1$};
 
-% Bottom row: analog
-\node[box, below=2.0cm of target1] (target2) {$U_{\mathrm{target}}$};
-\node[box, right=of target2] (ocp) {optimal control\\ problem};
-\node[box, right=of ocp] (pulse) {single pulse\\ $\bm{u}(t)$};
-\node[box, right=of pulse] (phys) {physical evolution\\ $U(T,0)$};
+% % Bottom row: analog
+% \node[box, below=2.0cm of target1] (target2) {$U_{\mathrm{target}}$};
+% \node[box, right=of target2] (ocp) {optimal control\\ problem};
+% \node[box, right=of ocp] (pulse) {single pulse\\ $\bm{u}(t)$};
+% \node[box, right=of pulse] (phys) {physical evolution\\ $U(T,0)$};
 
-\draw[arrow] (target2) -- (ocp);
-\draw[arrow] (ocp) -- (pulse);
-\draw[arrow] (pulse) -- (phys);
+% \draw[arrow] (target2) -- (ocp);
+% \draw[arrow] (ocp) -- (pulse);
+% \draw[arrow] (pulse) -- (phys);
 
-\node[below=0.25cm of pulse] (bottomtext) {\small $U(T,0)\approx e^{i\phi}U_{\mathrm{target}}$};
+% \node[below=0.25cm of pulse] (bottomtext) {\small $U(T,0)\approx e^{i\phi}U_{\mathrm{target}}$};
 
-% Labels
-\node[above=0.25cm of compiler] {\small \textbf{Compiled gate synthesis}};
-\node[above=0.25cm of ocp] {\small \textbf{Direct analog realization}};
+% % Labels
+% \node[above=0.25cm of compiler] {\small \textbf{Compiled gate synthesis}};
+% \node[above=0.25cm of ocp] {\small \textbf{Direct analog realization}};
 
-\end{tikzpicture}
+% \end{tikzpicture}
 \caption{Two conceptually distinct routes to implementing a target unitary. In the upper route, the gate is compiled into a sequence of elements from a finite universal set. In the lower route, one directly optimizes a continuous control protocol so that the full physical evolution approximates the target in a single coherent pulse sequence.}
 \label{fig:synthesis_vs_analog_control}
 \end{figure}
@@ -743,42 +745,43 @@ In summary, superconducting qubits should be viewed as engineered nonlinear osci
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[
-    x=1cm, y=1cm,
-    level/.style={thick},
-    drive/.style={-{Latex[length=2.2mm]}, thick},
-    brace/.style={decorate,decoration={brace,amplitude=6pt}},
-    lbl/.style={font=\small}
-]
+\includegraphics[width=0.6\textwidth]{chapters/plots/weakly_anharmonic_ladder.pdf}
+% \begin{tikzpicture}[
+%     x=1cm, y=1cm,
+%     level/.style={thick},
+%     drive/.style={-{Latex[length=2.2mm]}, thick},
+%     brace/.style={decorate,decoration={brace,amplitude=6pt}},
+%     lbl/.style={font=\small}
+% ]
 
-% Energy levels
-\draw[level] (0,0) -- (3.2,0) node[right, lbl] {$\ket{0}$};
-\draw[level] (0,1.2) -- (3.2,1.2) node[right, lbl] {$\ket{1}$};
-\draw[level] (0,2.75) -- (3.2,2.75) node[right, lbl] {$\ket{2}$};
-\draw[level] (0,3.8) -- (3.2,3.8) node[right, lbl] {$\ket{3}$};
+% % Energy levels
+% \draw[level] (0,0) -- (3.2,0) node[right, lbl] {$\ket{0}$};
+% \draw[level] (0,1.2) -- (3.2,1.2) node[right, lbl] {$\ket{1}$};
+% \draw[level] (0,2.75) -- (3.2,2.75) node[right, lbl] {$\ket{2}$};
+% \draw[level] (0,3.8) -- (3.2,3.8) node[right, lbl] {$\ket{3}$};
 
-% Braces for transition spacings
-\draw[brace] (-0.25,0) -- (-0.25,1.2)
-    node[midway,left=8pt,lbl] {$\omega_{01}$};
-\draw[brace] (-0.25,1.2) -- (-0.25,2.75)
-    node[midway,left=8pt,lbl] {$\omega_{12}$};
-\draw[brace] (-0.25,2.75) -- (-0.25,3.8)
-    node[midway,left=8pt,lbl] {$\omega_{23}$};
+% % Braces for transition spacings
+% \draw[brace] (-0.25,0) -- (-0.25,1.2)
+%     node[midway,left=8pt,lbl] {$\omega_{01}$};
+% \draw[brace] (-0.25,1.2) -- (-0.25,2.75)
+%     node[midway,left=8pt,lbl] {$\omega_{12}$};
+% \draw[brace] (-0.25,2.75) -- (-0.25,3.8)
+%     node[midway,left=8pt,lbl] {$\omega_{23}$};
 
-% Computational subspace highlight
-\draw[dashed, rounded corners, draw=blue!60!black] (-0.55,-0.3) rectangle (3.75,1.5);
-\node[lbl, blue!60!black] at (1.6,-0.65) {computational subspace};
+% % Computational subspace highlight
+% \draw[dashed, rounded corners, draw=blue!60!black] (-0.55,-0.3) rectangle (3.75,1.5);
+% \node[lbl, blue!60!black] at (1.6,-0.65) {computational subspace};
 
-% Anharmonicity annotation
-\node[lbl] at (1.5,2.12) {$\alpha=\omega_{12}-\omega_{01}<0$};
+% % Anharmonicity annotation
+% \node[lbl] at (1.5,2.12) {$\alpha=\omega_{12}-\omega_{01}<0$};
 
-% Intended drive (solid arc)
-\draw[drive] (4.0, 0.1) to [bend right=45] node[midway, right=6pt, lbl] {intended} (4.0, 1.4);
+% % Intended drive (solid arc)
+% \draw[drive] (4.0, 0.1) to [bend right=45] node[midway, right=6pt, lbl] {intended} (4.0, 1.4);
 
-% Leakage path (dashed arc)
-\draw[drive, dashed] (4.0, 1.6) to [bend right=45] node[midway, right=6pt, lbl] {possible leakage} (4.0, 2.65);
+% % Leakage path (dashed arc)
+% \draw[drive, dashed] (4.0, 1.6) to [bend right=45] node[midway, right=6pt, lbl] {possible leakage} (4.0, 2.65);
 
-\end{tikzpicture}
+% \end{tikzpicture}
 \caption{Schematic spectrum of a weakly anharmonic superconducting qubit. The two lowest levels define the computational subspace, while the higher levels remain physically present. Because the transition spacings are unequal but not widely separated, a drive resonant with the logical transition can still weakly couple to higher transitions, especially under strong or short pulses.}
 \label{fig:weakly_anharmonic_ladder}
 \end{figure}
@@ -963,34 +966,35 @@ For this reason, the preservation of the computational subspace should be regard
 \textbf{TODO:} Rendere più chiaro il disegno 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[
-    box/.style={draw, rounded corners, minimum width=3.8cm, minimum height=2.6cm, align=center},
-    small/.style={font=\small},
-    arrow/.style={-{Latex[length=2.2mm]}, thick},
-    node distance=1.7cm and 2.0cm
-]
+\includegraphics[width=0.8\textwidth]{chapters/plots/computational_vs_leakage_subspace.pdf}
+% \begin{tikzpicture}[
+%     box/.style={draw, rounded corners, minimum width=3.8cm, minimum height=2.6cm, align=center},
+%     small/.style={font=\small},
+%     arrow/.style={-{Latex[length=2.2mm]}, thick},
+%     node distance=1.7cm and 2.0cm
+% ]
 
-\node[box] (comp) {
-$\mathcal{H}_{\mathrm{comp}}$\\[0.2em]
-$\ket{00},\ket{01},\ket{10},\ket{11},\dots$
-};
+% \node[box] (comp) {
+% $\mathcal{H}_{\mathrm{comp}}$\\[0.2em]
+% $\ket{00},\ket{01},\ket{10},\ket{11},\dots$
+% };
 
-\node[box, right=of comp] (leak) {
-$\mathcal{H}_{\mathrm{leak}}$\\[0.2em]
-$\ket{2},\ket{3},\dots$ locally\\
-or higher-excitation sectors
-};
+% \node[box, right=of comp] (leak) {
+% $\mathcal{H}_{\mathrm{leak}}$\\[0.2em]
+% $\ket{2},\ket{3},\dots$ locally\\
+% or higher-excitation sectors
+% };
 
-\draw[arrow] (comp.east) -- node[above,small] {$H_{\mathrm{off}}(t)$} (leak.west);
-\draw[arrow] (leak.west) -- node[below,small] {$H_{\mathrm{off}}(t)$} (comp.east);
+% \draw[arrow] (comp.east) -- node[above,small] {$H_{\mathrm{off}}(t)$} (leak.west);
+% \draw[arrow] (leak.west) -- node[below,small] {$H_{\mathrm{off}}(t)$} (comp.east);
 
-\draw[->, thick] ($(comp.north west)+(0.3,-0.45)$) -- ($(comp.north east)+(-0.3,-0.45)$);
-\node[small] at ($(comp.south)+(0,0.45)$) {$H_{\mathrm{diag}}(t)$};
+% \draw[->, thick] ($(comp.north west)+(0.3,-0.45)$) -- ($(comp.north east)+(-0.3,-0.45)$);
+% \node[small] at ($(comp.south)+(0,0.45)$) {$H_{\mathrm{diag}}(t)$};
 
-\draw[->, thick] ($(leak.north west)+(0.3,-0.45)$) -- ($(leak.north east)+(-0.3,-0.45)$);
-\node[small] at ($(leak.south)+(0,0.45)$) {$H_{\mathrm{diag}}(t)$};
+% \draw[->, thick] ($(leak.north west)+(0.3,-0.45)$) -- ($(leak.north east)+(-0.3,-0.45)$);
+% \node[small] at ($(leak.south)+(0,0.45)$) {$H_{\mathrm{diag}}(t)$};
 
-\end{tikzpicture}
+% \end{tikzpicture}
 \caption{Schematic decomposition of the physical Hilbert space into computational and leakage sectors. The block-diagonal Hamiltonian generates evolution within each sector, while the block-off-diagonal part $H_{\mathrm{off}}(t)$ couples the two sectors and is the microscopic source of leakage.}
 \label{fig:computational_vs_leakage_subspace}
 \end{figure}
@@ -1127,39 +1131,40 @@ From the viewpoint of superconducting-qubit physics, one may summarize the trade
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[
-    x=1cm,y=1cm,
-    axis/.style={thick,->},
-    curve1/.style={thick},
-    curve2/.style={thick,dashed},
-    lbl/.style={font=\small}
-]
+\includegraphics[width=0.75\textwidth]{chapters/plots/speed_leakage_tradeoff.pdf}
+% \begin{tikzpicture}[
+%     x=1cm,y=1cm,
+%     axis/.style={thick,->},
+%     curve1/.style={thick},
+%     curve2/.style={thick,dashed},
+%     lbl/.style={font=\small}
+% ]
 
-% axes
-\draw[axis] (0,0) -- (7.2,0) node[right,lbl] {gate speed / shorter $T_{\mathrm g}$};
-\draw[axis] (0,0) -- (0,4.6) node[above,lbl] {qualitative cost};
+% % axes
+% \draw[axis] (0,0) -- (7.2,0) node[right,lbl] {gate speed / shorter $T_{\mathrm g}$};
+% \draw[axis] (0,0) -- (0,4.6) node[above,lbl] {qualitative cost};
 
-% coherence cost (decreases with speed)
-\draw[curve1]
-    plot[smooth] coordinates {(0.5,3.8) (1.5,2.9) (2.5,2.1) (3.5,1.4) (4.5,0.95) (5.5,0.7) (6.5,0.55)};
-\node[lbl] at (1.8,1.4) {decoherence cost};
+% % coherence cost (decreases with speed)
+% \draw[curve1]
+%     plot[smooth] coordinates {(0.5,3.8) (1.5,2.9) (2.5,2.1) (3.5,1.4) (4.5,0.95) (5.5,0.7) (6.5,0.55)};
+% \node[lbl] at (1.8,1.4) {decoherence cost};
 
-% leakage cost (increases with speed)
-\draw[curve2]
-    plot[smooth] coordinates {(0.5,0.45) (1.5,0.5) (2.5,0.7) (3.5,1.15) (4.5,1.9) (5.5,3.0) (6.5,4.1)};
-\node[lbl] at (6.4,2.0) {leakage cost};
+% % leakage cost (increases with speed)
+% \draw[curve2]
+%     plot[smooth] coordinates {(0.5,0.45) (1.5,0.5) (2.5,0.7) (3.5,1.15) (4.5,1.9) (5.5,3.0) (6.5,4.1)};
+% \node[lbl] at (6.4,2.0) {leakage cost};
 
-% total cost
-\draw[very thick]
-    plot[smooth] coordinates {(0.5,4.25) (1.5,3.4) (2.5,2.8) (3.5,2.55) (4.5,2.85) (5.5,3.7) (6.5,4.65)};
-\node[lbl] at (3.9,2.15) {total cost};
+% % total cost
+% \draw[very thick]
+%     plot[smooth] coordinates {(0.5,4.25) (1.5,3.4) (2.5,2.8) (3.5,2.55) (4.5,2.85) (5.5,3.7) (6.5,4.65)};
+% \node[lbl] at (3.9,2.15) {total cost};
 
-% optimum marker
-\draw[dotted] (3.5,0) -- (3.5,2.55);
-\filldraw (3.5,2.55) circle (1.4pt);
-\node[lbl] at (3.8,0.35) {optimal compromise};
+% % optimum marker
+% \draw[dotted] (3.5,0) -- (3.5,2.55);
+% \filldraw (3.5,2.55) circle (1.4pt);
+% \node[lbl] at (3.8,0.35) {optimal compromise};
 
-\end{tikzpicture}
+% \end{tikzpicture}
 \caption{Qualitative illustration of the speed--leakage tradeoff in weakly anharmonic superconducting qubits. Slower gates suffer more from decoherence and low-frequency noise, whereas faster gates typically increase leakage through stronger driving, broader spectral content, and larger non-adiabatic effects. The physically relevant control problem is therefore a compromise between these competing tendencies.}
 \label{fig:speed_leakage_tradeoff}
 \end{figure}
@@ -1269,43 +1274,44 @@ For the purposes of this thesis, the most important point is the following. The 
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[
-    box/.style={draw, rounded corners, minimum width=2.9cm, minimum height=1cm, align=center},
-    smallbox/.style={draw, rounded corners, minimum width=2.2cm, minimum height=0.9cm, align=center},
-    arrow/.style={-{Latex[length=2mm]}, thick},
-    dashedarrow/.style={-{Latex[length=2mm]}, thick, dashed},
-    node distance=1.4cm and 1.8cm
-]
+\includegraphics[width=0.9\textwidth]{chapters/plots/open_closed_loop_control.pdf}
+% \begin{tikzpicture}[
+%     box/.style={draw, rounded corners, minimum width=2.9cm, minimum height=1cm, align=center},
+%     smallbox/.style={draw, rounded corners, minimum width=2.2cm, minimum height=0.9cm, align=center},
+%     arrow/.style={-{Latex[length=2mm]}, thick},
+%     dashedarrow/.style={-{Latex[length=2mm]}, thick, dashed},
+%     node distance=1.4cm and 1.8cm
+% ]
 
-% OPEN LOOP
-% \node[smallbox] (model1) {model / simulator};
-\node[smallbox] (model1) {model};
-\node[smallbox, right=of model1] (opt1) {optimizer};
-\node[smallbox, right=of opt1] (pulse1) {pulse $\bm{u}(t;\bm{\theta}^{\star})$};
-\node[smallbox, right=of pulse1] (sys1) {quantum system};
+% % OPEN LOOP
+% % \node[smallbox] (model1) {model / simulator};
+% \node[smallbox] (model1) {model};
+% \node[smallbox, right=of model1] (opt1) {optimizer};
+% \node[smallbox, right=of opt1] (pulse1) {pulse $\bm{u}(t;\bm{\theta}^{\star})$};
+% \node[smallbox, right=of pulse1] (sys1) {quantum system};
 
-\draw[arrow] (model1) -- (opt1);
-\draw[arrow] (opt1) -- (pulse1);
-\draw[arrow] (pulse1) -- (sys1);
+% \draw[arrow] (model1) -- (opt1);
+% \draw[arrow] (opt1) -- (pulse1);
+% \draw[arrow] (pulse1) -- (sys1);
 
-\node[above=0.3cm of opt1] {\textbf{Open loop}};
-\node[below=0.35cm of opt1] {\small no measurement-based update during the gate};
+% \node[above=0.3cm of opt1] {\textbf{Open loop}};
+% \node[below=0.35cm of opt1] {\small no measurement-based update during the gate};
 
-% CLOSED LOOP
-\node[smallbox, below=2.3cm of model1] (pulse2) {pulse $\bm{u}(t;\bm{\theta}_r)$};
-\node[smallbox, right=of pulse2] (sys2) {quantum system};
-\node[smallbox, right=of sys2] (meas2) {measurement \\ and \\ cost estimate};
-\node[smallbox, right=of meas2] (opt2) {update rule};
+% % CLOSED LOOP
+% \node[smallbox, below=2.3cm of model1] (pulse2) {pulse $\bm{u}(t;\bm{\theta}_r)$};
+% \node[smallbox, right=of pulse2] (sys2) {quantum system};
+% \node[smallbox, right=of sys2] (meas2) {measurement \\ and \\ cost estimate};
+% \node[smallbox, right=of meas2] (opt2) {update rule};
 
-\draw[arrow] (pulse2) -- (sys2);
-\draw[arrow] (sys2) -- (meas2);
-\draw[arrow] (meas2) -- (opt2);
-\draw[dashedarrow] (opt2.north) |- ++(0,1.15) -| (pulse2.north);
+% \draw[arrow] (pulse2) -- (sys2);
+% \draw[arrow] (sys2) -- (meas2);
+% \draw[arrow] (meas2) -- (opt2);
+% \draw[dashedarrow] (opt2.north) |- ++(0,1.15) -| (pulse2.north);
 
-\node[above=0.3cm of meas2] {\textbf{Closed loop}};
-\node[below=0.35cm of meas2] {\small measured performance updates the next pulse};
+% \node[above=0.3cm of meas2] {\textbf{Closed loop}};
+% \node[below=0.35cm of meas2] {\small measured performance updates the next pulse};
 
-\end{tikzpicture}
+% \end{tikzpicture}
 \caption{Schematic distinction between open-loop and closed-loop quantum control. In open-loop control, pulse design is performed from a model and the resulting pulse is applied without feedback during the gate. In closed-loop control, experimental information is fed back to improve the next control decision, either in real time or iteratively between repeated runs.}
 \label{fig:open_closed_loop_control}
 \end{figure}
@@ -1586,39 +1592,40 @@ For the purposes of this thesis, the most important takeaway is that robustness 
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[
-    axis/.style={thick,->},
-    curve/.style={thick},
-    lbl/.style={font=\small}
-]
+\includegraphics[width=0.8\textwidth]{chapters/plots/robustness_landscape_shift.pdf}
+% \begin{tikzpicture}[
+%     axis/.style={thick,->},
+%     curve/.style={thick},
+%     lbl/.style={font=\small}
+% ]
 
-% axes
-\draw[axis] (0,0) -- (7.2,0) node[right,lbl] {control parameter / pulse family};
-\draw[axis] (0,0) -- (0,4.5) node[above,lbl] {cost};
+% % axes
+% \draw[axis] (0,0) -- (7.2,0) node[right,lbl] {control parameter / pulse family};
+% \draw[axis] (0,0) -- (0,4.5) node[above,lbl] {cost};
 
-% nominal cost
-\draw[curve]
-    plot[smooth] coordinates {(0.6,3.8) (1.3,2.8) (2.0,1.8) (2.8,0.95) (3.5,0.55) (4.2,0.85) (5.0,1.5) (5.9,2.5)}
-    node[right,lbl] {nominal cost};
+% % nominal cost
+% \draw[curve]
+%     plot[smooth] coordinates {(0.6,3.8) (1.3,2.8) (2.0,1.8) (2.8,0.95) (3.5,0.55) (4.2,0.85) (5.0,1.5) (5.9,2.5)}
+%     node[right,lbl] {nominal cost};
 
-% perturbed cost 1
-\draw[curve,dashed]
-    plot[smooth] coordinates {(0.6,3.2) (1.3,2.2) (2.1,1.2) (3.0,0.95) (3.9,1.2) (4.7,2.0) (5.5,3.3)}
-    node[right,lbl] {perturbed model};
+% % perturbed cost 1
+% \draw[curve,dashed]
+%     plot[smooth] coordinates {(0.6,3.2) (1.3,2.2) (2.1,1.2) (3.0,0.95) (3.9,1.2) (4.7,2.0) (5.5,3.3)}
+%     node[right,lbl] {perturbed model};
 
-% perturbed cost 2
-\draw[curve,dotted]
-    plot[smooth] coordinates {(0.6,4.1) (1.4,3.0) (2.3,1.9) (3.2,1.0) (4.0,0.75) (4.8,1.1) (5.8,1.8)}
-    node[right,lbl] {another perturbation};
+% % perturbed cost 2
+% \draw[curve,dotted]
+%     plot[smooth] coordinates {(0.6,4.1) (1.4,3.0) (2.3,1.9) (3.2,1.0) (4.0,0.75) (4.8,1.1) (5.8,1.8)}
+%     node[right,lbl] {another perturbation};
 
-% markers
-\filldraw (3.5,0.55) circle (1.4pt);
-\draw[thin] (3.45,0.5) -- (2.8,0.2) node[left, lbl] {nominal optimum};
+% % markers
+% \filldraw (3.5,0.55) circle (1.4pt);
+% \draw[thin] (3.45,0.5) -- (2.8,0.2) node[left, lbl] {nominal optimum};
 
-\filldraw (4.0,0.75) circle (1.4pt);
-\draw[thin] (4.05,0.7) -- (4.6,0.3) node[right, lbl] {robust compromise};
+% \filldraw (4.0,0.75) circle (1.4pt);
+% \draw[thin] (4.05,0.7) -- (4.6,0.3) node[right, lbl] {robust compromise};
 
-\end{tikzpicture}
+% \end{tikzpicture}
 \caption{Schematic illustration of why robustness is difficult. A pulse that is optimal for a nominal model need not remain optimal when the Hamiltonian, noise parameters, or control transfer functions are perturbed. Robust optimization must account for an ensemble of such landscapes rather than for a single nominal one.}
 \label{fig:robustness_landscape_shift}
 \end{figure}
@@ -1707,24 +1714,25 @@ For the purposes of this thesis, the relevance of RL is therefore twofold. First
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[
-    box/.style={draw, rounded corners, minimum width=3.0cm, minimum height=1.0cm, align=center},
-    arrow/.style={-{Latex[length=2mm]}, thick},
-    node distance=1.8cm and 1.8cm
-]
+\includegraphics[width=0.8\textwidth]{chapters/plots/rl_quantum_control_loop.pdf}
+% \begin{tikzpicture}[
+%     box/.style={draw, rounded corners, minimum width=3.0cm, minimum height=1.0cm, align=center},
+%     arrow/.style={-{Latex[length=2mm]}, thick},
+%     node distance=1.8cm and 1.8cm
+% ]
 
-\node[box] (agent) {RL agent\\policy $\pi_{\bm{\theta}}(a|s)$};
-\node[box, right=of agent] (env) {quantum environment\\Hamiltonian dynamics + noise};
-\node[box, below=of env] (reward) {reward / cost\\fidelity, leakage, runtime};
-\node[box, below=of agent] (state) {state representation\\time, observables, history};
+% \node[box] (agent) {RL agent\\policy $\pi_{\bm{\theta}}(a|s)$};
+% \node[box, right=of agent] (env) {quantum environment\\Hamiltonian dynamics + noise};
+% \node[box, below=of env] (reward) {reward / cost\\fidelity, leakage, runtime};
+% \node[box, below=of agent] (state) {state representation\\time, observables, history};
 
-\draw[arrow] (agent) -- node[above] {$a_t$} (env);
-\draw[arrow] (env) -- node[right] {$r_t$} (reward);
-\draw[arrow] (reward) -- ++(-3.35,0) |- (agent);
-\draw[arrow] (env) -- node[left] {$s_{t+1}$} (state);
-\draw[arrow] (state) -- (agent);
+% \draw[arrow] (agent) -- node[above] {$a_t$} (env);
+% \draw[arrow] (env) -- node[right] {$r_t$} (reward);
+% \draw[arrow] (reward) -- ++(-3.35,0) |- (agent);
+% \draw[arrow] (env) -- node[left] {$s_{t+1}$} (state);
+% \draw[arrow] (state) -- (agent);
 
-\end{tikzpicture}
+% \end{tikzpicture}
 \caption{Agent--environment view of quantum control in reinforcement learning. The agent chooses control actions, the quantum system evolves under those controls and possible noise, and the resulting state and reward are fed back to improve the policy. Depending on the choice of state representation, the same formalism can describe either open-loop pulse generation or closed-loop feedback control.}
 \label{fig:rl_quantum_control_loop}
 \end{figure}
@@ -1909,35 +1917,36 @@ There is also a conceptual reason why policy optimization is a good match for qu
 For the purposes of this thesis, the key message is the following. Once the control amplitudes are treated as continuous actions, reinforcement learning naturally leads to policy-gradient methods rather than to purely value-based discrete-action algorithms. Among policy-gradient methods, TRPO is especially relevant because it combines direct optimization of continuous stochastic policies with a principled mechanism for stabilizing updates through a trust-region constraint. This is why it forms the algorithmic core of the reference paper and why it provides the natural bridge between the general RL background developed so far and the specific deep-RL control framework analyzed in the following chapter.
 
 
-\tikzexternaldisable
-\begin{figure}[t]
-\centering
-\begin{tikzpicture}[
-    box/.style={draw, rounded corners, minimum width=3.0cm, minimum height=1.0cm, align=center},
-    arrow/.style={-{Latex[length=2mm]}, thick},
-    node distance=1.6cm and 1.8cm
-]
+\includegraphics[width=0.8\textwidth]{chapters/plots/continuous_action_trpo.pdf}
+% \tikzexternaldisable
+% \begin{figure}[t]
+% \centering
+% \begin{tikzpicture}[
+%     box/.style={draw, rounded corners, minimum width=3.0cm, minimum height=1.0cm, align=center},
+%     arrow/.style={-{Latex[length=2mm]}, thick},
+%     node distance=1.6cm and 1.8cm
+% ]
 
-\node[box] (state) {state $s_t$};
-\node[box, right=of state] (policy) {stochastic policy\\ $\pi_{\bm{\theta}}(a\mid s)$};
-\node[box, right=of policy] (action) {continuous action\\ $a_t=\bm{u}_t\in\mathbb{R}^m$};
-\node[box, below=of policy] (env) {quantum dynamics\\ + reward}; 
-\node[box, below=of action] (trpo) {TRPO update\\ maximize \eqref{eq:trpo_surrogate_objective}\\ subject to \eqref{eq:trpo_kl_constraint}};
+% \node[box] (state) {state $s_t$};
+% \node[box, right=of state] (policy) {stochastic policy\\ $\pi_{\bm{\theta}}(a\mid s)$};
+% \node[box, right=of policy] (action) {continuous action\\ $a_t=\bm{u}_t\in\mathbb{R}^m$};
+% \node[box, below=of policy] (env) {quantum dynamics\\ + reward}; 
+% \node[box, below=of action] (trpo) {TRPO update\\ maximize \eqref{eq:trpo_surrogate_objective}\\ subject to \eqref{eq:trpo_kl_constraint}};
 
-\draw[arrow] (state) -- (policy);
-\draw[arrow] (policy) -- (action);
-\draw[arrow] (action) -- (env);
-\draw[arrow] (env) -- (state);
-\draw[arrow] (env) -- (trpo);
-\draw[arrow] (trpo) -- (policy);
+% \draw[arrow] (state) -- (policy);
+% \draw[arrow] (policy) -- (action);
+% \draw[arrow] (action) -- (env);
+% \draw[arrow] (env) -- (state);
+% \draw[arrow] (env) -- (trpo);
+% \draw[arrow] (trpo) -- (policy);
 
-\end{tikzpicture}
-\caption{Continuous-action policy optimization in quantum control. The policy maps the current state to a distribution over continuous control amplitudes, the quantum system returns the resulting trajectory information and reward, and TRPO updates the policy through a surrogate objective constrained by a KL trust region.
-\textbf{TODO:} add snippet
-}
-\label{fig:continuous_action_trpo}
-\end{figure}
-\tikzexternalenable
+% \end{tikzpicture}
+% \caption{Continuous-action policy optimization in quantum control. The policy maps the current state to a distribution over continuous control amplitudes, the quantum system returns the resulting trajectory information and reward, and TRPO updates the policy through a surrogate objective constrained by a KL trust region.
+% \textbf{TODO:} add snippet
+% }
+% \label{fig:continuous_action_trpo}
+% \end{figure}
+% \tikzexternalenable
 
 \subsection{Reward design as the bridge between physics and reinforcement learning}
 \label{subsec:reward_design_bridge_physics_rl}
@@ -2063,7 +2072,8 @@ This is precisely the conceptual role played by the framework analyzed in the ne
 
 \begin{figure}[t]
     \centering
-    \begin{tikzpicture}[
+    % \includegraphics[width=0.8\textwidth]{chapters/plots/reward_design_bridge.pdf}
+        \begin{tikzpicture}[
         box/.style={draw, rounded corners, minimum width=3.1cm, minimum height=1.0cm, align=center},
         arrow/.style={-{Latex[length=2mm]}, thick},
         node distance=1.6cm and 1.7cm
@@ -2173,143 +2183,144 @@ In the present thesis, this neural parameterization should therefore be viewed a
 
 \begin{figure}[htpb]
 \centering
-\begin{tikzpicture}[
-    node distance=0.6cm and 0.6cm,
-    bluenode/.style={circle, minimum size=0.5cm, inner sep=0pt, top color=blue!5, bottom color=blue!20, draw=blue!60!black},
-    greennode/.style={circle, minimum size=0.5cm, inner sep=0pt, top color=green!5, bottom color=green!20, draw=green!60!black},
-    envbox/.style={draw=gray!50!black, fill=gray!5, rounded corners, inner sep=10pt},
-    arr/.style={-{Latex[length=2mm]}, thick, gray!80!black}
-]
+\includegraphics[width=\textwidth]{chapters/plots/actor_critic_nn_control.pdf}
+% \begin{tikzpicture}[
+%     node distance=0.6cm and 0.6cm,
+%     bluenode/.style={circle, minimum size=0.5cm, inner sep=0pt, top color=blue!5, bottom color=blue!20, draw=blue!60!black},
+%     greennode/.style={circle, minimum size=0.5cm, inner sep=0pt, top color=green!5, bottom color=green!20, draw=green!60!black},
+%     envbox/.style={draw=gray!50!black, fill=gray!5, rounded corners, inner sep=10pt},
+%     arr/.style={-{Latex[length=2mm]}, thick, gray!80!black}
+% ]
 
-\pgfdeclarelayer{background}
-\pgfsetlayers{background,main}
+% \pgfdeclarelayer{background}
+% \pgfsetlayers{background,main}
 
-% Policy NN 
-\node[align=center] (state) {\textbf{State} $s_t = U_n$};
+% % Policy NN 
+% \node[align=center] (state) {\textbf{State} $s_t = U_n$};
 
-\node[bluenode, above=0.7cm of state, xshift=-1cm] (p11) {};
-\node[bluenode, right=0.3cm of p11] (p12) {};
-\node[right=0.3cm of p12] (p1_dots) {$\dots$};
-\node[bluenode, right=0.3cm of p1_dots] (p13) {};
+% \node[bluenode, above=0.7cm of state, xshift=-1cm] (p11) {};
+% \node[bluenode, right=0.3cm of p11] (p12) {};
+% \node[right=0.3cm of p12] (p1_dots) {$\dots$};
+% \node[bluenode, right=0.3cm of p1_dots] (p13) {};
 
-\node[bluenode, above=0.7cm of p11, xshift=-0.4cm] (p21) {};
-\node[bluenode, right=0.3cm of p21] (p22) {};
-\node[right=0.3cm of p22] (p2_dots) {$\dots$};
-\node[bluenode, right=0.3cm of p2_dots] (p23) {};
-\node[bluenode, right=0.3cm of p23] (p24) {};
+% \node[bluenode, above=0.7cm of p11, xshift=-0.4cm] (p21) {};
+% \node[bluenode, right=0.3cm of p21] (p22) {};
+% \node[right=0.3cm of p22] (p2_dots) {$\dots$};
+% \node[bluenode, right=0.3cm of p2_dots] (p23) {};
+% \node[bluenode, right=0.3cm of p23] (p24) {};
 
-\node[bluenode, above=0.7cm of p21, xshift=0.4cm] (p31) {};
-\node[bluenode, right=0.3cm of p31] (p32) {};
-\node[right=0.3cm of p32] (p3_dots) {$\dots$};
-\node[bluenode, right=0.3cm of p3_dots] (p33) {};
+% \node[bluenode, above=0.7cm of p21, xshift=0.4cm] (p31) {};
+% \node[bluenode, right=0.3cm of p31] (p32) {};
+% \node[right=0.3cm of p32] (p3_dots) {$\dots$};
+% \node[bluenode, right=0.3cm of p3_dots] (p33) {};
 
-% Connections for Policy NN
-\begin{pgfonlayer}{background}
-\foreach \i in {1,2,3}
-    \foreach \j in {1,2,3,4} {
-        \draw[gray!40, thin] (p1\i) -- (p2\j);
-    }
-\foreach \i in {1,2,3,4}
-    \foreach \j in {1,2,3} {
-        \draw[gray!40, thin] (p2\i) -- (p3\j);
-    }
-\end{pgfonlayer}
+% % Connections for Policy NN
+% \begin{pgfonlayer}{background}
+% \foreach \i in {1,2,3}
+%     \foreach \j in {1,2,3,4} {
+%         \draw[gray!40, thin] (p1\i) -- (p2\j);
+%     }
+% \foreach \i in {1,2,3,4}
+%     \foreach \j in {1,2,3} {
+%         \draw[gray!40, thin] (p2\i) -- (p3\j);
+%     }
+% \end{pgfonlayer}
 
-\draw[arr] (state) -- (p12);
-\draw[arr] (state) -- (p1_dots);
+% \draw[arr] (state) -- (p12);
+% \draw[arr] (state) -- (p1_dots);
 
-% Action
-\node[above=0.8cm of p32, xshift=0.4cm, align=center] (action) {\textbf{Action} $a_t \in \mathbb{R}^m$};
-\draw[arr] (p32) -- (action);
-\draw[arr] (p3_dots) -- (action);
+% % Action
+% \node[above=0.8cm of p32, xshift=0.4cm, align=center] (action) {\textbf{Action} $a_t \in \mathbb{R}^m$};
+% \draw[arr] (p32) -- (action);
+% \draw[arr] (p3_dots) -- (action);
 
-% Environment
-\node[above=0.6cm of action, align=center] (H) {$\hat{H}_{n+1}$};
-\node[above=0.6cm of H, align=center] (U) {$U_{n+1} = \exp[i\Delta t(\hat{H}_{n+1} + \delta\hat{H}_{n+1})]U_n$};
-\node[above=0.6cm of U, align=center] (cost) {\textbf{Reward} $r_t$ \textbf{\& Next State} $U_{n+1}$};
+% % Environment
+% \node[above=0.6cm of action, align=center] (H) {$\hat{H}_{n+1}$};
+% \node[above=0.6cm of H, align=center] (U) {$U_{n+1} = \exp[i\Delta t(\hat{H}_{n+1} + \delta\hat{H}_{n+1})]U_n$};
+% \node[above=0.6cm of U, align=center] (cost) {\textbf{Reward} $r_t$ \textbf{\& Next State} $U_{n+1}$};
 
-\draw[arr] (action) -- (H);
-\draw[arr] (H) -- (U);
-\draw[arr] (U) -- (cost);
+% \draw[arr] (action) -- (H);
+% \draw[arr] (H) -- (U);
+% \draw[arr] (U) -- (cost);
 
-\begin{pgfonlayer}{background}
-\node[envbox, fit=(action) (H) (cost) (U), inner xsep=1.0cm, inner ysep=0.4cm] (env) {};
-\end{pgfonlayer}
+% \begin{pgfonlayer}{background}
+% \node[envbox, fit=(action) (H) (cost) (U), inner xsep=1.0cm, inner ysep=0.4cm] (env) {};
+% \end{pgfonlayer}
 
-% Value NN
-\node[greennode, above=1.0cm of cost, xshift=-1.4cm] (v11) {};
-\node[greennode, right=0.3cm of v11] (v12) {};
-\node[right=0.3cm of v12] (v1_dots) {$\dots$};
-\node[greennode, right=0.3cm of v1_dots] (v13) {};
-\node[greennode, right=0.3cm of v13] (v14) {};
+% % Value NN
+% \node[greennode, above=1.0cm of cost, xshift=-1.4cm] (v11) {};
+% \node[greennode, right=0.3cm of v11] (v12) {};
+% \node[right=0.3cm of v12] (v1_dots) {$\dots$};
+% \node[greennode, right=0.3cm of v1_dots] (v13) {};
+% \node[greennode, right=0.3cm of v13] (v14) {};
 
-\node[greennode, above=0.7cm of v11, xshift=-0.4cm] (v21) {};
-\node[greennode, right=0.3cm of v21] (v22) {};
-\node[right=0.3cm of v22] (v2_dots) {$\dots$};
-\node[greennode, right=0.3cm of v2_dots] (v23) {};
-\node[greennode, right=0.3cm of v23] (v24) {};
+% \node[greennode, above=0.7cm of v11, xshift=-0.4cm] (v21) {};
+% \node[greennode, right=0.3cm of v21] (v22) {};
+% \node[right=0.3cm of v22] (v2_dots) {$\dots$};
+% \node[greennode, right=0.3cm of v2_dots] (v23) {};
+% \node[greennode, right=0.3cm of v23] (v24) {};
 
-\node[greennode, above=0.7cm of v21, xshift=0.4cm] (v31) {};
-\node[greennode, right=0.3cm of v31] (v32) {};
-\node[right=0.3cm of v32] (v3_dots) {$\dots$};
-\node[greennode, right=0.3cm of v3_dots] (v33) {};
+% \node[greennode, above=0.7cm of v21, xshift=0.4cm] (v31) {};
+% \node[greennode, right=0.3cm of v31] (v32) {};
+% \node[right=0.3cm of v32] (v3_dots) {$\dots$};
+% \node[greennode, right=0.3cm of v3_dots] (v33) {};
 
-% Connections for Value NN
-\begin{pgfonlayer}{background}
-\foreach \i in {1,2,3,4}
-    \foreach \j in {1,2,3,4} {
-        \draw[gray!40, thin] (v1\i) -- (v2\j);
-    }
-\foreach \i in {1,2,3,4}
-    \foreach \j in {1,2,3} {
-        \draw[gray!40, thin] (v2\i) -- (v3\j);
-    }
-\end{pgfonlayer}
+% % Connections for Value NN
+% \begin{pgfonlayer}{background}
+% \foreach \i in {1,2,3,4}
+%     \foreach \j in {1,2,3,4} {
+%         \draw[gray!40, thin] (v1\i) -- (v2\j);
+%     }
+% \foreach \i in {1,2,3,4}
+%     \foreach \j in {1,2,3} {
+%         \draw[gray!40, thin] (v2\i) -- (v3\j);
+%     }
+% \end{pgfonlayer}
 
-\draw[arr] (cost) -- (v12);
-\draw[arr] (cost) -- (v1_dots);
+% \draw[arr] (cost) -- (v12);
+% \draw[arr] (cost) -- (v1_dots);
 
-\node[above=0.7cm of v3_dots, xshift=-0.4cm, align=center] (reward) {\textbf{Expected Return} $V_\omega(s_{t+1})$};
-\draw[arr] (v31) -- (reward);
-\draw[arr] (v32) -- (reward);
-\draw[arr] (v33) -- (reward);
+% \node[above=0.7cm of v3_dots, xshift=-0.4cm, align=center] (reward) {\textbf{Expected Return} $V_\omega(s_{t+1})$};
+% \draw[arr] (v31) -- (reward);
+% \draw[arr] (v32) -- (reward);
+% \draw[arr] (v33) -- (reward);
 
-% Annotative Braces
-\coordinate (agent_brace_bottom) at (env.south west |- p11.south);
-\coordinate (agent_brace_top)    at (env.north west |- v33.north);
-\draw[decorate, decoration={brace, amplitude=6pt}, thick] 
-    ([xshift=-0.5cm]agent_brace_bottom) -- ([xshift=-0.5cm]agent_brace_top) 
-    node[midway, left=0.3cm] {\textbf{AGENT}};
+% % Annotative Braces
+% \coordinate (agent_brace_bottom) at (env.south west |- p11.south);
+% \coordinate (agent_brace_top)    at (env.north west |- v33.north);
+% \draw[decorate, decoration={brace, amplitude=6pt}, thick] 
+%     ([xshift=-0.5cm]agent_brace_bottom) -- ([xshift=-0.5cm]agent_brace_top) 
+%     node[midway, left=0.3cm] {\textbf{AGENT}};
 
-\coordinate (p_brace_bottom) at (env.south east |- p11.south);
-\coordinate (p_brace_top)    at (env.north east |- p33.north);
-\draw[decorate, decoration={brace, amplitude=6pt}, thick] 
-    ([xshift=0.2cm]p_brace_top) -- ([xshift=0.2cm]p_brace_bottom) 
-    node[midway, right=0.3cm, align=left] {
-        \textbf{POLICY NN} $\pi_\theta$\\
-        \textnormal{\scriptsize Input: state $s_t \in \mathbb{R}^{d_s}$}\\
-        \textnormal{\scriptsize Output: dist. params $\mu_\theta, \Sigma_\theta \in \mathbb{R}^m$}
-    };
+% \coordinate (p_brace_bottom) at (env.south east |- p11.south);
+% \coordinate (p_brace_top)    at (env.north east |- p33.north);
+% \draw[decorate, decoration={brace, amplitude=6pt}, thick] 
+%     ([xshift=0.2cm]p_brace_top) -- ([xshift=0.2cm]p_brace_bottom) 
+%     node[midway, right=0.3cm, align=left] {
+%         \textbf{POLICY NN} $\pi_\theta$\\
+%         \textnormal{\scriptsize Input: state $s_t \in \mathbb{R}^{d_s}$}\\
+%         \textnormal{\scriptsize Output: dist. params $\mu_\theta, \Sigma_\theta \in \mathbb{R}^m$}
+%     };
 
-\coordinate (v_brace_bottom) at (env.south east |- v11.south);
-\coordinate (v_brace_top)    at (env.north east |- v33.north);
-\draw[decorate, decoration={brace, amplitude=6pt}, thick] 
-    ([xshift=0.2cm]v_brace_top) -- ([xshift=0.2cm]v_brace_bottom) 
-    node[midway, right=0.3cm, align=left] {
-        \textbf{VALUE NN} $V_\omega$\\
-        \textnormal{\scriptsize Input: state $s_{t+1} \in \mathbb{R}^{d_s}$}\\
-        \textnormal{\scriptsize Output: scalar baseline $\in \mathbb{R}$}
-    };
+% \coordinate (v_brace_bottom) at (env.south east |- v11.south);
+% \coordinate (v_brace_top)    at (env.north east |- v33.north);
+% \draw[decorate, decoration={brace, amplitude=6pt}, thick] 
+%     ([xshift=0.2cm]v_brace_top) -- ([xshift=0.2cm]v_brace_bottom) 
+%     node[midway, right=0.3cm, align=left] {
+%         \textbf{VALUE NN} $V_\omega$\\
+%         \textnormal{\scriptsize Input: state $s_{t+1} \in \mathbb{R}^{d_s}$}\\
+%         \textnormal{\scriptsize Output: scalar baseline $\in \mathbb{R}$}
+%     };
 
-\draw[decorate, decoration={brace, amplitude=6pt}, thick] 
-    ([xshift=0.2cm]env.north east) -- ([xshift=0.2cm]env.south east) 
-    node[midway, right=0.3cm, align=left] {
-        \textbf{ENVIRONMENT}\\
-        \textnormal{\scriptsize Propagator \& noise handling}\\
-        \textnormal{\scriptsize Evaluates cost $\mathcal{C}$ giving reward $r_t$}
-    };
+% \draw[decorate, decoration={brace, amplitude=6pt}, thick] 
+%     ([xshift=0.2cm]env.north east) -- ([xshift=0.2cm]env.south east) 
+%     node[midway, right=0.3cm, align=left] {
+%         \textbf{ENVIRONMENT}\\
+%         \textnormal{\scriptsize Propagator \& noise handling}\\
+%         \textnormal{\scriptsize Evaluates cost $\mathcal{C}$ giving reward $r_t$}
+%     };
 
-\end{tikzpicture}
+% \end{tikzpicture}
 \caption{Actor--critic view of continuous-action quantum control. The policy network maps the current state to a distribution over the next control action, while the value network estimates the expected discounted future reward associated with that state. The environment propagates the controlled quantum dynamics and returns the next state and reward.}
 \label{fig:actor_critic_nn_control}
 \end{figure}
