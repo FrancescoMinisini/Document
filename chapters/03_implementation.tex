@@ -1307,48 +1307,32 @@ with each baseline probing a different aspect of this performance vector.
 \subsection{Main findings of the original paper}
 \label{subsec:main_findings_original_paper}
 
-\textbf{TODO:} da sistemare 
+% \textbf{TODO:} da sistemare 
 % FOR NOW AI GENERATED THIS SECTION (TO BE INCLUDED THE PAPERS ORIGINAL RESULTS)
 
 With the physical model, the UFO objective, the reinforcement-learning formulation, and the target gate family all in place, the main findings of the reference paper can now be stated clearly. The paper reports that training a TRPO-based reinforcement-learning agent in a stochastic control environment yields analog gate controls that are simultaneously fast, accurate, and substantially more robust to Gaussian control noise than the baseline methods considered \cite{Niu2019}. In other words, the central claim of the work is not merely that reinforcement learning can find workable controls, but that the combination of the UFO objective with noisy training leads to a qualitatively better balance between fidelity, robustness, and runtime than alternative approaches.
 
-The first major result concerns robustness under stochastic control errors. For the family of Gaussian control-noise models considered in the paper, with variance
-\begin{equation}
-\sigma_{\mathrm{noise}} \in [0.1,\,3.5]~\mathrm{MHz},
-\label{eq:main_result_noise_range}
-\end{equation}
-the noise-optimized RL controller maintains an average fidelity in the range
-\begin{equation}
-\overline{F}_{\mathrm{RL,noisy}}
-\in
-[99.5\%,\,98\%],
-\label{eq:main_result_average_fidelity_range}
-\end{equation}
-across the tested noise interval \cite{Niu2019}. In particular, at the representative value
-\begin{equation}
-\sigma_{\mathrm{noise}} = 1~\mathrm{MHz},
-\label{eq:representative_noise_scale}
-\end{equation}
-the paper states that the obtained control satisfies its robustness criterion
-\begin{equation}
-1-\overline{F} \le \epsilon_0,
-\qquad
-\epsilon_0 = 0.007.
-\label{eq:paper_robustness_criterion}
-\end{equation}
-These results are significant because they show that the optimized controls are not only high-fidelity in the nominal setting, but remain accurate under a broad family of experimentally relevant perturbations.
+The primary finding concerns the performance of the noise-optimized RL controller in a stochastic environment. The results of this investigation are reported in Table~\ref{tab:robustness_results_summary}.
+
+\begin{table}[htpb]
+\centering
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{lll}
+\hline
+\textbf{Metric} & \textbf{Value} & \textbf{Description} \\
+\hline
+Tested noise range & $\sigma_{\mathrm{noise}} \in [0.1, 3.5]$ MHz & Sweep of standard deviations \\
+Average gate fidelity & $\overline{F}_{\mathrm{RL,noisy}} \in [99.5\%, 98\%]$ & Noisy performance regime \\
+Representative noise & $\sigma_{\mathrm{noise}} = 1$ MHz & Experimental reference scale \\
+Robustness condition & $1-\overline{F} \le \epsilon_0, \;\epsilon_0 = 0.007$ & Robustness criterion satisfaction \\
+\hline
+\end{tabular}
+\caption{Assessing the robustness performance of the noise-trained policy. The table summarizes the key benchmarks and performance thresholds across different noise regimes as reported in \cite{Niu2019}.}
+\label{tab:robustness_results_summary}
+\end{table}
 
 The second major result is comparative. When evaluated under the same Gaussian control-noise model, the noise-optimized RL solution outperforms both the noise-free RL solution and the SGD baseline. The paper reports up to
-\begin{equation}
-\text{one order of magnitude}
-\label{eq:one_order_magnitude_statement}
-\end{equation}
-improvement in average gate infidelity relative to the RL controller trained without stochastic noise, and around
-\begin{equation}
-\text{two orders of magnitude}
-\label{eq:two_order_magnitude_statement}
-\end{equation}
-improvement in average gate infidelity relative to the SGD baseline \cite{Niu2019}. This is one of the most important conclusions of the paper, because it isolates the source of the improvement: the gain is not due only to the use of RL in general, but specifically to the combination of policy-gradient learning with a noisy training environment.
+\emph{one order of magnitude} improvement in average gate infidelity relative to the RL controller trained without stochastic noise, and around \emph{two orders of magnitude} improvement in average gate infidelity relative to the SGD baseline \cite{Niu2019}. This is one of the most important conclusions of the paper, because it isolates the source of the improvement: the gain is not due only to the use of RL in general, but specifically to the combination of policy-gradient learning with a noisy training environment.
 
 A third important finding concerns stability. The paper shows that the sampled fidelity variance of the noise-optimized RL solution is consistently about one order of magnitude smaller than that of the two comparison methods throughout the tested noise range \cite{Niu2019}. Since fidelity variance measures the sensitivity of the gate performance to random perturbations, this means that the RL-trained control is not only more accurate on average, but also more reproducible from one noisy realization to another. This is a particularly meaningful notion of robustness from the viewpoint of experimental implementation: a control protocol whose average performance is good but whose shot-to-shot fluctuation is large is much less useful than a protocol with similar mean fidelity but significantly smaller variance.
 
