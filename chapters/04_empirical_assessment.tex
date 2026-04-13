@@ -274,16 +274,16 @@ On the basis of this completed sweep, two conclusions follow. First, architectur
 \centering
 \begin{subfigure}{0.48\textwidth}
     \centering
-    % \includegraphics[width=\linewidth]{chapters/plots/architecture_sweep_leakage.pdf}
-    \input{plots/architecture_sweep_leakage.tex}
+    \includegraphics[width=\linewidth]{chapters/plots/architecture_sweep_leakage.pdf}
+    % \input{plots/architecture_sweep_leakage.tex}
     \caption{Best Eval Leakage}
     \label{fig:architecture_sweep_leakage}
 \end{subfigure}
 \hfill
 \begin{subfigure}{0.48\textwidth}
     \centering
-    % \includegraphics[width=\linewidth]{chapters/plots/architecture_sweep_robustness.pdf}
-    \input{plots/architecture_sweep_robustness.tex}
+    \includegraphics[width=\linewidth]{chapters/plots/architecture_sweep_robustness.pdf}
+    % \input{plots/architecture_sweep_robustness.tex}
     \caption{Average Fidelity ($\overline{F}_{\sigma=1.0}$)}
     \label{fig:architecture_sweep_robustness}
 \end{subfigure}
@@ -293,8 +293,8 @@ On the basis of this completed sweep, two conclusions follow. First, architectur
 
 \begin{figure}[t]
 \centering
-% \includegraphics[width=0.95\textwidth]{chapters/plots/architecture_sweep_pareto_combined.pdf}
-\input{plots/architecture_sweep_pareto_combined.tex}
+\includegraphics[width=0.95\textwidth]{chapters/plots/architecture_sweep_pareto_combined.pdf}
+% \input{plots/architecture_sweep_pareto_combined.tex}
 \caption{Synthesis of the architecture performance trade-offs. The scatter plots contrast evaluation leakage against (a)~average fidelity at $\sigma=1\,\mathrm{MHz}$ and (b)~purely nominal evaluation fidelity. Different network depths and widths are encoded by distinct color markers (shared legend). Leakage minimization does not automatically act as a simple heuristic for robust fidelity guarantees: architectures that heavily suppress leakage often sacrifice absolute nominal accuracy or structural resilience.}
 \label{fig:architecture_sweep_pareto}
 \end{figure}
@@ -319,8 +319,8 @@ A further methodological point should be emphasized. Because the sweep was carri
 \label{subsec:ufo_weight_sweep}
 \begin{figure}[t]
 \centering
-% \includegraphics[width=0.9\textwidth]{chapters/plots/ufo_weight_sweep_robustness.pdf}
-\input{plots/ufo_weight_sweep_robustness.tex}
+\includegraphics[width=0.9\textwidth]{chapters/plots/ufo_weight_sweep_robustness.pdf}
+% \input{plots/ufo_weight_sweep_robustness.tex}
 \caption{Sensitivity of the average fidelity $\overline{F}_{\sigma=1.0}$ to the main UFO cost function components. The three panels report the independent isolated variations triggered individually by $\chi$ (fidelity penalty), $\mu$ (leakage penalty), and $\kappa$ (boundary penalty). Note that $\beta$ is fundamentally fixed globally as a scaling factor, allowing structural sensitivity mapping against the remaining dynamically scaled components.}
 \label{fig:ufo_weight_sweep_robustness}
 \end{figure}
@@ -337,8 +337,8 @@ A further methodological point should be emphasized. Because the sweep was carri
 \centering
 \begin{subfigure}{0.48\textwidth}
     \centering
-% \includegraphics[width=\linewidth]{chapters/plots/ufo_weight_sweep_pareto.pdf}
-    \input{plots/ufo_weight_sweep_pareto.tex}
+\includegraphics[width=\linewidth]{chapters/plots/ufo_weight_sweep_pareto.pdf}
+    % \input{plots/ufo_weight_sweep_pareto.tex}
     \caption{Average Fidelity ($\sigma=1$ MHz)}
     \label{fig:ufo_weight_sweep_pareto_robustness}
 \end{subfigure}
