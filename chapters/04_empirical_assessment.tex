@@ -272,34 +272,30 @@ On the basis of this completed sweep, two conclusions follow. First, architectur
 
 \begin{figure}[t]
 \centering
-% \input{plots/architecture_sweep_leakage.tex}
-\caption{Best-evaluation state leakage across the tested structural architectures of the policy and value networks. The boxplots aggregate final evaluation leakages from independent seed trainings for each hidden-layer configuration on the representative target $N(2.2,2.2,\pi/2)$. The central tendency and spread visibly demonstrate that deeper architectures do not uniformly suppress error dynamics, but rather lead to distinct isolation characteristics across independent runs.}
-\label{fig:architecture_sweep_leakage}
-\end{figure}
-
-\begin{figure}[t]
-\centering
-% \input{plots/architecture_sweep_robustness.tex}
-\caption{Distribution of validation robustness mapping $\overline{F}_{\sigma=1.0}$ (average deterministic fidelity across Gaussian noise realizations) among different neural network architectures. The $64\text{-}64\text{-}64$ topology displays consistently stronger robustness with higher median stabilization, suggesting it offers an optimal parameterization scale to capture the desired optimal resilient control regime before hitting overparameterization penalties.}
-\label{fig:architecture_sweep_robustness}
-\end{figure}
-
-\begin{figure}[t]
-\centering
 \begin{subfigure}{0.48\textwidth}
     \centering
-    \input{plots/architecture_sweep_pareto.tex}
-    \caption{Robustness ($\sigma=1$ MHz)}
-    \label{fig:architecture_sweep_pareto_robustness}
+    \includegraphics[width=\linewidth]{chapters/plots/architecture_sweep_leakage.pdf}
+    % \input{plots/architecture_sweep_leakage.tex}
+    \caption{Best Eval Leakage}
+    \label{fig:architecture_sweep_leakage}
 \end{subfigure}
 \hfill
 \begin{subfigure}{0.48\textwidth}
     \centering
-    \input{plots/architecture_sweep_pareto_fidelity.tex}
-    \caption{Nominal Fidelity}
-    \label{fig:architecture_sweep_pareto_fidelity}
+    \includegraphics[width=\linewidth]{chapters/plots/architecture_sweep_robustness.pdf}
+    % \input{plots/architecture_sweep_robustness.tex}
+    \caption{Average Fidelity ($\overline{F}_{\sigma=1.0}$)}
+    \label{fig:architecture_sweep_robustness}
 \end{subfigure}
-\caption{Synthesis of the architecture performance trade-offs shaping the multi-objective optimization bounds. The scatter plot mappings contrast evaluation leakage against (a) operational noise robustness and (b) purely nominal evaluation fidelity. Different network depths and widths are encoded by specific color clusters. Unambiguously, leakage minimization does not automatically act as a simple heuristic for robust fidelity guarantees: network architectures that heavily concentrate on leakage suppression often sacrifice absolute nominal accuracy or general structural resilience.}
+\caption{Architecture sweep boxplots for the five tested hidden-layer configurations on the representative target $N(2.2,2.2,\pi/2)$. Each boxplot aggregates three independent random seeds. (a)~Best-evaluation leakage: notice that the architecture with the lowest median leakage (128-64-32-32) does not correspond to the best overall controller. (b)~Average Fidelity at $\sigma=1\,\mathrm{MHz}$: the $64\text{-}64\text{-}64$ topology displays the strongest median robustness and the tightest spread, while $64\text{-}32\text{-}32$ remains highly competitive.}
+\label{fig:architecture_sweep_boxplots}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{chapters/plots/architecture_sweep_pareto_combined.pdf}
+% \input{plots/architecture_sweep_pareto_combined.tex}
+\caption{Synthesis of the architecture performance trade-offs. The scatter plots contrast evaluation leakage against (a)~average fidelity at $\sigma=1\,\mathrm{MHz}$ and (b)~purely nominal evaluation fidelity. Different network depths and widths are encoded by distinct color markers (shared legend). Leakage minimization does not automatically act as a simple heuristic for robust fidelity guarantees: architectures that heavily suppress leakage often sacrifice absolute nominal accuracy or structural resilience.}
 \label{fig:architecture_sweep_pareto}
 \end{figure}
 
@@ -323,15 +319,17 @@ A further methodological point should be emphasized. Because the sweep was carri
 \label{subsec:ufo_weight_sweep}
 \begin{figure}[t]
 \centering
+\includegraphics[width=0.9\textwidth]{chapters/plots/ufo_weight_sweep_robustness.pdf}
 % \input{plots/ufo_weight_sweep_robustness.tex}
-\caption{Sensitivity of the validation robustness mapping $\overline{F}_{\sigma=1.0}$ to the main UFO cost function components. The three panels report the independent isolated variations triggered individually by $\chi$ (fidelity penalty), $\mu$ (leakage penalty), and $\kappa$ (boundary penalty). Note that $\beta$ is fundamentally fixed globally as a scaling factor, allowing structural sensitivity mapping against the remaining dynamically scaled components.}
+\caption{Sensitivity of the average fidelity $\overline{F}_{\sigma=1.0}$ to the main UFO cost function components. The three panels report the independent isolated variations triggered individually by $\chi$ (fidelity penalty), $\mu$ (leakage penalty), and $\kappa$ (boundary penalty). Note that $\beta$ is fundamentally fixed globally as a scaling factor, allowing structural sensitivity mapping against the remaining dynamically scaled components.}
 \label{fig:ufo_weight_sweep_robustness}
 \end{figure}
 
 \begin{figure}[t]
 \centering
-% % \input{plots/ufo_weight_sweep_leakage.tex}
-\caption{Sensitivity of best-evaluation state leakage evaluated across the cost weights. Contrasted to robustness, leakage displays heavily non-monotonic behavior with high inverse correlation to $\chi$. This confirms that strictly enforcing minimum leakage does not straightforwardly align with general optimized robustness, leading to necessary compromises in weighting balance.}
+% \includegraphics[width=0.8\textwidth]{chapters/plots/ufo_weight_sweep_leakage.pdf}
+\input{plots/ufo_weight_sweep_leakage.tex}
+\caption{Sensitivity of best-evaluation state leakage evaluated across the cost weights. Contrasted to average fidelity, leakage displays heavily non-monotonic behavior with high inverse correlation to $\chi$. This confirms that strictly enforcing minimum leakage does not straightforwardly align with general optimized robustness, leading to necessary compromises in weighting balance.}
 \label{fig:ufo_weight_sweep_leakage}
 \end{figure}
 
@@ -339,18 +337,20 @@ A further methodological point should be emphasized. Because the sweep was carri
 \centering
 \begin{subfigure}{0.48\textwidth}
     \centering
-    \input{plots/ufo_weight_sweep_pareto.tex}
-    \caption{Robustness ($\sigma=1$ MHz)}
+\includegraphics[width=\linewidth]{chapters/plots/ufo_weight_sweep_pareto.pdf}
+    % \input{plots/ufo_weight_sweep_pareto.tex}
+    \caption{Average Fidelity ($\sigma=1$ MHz)}
     \label{fig:ufo_weight_sweep_pareto_robustness}
 \end{subfigure}
 \hfill
 \begin{subfigure}{0.48\textwidth}
     \centering
-    \input{plots/ufo_weight_sweep_pareto_fidelity.tex}
+\includegraphics[width=\linewidth]{chapters/plots/ufo_weight_sweep_pareto_fidelity.pdf}
+    % \input{plots/ufo_weight_sweep_pareto_fidelity.tex}
     \caption{Nominal Fidelity}
     \label{fig:ufo_weight_sweep_pareto_fidelity}
 \end{subfigure}
-\caption{Synthesis of the multidimensional control trade-offs under systematic UFO-weight variations. The scatter correlations map (a) operational robustness against evaluation leakage, and (b) nominal deterministic fidelity against evaluation leakage. The colormap indicates the primary fidelity weight multiplier $\chi$. Crucially, the target paper configuration $(\chi,\beta,\mu,\kappa)=(10,10,0.2,0.1)$ occupies an optimal Pareto boundary positioning, yielding structural robustness validity without heavily sacrificing individual metrics.}
+\caption{Synthesis of the multidimensional control trade-offs under systematic UFO-weight variations. The scatter correlations map (a) average fidelity against evaluation leakage, and (b) nominal deterministic fidelity against evaluation leakage. The colormap indicates the primary fidelity weight multiplier $\chi$. Crucially, the target paper configuration $(\chi,\beta,\mu,\kappa)=(10,10,0.2,0.1)$ occupies an optimal Pareto boundary positioning, yielding structural robustness validity without heavily sacrificing individual metrics.}
 \label{fig:ufo_weight_sweep_pareto}
 \end{figure}
 
@@ -395,7 +395,7 @@ The choice to keep \(\beta\) fixed deserves an explicit comment. Since the goal 
 
 A second methodological point is even more important: the \emph{best evaluation cost} is not an informative global selection criterion across this sweep. Indeed, different values of \(\chi\), \(\mu\), and \(\kappa\) define different scalarizations of the same physical control problem, so the numerical value of \(C(\chi,\beta,\mu,\kappa)\) is not directly comparable across configurations. This is not just a formal issue. In the present experiment, all runs terminate at the same evaluation time of \(180\,\mathrm{ns}\), so increasing \(\kappa\) contributes mainly a nearly rigid additive shift to the total cost without necessarily improving the learned control in any physically meaningful sense. For this reason, the search-script primary metric is retained only as an internal bookkeeping quantity, whereas the physically relevant comparison is based instead on nominal fidelity, best evaluation leakage, and robustness average fidelity at \(\sigma=1\,\mathrm{MHz}\).
 
-Under this interpretation, the first clear result concerns the fidelity weight \(\chi\). The robustness boxplot in Fig.~\ref{fig:ufo_weight_sweep_robustness} shows that \(\chi=5\) leads to a visibly broader and lower-performing distribution, with several runs collapsing into a poor-robustness regime around \(0.81\)--\(0.83\). By contrast, \(\chi=10\) and \(\chi=20\) both yield substantially tighter and higher robustness distributions, concentrated around \(0.92\)--\(0.95\). This indicates that the low-fidelity-penalty regime underweights the logical-accuracy term too strongly relative to the other penalties. 
+Under this interpretation, the first clear result concerns the fidelity weight \(\chi\). The average fidelity boxplot in Fig.~\ref{fig:ufo_weight_sweep_robustness} shows that \(\chi=5\) leads to a visibly broader and lower-performing distribution, with several runs collapsing into a poor-average-fidelity regime around \(0.81\)--\(0.83\). By contrast, \(\chi=10\) and \(\chi=20\) both yield substantially tighter and higher average-fidelity distributions, concentrated around \(0.92\)--\(0.95\). This indicates that the low-fidelity-penalty regime underweights the logical-accuracy term too strongly relative to the other penalties. 
 % In other words, if \(\chi\) is chosen too small compared with \(\beta\), the optimizer is allowed to settle into controls that may be acceptable in terms of leakage or boundary behavior, yet remain clearly inferior in actual gate quality. Increasing \(\chi\) to the paper scale already removes most of this failure mode, while a further increase to \(\chi=20\) produces only a marginal additional gain.
 
 The behavior of the boundary weight \(\mu\) is more subtle and, in some sense, more interesting. The sweep reveals a clear non-monotonic pattern. The intermediate value
@@ -403,16 +403,16 @@ The behavior of the boundary weight \(\mu\) is more subtle and, in some sense, m
 \mu = 0.2
 \label{eq:mu_intermediate_best}
 \end{equation}
-produces the most favorable median trade-off, with high robustness and good nominal fidelity. Reducing the penalty to \(\mu=0.1\) remains viable, but leads on average to slightly larger leakage and a somewhat less favorable robustness profile. Increasing it to \(\mu=0.4\), however, makes the distribution strongly bimodal: for some values of \(\chi\) it yields some of the best runs of the entire sweep, while for others it produces a catastrophic degradation in robustness. This is clearly visible in the robustness boxplot, where \(\mu=0.4\) generates the widest spread and the strongest lower-tail failures. The physical interpretation is that boundary regularization is beneficial only up to a point. A moderate boundary penalty encourages smoother pulse endpoints, but an overly strong one can overconstrain the optimizer and distort the balance with the fidelity term, thereby harming the overall control quality rather than improving it.
+produces the most favorable median trade-off, with high average fidelity and good nominal fidelity. Reducing the penalty to \(\mu=0.1\) remains viable, but leads on average to slightly larger leakage and a somewhat less favorable average fidelity profile. Increasing it to \(\mu=0.4\), however, makes the distribution strongly bimodal: for some values of \(\chi\) it yields some of the best runs of the entire sweep, while for others it produces a catastrophic degradation in average fidelity. This is clearly visible in the average fidelity boxplot, where \(\mu=0.4\) generates the widest spread and the strongest lower-tail failures. The physical interpretation is that boundary regularization is beneficial only up to a point. A moderate boundary penalty encourages smoother pulse endpoints, but an overly strong one can overconstrain the optimizer and distort the balance with the fidelity term, thereby harming the overall control quality rather than improving it.
 
 This interpretation is reinforced when leakage is examined separately. Figure~\ref{fig:ufo_weight_sweep_leakage} shows that larger \(\mu\) tends, on average, to reduce the leakage proxy. In fact, the lowest-leakage region of the sweep is often associated with \(\mu=0.4\). However, this does \emph{not} translate automatically into the best robust controller. The reason is precisely that leakage is only one component of the total physical objective. In several runs, the stronger boundary penalty helps suppress leakage but simultaneously worsens the broader fidelity--robustness trade-off. 
 This is therefore an example of the fact that minimizing one term of the cost more aggressively does not guarantee a better overall control solution.
 
-The runtime coefficient \(\kappa\) has the weakest effect in the present restricted-budget sweep. This is visible both in the robustness sensitivity plot and in the leakage sensitivity plot, where the four tested values
+The runtime coefficient \(\kappa\) has the weakest effect in the present restricted-budget sweep. This is visible both in the average fidelity sensitivity plot and in the leakage sensitivity plot, where the four tested values
 
 \(\kappa\in\{0.05,0.1,0.2,0.4\}\) produce distributions that are almost indistinguishable at the level of median performance. This weak dependence is not surprising once the evaluation protocol is taken into account. Since every run reaches the same best evaluation time of \(180\,\mathrm{ns}\), the runtime term does not act here as a strong discriminating mechanism on the learned stopping time, but mainly as a reweighting of the scalar objective. In other words, under this short and fixed-horizon model-selection regime, \(\kappa\) does not yet have enough room to reshape the control strategy as dramatically as \(\chi\) and \(\mu\) do. A stronger effect of \(\kappa\) is more likely to appear in the later runtime-family experiments, where gate duration is itself a central observable rather than an almost fixed boundary condition of the sweep.
 
-The clearest global summary of the experiment is given by the Pareto-style leakage--robustness scatter in Fig.~\ref{fig:ufo_weight_sweep_pareto}. Two clusters stand out. The first corresponds to a favorable region with robustness around \(0.94\) and leakage in the low-\(10^{-4}\) to mid-\(10^{-4}\) range. The second corresponds to a clearly worse region with robustness around \(0.81\)--\(0.83\), associated mainly with the underweighted-fidelity settings. The color coding by \(\chi\) makes the main trend immediately visible: low \(\chi\) is overrepresented in the poor-robustness cluster, whereas the paper-scale and larger-\(\chi\) settings dominate the Pareto-favorable part of the plane. At the same time, the frontier is not determined by \(\chi\) alone. The best region is occupied jointly by configurations near
+The clearest global summary of the experiment is given by the Pareto-style leakage--average fidelity scatter in Fig.~\ref{fig:ufo_weight_sweep_pareto}. Two clusters stand out. The first corresponds to a favorable region with average fidelity around \(0.94\) and leakage in the low-\(10^{-4}\) to mid-\(10^{-4}\) range. The second corresponds to a clearly worse region with average fidelity around \(0.81\)--\(0.83\), associated mainly with the underweighted-fidelity settings. The color coding by \(\chi\) makes the main trend immediately visible: low \(\chi\) is overrepresented in the poor-average-fidelity cluster, whereas the paper-scale and larger-\(\chi\) settings dominate the Pareto-favorable part of the plane. At the same time, the frontier is not determined by \(\chi\) alone. The best region is occupied jointly by configurations near
 \begin{equation}
 (\chi,\mu) \approx (10,0.2)
 \qquad \text{and} \qquad
@@ -421,15 +421,15 @@ The clearest global summary of the experiment is given by the Pareto-style leaka
 \end{equation}
 with only weak dependence on \(\kappa\) within the explored range.
 
-This last observation is crucial for the final choice. The numerically best average robustness is attained by the family of configurations centered around \((\chi,\beta,\mu)=(20,10,0.4)\), but the gain over the paper choice
-\((10,10,0.2)\) is extremely small. In the present sweep, the paper configuration remains essentially on the same Pareto-favorable frontier, with very similar robustness and leakage, while being directly aligned with the scalarization reported in the original study \cite{Niu2019}. Since the improvement offered by the larger-\(\chi\), larger-\(\mu\) corner is marginal and the present sweep is based on only two seeds and a very small training budget, there is no strong methodological reason to abandon the paper weights for the main experiments. On the contrary, keeping the reference choice
+This last observation is crucial for the final choice. The numerically best average fidelity is attained by the family of configurations centered around \((\chi,\beta,\mu)=(20,10,0.4)\), but the gain over the paper choice
+\((10,10,0.2)\) is extremely small. In the present sweep, the paper configuration remains essentially on the same Pareto-favorable frontier, with very similar average fidelity and leakage, while being directly aligned with the scalarization reported in the original study \cite{Niu2019}. Since the improvement offered by the larger-\(\chi\), larger-\(\mu\) corner is marginal and the present sweep is based on only two seeds and a very small training budget, there is no strong methodological reason to abandon the paper weights for the main experiments. On the contrary, keeping the reference choice
 \begin{equation}
 (\chi,\beta,\mu,\kappa)=(10,10,0.2,0.1)
 \label{eq:selected_ufo_weights_final}
 \end{equation}
 is preferable for two reasons: it remains empirically near-optimal in the present implementation, and it preserves the cleanest possible fair-comparison protocol with the original UFO framework.
 
-The main conclusion of this subsection is therefore twofold. First, the cost weights matter, and they matter in a physically interpretable way: too small a fidelity weight degrades robustness substantially, while an excessively strong boundary penalty can reduce leakage at the price of destabilizing the broader control trade-off. Second, the paper scalarization is not only historically motivated, but also empirically reasonable in the present independent implementation. For this reason, the remainder of the empirical chapter will retain the reference UFO coefficients in Eq.~\eqref{eq:selected_ufo_weights_final}, unless explicitly stated otherwise.
+The main conclusion of this subsection is therefore twofold. First, the cost weights matter, and they matter in a physically interpretable way: too small a fidelity weight degrades average fidelity substantially, while an excessively strong boundary penalty can reduce leakage at the price of destabilizing the broader control trade-off. Second, the paper scalarization is not only historically motivated, but also empirically reasonable in the present independent implementation. For this reason, the remainder of the empirical chapter will retain the reference UFO coefficients in Eq.~\eqref{eq:selected_ufo_weights_final}, unless explicitly stated otherwise.
 
 
 \subsection{Final parameter configuration for the remainder of the chapter}
@@ -537,7 +537,8 @@ The dependence on the gate duration is particularly instructive. Very short hori
 % ----------------------------------------------------
 \begin{figure}[t]
 \centering
-\input{plots/adam_single_target_horizon_sweep.tex}
+\includegraphics[width=0.9\textwidth]{chapters/plots/adam_single_target_horizon_sweep.pdf}
+% \input{plots/adam_single_target_horizon_sweep.tex}
 \caption{Adam baseline on the representative target \(N(2.2,2.2,\pi/2)\) as a function of the gate horizon. \textbf{(a)} Nominal total cost versus horizon, with the optimum at \(70\,\mathrm{ns}\) highlighted. \textbf{(b)} Nominal fidelity and total leakage versus horizon, shown with dual vertical axes. \textbf{(c)} Boundary and time penalties versus horizon. The nominal optimum at \(70\,\mathrm{ns}\) arises from the simultaneous collapse of the boundary term and the sharp increase in fidelity, whereas longer horizons exhibit fidelity saturation and only marginal further leakage reduction.}
 \label{fig:adam_single_target_horizon_sweep}
 \end{figure}
@@ -562,7 +563,9 @@ even before introducing policy optimization or transfer learning. This does \emp
 % ----------------------------------------------------
 \begin{figure}[t]
 \centering
-\input{plots/adam_family_sweep.tex}
+\includegraphics[width=0.9\textwidth]{chapters/plots/adam_family_sweep.pdf}
+% \input{plots/adam_family_sweep.tex} 
+
 % \caption{Preliminary family-wide Adam sweep for the gates \(N(\alpha,\alpha,\pi/2)\), trained from scratch for each \(\alpha\).
 % A visually effective two-row design:
 % \textbf{(a)} best selected horizon versus \(\alpha\) as a step plot, showing plateaus at \(40\), \(50\), \(60\), \(70\), and \(80\,\mathrm{ns}\);
@@ -620,7 +623,8 @@ which is significant, but far from the order-of-magnitude speedups later reporte
 
 \begin{figure}[t]
 \centering
-\input{plots/nominal_trpo_training_curves.tex}
+\includegraphics[width=0.9\textwidth]{chapters/plots/nominal_trpo_training_curves.pdf}
+% \input{plots/nominal_trpo_training_curves.tex}
 \caption{Training curves for the nominal TRPO run on the representative target \(N(2.2,2.2,\pi/2)\). }
 \textbf{(a)} evaluation cost versus policy iteration, with the best checkpoint (\(111\)) highlighted;
 \textbf{(b)} evaluation gate time \(T\) and minimum-cost time \(t_{\min}\) versus iteration;
@@ -687,7 +691,8 @@ It should be emphasized, however, that while the target $N(2.2, 2.2, \pi/2)$ is 
 
 \begin{figure}[t]
 \centering
-\input{plots/single_target_adam_vs_nominal_trpo.tex}
+\includegraphics[width=0.9\textwidth]{chapters/plots/single_target_adam_vs_nominal_trpo.pdf}
+% \input{plots/single_target_adam_vs_nominal_trpo.tex}
 \caption{Comparison of established nominal performance metrics between Adam and nominal TRPO for the representative target $N(2.2,2.2,\pi/2)$.
 A visually effective four-panel summary:
 \textbf{(a)} grouped bars for total nominal cost;
@@ -792,7 +797,8 @@ Eqs.~\eqref{eq:robustness_average_fidelity_section} and \eqref{eq:robustness_fid
 % -------------------------------------------------
 \begin{figure}[t]
     \centering
-    \input{plots/avg_fidelity_vs_noise.tex}
+\includegraphics[width=0.9\textwidth]{chapters/plots/avg_fidelity_vs_noise.pdf}
+    % \input{plots/avg_fidelity_vs_noise.tex}
     \caption{
     Average fidelity $\overline{F}(\sigma_{\mathrm{noise}})$ as a function of the Gaussian noise strength
     for the representative target gate $N(2.2,2.2,\pi/2)$. 
@@ -861,7 +867,8 @@ This result is particularly important for the interpretation of the framework. T
 % -------------------------------------------------
 \begin{figure}[t]
     \centering
-    \input{plots/fidelity_variance_vs_noise.tex}
+\includegraphics[width=0.9\textwidth]{chapters/plots/fidelity_variance_vs_noise.pdf}
+    % \input{plots/avg_fidelity_vs_noise.tex}
     \caption{
     Fidelity variance $\mathrm{Var}(F)$ as a function of the Gaussian noise strength 
     $\sigma_{\mathrm{noise}}$ for the target gate $N(2.2,2.2,\pi/2)$. 
@@ -989,7 +996,8 @@ device to outperform standard compiled implementations over a nontrivial family 
 \label{subsec:runtime_curve}
 \begin{figure}[t]
     \centering
-    \input{plots/runtime_vs_alpha_curriculum.tex}
+\includegraphics[width=0.9\textwidth]{chapters/plots/runtime_vs_alpha.pdf}
+    % \input{plots/avg_fidelity_vs_noise.tex}
     \caption{
     Curriculum optimization profile over the family $N(\alpha,\alpha,\pi/2)$.
     The three stacked panels trace the performance evolution and constraint fulfillment as a function of the target parameter $\alpha$:
