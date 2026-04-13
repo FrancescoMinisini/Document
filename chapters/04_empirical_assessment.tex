@@ -222,30 +222,26 @@ The sweep was performed on the same representative target gate used for the trai
 U_{\mathrm{rep}} = N(2.2,2.2,\pi/2),
 \label{eq:nn_sweep_representative_target}
 \end{equation}
-and under a fixed reduced-budget training protocol designed for model selection. 
+and under a fixed reduced-budget training protocol designed for model selection.
 More precisely, all runs used noise-optimized TRPO, termination threshold \(C_{\mathrm{term}}=0.4\), and the nominal UFO weights
 \begin{equation}
 (\chi,\beta,\mu,\kappa)=(10,10,0.2,0.1).
 \label{eq:nn_sweep_default_weights}
 \end{equation}
-Each architecture was trained for \(20\) TRPO iterations with \(5000\) episodes per batch and evaluated over \(3\) random seeds.
-\footnote{The rest of the parameters where set as mentioned in the subsection \ref{subsec:simulation_and_training_parameters_choice}}. The tested hidden-layer layouts were
+Each architecture was trained for \(20\) TRPO iterations with \(5000\) episodes per batch and evaluated over \(3\) random seeds.\footnote{The remaining parameters were fixed as described in subsection~\ref{subsec:simulation_and_training_parameters_choice}.}
+The tested hidden-layer layouts were
 \begin{equation}
+(64,32,32),\qquad
 (64,64,64),\qquad
 (64,64,64,32),\qquad
 (128,64,32),\qquad
 (128,64,32,32).
 \label{eq:tested_hidden_sizes}
 \end{equation}
-% It should be noted explicitly that the exact paper architecture \((64,32,32)\) was not part of this restricted sweep. Consequently, the present study should be interpreted as a comparison among nearby thesis-side alternatives rather than as a direct empirical rejection of the reference architecture.
 
-\textbf{TODO:} MI SONO SBAGLIATO, Aggiungere il layout principale mancante (64,32,32) ai risultati, esperimento gia fatto, solo da inserire.
+To compare the candidate networks, several criteria were considered simultaneously. The primary selection metric was the best evaluation cost reached during training, since this is the quantity most directly aligned with the UFO objective. However, this scalar alone is not sufficient for a meaningful choice. A network could achieve a favorable total cost by trading leakage against fidelity or by settling into an unnecessarily long runtime. For this reason, the architecture comparison also tracked best evaluation fidelity, best evaluation leakage, effective evaluation runtime, and robustness under noisy deployment through the average fidelity at \(\sigma=1\,\mathrm{MHz}\). In this way, the architecture was not chosen solely by one scalar score, but by its overall position in the multi-objective trade-off relevant to the control problem.
 
-
-To compare the candidate networks, several criteria were considered simultaneously. The primary selection metric was the best evaluation cost reached during training, since this is the quantity most directly aligned with the UFO objective. However, this scalar alone is not sufficient for a meaningful choice. A network could achieve a favorable total cost by trading leakage against fidelity or by settling into an unnecessarily long runtime. For this reason, the architecture comparison also tracked best evaluation fidelity, best evaluation leakage, effective evaluation runtime, and robustness under noisy deployment through the average fidelity at \(\sigma = 1\,\mathrm{MHz}\). In this way, the architecture was not chosen solely by one scalar score, but by its overall position in the multi-objective trade-off relevant to the control problem.
-
-The results of the restricted architecture sweep are summarized in Table~\ref{tab:architecture_sweep_results}. The analysis reveals a clear but not entirely trivial pattern among the four tested candidates. The \((64,64,64)\) architecture achieves the best overall performance, reaching the lowest mean evaluation cost, the highest mean best-evaluation fidelity, and the highest mean robustness score at \(\sigma=1\,\mathrm{MHz}\).
-This is an important result because it indicates that, within the explored subset, moderate widening of the network improves the optimization outcome without requiring extra depth.
+The results of the completed architecture sweep are summarized in Table~\ref{tab:architecture_sweep_results}. The first important observation is that the architecture \(64\text{-}64\text{-}64\) still achieves the best overall mean evaluation cost, together with the strongest mean robustness at \(\sigma=1\,\mathrm{MHz}\). In this restricted-budget setting, it therefore remains the strongest architecture in terms of the aggregated objective. However, the inclusion of the previously missing paper architecture \(64\text{-}32\text{-}32\) changes the interpretation in a nontrivial way. Its mean evaluation cost is only marginally worse than that of \(64\text{-}64\text{-}64\), while it achieves a slightly higher mean nominal fidelity and a lower mean leakage. In other words, the original paper layout is not dominated by a large margin; rather, it lies very close to the best-performing region of the sweep.
 
 \begin{table}[ht]
 \centering
@@ -253,74 +249,26 @@ This is an important result because it indicates that, within the explored subse
 \hline
 Architecture & $\overline{C}_{\mathrm{eval}}$ & $\overline{F}_{\mathrm{eval}}$ & $\overline{F}_{\sigma=1\,\mathrm{MHz}}$ & $\overline{T}_{\mathrm{eval}}$ (ns) & $\overline{L}_{\mathrm{eval}}$ ($10^{-4}$) \\
 \hline
-(64, 64, 64)        & \textbf{0.3584} & \textbf{0.9941} & \textbf{0.9637} & \textbf{106.7} & 4.05 \\
+(64, 64, 64)        & \textbf{0.3584} & 0.9941          & \textbf{0.9637} & \textbf{106.7} & 4.05 \\
+(64, 32, 32)        & 0.3592          & \textbf{0.9950} & 0.9622          & 111.3          & 3.67 \\
 (64, 64, 64, 32)    & 0.3626          & 0.9926          & 0.9604          & 107.3          & 4.17 \\
 (128, 64, 32)       & 0.3630          & 0.9920          & 0.9616          & \textbf{106.7} & 4.22 \\
 (128, 64, 32, 32)   & 0.3691          & 0.9906          & 0.9589          & 110.7          & \textbf{3.56} \\
 \hline
 \end{tabular}
-\caption{Summary of results for the restricted neural-network architecture sweep on the representative target $N(2.2,2.2,\pi/2)$. Performance metrics are averaged over three random seeds.}
+\caption{Summary of results for the neural-network architecture sweep on the representative target $N(2.2,2.2,\pi/2)$. Performance metrics are averaged over three random seeds.}
 \label{tab:architecture_sweep_results}
 \end{table}
 
-The deeper alternatives do not improve this picture. The architecture \((64,64,64,32)\) performs slightly worse in all main aggregated metrics, with a higher mean evaluation cost and a lower mean robust fidelity. The architecture \((128,64,32)\) remains close in mean cost, but displays a somewhat less favorable robustness profile and larger seed-to-seed variability. The deepest tested model, \((128,64,32,32)\), is particularly instructive: it achieves the \emph{lowest mean leakage} (see Table~\ref{tab:architecture_sweep_results}), but at the price of the \emph{worst} mean evaluation cost, the lowest mean fidelity, the longest mean runtime, and the weakest mean robustness among the tested candidates. This indicates that minimizing leakage in isolation is not an adequate architecture-selection principle. A more expressive or deeper network may learn a comparatively conservative control strategy with slightly cleaner multilevel confinement, yet still fail to produce the best overall balance among the terms entering the UFO objective.
+This updated picture suggests a more nuanced conclusion than the preliminary one. The architecture \(64\text{-}64\text{-}64\) remains the best choice if the objective is to optimize the aggregate reduced-budget performance as aggressively as possible. Nevertheless, the gap with \(64\text{-}32\text{-}32\) is small enough that the latter should now be regarded as a genuinely competitive alternative rather than as a clearly inferior baseline. This point matters methodologically, because \(64\text{-}32\text{-}32\) is the exact architecture reported in the original paper \cite{Niu2019}; retaining it in later experiments is therefore still fully defensible when faithfulness to the reference framework is prioritized over marginal gains in the reduced-budget sweep.
 
-\begin{figure}[t]
-\centering
-% \input{plots/architecture_sweep_leakage.tex}
-\caption{\textbf{TODO:} Da fare }
-\fbox{\parbox[c][5.2cm][c]{0.9\linewidth}{\centering Placeholder }}
-% \caption{Recommended figure for the architecture sweep: use the boxplot already generated for \emph{Best Eval Leakage across Architectures}. The horizontal axis should report the four tested hidden-layer layouts, while the vertical axis should show the best evaluation leakage on a scientific or logarithmic-friendly scale. Overlay the individual seed points, as in the current plot, so that both the central tendency and the seed-level spread remain visible. The visual purpose of the figure is to show clearly that the architecture with the smallest mean leakage is not the one with the best overall evaluation cost.}
-\label{fig:architecture_sweep_leakage}
-\end{figure}
+The deeper alternatives do not improve this picture. The architecture \(64\text{-}64\text{-}64\text{-}32\) performs worse than both leading candidates in all principal aggregated metrics, with a higher mean evaluation cost, a lower mean fidelity, and a visibly weaker robustness profile. The architecture \(128\text{-}64\text{-}32\) remains close in mean cost, but does not offer a compensating advantage in fidelity, leakage, or robustness. The deepest tested model, \(128\text{-}64\text{-}32\text{-}32\), is particularly instructive: it achieves the \emph{lowest mean leakage} of the sweep, but also the \emph{worst} mean evaluation cost, the lowest mean robustness, and the weakest mean nominal fidelity. This indicates once again that minimizing leakage in isolation is not an adequate architecture-selection principle. A larger or deeper network may learn a more conservative control strategy with somewhat cleaner multilevel confinement, yet still fail to provide the best overall balance among the terms entering the UFO objective.
 
-\begin{figure}[t]
-\centering
-% \input{plots/architecture_sweep_robustness.tex}
-\fbox{\parbox[c][5.2cm][c]{0.9\linewidth}{\centering Placeholder }}
-\caption{\textbf{TODO:} Da fare }
-% \caption{Recommended figure for the architecture sweep: use the boxplot already generated for \emph{Robustness Fidelity across Architectures}. The horizontal axis should again report the four hidden-layer layouts, while the vertical axis should show the average fidelity under noisy evaluation at \(\sigma=1\,\mathrm{MHz}\). Overlay the individual seed values. This figure is meant to make the robustness ranking immediately visible and to show that the \(64\text{-}64\text{-}64\) architecture occupies the most favorable region in terms of average noisy fidelity.}
-\label{fig:architecture_sweep_robustness}
-\end{figure}
-
-\begin{figure}[t]
-\centering
-\begin{subfigure}{0.48\textwidth}
-    \centering
-    % \input{plots/architecture_sweep_pareto.tex}
-    \fbox{\parbox[c][5.2cm][c]{0.9\linewidth}{\centering Placeholder }}
-    \caption{Robustness ($\sigma=1$ MHz)}
-    \label{fig:architecture_sweep_pareto_robustness}
-\end{subfigure}
-\hfill
-\begin{subfigure}{0.48\textwidth}
-    \centering
-    % \input{plots/architecture_sweep_pareto_fidelity.tex}
-    \fbox{\parbox[c][5.2cm][c]{0.9\linewidth}{\centering Placeholder }}
-    \caption{Nominal Fidelity}
-    \label{fig:architecture_sweep_pareto_fidelity}
-\end{subfigure}
-% \caption{Synthesis of the architecture sweep performance trade-offs. The scatter plots show (a) the average fidelity under noise versus evaluation leakage, and (b) the nominal evaluation fidelity versus evaluation leakage. Colors distinguish the tested hidden-layer layouts, with each point representing a separate seed. These figures highlight the multi-objective nature of the architecture selection: lower leakage does not always translate to higher nominal fidelity or better noise robustness.}
-\caption{\textbf{TODO:} Da fare }
-\label{fig:architecture_sweep_pareto}
-\end{figure}
-
-This interpretation is reinforced by the qualitative structure of the trade-off plots. The leakage boxplot is useful because it shows that the lowest-leakage architecture is not the one with the best total control quality. The robustness boxplot shows that the \(64\text{-}64\text{-}64\) architecture is not only strong on average, but also competitive in terms of seed-level consistency. Finally, the Pareto-style scatter plot of leakage versus robustness gives perhaps the clearest visual summary: the architectures do not lie on a simple monotonic frontier where lower leakage automatically implies higher robustness. Instead, the sweep suggests that the best architecture is the one occupying the most favorable compromise region of the leakage--robustness plane, rather than the one that optimizes either axis independently.
+This interpretation is reinforced by the qualitative structure of the plots. The leakage boxplot is useful because it shows that the architecture with the lowest central leakage tendency is not the one with the best overall control performance. The robustness boxplot shows that \(64\text{-}64\text{-}64\) has the strongest median robustness, but also that \(64\text{-}32\text{-}32\) remains within the same favorable performance region. Finally, the Pareto-style scatter plot of leakage versus robustness provides the clearest visual summary: the architectures do not lie on a simple monotonic frontier where lower leakage automatically implies higher robustness. Instead, the best candidates occupy a compact compromise region in which both \(64\text{-}64\text{-}64\) and \(64\text{-}32\text{-}32\) remain close to the favorable leakage--robustness boundary, while the deeper and wider variants drift away from it in different directions.
 
 A further methodological point should be emphasized. Because the sweep was carried out under a reduced training budget, namely \(20\) policy iterations and \(5000\) episodes per batch, the resulting ranking should be interpreted as a comparison of \emph{practical trainability} under limited optimization time rather than as a proof of asymptotic superiority under full convergence. This distinction matters. A larger architecture may in principle catch up under a much longer training budget, but if it is consistently slower, noisier, or less reliable in the practical regime relevant to the rest of the thesis, then it is still a less attractive default choice. For the purposes of the present empirical chapter, the relevant question is therefore not which architecture might eventually win under unlimited compute, but which one provides the best and most stable control quality under the realistic budget used for the experiments.
 
-
-\textbf{TODO:} Aggiungere il layout principale mancante (64,32,32) ai risultati, esperimento gia fatto, solo da inserire e sistemare i grafici + revisionare conclusione e discussione e tabella.
-
-% On the basis of this restricted sweep, the architecture
-% \begin{equation}
-% (64,64,64)
-% \label{eq:selected_architecture_main_experiments}
-% \end{equation}
-% is adopted as the default policy/value hidden-layer configuration for the subsequent thesis-side experiments. This choice is motivated by its best mean evaluation cost, best mean fidelity, and strongest average robustness among the tested candidates, together with a competitive runtime and acceptable leakage. At the same time, this conclusion should be phrased carefully. Since the exact paper architecture \((64,32,32)\) was not included in the tested subset, the present result does not establish that the reference layout is suboptimal in absolute terms. It only shows that, within the explored family of nearby alternatives, \((64,64,64)\) is the most effective architecture for the current implementation.
-
-% For this reason, the present subsection supports two distinct conclusions. First, architecture choice is not neutral: changes in width and depth do measurably affect the final control trade-off. Second, the dependence on architecture is not monotonic: increasing network size does not automatically improve control quality, and in fact the deepest tested model performs worst in the aggregated objective despite having the lowest mean leakage. This is precisely why the architecture study is useful. It prevents the later experiments from relying on an arbitrary actor--critic layout, while also showing that the dominant effects observed in the rest of the chapter are unlikely to be artifacts of an especially pathological network choice.
-
+On the basis of this completed sweep, two conclusions follow. First, architecture choice is not neutral: moderate changes in width and depth do produce measurable differences in the final trade-off among fidelity, leakage, robustness, and runtime. Second, this dependence is not monotonic: increasing size does not systematically improve the learned controller, and in fact the deepest tested model performs worst in the aggregated objective despite achieving the lowest mean leakage. In practical terms, \(64\text{-}64\text{-}64\) can be regarded as the strongest architecture in the present reduced-budget implementation, whereas \(64\text{-}32\text{-}32\) remains the closest competitor and the most natural paper-faithful choice for later experiments. This is an important refinement of the preliminary analysis, because it shows that the main empirical trends reported later in the chapter are unlikely to be artifacts of an especially poor actor--critic layout, while also clarifying that the original paper architecture remains well supported by the completed sweep.
 
 \subsection{Sensitivity study of the UFO cost-function weights}
 \label{subsec:ufo_weight_sweep}
