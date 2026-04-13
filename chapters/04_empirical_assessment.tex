@@ -272,7 +272,7 @@ On the basis of this completed sweep, two conclusions follow. First, architectur
 
 \begin{figure}[t]
 \centering
-% % \input{plots/architecture_sweep_leakage.tex}
+% \input{plots/architecture_sweep_leakage.tex}
 \caption{Best-evaluation state leakage across the tested structural architectures of the policy and value networks. The boxplots aggregate final evaluation leakages from independent seed trainings for each hidden-layer configuration on the representative target $N(2.2,2.2,\pi/2)$. The central tendency and spread visibly demonstrate that deeper architectures do not uniformly suppress error dynamics, but rather lead to distinct isolation characteristics across independent runs.}
 \label{fig:architecture_sweep_leakage}
 \end{figure}
@@ -323,7 +323,7 @@ A further methodological point should be emphasized. Because the sweep was carri
 \label{subsec:ufo_weight_sweep}
 \begin{figure}[t]
 \centering
-% % \input{plots/ufo_weight_sweep_robustness.tex}
+% \input{plots/ufo_weight_sweep_robustness.tex}
 \caption{Sensitivity of the validation robustness mapping $\overline{F}_{\sigma=1.0}$ to the main UFO cost function components. The three panels report the independent isolated variations triggered individually by $\chi$ (fidelity penalty), $\mu$ (leakage penalty), and $\kappa$ (boundary penalty). Note that $\beta$ is fundamentally fixed globally as a scaling factor, allowing structural sensitivity mapping against the remaining dynamically scaled components.}
 \label{fig:ufo_weight_sweep_robustness}
 \end{figure}
@@ -346,7 +346,7 @@ A further methodological point should be emphasized. Because the sweep was carri
 \hfill
 \begin{subfigure}{0.48\textwidth}
     \centering
-    % % \input{plots/ufo_weight_sweep_pareto_fidelity.tex}
+    \input{plots/ufo_weight_sweep_pareto_fidelity.tex}
     \caption{Nominal Fidelity}
     \label{fig:ufo_weight_sweep_pareto_fidelity}
 \end{subfigure}
