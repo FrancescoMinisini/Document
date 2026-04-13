@@ -2131,7 +2131,136 @@ This is precisely the conceptual role played by the framework analyzed in the ne
 
 The reinforcement-learning formulation introduced in the previous subsections defines the control problem at the level of states, actions, rewards, and policy updates. In order to make this formulation operational in a continuous-action and high-dimensional setting, one must still specify how the policy and the value function are represented. In simple low-dimensional problems, one could in principle store these objects explicitly in tabular form. In the present control setting, however, such an approach is not feasible. The state space is continuous, the action space is continuous, and the relevant control law must be able to capture highly nonlinear relations between the current dynamical configuration of the system and the next control decision. For this reason, both the policy and the value function are represented by trainable parametric function approximators.
 
-In the framework considered in this thesis, these approximators are implemented as feed-forward neural networks. This choice should be understood in a pragmatic rather than purely algorithmic sense. The goal is not to introduce a separate layer of physical modeling based on machine learning, but to provide a flexible finite-dimensional representation for the two central objects of actor--critic reinforcement learning: the policy
+In the framework considered in this thesis, these approximators are implemented as feed-forward neural networks. 
+
+\paragraph{Feed-forward neural network.}
+A feed-forward neural network is a parametric nonlinear map built by composing a sequence of affine transformations and activation functions. Its defining structural feature is that information flows only in one direction, from the input layer to the output layer, without recurrent connections or feedback loops inside the network itself. The simplest building block is the \emph{perceptron}, which receives an input vector \(x=(x_1,\dots,x_n)\), forms a weighted sum with bias,
+\begin{equation}
+z = \sum_{i=1}^{n} w_i x_i + b = \bm{w}^{\top}\bm{x}+b,
+\label{eq:perceptron_affine_map}
+\end{equation}
+and then applies a nonlinear activation function \(\phi\), yielding
+\begin{equation}
+y = \phi(z).
+\label{eq:perceptron_output}
+\end{equation}
+A \emph{multilayer perceptron} (MLP) generalizes this idea by stacking many such units into successive hidden layers, so that the output of one layer becomes the input of the next. In this way, the network realizes a hierarchical nonlinear transformation of the form
+\begin{equation}
+h^{(1)} = \phi\!\left(W^{(1)}x+b^{(1)}\right), \qquad
+h^{(2)} = \phi\!\left(W^{(2)}h^{(1)}+b^{(2)}\right), \qquad \dots
+\label{eq:mlp_hidden_layers}
+\end{equation}
+up to a final output map
+\begin{equation}
+f_{\theta}(x)=W^{(L)}h^{(L-1)}+b^{(L)},
+\label{eq:mlp_output_map}
+\end{equation}
+where \(\theta=\{W^{(\ell)},b^{(\ell)}\}_{\ell=1}^{L}\) denotes the full set of trainable parameters. The practical importance of this architecture is that the repeated alternation of linear maps and nonlinear activations allows the network to approximate highly nontrivial input--output relations while still remaining a finite-dimensional differentiable model. 
+Given a differentiable objective function \(\mathcal{L}(\theta)\), the network parameters can then be updated by gradient-based optimization, with the required derivatives \(\nabla_{\theta}\mathcal{L}\) computed efficiently through the backpropagation algorithm, which applies the chain rule recursively from the output layer back to the earlier layers \cite{Rumelhart1986,Goodfellow2016}.
+In the present context, this makes feed-forward networks a natural choice for representing the policy and value functions: they are flexible enough to capture nonlinear control strategies, yet simple enough to remain fully compatible with the actor--critic and TRPO framework adopted in this thesis.
+
+\begin{figure}[t]
+\centering
+
+\begin{subfigure}[t]{0.38\textwidth}
+\centering
+\begin{tikzpicture}[
+    x=0.9cm,y=0.9cm,
+    neuron/.style={circle, draw, minimum size=6mm, inner sep=0pt},
+    sum/.style={circle, draw, minimum size=7mm, inner sep=0pt},
+    act/.style={rectangle, draw, rounded corners, minimum width=7mm, minimum height=6mm},
+    arrow/.style={-{Latex[length=1.8mm]}, thick}
+]
+% Inputs
+\node[neuron] (x1) at (0,1.2) {$x_1$};
+\node[neuron] (x2) at (0,0.0) {$x_2$};
+\node[neuron] (x3) at (0,-1.2) {$x_3$};
+
+% Sum and activation
+\node[sum] (sum) at (1.8,0.0) {$\Sigma$};
+\node[act] (phi) at (3.8,0.0) {$\phi$};
+\node[neuron] (y) at (5.6,0.0) {$y$};
+
+% Connections
+\draw[arrow] (x1) -- node[pos=0.4, above, sloped] {\scriptsize $w_1$} (sum);
+\draw[arrow] (x2) -- node[pos=0.4, above, sloped] {\scriptsize $w_2$} (sum);
+\draw[arrow] (x3) -- node[pos=0.4, below, sloped] {\scriptsize $w_3$} (sum);
+\draw[arrow] (sum) -- node[midway, above=6pt] {\scriptsize $z = \bm w^\top \bm x + b$} (phi);
+\draw[arrow] (phi) -- node[midway, above=6pt] {\scriptsize $y = \phi(z)$} (y);
+
+% Bias
+\draw[arrow] (1.8,-1.0) -- node[right, pos=0.2] {\scriptsize $b$} (sum);
+\end{tikzpicture}
+\caption{A single perceptron computes an affine combination of the inputs and then applies a nonlinear activation function.}
+\label{fig:single_perceptron}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.55\textwidth}
+\centering
+\begin{tikzpicture}[
+    x=0.9cm,y=0.9cm,
+    neuron/.style={circle, draw, minimum size=5mm, inner sep=0pt},
+    arrow/.style={-{Latex[length=1.5mm]}, thick}
+]
+% Layer spacing
+\def\xone{0}
+\def\xtwo{1.7}
+\def\xthree{3.4}
+\def\xfour{5.1}
+
+% Input layer
+\node[neuron] (i1) at (\xone,1.8) {};
+\node[neuron] (i2) at (\xone,0.6) {};
+\node[neuron] (i3) at (\xone,-0.6) {};
+\node[neuron] (i4) at (\xone,-1.8) {};
+
+% Hidden layer 1
+\node[neuron] (h11) at (\xtwo,2.4) {};
+\node[neuron] (h12) at (\xtwo,0.8) {};
+\node[neuron] (h13) at (\xtwo,-0.8) {};
+\node[neuron] (h14) at (\xtwo,-2.4) {};
+
+% Hidden layer 2
+\node[neuron] (h21) at (\xthree,1.6) {};
+\node[neuron] (h22) at (\xthree,0.0) {};
+\node[neuron] (h23) at (\xthree,-1.6) {};
+
+% Output layer
+\node[neuron] (o1) at (\xfour,0.8) {};
+\node[neuron] (o2) at (\xfour,-0.8) {};
+
+% Fully connected arrows
+\foreach \a in {i1,i2,i3,i4}
+    \foreach \b in {h11,h12,h13,h14}
+        \draw[arrow] (\a) -- (\b);
+
+\foreach \a in {h11,h12,h13,h14}
+    \foreach \b in {h21,h22,h23}
+        \draw[arrow] (\a) -- (\b);
+
+\foreach \a in {h21,h22,h23}
+    \foreach \b in {o1,o2}
+        \draw[arrow] (\a) -- (\b);
+
+% Labels
+\node at (\xone,-2.8) {\small input layer};
+\node at (\xtwo,-3.2) {\small hidden layer 1};
+\node at (\xthree,-2.8) {\small hidden layer 2};
+\node at (\xfour,-1.8) {\small output layer};
+
+\node at (\xone,2.6) {\small $\bm{x}$};
+\node at (\xfour,1.6) {\small $f_\theta(\bm{x})$};
+\end{tikzpicture}
+\caption{A feed-forward multilayer perceptron propagates information through successive hidden layers, thereby constructing a nonlinear map from input to output.}
+\label{fig:feedforward_mlp}
+\end{subfigure}
+
+\caption{Elementary building blocks of feed-forward neural networks. The left panel shows the structure of a single perceptron, while the right panel illustrates a multilayer perceptron obtained by composing many perceptrons into successive hidden layers.}
+\label{fig:perceptron_and_mlp}
+\end{figure}
+
+This choice should be understood in a pragmatic rather than purely algorithmic sense. The goal is not to introduce a separate layer of physical modeling based on machine learning, but to provide a flexible finite-dimensional representation for the two central objects of actor--critic reinforcement learning: the policy
+
 \begin{equation}
 \pi_{\theta}(a \mid s),
 \label{eq:nn_policy_general}
@@ -2145,7 +2274,7 @@ which estimates the expected discounted future reward associated with that state
 
 The use of feed-forward architectures is particularly natural in the present context because the control problem is formulated in discrete time and each decision step is based on a fixed-dimensional state representation. The network is therefore asked to learn a nonlinear map from a vector encoding the current status of the gate-construction process to either a distribution over the next control action or a scalar estimate of future performance. No recurrence is required at this level, since the relevant dynamical history is already encoded in the state variable itself. For this reason, fully connected feed-forward networks provide a sufficiently expressive and conceptually simple parameterization for both the actor and the critic.
 
-\subsubsection{Policy function}
+\paragraph{Policy function.}
 \label{subsubsec:policy_function}
 
 In continuous-action reinforcement learning, the policy is most naturally represented as a probability distribution over actions conditioned on the current state. A standard choice, and the one relevant for the present framework, is a Gaussian policy of the form
@@ -2164,7 +2293,7 @@ where \(\varphi\) is typically chosen so as to enforce finite action bounds. Thi
 
 The conceptual role of the policy network is therefore clear: it does not output a complete pulse sequence in one shot, but rather parameterizes a sequential control law that generates the control trajectory step by step. At each decision time, the network receives the current state \(s_t\) and produces the parameters of the distribution from which the next action is sampled. The resulting sequence of actions defines the full control protocol. In this sense, the policy network is the object through which reinforcement learning translates the abstract optimization objective into an adaptive rule for constructing pulse trajectories.
 
-\subsubsection{Value function}
+\paragraph{Value function.}
 \label{subsubsec:value_function}
 
 The second neural component is the value network, which represents the state-value function
