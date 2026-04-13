@@ -1,33 +1,54 @@
 \begin{tikzpicture}
     \begin{axis}[
-        width=0.9\linewidth,
-        height=6cm,
-        ymode=log,
+        width=5.8cm,
+        height=6.2cm,
+        boxplot/draw direction=y,
         ylabel={Best Eval Leakage},
+        xlabel={},
         xtick={1,2,3,4,5},
-        xticklabels={128-64-32, 128-64-32-32, 64-32-32, 64-64-64, 64-64-64-32},
-        x tick label style={rotate=15, anchor=east, font=\footnotesize},
+        xticklabels={64-32-32, 64-64-64, {64-64-64-32}, 128-64-32, {128-64-32-32}},
+        x tick label style={rotate=45, anchor=east, font=\scriptsize},
+        xmin=0.4, xmax=5.6,
         grid=major,
         grid style={dashed, gray!30},
-        boxplot/every median/.style={thick, draw=black},
-        boxplot/every box/.style={thick, solid, draw=teal!80!black, fill=teal!40!white},
-        boxplot/every whisker/.style={thick, solid, draw=teal!80!black},
-        boxplot/every mark/.style={mark=*, fill=teal!80!black, fill opacity=0.7, draw=none, scale=1.3}
+        yticklabel style={font=\footnotesize},
+        label style={font=\footnotesize},
+        boxplot/every median/.style={very thick, draw=black},
     ]
-        % 128-64-32 (rows 9,10,11)
-        \addplot [boxplot] table [y=best_eval_leakage, restrict expr to domain={\coordindex}{9:11}, col sep=comma] {data/nn_size_sweep_results/sweep_complete_metrics.csv};
-        
-        % 128-64-32-32 (rows 12,13,14)
-        \addplot [boxplot] table [y=best_eval_leakage, restrict expr to domain={\coordindex}{12:14}, col sep=comma] {data/nn_size_sweep_results/sweep_complete_metrics.csv};
-
-        % 64-32-32 (rows 0,1,2)
-        \addplot [boxplot] table [y=best_eval_leakage, restrict expr to domain={\coordindex}{0:2}, col sep=comma] {data/nn_size_sweep_results/sweep_complete_metrics.csv};
-
-        % 64-64-64 (rows 6,7,8)
-        \addplot [boxplot] table [y=best_eval_leakage, restrict expr to domain={\coordindex}{6:8}, col sep=comma] {data/nn_size_sweep_results/sweep_complete_metrics.csv};
-
-        % 64-64-64-32 (rows 3,4,5)
-        \addplot [boxplot] table [y=best_eval_leakage, restrict expr to domain={\coordindex}{3:5}, col sep=comma] {data/nn_size_sweep_results/sweep_complete_metrics.csv};
+        % 64-32-32
+        \addplot [boxplot prepared={
+            lower whisker=0.0003103257, lower quartile=0.0003413474,
+            median=0.0003723691,
+            upper quartile=0.0003952013, upper whisker=0.0004180335},
+            draw=teal!80!black, fill=teal!25!white, thick
+        ] coordinates {};
+        % 64-64-64
+        \addplot [boxplot prepared={
+            lower whisker=0.0003405043, lower quartile=0.0003633335,
+            median=0.0003861627,
+            upper quartile=0.0004365722, upper whisker=0.0004869818},
+            draw=teal!80!black, fill=teal!25!white, thick
+        ] coordinates {};
+        % 64-64-64-32
+        \addplot [boxplot prepared={
+            lower whisker=0.0003657915, lower quartile=0.0003773478,
+            median=0.0003889042,
+            upper quartile=0.0004425265, upper whisker=0.0004961488},
+            draw=teal!80!black, fill=teal!25!white, thick
+        ] coordinates {};
+        % 128-64-32
+        \addplot [boxplot prepared={
+            lower whisker=0.0003420670, lower quartile=0.0003694918,
+            median=0.0003969165,
+            upper quartile=0.0004617600, upper whisker=0.0005266036},
+            draw=teal!80!black, fill=teal!25!white, thick
+        ] coordinates {};
+        % 128-64-32-32
+        \addplot [boxplot prepared={
+            lower whisker=0.0002578333, lower quartile=0.0003014737,
+            median=0.0003451140,
+            upper quartile=0.0004046539, upper whisker=0.0004641937},
+            draw=teal!80!black, fill=teal!25!white, thick
+        ] coordinates {};
     \end{axis}
 \end{tikzpicture}
-

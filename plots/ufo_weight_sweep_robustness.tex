@@ -11,42 +11,102 @@
         grid=major,
         grid style={dashed, gray!30},
         tick label style={font=\footnotesize},
+        label style={font=\footnotesize},
         ylabel={Robustness Fidelity ($\overline{F}_{\sigma=1.0}$)},
         ymin=0.8, ymax=0.96,
-        xtick={1,2,3,4},
         boxplot/every median/.style={thick, draw=black},
-        boxplot/every box/.style={thick, solid, draw=blue!80!black, fill=blue!40!white},
-        boxplot/every whisker/.style={thick, solid, draw=blue!80!black},
-        boxplot/every mark/.style={mark=*, fill=blue!80!black, fill opacity=0.7, draw=none, scale=1.3}
     ]
 
     % Panel 1: cost_chi
     \nextgroupplot[
         xlabel={Weight $\chi$},
+        xtick={1,2,3},
         xticklabels={5, 10, 20},
     ]
-        \addplot[boxplot] table[y=robustness_sigma_1p0_average_fidelity, col sep=comma, restrict expr to domain={\thisrow{cost_chi}}{4:6}] {data/cost_function_sweep_results/sweep_complete_metrics.csv};
-        \addplot[boxplot] table[y=robustness_sigma_1p0_average_fidelity, col sep=comma, restrict expr to domain={\thisrow{cost_chi}}{9:11}] {data/cost_function_sweep_results/sweep_complete_metrics.csv};
-        \addplot[boxplot] table[y=robustness_sigma_1p0_average_fidelity, col sep=comma, restrict expr to domain={\thisrow{cost_chi}}{19:21}] {data/cost_function_sweep_results/sweep_complete_metrics.csv};
+        % chi=5
+        \addplot [boxplot prepared={
+            lower whisker=0.8141731073, lower quartile=0.8294537131,
+            median=0.9210505551,
+            upper quartile=0.9383497417, upper whisker=0.9444806380},
+            draw=blue!80!black, fill=blue!40!white, thick
+        ] coordinates {};
+        % chi=10
+        \addplot [boxplot prepared={
+            lower whisker=0.9130126436, lower quartile=0.9153460989,
+            median=0.9249846896,
+            upper quartile=0.9421951028, upper whisker=0.9453851384},
+            draw=blue!80!black, fill=blue!40!white, thick
+        ] coordinates {};
+        % chi=20
+        \addplot [boxplot prepared={
+            lower whisker=0.8966311331, lower quartile=0.9072902038,
+            median=0.9271697565,
+            upper quartile=0.9423666458, upper whisker=0.9456234454},
+            draw=blue!80!black, fill=blue!40!white, thick
+        ] coordinates {};
 
     % Panel 2: cost_mu
     \nextgroupplot[
         xlabel={Weight $\mu$},
+        xtick={1,2,3},
         xticklabels={0.1, 0.2, 0.4},
     ]
-        \addplot[boxplot] table[y=robustness_sigma_1p0_average_fidelity, col sep=comma, restrict expr to domain={\thisrow{cost_mu}}{0.09:0.11}] {data/cost_function_sweep_results/sweep_complete_metrics.csv};
-        \addplot[boxplot] table[y=robustness_sigma_1p0_average_fidelity, col sep=comma, restrict expr to domain={\thisrow{cost_mu}}{0.19:0.21}] {data/cost_function_sweep_results/sweep_complete_metrics.csv};
-        \addplot[boxplot] table[y=robustness_sigma_1p0_average_fidelity, col sep=comma, restrict expr to domain={\thisrow{cost_mu}}{0.39:0.41}] {data/cost_function_sweep_results/sweep_complete_metrics.csv};
+        % mu=0.1
+        \addplot [boxplot prepared={
+            lower whisker=0.8966311331, lower quartile=0.9072902038,
+            median=0.9249846896,
+            upper quartile=0.9383497417, upper whisker=0.9444806380},
+            draw=blue!80!black, fill=blue!40!white, thick
+        ] coordinates {};
+        % mu=0.2
+        \addplot [boxplot prepared={
+            lower whisker=0.9198584151, lower quartile=0.9218161922,
+            median=0.9271697565,
+            upper quartile=0.9421951028, upper whisker=0.9453851384},
+            draw=blue!80!black, fill=blue!40!white, thick
+        ] coordinates {};
+        % mu=0.4
+        \addplot [boxplot prepared={
+            lower whisker=0.8141731073, lower quartile=0.8294537131,
+            median=0.9145836529,
+            upper quartile=0.9423666458, upper whisker=0.9456234454},
+            draw=blue!80!black, fill=blue!40!white, thick
+        ] coordinates {};
 
     % Panel 3: cost_kappa
     \nextgroupplot[
         xlabel={Weight $\kappa$},
+        xtick={1,2,3,4},
         xticklabels={0.05, 0.1, 0.2, 0.4},
     ]
-        \addplot[boxplot] table[y=robustness_sigma_1p0_average_fidelity, col sep=comma, restrict expr to domain={\thisrow{cost_kappa}}{0.04:0.06}] {data/cost_function_sweep_results/sweep_complete_metrics.csv};
-        \addplot[boxplot] table[y=robustness_sigma_1p0_average_fidelity, col sep=comma, restrict expr to domain={\thisrow{cost_kappa}}{0.09:0.11}] {data/cost_function_sweep_results/sweep_complete_metrics.csv};
-        \addplot[boxplot] table[y=robustness_sigma_1p0_average_fidelity, col sep=comma, restrict expr to domain={\thisrow{cost_kappa}}{0.19:0.21}] {data/cost_function_sweep_results/sweep_complete_metrics.csv};
-        \addplot[boxplot] table[y=robustness_sigma_1p0_average_fidelity, col sep=comma, restrict expr to domain={\thisrow{cost_kappa}}{0.39:0.41}] {data/cost_function_sweep_results/sweep_complete_metrics.csv};
+        % kappa=0.05
+        \addplot [boxplot prepared={
+            lower whisker=0.8141731073, lower quartile=0.9130126436,
+            median=0.9253264265,
+            upper quartile=0.9420275702, upper whisker=0.9456234454},
+            draw=blue!80!black, fill=blue!40!white, thick
+        ] coordinates {};
+        % kappa=0.1
+        \addplot [boxplot prepared={
+            lower whisker=0.8239182031, lower quartile=0.9131639573,
+            median=0.9245841818,
+            upper quartile=0.9387145705, upper whisker=0.9456207063},
+            draw=blue!80!black, fill=blue!40!white, thick
+        ] coordinates {};
+        % kappa=0.2
+        \addplot [boxplot prepared={
+            lower whisker=0.8145907696, lower quartile=0.9134780784,
+            median=0.9244723711,
+            upper quartile=0.9421648023, upper whisker=0.9456146335},
+            draw=blue!80!black, fill=blue!40!white, thick
+        ] coordinates {};
+        % kappa=0.4
+        \addplot [boxplot prepared={
+            lower whisker=0.8196273805, lower quartile=0.9141260368,
+            median=0.9240799243,
+            upper quartile=0.9420226946, upper whisker=0.9456005922},
+            draw=blue!80!black, fill=blue!40!white, thick
+        ] coordinates {};
 
     \end{groupplot}
 \end{tikzpicture}

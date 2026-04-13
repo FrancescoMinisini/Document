@@ -1,0 +1,62 @@
+\begin{tikzpicture}
+    \begin{groupplot}[
+        group style={
+            group size=2 by 1,
+            horizontal sep=1.2cm,
+        },
+        width=6.5cm,
+        height=5.2cm,
+        xmode=log,
+        xlabel={Best Eval Leakage},
+        grid=major,
+        grid style={dashed, gray!30},
+        tick label style={font=\footnotesize},
+        label style={font=\footnotesize},
+        enlargelimits=0.08,
+    ]
+
+    % Left panel: Robustness
+    \nextgroupplot[
+        ylabel={Robustness ($\overline{F}_{\sigma=1.0}$)},
+        title={\footnotesize (a) Robustness ($\sigma=1$ MHz)},
+    ]
+        \addplot[only marks, mark=*, mark size=2.5pt, mark options={fill=green!60!black, draw=green!40!black}] 
+        table[x=best_eval_leakage, y=robustness_sigma_1p0_average_fidelity, restrict expr to domain={\coordindex}{0:2}, col sep=comma] {data/nn_size_sweep_results/sweep_complete_metrics.csv};
+        \addplot[only marks, mark=*, mark size=2.5pt, mark options={fill=red!70!white, draw=red!80!black}] 
+        table[x=best_eval_leakage, y=robustness_sigma_1p0_average_fidelity, restrict expr to domain={\coordindex}{6:8}, col sep=comma] {data/nn_size_sweep_results/sweep_complete_metrics.csv};
+        \addplot[only marks, mark=*, mark size=2.5pt, mark options={fill=purple!60!white, draw=purple!80!black}] 
+        table[x=best_eval_leakage, y=robustness_sigma_1p0_average_fidelity, restrict expr to domain={\coordindex}{3:5}, col sep=comma] {data/nn_size_sweep_results/sweep_complete_metrics.csv};
+        \addplot[only marks, mark=*, mark size=2.5pt, mark options={fill=blue!70!white, draw=blue!80!black}] 
+        table[x=best_eval_leakage, y=robustness_sigma_1p0_average_fidelity, restrict expr to domain={\coordindex}{9:11}, col sep=comma] {data/nn_size_sweep_results/sweep_complete_metrics.csv};
+        \addplot[only marks, mark=*, mark size=2.5pt, mark options={fill=orange!70!white, draw=orange!80!black}] 
+        table[x=best_eval_leakage, y=robustness_sigma_1p0_average_fidelity, restrict expr to domain={\coordindex}{12:14}, col sep=comma] {data/nn_size_sweep_results/sweep_complete_metrics.csv};
+
+    % Right panel: Nominal Fidelity
+    \nextgroupplot[
+        ylabel={Nominal Fidelity ($F_{\mathrm{nominal}}$)},
+        title={\footnotesize (b) Nominal Fidelity},
+    ]
+        \addplot[only marks, mark=*, mark size=2.5pt, mark options={fill=green!60!black, draw=green!40!black}] 
+        table[x=best_eval_leakage, y=best_eval_fidelity, restrict expr to domain={\coordindex}{0:2}, col sep=comma] {data/nn_size_sweep_results/sweep_complete_metrics.csv};
+        \addplot[only marks, mark=*, mark size=2.5pt, mark options={fill=red!70!white, draw=red!80!black}] 
+        table[x=best_eval_leakage, y=best_eval_fidelity, restrict expr to domain={\coordindex}{6:8}, col sep=comma] {data/nn_size_sweep_results/sweep_complete_metrics.csv};
+        \addplot[only marks, mark=*, mark size=2.5pt, mark options={fill=purple!60!white, draw=purple!80!black}] 
+        table[x=best_eval_leakage, y=best_eval_fidelity, restrict expr to domain={\coordindex}{3:5}, col sep=comma] {data/nn_size_sweep_results/sweep_complete_metrics.csv};
+        \addplot[only marks, mark=*, mark size=2.5pt, mark options={fill=blue!70!white, draw=blue!80!black}] 
+        table[x=best_eval_leakage, y=best_eval_fidelity, restrict expr to domain={\coordindex}{9:11}, col sep=comma] {data/nn_size_sweep_results/sweep_complete_metrics.csv};
+        \addplot[only marks, mark=*, mark size=2.5pt, mark options={fill=orange!70!white, draw=orange!80!black}] 
+        table[x=best_eval_leakage, y=best_eval_fidelity, restrict expr to domain={\coordindex}{12:14}, col sep=comma] {data/nn_size_sweep_results/sweep_complete_metrics.csv};
+
+    \end{groupplot}
+
+    % Shared legend below — with extra vertical space to avoid x-label overlap
+    \node[anchor=north, font=\scriptsize] at ([yshift=-1.1cm]$(group c1r1.south)!0.5!(group c2r1.south)$) {%
+        \begin{tabular}{ccccc}
+            \tikz\draw[fill=green!60!black,draw=green!40!black] (0,0) circle (2.5pt); 64-32-32 \quad &
+            \tikz\draw[fill=red!70!white,draw=red!80!black] (0,0) circle (2.5pt); 64-64-64 \quad &
+            \tikz\draw[fill=purple!60!white,draw=purple!80!black] (0,0) circle (2.5pt); 64-64-64-32 \quad &
+            \tikz\draw[fill=blue!70!white,draw=blue!80!black] (0,0) circle (2.5pt); 128-64-32 \quad &
+            \tikz\draw[fill=orange!70!white,draw=orange!80!black] (0,0) circle (2.5pt); 128-64-32-32
+        \end{tabular}
+    };
+\end{tikzpicture}
