@@ -43,7 +43,6 @@ i\left(
 \end{equation}
 and control quality is assessed through the same UFO cost structure introduced previously, namely a weighted combination of gate infidelity, leakage penalty, boundary penalty, and runtime. This uniform physical and numerical setup is essential for the interpretation of the experiments, because it ensures that all methods are compared within the same multilevel model, under the same control constraints, and against the same class of target gates.
 
-\textbf{TODO:} Aggiungere un diagramma parlante
 
 \subsection{Compared methods}
 Within this common framework, four optimization and comparison schemes are considered.
@@ -162,19 +161,21 @@ Taken together, the choices in Eqs.~\eqref{eq:default_simulation_discretization}
 \paragraph{Training hyperparameters}
 \label{subsec:training_hyperparameters}
 
-Once the simulation environment has been fixed, the next layer of parameter selection concerns the hyperparameters of the reinforcement-learning algorithm itself. These do not change the physical control problem, but they strongly affect optimization stability, exploration behavior, statistical efficiency, and wall-time cost. For this reason, they should be distinguished from the simulation-side choices discussed above, even though the two levels are obviously coupled in practice. 
-% The goal of the present subsection is therefore not to perform an exhaustive search over the full TRPO design space, but to identify a regime that is stable, reproducible, and sufficiently well aligned with the reference framework to support the experiments reported later in the chapter.
+\paragraph{Training hyperparameters}
+\label{subsec:training_hyperparameters}
 
-Within this optimizer-side configuration, the most relevant parameters are the trust-region radius (\(\delta_{\mathrm{KL}}\)), the initial exploration scale (\(\log \sigma_{0}\)), the batch size measured in episodes per policy update, the number of training iterations, and the terminal-cost threshold used for early stopping. These quantities affect different parts of the learning dynamics. The trust-region radius \(\delta_{\mathrm{KL}}\) controls how aggressively the policy is allowed to move in one TRPO update, while the initial exploration scale \(\log \sigma_{0}\) determines the width of the Gaussian exploration policy at the beginning of training. The batch size influences the statistical quality of the policy-gradient estimate, the iteration budget controls how long the optimizer is allowed to refine the policy, and the stopping threshold determines how demanding the convergence criterion should be.
+Once the simulation environment has been fixed, the next layer of parameter selection concerns the hyperparameters of the reinforcement-learning algorithm itself. These do not change the physical control problem, but they strongly affect optimization stability, exploration behavior, statistical efficiency, and wall-time cost. For this reason, they should be distinguished from the simulation-side choices discussed above, even though the two levels are obviously coupled in practice.
 
-Among these parameters, the clearest trade-off is the one between exploration and stability. If \(\log \sigma_{0}\) is chosen too large, early training becomes excessively noisy: the policy explores too broadly, the squashed actions are frequently pushed toward saturation, and the resulting control trajectories become unstable and difficult to refine. If it is chosen too small, however, the controller explores only weakly and may fail to discover useful pulse patterns within a reasonable number of iterations. A similar balance appears in the trust-region radius \(\delta_{\mathrm{KL}}\): large values permit faster progress in principle, but also increase the risk of unstable policy jumps, whereas very small values make learning conservative and slow. In the present study, these considerations lead to the nominal optimizer-side choices
+Within this optimizer-side configuration, the most relevant parameters are the trust-region radius (\(\delta_{\mathrm{KL}}\)), the discount factor (\(\gamma_{\mathrm{RL}}\)), the GAE parameter (\(\lambda\)), the initial exploration scale (\(\log \sigma_0\)), the batch size measured in episodes per policy update, the number of training iterations, and the terminal-cost threshold used for early stopping. Their roles are standard in the TRPO literature. In particular, the KL bound controls how aggressively the policy is allowed to move at each update, while \(\gamma_{\mathrm{RL}}\) and \(\lambda\) regulate temporal credit assignment and the bias--variance trade-off in the advantage estimator; in continuous-control settings, these choices are closely tied to the stability of policy-gradient updates with neural-network function approximation \cite{Schulman2015,Schulman2016GAE}. For broader background on discounted returns and temporal-difference methods, see also \cite{SuttonBarto2018}.
+
+Among these parameters, the clearest trade-off is the one between exploration and stability. If \(\log \sigma_{0}\) is chosen too large, early training becomes excessively noisy: the policy explores too broadly, the squashed actions are frequently pushed toward saturation, and the resulting control trajectories become unstable and difficult to refine. If it is chosen too small, however, the controller explores too weakly and may fail to discover useful pulse patterns within a reasonable number of iterations. A similar balance appears in the trust-region radius \(\delta_{\mathrm{KL}}\): larger values permit faster progress in principle, but also increase the risk of unstable policy jumps, whereas very small values make learning overly conservative. In the present study, these considerations lead to the nominal optimizer-side choices
 \begin{equation}
 \log \sigma_0 = -1.0,
 \qquad
 \delta_{\mathrm{KL}} = 0.01,
 \label{eq:default_training_exploration_trustregion}
 \end{equation}
-together with the standard TRPO settings
+together with the standard TRPO-side settings
 \begin{equation}
 \gamma_{\mathrm{RL}}=0.99,
 \qquad
@@ -185,19 +186,14 @@ together with the standard TRPO settings
 \texttt{damping}=0.1.
 \label{eq:default_training_auxiliary_parameters}
 \end{equation}
-These values are not presented as globally optimal, but as a stable operating regime that proved adequate for the representative target and remained close to standard TRPO practice.
-
-\textbf{TODO:} Controllare eventuali referenze per questi valori (oltre a sutton)
-\textbf{TODO:} Serve piu chiarezza su cosa sono? Magari da riprendere meglio in background e implementation
+These values should not be interpreted as theoretically unique or universally optimal. Rather, they define an empirically stable operating regime, consistent with standard TRPO/GAE practice and with the reinforcement-learning formulation adopted in the original UFO framework \cite{Schulman2015,Schulman2016GAE,Niu2019}.
 
 A further methodological compromise concerns the relation between stopping threshold, batch size, and total iteration budget. A loose termination criterion reduces training time, but risks accepting controls that are only superficially satisfactory. A stricter threshold is scientifically preferable, since it forces the optimizer to search for genuinely low-cost solutions, but it is also harder to satisfy reliably within a finite computational budget. In the present implementation, the default early-stopping threshold is set to
 \begin{equation}
 C_{\mathrm{term}}=0.2,
 \label{eq:default_training_termination_cost}
 \end{equation}
-which is intentionally demanding and therefore avoids premature convergence toward mediocre solutions. 
-While on more extensive sweeps, that relied on a smaller number of iterations, as those one described in sections \ref{subsec:nn_size_sweep} and \ref{subsec:ufo_weight_sweep}, the less strict value of \(0.4\) was used. 
-On the data-collection side, the reference paper performs policy updates using \(20000\) episodes per batch \cite{Niu2019}. This value is retained for the main paper-matched runs, while lighter exploratory sweeps may use \(10000\) episodes per batch when computational cost must be reduced. In the same spirit, the full comparison runs are allowed to continue for up to \(100\) policy iterations, whereas shorter exploratory studies may use substantially smaller iteration budgets.
+which is intentionally demanding and therefore avoids premature convergence toward mediocre solutions. While more exploratory sweeps, such as those reported in Sections~\ref{subsec:nn_size_sweep} and \ref{subsec:ufo_weight_sweep}, were conducted with the looser threshold \(C_{\mathrm{term}}=0.4\), the main comparison runs retained the stricter value. Likewise, the larger-batch setting used in the main experiments was chosen to reduce gradient noise and improve the stability of on-policy updates, while lighter preliminary sweeps employed smaller batches for computational convenience.
 
 The resulting default optimizer-side configuration can therefore be summarized as
 \begin{equation}
@@ -206,9 +202,11 @@ The resulting default optimizer-side configuration can therefore be summarized a
 C_{\mathrm{term}}=0.20,
 \label{eq:default_training_configuration_summary_revised}
 \end{equation}
-with \(\gamma_{\mathrm{RL}}=0.99\), \(\lambda=0.97\), \(10\) conjugate-gradient iterations, damping \(0.1\), and batch sizes of \(20000\) episodes for the main runs or \(10000\) for lighter preliminary sweeps. This configuration is not claimed to be uniquely optimal, but it provides a coherent and transparent training regime under which later comparisons can be interpreted without ambiguity.
+with \(\gamma_{\mathrm{RL}}=0.99\), \(\lambda=0.97\), \(10\) conjugate-gradient iterations, damping \(0.1\), and the batch-size choices specified above. This configuration is not claimed to be uniquely optimal, but it provides a coherent and transparent training regime under which later comparisons can be interpreted without ambiguity.
 
-% It is worth stressing that the present subsection concerns only the optimizer-side hyperparameters of the TRPO pipeline. The architecture of the policy and value networks is held fixed here, so that the effect of training settings is not confounded with changes in representational capacity. Likewise, the UFO coefficients are not tuned in this subsection, because they belong to the physical scalarization of the control problem rather than to the optimizer itself. These two issues are therefore treated separately in the following subsections.
+
+% \textbf{TODO:} Controllare eventuali referenze per questi valori (oltre a sutton)
+% \textbf{TODO:} Serve piu chiarezza su cosa sono? Magari da riprendere meglio in background e implementation
 
 \subsection{Neural-network size sweep for policy and value functions}
 \label{subsec:nn_size_sweep}
@@ -263,13 +261,6 @@ Architecture & $\overline{C}_{\mathrm{eval}}$ & $\overline{F}_{\mathrm{eval}}$ &
 This updated picture suggests a more nuanced conclusion than the preliminary one. The architecture \(64\text{-}64\text{-}64\) remains the best choice if the objective is to optimize the aggregate reduced-budget performance as aggressively as possible. Nevertheless, the gap with \(64\text{-}32\text{-}32\) is small enough that the latter should now be regarded as a genuinely competitive alternative rather than as a clearly inferior baseline. This point matters methodologically, because \(64\text{-}32\text{-}32\) is the exact architecture reported in the original paper \cite{Niu2019}; retaining it in later experiments is therefore still fully defensible when faithfulness to the reference framework is prioritized over marginal gains in the reduced-budget sweep.
 
 The deeper alternatives do not improve this picture. The architecture \(64\text{-}64\text{-}64\text{-}32\) performs worse than both leading candidates in all principal aggregated metrics, with a higher mean evaluation cost, a lower mean fidelity, and a visibly weaker robustness profile. The architecture \(128\text{-}64\text{-}32\) remains close in mean cost, but does not offer a compensating advantage in fidelity, leakage, or robustness. The deepest tested model, \(128\text{-}64\text{-}32\text{-}32\), is particularly instructive: it achieves the \emph{lowest mean leakage} of the sweep, but also the \emph{worst} mean evaluation cost, the lowest mean robustness, and the weakest mean nominal fidelity. This indicates once again that minimizing leakage in isolation is not an adequate architecture-selection principle. A larger or deeper network may learn a more conservative control strategy with somewhat cleaner multilevel confinement, yet still fail to provide the best overall balance among the terms entering the UFO objective.
-
-This interpretation is reinforced by the qualitative structure of the plots. The leakage boxplot is useful because it shows that the architecture with the lowest central leakage tendency is not the one with the best overall control performance. The robustness boxplot shows that \(64\text{-}64\text{-}64\) has the strongest median robustness, but also that \(64\text{-}32\text{-}32\) remains within the same favorable performance region. Finally, the Pareto-style scatter plot of leakage versus robustness provides the clearest visual summary: the architectures do not lie on a simple monotonic frontier where lower leakage automatically implies higher robustness. Instead, the best candidates occupy a compact compromise region in which both \(64\text{-}64\text{-}64\) and \(64\text{-}32\text{-}32\) remain close to the favorable leakage--robustness boundary, while the deeper and wider variants drift away from it in different directions.
-
-A further methodological point should be emphasized. Because the sweep was carried out under a reduced training budget, namely \(20\) policy iterations and \(5000\) episodes per batch, the resulting ranking should be interpreted as a comparison of \emph{practical trainability} under limited optimization time rather than as a proof of asymptotic superiority under full convergence. This distinction matters. A larger architecture may in principle catch up under a much longer training budget, but if it is consistently slower, noisier, or less reliable in the practical regime relevant to the rest of the thesis, then it is still a less attractive default choice. For the purposes of the present empirical chapter, the relevant question is therefore not which architecture might eventually win under unlimited compute, but which one provides the best and most stable control quality under the realistic budget used for the experiments.
-
-On the basis of this completed sweep, two conclusions follow. First, architecture choice is not neutral: moderate changes in width and depth do produce measurable differences in the final trade-off among fidelity, leakage, robustness, and runtime. Second, this dependence is not monotonic: increasing size does not systematically improve the learned controller, and in fact the deepest tested model performs worst in the aggregated objective despite achieving the lowest mean leakage. In practical terms, \(64\text{-}64\text{-}64\) can be regarded as the strongest architecture in the present reduced-budget implementation, whereas \(64\text{-}32\text{-}32\) remains the closest competitor and the most natural paper-faithful choice for later experiments. This is an important refinement of the preliminary analysis, because it shows that the main empirical trends reported later in the chapter are unlikely to be artifacts of an especially poor actor--critic layout, while also clarifying that the original paper architecture remains well supported by the completed sweep.
-
 \begin{figure}[t]
 \centering
 \begin{subfigure}{0.40\textwidth}
@@ -300,11 +291,18 @@ On the basis of this completed sweep, two conclusions follow. First, architectur
 \label{fig:architecture_sweep_pareto}
 \end{figure}
 
+This interpretation is reinforced by the qualitative structure of the plots. The leakage boxplot is useful because it shows that the architecture with the lowest central leakage tendency is not the one with the best overall control performance. The robustness boxplot shows that \(64\text{-}64\text{-}64\) has the strongest median robustness, but also that \(64\text{-}32\text{-}32\) remains within the same favorable performance region. Finally, the Pareto-style scatter plot of leakage versus robustness provides the clearest visual summary: the architectures do not lie on a simple monotonic frontier where lower leakage automatically implies higher robustness. Instead, the best candidates occupy a compact compromise region in which both \(64\text{-}64\text{-}64\) and \(64\text{-}32\text{-}32\) remain close to the favorable leakage--robustness boundary, while the deeper and wider variants drift away from it in different directions.
+
+A further methodological point should be emphasized. Because the sweep was carried out under a reduced training budget, namely \(20\) policy iterations and \(5000\) episodes per batch, the resulting ranking should be interpreted as a comparison of \emph{practical trainability} under limited optimization time rather than as a proof of asymptotic superiority under full convergence. This distinction matters. A larger architecture may in principle catch up under a much longer training budget, but if it is consistently slower, noisier, or less reliable in the practical regime relevant to the rest of the thesis, then it is still a less attractive default choice. For the purposes of the present empirical chapter, the relevant question is therefore not which architecture might eventually win under unlimited compute, but which one provides the best and most stable control quality under the realistic budget used for the experiments.
+
+On the basis of this completed sweep, two conclusions follow. First, architecture choice is not neutral: moderate changes in width and depth do produce measurable differences in the final trade-off among fidelity, leakage, robustness, and runtime. Second, this dependence is not monotonic: increasing size does not systematically improve the learned controller, and in fact the deepest tested model performs worst in the aggregated objective despite achieving the lowest mean leakage. In practical terms, \(64\text{-}64\text{-}64\) can be regarded as the strongest architecture in the present reduced-budget implementation, whereas \(64\text{-}32\text{-}32\) remains the closest competitor and the most natural paper-faithful choice for later experiments. This is an important refinement of the preliminary analysis, because it shows that the main empirical trends reported later in the chapter are unlikely to be artifacts of an especially poor actor--critic layout, while also clarifying that the original paper architecture remains well supported by the completed sweep.
+
+
 This interpretation is reinforced by the qualitative structure of the trade-off plots. The leakage boxplot is useful because it shows that the architecture with the lowest leakage is not the one with the best overall control quality. The robustness boxplot shows that the \(64\text{-}64\text{-}64\) architecture remains one of the strongest candidates not only in terms of average robustness, but also in terms of seed-level stability. At the same time, the \(64\text{-}32\text{-}32\) architecture remains in a very similar favorable region, confirming that the paper architecture is still highly competitive in the present implementation. Finally, the Pareto-style scatter plot of leakage versus robustness provides perhaps the clearest visual summary: the architectures do not lie on a simple monotonic frontier where lower leakage automatically implies higher robustness. Instead, the sweep suggests that the most effective architectures are those occupying the most favorable compromise region of the leakage--robustness plane, rather than those optimizing either axis independently.
 
 A further methodological point should be emphasized. Because the sweep was carried out under a reduced training budget, namely \(20\) policy iterations and \(5000\) episodes per batch, the resulting ranking should be interpreted as a comparison of \emph{practical trainability} under limited optimization time rather than as a proof of asymptotic superiority under full convergence. This distinction matters. A larger architecture may in principle catch up under a much longer training budget, but if it is consistently slower, noisier, or less reliable in the practical regime relevant to the rest of the thesis, then it is still a less attractive default choice. For the purposes of the present empirical chapter, the relevant question is therefore not which architecture might eventually win under unlimited compute, but which one provides the best and most stable control quality under the realistic budget used for the experiments.
 
-\textbf{TODO:} Aggiungere il layout principale mancante (64,32,32) ai risultati, esperimento gia fatto, solo da inserire e sistemare i grafici + revisionare conclusione e discussione e tabella.
+% \textbf{TODO:} Aggiungere il layout principale mancante (64,32,32) ai risultati, esperimento gia fatto, solo da inserire e sistemare i grafici + revisionare conclusione e discussione e tabella.
 
 % On the basis of this restricted sweep, the architecture
 % \begin{equation}
@@ -317,6 +315,59 @@ A further methodological point should be emphasized. Because the sweep was carri
 
 
 \subsection{Sensitivity study of the UFO cost-function weights}
+
+The choice of the UFO coefficients deserves a separate study because, unlike ordinary optimizer hyperparameters, these quantities are part of the physical definition of the control problem itself. As mentioned in \ref{subsec:ufo_cost_function}, the total objective is written as
+\begin{equation}
+    C(\chi,\beta,\mu,\kappa)
+    =
+\chi\bigl[1-F(U(T))\bigr]
++
+\beta L_{\mathrm{tot}}
++
+\mu P_{\mathrm{bdry}}
++
+\kappa T,
+\label{eq:ufo_cost_recalled_weight_sweep}
+\end{equation}
+where \(\chi\) controls the weight of gate infidelity, \(\beta\) penalizes accumulated leakage, \(\mu\) enforces boundary regularity, and \(\kappa\) penalizes runtime \cite{Niu2019}. The reference paper reports that these coefficients were selected by grid search and then fixed uniformly across the target gates considered, with the final choice
+\begin{equation}
+    \chi=\beta=10,
+    \qquad
+    \mu=0.2,
+    \qquad
+    \kappa=0.1.
+    \label{eq:paper_ufo_weights_recalled}
+\end{equation}
+For the purposes of the present thesis, this makes the weight study methodologically important in two complementary senses. On the one hand, it allows one to test whether the balance adopted in the paper is also reasonable in the present independent implementation. On the other hand, it clarifies which aspects of the observed performance are due to the optimizer and which are instead induced directly by the physical scalarization of the control objective.
+
+
+The sweep was performed under the same parameter choices described in \ref{subsec:simulation_and_training_parameters_choice}, and the paper-matched network architecture \(64\text{-}32\text{-}32\). Two random seeds were used for each configuration. The explored coefficient ranges were
+\begin{equation}
+    \chi \in \{5,10,20\},
+    \qquad
+\beta = 10,
+\qquad
+\mu \in \{0.1,0.2,0.4\},
+\qquad
+\kappa \in \{0.05,0.1,0.2,0.4\},
+\label{eq:ufo_weight_sweep_ranges}
+\end{equation}
+for a total of \(3\times 1\times 3\times 4 = 36\) weight configurations and \(72\) runs once the two seeds are included.
+
+The choice to keep \(\beta\) fixed deserves an explicit comment. Since the goal of the present experiment is to understand how the optimizer reacts to changing the balance between fidelity, boundary regularity, and runtime \emph{relative} to leakage suppression, it is natural to treat \(\beta\) as a reference scale and vary the other coefficients around it. In this sense, the sweep should be interpreted primarily through the ratios \(\chi/\beta\), \(\mu/\beta\), and \(\kappa/\beta\), rather than as a completely unconstrained four-dimensional search. This restriction also keeps the interpretation manageable: if all four coefficients were varied simultaneously, it would become much harder to isolate which part of the scalarization is actually responsible for a given change in behavior and it would increase further the computational cost of the sweep.
+
+A second methodological point is even more important: the \emph{best evaluation cost} is not an informative global selection criterion across this sweep. Indeed, different values of \(\chi\), \(\mu\), and \(\kappa\) define different scalarizations of the same physical control problem, so the numerical value of \(C(\chi,\beta,\mu,\kappa)\) is not directly comparable across configurations. This is not just a formal issue. In the present experiment, all runs terminate at the same evaluation time of \(180\,\mathrm{ns}\), so increasing \(\kappa\) contributes mainly a nearly rigid additive shift to the total cost without necessarily improving the learned control in any physically meaningful sense. For this reason, the search-script primary metric is retained only as an internal bookkeeping quantity, whereas the physically relevant comparison is based instead on nominal fidelity, best evaluation leakage, and robustness average fidelity at \(\sigma=1\,\mathrm{MHz}\).
+
+Under this interpretation, the first clear result concerns the fidelity weight \(\chi\). The average fidelity boxplot in Fig.~\ref{fig:ufo_weight_sweep_robustness} shows that \(\chi=5\) leads to a visibly broader and lower-performing distribution, with several runs collapsing into a poor-average-fidelity regime around \(0.81\)--\(0.83\). By contrast, \(\chi=10\) and \(\chi=20\) both yield substantially tighter and higher average-fidelity distributions, concentrated around \(0.92\)--\(0.95\). This indicates that the low-fidelity-penalty regime underweights the logical-accuracy term too strongly relative to the other penalties. 
+% In other words, if \(\chi\) is chosen too small compared with \(\beta\), the optimizer is allowed to settle into controls that may be acceptable in terms of leakage or boundary behavior, yet remain clearly inferior in actual gate quality. Increasing \(\chi\) to the paper scale already removes most of this failure mode, while a further increase to \(\chi=20\) produces only a marginal additional gain.
+
+The behavior of the boundary weight \(\mu\) is more subtle and, in some sense, more interesting. The sweep reveals a clear non-monotonic pattern. The intermediate value
+\begin{equation}
+    \mu = 0.2
+    \label{eq:mu_intermediate_best}
+\end{equation}
+produces the most favorable median trade-off, with high average fidelity and good nominal fidelity. Reducing the penalty to \(\mu=0.1\) remains viable, but leads on average to slightly larger leakage and a somewhat less favorable average fidelity profile. Increasing it to \(\mu=0.4\), however, makes the distribution strongly bimodal: for some values of \(\chi\) it yields some of the best runs of the entire sweep, while for others it produces a catastrophic degradation in average fidelity. This is clearly visible in the average fidelity boxplot, where \(\mu=0.4\) generates the widest spread and the strongest lower-tail failures. The physical interpretation is that boundary regularization is beneficial only up to a point. A moderate boundary penalty encourages smoother pulse endpoints, but an overly strong one can overconstrain the optimizer and distort the balance with the fidelity term, thereby harming the overall control quality rather than improving it.
+
 \label{subsec:ufo_weight_sweep}
 \begin{figure}[t]
 \centering
@@ -354,57 +405,6 @@ A further methodological point should be emphasized. Because the sweep was carri
 \caption{Synthesis of the multidimensional control trade-offs under systematic UFO-weight variations. The scatter correlations map (a) average fidelity against evaluation leakage, and (b) nominal deterministic fidelity against evaluation leakage. The colormap indicates the primary fidelity weight multiplier $\chi$. Crucially, the target paper configuration $(\chi,\beta,\mu,\kappa)=(10,10,0.2,0.1)$ occupies an optimal Pareto boundary positioning, yielding structural robustness validity without heavily sacrificing individual metrics.}
 \label{fig:ufo_weight_sweep_pareto}
 \end{figure}
-
-The choice of the UFO coefficients deserves a separate study because, unlike ordinary optimizer hyperparameters, these quantities are part of the physical definition of the control problem itself. As mentioned in \ref{subsec:ufo_cost_function}, the total objective is written as
-\begin{equation}
-C(\chi,\beta,\mu,\kappa)
-=
-\chi\bigl[1-F(U(T))\bigr]
-+
-\beta L_{\mathrm{tot}}
-+
-\mu P_{\mathrm{bdry}}
-+
-\kappa T,
-\label{eq:ufo_cost_recalled_weight_sweep}
-\end{equation}
-where \(\chi\) controls the weight of gate infidelity, \(\beta\) penalizes accumulated leakage, \(\mu\) enforces boundary regularity, and \(\kappa\) penalizes runtime \cite{Niu2019}. The reference paper reports that these coefficients were selected by grid search and then fixed uniformly across the target gates considered, with the final choice
-\begin{equation}
-\chi=\beta=10,
-\qquad
-\mu=0.2,
-\qquad
-\kappa=0.1.
-\label{eq:paper_ufo_weights_recalled}
-\end{equation}
-For the purposes of the present thesis, this makes the weight study methodologically important in two complementary senses. On the one hand, it allows one to test whether the balance adopted in the paper is also reasonable in the present independent implementation. On the other hand, it clarifies which aspects of the observed performance are due to the optimizer and which are instead induced directly by the physical scalarization of the control objective.
-
-The sweep was performed under the same parameter choices described in \ref{subsec:simulation_and_training_parameters_choice}, and the paper-matched network architecture \(64\text{-}32\text{-}32\). Two random seeds were used for each configuration. The explored coefficient ranges were
-\begin{equation}
-\chi \in \{5,10,20\},
-\qquad
-\beta = 10,
-\qquad
-\mu \in \{0.1,0.2,0.4\},
-\qquad
-\kappa \in \{0.05,0.1,0.2,0.4\},
-\label{eq:ufo_weight_sweep_ranges}
-\end{equation}
-for a total of \(3\times 1\times 3\times 4 = 36\) weight configurations and \(72\) runs once the two seeds are included.
-
-The choice to keep \(\beta\) fixed deserves an explicit comment. Since the goal of the present experiment is to understand how the optimizer reacts to changing the balance between fidelity, boundary regularity, and runtime \emph{relative} to leakage suppression, it is natural to treat \(\beta\) as a reference scale and vary the other coefficients around it. In this sense, the sweep should be interpreted primarily through the ratios \(\chi/\beta\), \(\mu/\beta\), and \(\kappa/\beta\), rather than as a completely unconstrained four-dimensional search. This restriction also keeps the interpretation manageable: if all four coefficients were varied simultaneously, it would become much harder to isolate which part of the scalarization is actually responsible for a given change in behavior and it would increase further the computational cost of the sweep.
-
-A second methodological point is even more important: the \emph{best evaluation cost} is not an informative global selection criterion across this sweep. Indeed, different values of \(\chi\), \(\mu\), and \(\kappa\) define different scalarizations of the same physical control problem, so the numerical value of \(C(\chi,\beta,\mu,\kappa)\) is not directly comparable across configurations. This is not just a formal issue. In the present experiment, all runs terminate at the same evaluation time of \(180\,\mathrm{ns}\), so increasing \(\kappa\) contributes mainly a nearly rigid additive shift to the total cost without necessarily improving the learned control in any physically meaningful sense. For this reason, the search-script primary metric is retained only as an internal bookkeeping quantity, whereas the physically relevant comparison is based instead on nominal fidelity, best evaluation leakage, and robustness average fidelity at \(\sigma=1\,\mathrm{MHz}\).
-
-Under this interpretation, the first clear result concerns the fidelity weight \(\chi\). The average fidelity boxplot in Fig.~\ref{fig:ufo_weight_sweep_robustness} shows that \(\chi=5\) leads to a visibly broader and lower-performing distribution, with several runs collapsing into a poor-average-fidelity regime around \(0.81\)--\(0.83\). By contrast, \(\chi=10\) and \(\chi=20\) both yield substantially tighter and higher average-fidelity distributions, concentrated around \(0.92\)--\(0.95\). This indicates that the low-fidelity-penalty regime underweights the logical-accuracy term too strongly relative to the other penalties. 
-% In other words, if \(\chi\) is chosen too small compared with \(\beta\), the optimizer is allowed to settle into controls that may be acceptable in terms of leakage or boundary behavior, yet remain clearly inferior in actual gate quality. Increasing \(\chi\) to the paper scale already removes most of this failure mode, while a further increase to \(\chi=20\) produces only a marginal additional gain.
-
-The behavior of the boundary weight \(\mu\) is more subtle and, in some sense, more interesting. The sweep reveals a clear non-monotonic pattern. The intermediate value
-\begin{equation}
-\mu = 0.2
-\label{eq:mu_intermediate_best}
-\end{equation}
-produces the most favorable median trade-off, with high average fidelity and good nominal fidelity. Reducing the penalty to \(\mu=0.1\) remains viable, but leads on average to slightly larger leakage and a somewhat less favorable average fidelity profile. Increasing it to \(\mu=0.4\), however, makes the distribution strongly bimodal: for some values of \(\chi\) it yields some of the best runs of the entire sweep, while for others it produces a catastrophic degradation in average fidelity. This is clearly visible in the average fidelity boxplot, where \(\mu=0.4\) generates the widest spread and the strongest lower-tail failures. The physical interpretation is that boundary regularization is beneficial only up to a point. A moderate boundary penalty encourages smoother pulse endpoints, but an overly strong one can overconstrain the optimizer and distort the balance with the fidelity term, thereby harming the overall control quality rather than improving it.
 
 This interpretation is reinforced when leakage is examined separately. Figure~\ref{fig:ufo_weight_sweep_leakage} shows that larger \(\mu\) tends, on average, to reduce the leakage proxy. In fact, the lowest-leakage region of the sweep is often associated with \(\mu=0.4\). However, this does \emph{not} translate automatically into the best robust controller. The reason is precisely that leakage is only one component of the total physical objective. In several runs, the stronger boundary penalty helps suppress leakage but simultaneously worsens the broader fidelity--robustness trade-off. 
 This is therefore an example of the fact that minimizing one term of the cost more aggressively does not guarantee a better overall control solution.
@@ -459,14 +459,14 @@ with \(\gamma_{\mathrm{RL}}=0.99\), \(\lambda=0.97\), damping \(0.1\), and \(10\
 in direct continuity with the reference framework \cite{Niu2019}.
 
 
-\textbf{TODO:} Da menzionalre il nn sizes choice e motivo
+% \textbf{TODO:} Da menzionalre il nn sizes choice e motivo
 
-% For the actor--critic representation, the architecture sweep suggests that network choice is not neutral, but also that improvements are not monotonic with increasing width or depth. Since the restricted sweep identified
-% \begin{equation}
-% (64,64,64)
-% \label{eq:final_hidden_sizes_choice}
-% \end{equation}
-% as the most favorable architecture among the tested alternatives, this layout is adopted as the default thesis-side configuration for the subsequent experiments.
+For the actor--critic representation, both the policy and value functions are fixed to the hidden-layer architecture
+\begin{equation}
+(64,32,32).
+\label{eq:final_hidden_sizes_choice}
+\end{equation}
+This choice deserves a brief clarification. In the reduced-budget architecture sweep discussed in subsection~\ref{subsec:nn_size_sweep}, the layout \(64\text{-}64\text{-}64\) achieved the best mean aggregate performance, in particular in terms of evaluation cost and average robustness at \(\sigma=1\,\mathrm{MHz}\). However, the gap with \(64\text{-}32\text{-}32\) was found to be very small, while the latter remained highly competitive and in fact displayed slightly better nominal fidelity and lower leakage on average. Since the completed sweep therefore does not indicate a decisive superiority of the wider architecture, adopting \(64\text{-}32\text{-}32\) is methodologically preferable for the main experiments: it preserves close-to-best empirical performance while maintaining the cleanest possible continuity with the original UFO framework, in which the same hidden-layer configuration is used for both the policy and value networks \cite{Niu2019}. For this reason, the paper-matched architecture in Eq.~\eqref{eq:final_hidden_sizes_choice} is retained as the default network configuration throughout the remainder of the chapter.
 
 Finally, for the UFO scalarization, the sensitivity study shows that the absolute value of the total cost is not directly comparable across different weight configurations, and that the most meaningful comparison must instead be based on fidelity, leakage, and robustness. Under this interpretation, the reference-paper choice
 \begin{equation}
@@ -478,7 +478,7 @@ remains very close to the best trade-off region observed in the present sweep. F
 Unless explicitly stated otherwise, all later experiments therefore use the combined reference configuration defined by
 Eqs.~\eqref{eq:final_training_setup}--\eqref{eq:final_ufo_weights_choice}. This choice ensures that the empirical comparisons reported in the following sections are not affected by experiment-specific retuning, and that the results remain directly interpretable within the methodological logic established by the reference paper.
 
-\textbf{TODO:} Da considerare se farlo tabella
+% \textbf{TODO:} Da considerare se farlo tabella
 
 \section{Single-target control optimization}
 \label{sec:single_target_optimization}
