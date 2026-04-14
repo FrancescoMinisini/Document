@@ -1189,25 +1189,84 @@ From the control-theoretic viewpoint, the family \(N(\alpha,\alpha,\gamma)\) is 
 
 For the purposes of the thesis, the key role of Eq.~\eqref{eq:target_gate_family} is therefore twofold. First, it defines the class of gates on which the UFO framework is trained and tested. Second, it provides a physically meaningful bridge between the mathematical control problem and applications in quantum simulation and quantum chemistry. The next subsection will build on this by explaining how the paper benchmarks its analog-control solutions against standard circuit-based baselines and which performance metrics are used in the comparison.
 
-% % Optional short summary equation
-% It is useful to summarize the logic of this choice as follows:
-% \begin{equation}
-% \text{structured target family}
-% \quad+\quad
-% \text{hardware-native interaction relevance} 
-% \quad+\quad 
-% \text{algorithmic importance in simulation}
-% \quad\Longrightarrow\quad
-% \text{meaningful benchmark for analog quantum control}.
-% \label{eq:target_family_logic}
-% \end{equation}
 
+\subsection{Implementation of the direct gradient-based baseline}
+\label{subsec:implementation_adam_baseline}
 
-% Requires in the preamble:
-% \usepackage{amsmath,amssymb,amsfonts,bm}
+Before discussing the comparison strategy in more detail, it is useful to state explicitly how the main non-RL baseline used in this thesis is implemented. This point deserves a dedicated subsection because the baseline is not intended as a minimal or purely heuristic comparator. On the contrary, it is designed as a strong direct pulse-optimization reference, built on the same multilevel physical model and on the same physically structured objective used throughout the rest of the empirical study. In methodological terms, the role of this baseline is to test whether a classical gradient-based optimization of the control trajectory itself is already sufficient to produce high-quality solutions, before introducing the additional machinery of policy-gradient reinforcement learning.
+
+Conceptually, the procedure belongs to the family of direct gradient-based quantum optimal-control methods discussed in subsection~\ref{subsec:classical_qoc_methods}. In particular, it is close in spirit to GRAPE, in the sense that the control field is discretized in time and the optimization is performed directly over the pulse parameters of a fixed target gate \cite{Khaneja2005,Koch2022}. At the same time, the present implementation is not meant as a strict textbook reproduction of the canonical GRAPE algorithm. Rather, it should be understood as a GRAPE-style direct pulse-search baseline in which the discretized controls are optimized numerically with Adam under the same multilevel Hamiltonian and the same UFO-inspired cost structure used elsewhere in the thesis. This distinction is worth stating explicitly, because it clarifies both the methodological continuity with classical optimal control and the specific implementation choices adopted here.
+
+For a fixed target gate \(U_{\mathrm{target}} = N(\alpha,\alpha,\gamma)\) and a fixed candidate gate duration \(T\), the control problem is discretized on a uniform time grid of step \(\Delta t\), so that
+\begin{equation}
+N_T = \frac{T}{\Delta t}
+\label{eq:adam_num_time_steps}
+\end{equation}
+time slices are used. The optimization variables are then the full time-discretized control trajectory
+\begin{equation}
+\Bigl\{
+g_\ell,\,
+\delta_{1,\ell},\delta_{2,\ell},\,
+f_{1,\ell},f_{2,\ell},\,
+\phi_{1,\ell},\phi_{2,\ell}
+\Bigr\}_{\ell=0}^{N_T-1},
+\label{eq:adam_discretized_controls}
+\end{equation}
+which parameterizes the effective Hamiltonian over the entire pulse. In other words, unlike the RL controller, which learns a stochastic sequential policy over actions, the direct baseline optimizes the control amplitudes themselves as explicit free parameters of a fixed-horizon pulse.
+
+For each such discretized pulse, the physical evolution is simulated on the same truncated multilevel gmon model introduced previously, and the corresponding control quality is evaluated through the same cost-function structure that underlies the UFO framework, described in subsection~\ref{subsec:ufo_cost_function}.  This choice is important for the interpretation of the later comparisons. It means that the Adam baseline is not solving a different or artificially simplified control problem; it is solving essentially the same physical optimization problem as the RL controller, but through a direct search in pulse space rather than through policy optimization.
+
+The numerical optimization is then carried out independently for each candidate gate duration using the Adam optimizer. Denoting collectively by \(\bm{c}_T\) the discretized control variables associated with horizon \(T\), the optimization problem may be written schematically as
+\begin{equation}
+\bm{c}_T^{\star}
+=
+\arg\min_{\bm{c}_T}
+C(\bm{c}_T;T),
+\label{eq:adam_fixed_horizon_problem}
+\end{equation}
+where the dependence on \(T\) is explicit both through the number of time slices and through the runtime penalty entering the objective. In practice, the optimizer is run for a fixed number of Adam iterations at each candidate horizon, producing one locally optimized control plan per duration.
+
+A further methodological feature of the baseline is that the gate duration is not optimized continuously inside a single run. Instead, the problem is solved repeatedly over a discrete set of candidate horizons,
+\begin{equation}
+T \in \mathcal{T}_{\mathrm{cand}},
+\label{eq:adam_candidate_horizons}
+\end{equation}
+and the resulting horizon-wise optimized solutions are then compared. This means that the Adam baseline should be interpreted as a \emph{family} of fixed-horizon pulse-optimization problems rather than as a single variable-time control policy. Such a design is fully reasonable in the present context. It allows the direct optimizer to search efficiently within each fixed temporal budget, while still making it possible to identify which runtime provides the best overall compromise among fidelity, leakage, boundary behavior, and total cost.
+
+Once all candidate horizons have been optimized, the corresponding solutions are reevaluated in a common deterministic setting using the same multilevel simulator. This post-optimization reevaluation is an important part of the pipeline, because it separates the internal optimizer output from the final reported physical metrics. In particular, for each candidate horizon the thesis records not only the optimizer-side best objective value, but also a full nominal evaluation including final cost, gate fidelity, total leakage, leakage decomposition, boundary penalty, and effective runtime. The best horizon is then selected on the basis of this systematic comparison, and the associated control plan is stored as the representative Adam baseline solution for the considered target gate.
+
+When required, the selected plan is further subjected to Monte Carlo robustness evaluation under sampled control perturbations. In this way, the baseline participates in the same robustness analysis as the RL-based solutions, rather than being restricted to purely nominal benchmarking. This is methodologically important, because it ensures that the later comparison between Adam and TRPO is not a comparison between a fully evaluated learning-based controller and a weakly characterized deterministic baseline. On the contrary, both methods are assessed under the same physical criteria, including noisy deployment when robustness is under study.
+
+Taken together, this implementation makes the direct gradient-based baseline a strong and scientifically meaningful reference. It is strong because it optimizes the full pulse trajectory directly on the multilevel Hamiltonian, rather than relying on a simplified gate-level abstraction. It is fair because it uses the same target gates, the same physical model, and the same cost-function logic as the RL framework. And it is informative because its structure is genuinely different from that of TRPO: the Adam baseline performs direct fixed-horizon pulse optimization in control space, whereas TRPO learns a stochastic sequential policy that implicitly balances control shape and stopping behavior. Precisely because of this difference, the comparison between the two approaches is methodologically useful. It does not ask whether one optimizer is universally better in the abstract, but whether policy-based learning offers an advantage over a strong direct pulse-search strategy on the same underlying analog quantum-control problem.
+
+\begin{algorithm}[t]
+\caption{Direct gradient-based baseline with horizon sweep}
+\label{alg:adam_baseline_horizon_sweep}
+\begin{algorithmic}[1]
+\Require Target gate \(U_{\mathrm{target}}=N(\alpha,\alpha,\gamma)\), candidate horizons \(\mathcal{T}_{\mathrm{cand}}\), timestep \(\Delta t\), cost weights \((\chi,\beta,\mu,\kappa)\)
+\For{each \(T \in \mathcal{T}_{\mathrm{cand}}\)}
+    \State Discretize the control trajectory into \(N_T = T/\Delta t\) time steps
+    \State Initialize the pulse parameters \(\bm{c}_T\)
+    \For{\(m=1,\dots,M_{\mathrm{Adam}}\)}
+        \State Simulate the multilevel dynamics under \(\bm{c}_T\)
+        \State Compute the objective \(C(\bm{c}_T;T)\)
+        \State Update \(\bm{c}_T\) with Adam
+    \EndFor
+    \State Store the optimized plan \(\bm{c}_T^{\star}\)
+    \State Reevaluate nominally: cost, fidelity, leakage, boundary penalty, runtime
+\EndFor
+\State Select the best horizon according to the reevaluated performance
+\State Optionally evaluate robustness through noisy Monte Carlo rollouts
+\State \Return Best control plan and associated metrics
+\end{algorithmic}
+\end{algorithm}
+
+\textbf{TODO:} Da rileggere domani
 
 \subsection{Baselines and comparison strategy}
 \label{subsec:baselines_comparison_strategy}
+
+The first baseline is the direct gradient-based pulse-optimization method described in subsection~\ref{subsec:implementation_adam_baseline}. It represents the strongest non-RL comparator considered in this thesis, since it optimizes the full discretized control trajectory directly on the same multilevel physical model and under the same UFO-inspired cost structure.
 
 Once the target gate family \(N(\alpha,\alpha,\gamma)\) has been specified, the next step is to determine how the performance of the proposed control method should be assessed. The reference paper uses a comparison strategy built around two distinct questions \cite{Niu2019}. First, can the RL-based analog control produce target gates more \emph{robustly} than alternative pulse-optimization methods under stochastic control noise? Second, can it realize those gates more \emph{quickly} than their standard circuit-synthesis counterparts? These two questions lead naturally to two complementary classes of baselines: direct control-optimization baselines for robustness, and circuit-synthesis baselines for runtime.
 
