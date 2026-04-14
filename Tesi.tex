@@ -12,7 +12,10 @@
 \usepgfplotslibrary{statistics, groupplots}
 \usepackage{subcaption}
 % Page layout
-\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[a4paper,margin=.9in]{geometry}
+\usepackage{fancyhdr}
+\usepackage{setspace}
+\setstretch{1.0}
 
 % Math and symbols
 \usepackage{amsmath,amssymb,bm}
@@ -38,13 +41,67 @@
 \usetikzlibrary{external}
 \tikzexternalize[prefix=out/]
 \begin{document}
-\title{Reinforcement-Learning Framework for Robust and Universal Analog Quantum Control on Superconducting Qubits}
-\author{Francesco Minisini}
-\date{\today}
-\maketitle
+
+\begin{titlepage}
+    \centering
+    \begin{spacing}{1.2}
+        {\Large \textsc{University of Milan} \par}
+        \vspace{0.4cm}
+        {\large Department of Physics \par}
+        \vspace{0.4cm}
+        {\large Bachelor's Degree in Physics \par}
+    \end{spacing}
+
+    \vspace{2.5cm}
+    \begin{tikzpicture}
+        \draw[line width=1.2pt] (0,0) -- (\textwidth,0);
+    \end{tikzpicture}
+    \vspace{0.6cm}
+    
+    {\LARGE \bfseries Reinforcement-Learning Framework for Robust and\\ Universal Analog Quantum Control on Superconducting Qubits \par}
+    
+    \vspace{0.6cm}
+    \begin{tikzpicture}
+        \draw[line width=1.2pt] (0,0) -- (\textwidth,0);
+    \end{tikzpicture}
+    
+    \vspace{3cm}
+    
+    \begin{minipage}[t]{0.45\textwidth}
+        \begin{flushleft} \large
+            \textit{Supervisor:}\\
+            \textbf{Prof. Morten Hjort-Jensen} \\
+            \vspace{0.8cm}
+            \textit{Co-supervisor:}\\
+            \textbf{Davide Emilio Galli}
+        \end{flushleft}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.45\textwidth}
+        \begin{flushright} \large
+            \textit{Candidate:}\\
+            \textbf{Francesco Giuseppe Minisini} \\
+            ID: 40098A
+        \end{flushright}
+    \end{minipage}
+
+    \vfill
+    {\rule{0.4\textwidth}{0.4pt} \par}
+    \vspace{0.2cm}
+    {\large Academic Year 2025/2026 \par}
+\end{titlepage}
+
+\pagenumbering{roman}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\nouppercase{\leftmark}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
 \tableofcontents
 \newpage
 
+\newpage
+\pagenumbering{arabic}
 \include{chapters/01_introduction}
 \include{chapters/02_background}
 \include{chapters/03_implementation}

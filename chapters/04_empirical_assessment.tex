@@ -205,8 +205,8 @@ C_{\mathrm{term}}=0.20,
 with \(\gamma_{\mathrm{RL}}=0.99\), \(\lambda=0.97\), \(10\) conjugate-gradient iterations, damping \(0.1\), and the batch-size choices specified above. This configuration is not claimed to be uniquely optimal, but it provides a coherent and transparent training regime under which later comparisons can be interpreted without ambiguity.
 
 
-% \textbf{TODO:} Controllare eventuali referenze per questi valori (oltre a sutton)
-% \textbf{TODO:} Serve piu chiarezza su cosa sono? Magari da riprendere meglio in background e implementation
+% %\textbf{TODO:} Controllare eventuali referenze per questi valori (oltre a sutton)
+% %\textbf{TODO:} Serve piu chiarezza su cosa sono? Magari da riprendere meglio in background e implementation
 
 \subsection{Neural-network size sweep for policy and value functions}
 \label{subsec:nn_size_sweep}
@@ -304,7 +304,7 @@ This interpretation is reinforced by the qualitative structure of the trade-off 
 
 A further methodological point should be emphasized. Because the sweep was carried out under a reduced training budget, namely \(20\) policy iterations and \(5000\) episodes per batch, the resulting ranking should be interpreted as a comparison of \emph{practical trainability} under limited optimization time rather than as a proof of asymptotic superiority under full convergence. This distinction matters. A larger architecture may in principle catch up under a much longer training budget, but if it is consistently slower, noisier, or less reliable in the practical regime relevant to the rest of the thesis, then it is still a less attractive default choice. For the purposes of the present empirical chapter, the relevant question is therefore not which architecture might eventually win under unlimited compute, but which one provides the best and most stable control quality under the realistic budget used for the experiments.
 
-% \textbf{TODO:} Aggiungere il layout principale mancante (64,32,32) ai risultati, esperimento gia fatto, solo da inserire e sistemare i grafici + revisionare conclusione e discussione e tabella.
+% %\textbf{TODO:} Aggiungere il layout principale mancante (64,32,32) ai risultati, esperimento gia fatto, solo da inserire e sistemare i grafici + revisionare conclusione e discussione e tabella.
 
 % On the basis of this restricted sweep, the architecture
 % \begin{equation}
@@ -461,7 +461,7 @@ with \(\gamma_{\mathrm{RL}}=0.99\), \(\lambda=0.97\), damping \(0.1\), and \(10\
 in direct continuity with the reference framework \cite{Niu2019}.
 
 
-% \textbf{TODO:} Da menzionalre il nn sizes choice e motivo
+% %\textbf{TODO:} Da menzionalre il nn sizes choice e motivo
 
 For the actor--critic representation, both the policy and value functions are fixed to the hidden-layer architecture
 \begin{equation}
@@ -480,7 +480,7 @@ remains very close to the best trade-off region observed in the present sweep. F
 Unless explicitly stated otherwise, all later experiments therefore use the combined reference configuration defined by
 Eqs.~\eqref{eq:final_training_setup}--\eqref{eq:final_ufo_weights_choice}. This choice ensures that the empirical comparisons reported in the following sections are not affected by experiment-specific retuning, and that the results remain directly interpretable within the methodological logic established by the reference paper.
 
-% \textbf{TODO:} Da considerare se farlo tabella
+% %\textbf{TODO:} Da considerare se farlo tabella
 
 \section{Single-target control optimization}
 \label{sec:single_target_optimization}
@@ -502,7 +502,7 @@ which belongs to the two-qubit family \(N(\alpha,\alpha,\gamma)\) introduced in 
 \end{itemize}
 In this sense, Eq.~\eqref{eq:representative_target_gate} serves as the natural entry point for the empirical analysis, since it is sufficiently rich to be physically informative while remaining simple enough to support a transparent method-by-method comparison.
 
-\textbf{TODO:} Da decidere se fare con o senza labels posso anche fare una versione  meno restrittiva
+%\textbf{TODO:} Da decidere se fare con o senza labels posso anche fare una versione  meno restrittiva
 
 % \subsection{Adam-baseline Results}
 % \label{subsec:adam_baseline_results}
@@ -575,7 +575,7 @@ In this sense, Eq.~\eqref{eq:representative_target_gate} serves as the natural e
 % % \textbf{(b)} best nominal fidelity and best nominal cost versus \(\alpha\);
 % % \textbf{(c)} noisy average fidelity at \(\sigma_{\mathrm{noise}}=1\,\mathrm{MHz}\) and the associated fidelity variance versus \(\alpha\).
 % % This figure should make explicit that Adam performance is strongly non-uniform across the gate family, with an easier central region and significantly more difficult edge regions.}
-% % \caption{\textbf{TODO:} Da Fare}
+% % \caption{%\textbf{TODO:} Da Fare}
 % \caption{Adam sweep over the gate family $N(\alpha,\alpha,\pi/2)$, with each target optimized independently from scratch and the best solution selected by horizon search. 
 % \textbf{(a)} Best selected horizon versus $\alpha$, showing shorter optimal gates in the central region and longer ones near the edges. 
 % \textbf{(b)} Best nominal fidelity and nominal cost versus $\alpha$, revealing a broad central basin of better performance. 
@@ -588,7 +588,7 @@ In this sense, Eq.~\eqref{eq:representative_target_gate} serves as the natural e
 % A preliminary family-wide Adam sweep with fixed \(\gamma=\pi/2\) further reinforces this interpretation. Even without transfer learning, the performance of the direct optimizer is markedly non-uniform across the gate family \(N(\alpha,\alpha,\pi/2)\). The best results cluster around the central region \(\alpha\approx 1.4\)--\(1.7\), where the optimizer consistently selects \(40\,\mathrm{ns}\) as the best horizon, reaches nominal fidelities \(F_{\mathrm{Adam}}^{\mathrm{nom}}\gtrsim 0.9987\), and retains noisy average fidelities \(\overline{F}_{\mathrm{Adam}}(\sigma_{\mathrm{noise}}=1\,\mathrm{MHz})\approx 0.987\)--\(0.989\) with very small fidelity variance of order \(\mathrm{Var}(F)_{\mathrm{Adam}}\sim 10^{-5}\). By contrast, near the edges of the interval, i.e. for \(\alpha\approx 0\) or \(\alpha\approx \pi\), the best horizon shifts to \(70\,\mathrm{ns}\), the nominal fidelity drops to about \(F_{\mathrm{Adam}}^{\mathrm{nom}}\approx 0.94\), and the noisy average fidelity falls to about \(\overline{F}_{\mathrm{Adam}}(\sigma_{\mathrm{noise}}=1\,\mathrm{MHz})\approx 0.936\)--\(0.938\), with \(\mathrm{Var}(F)_{\mathrm{Adam}}\) increasing by roughly one order of magnitude. This shows that the difficulty of the gate family is highly structured already at the level of direct gradient optimization. Not all members of \(N(\alpha,\alpha,\pi/2)\) are equally easy to realize within the same bandwidth-limited multilevel control ansatz, and this fact will later be important when interpreting the runtime curves obtained with RL and transfer learning. Put differently, the Adam sweep provides a useful "zero" baseline for distinguishing between intrinsic gate-family geometry and genuine algorithmic gains due to policy optimization.
 
 
-% \textbf{TODO:} Da decidere se fare con o senza labels
+% %\textbf{TODO:} Da decidere se fare con o senza labels
 
 % \subsection{Nominal TRPO results}
 % \label{subsec:nominal_trpo_results}
@@ -712,7 +712,7 @@ A further useful benchmark emerges when this nominal Adam runtime is compared to
 \end{equation}
 even before introducing policy optimization or transfer learning. This does \emph{not} yet prove the stronger runtime claims of the RL framework across the whole gate family, but it is a useful early indication that direct analog optimization on the present hardware model can already exploit structure unavailable to a fixed compiled-gate implementation.
 
-% \textbf{TODO:} Aggiungere le lables ai riferimenti ( Average fidelity etc...)
+% %\textbf{TODO:} Aggiungere le lables ai riferimenti ( Average fidelity etc...)
 
 % ----------------------------------------------------
 % Suggested figure placeholder for the family-wide Adam sweep
@@ -746,11 +746,11 @@ A preliminary family-wide Adam sweep with fixed \(\gamma=\pi/2\) further reinfor
 \subsection{Nominal TRPO results}
 \label{subsec:nominal_trpo_results}
 
-% \textbf{TODO:} Aggiungere le labels, così lo rendo un pelo piu comprensibile<
+% %\textbf{TODO:} Aggiungere le labels, così lo rendo un pelo piu comprensibile<
 
 The second benchmark is obtained using the TRPO-based reinforcement-learning controller introduced in Chapter \ref{chap:implementation}, but trained in the \emph{nominal} environment, i.e. without stochastic perturbations injected during training, so that the policy is optimized against the deterministic multilevel gmon dynamics discussed in section \ref{subsec:paper_rl_formulation}. The controller is trained with the same physical model and parameters mentioned in section \ref{sec:parameter_choice_study}, with the same UFO weights used in the Adam baseline, namely \((\chi,\beta,\mu,\kappa)=(10,10,0.2,0.1)\).
 
-\textbf{TODO:} magari posso introdurre in implementation la distinzione per rendere più chiara la differenza tra i due approcci.
+%\textbf{TODO:} magari posso introdurre in implementation la distinzione per rendere più chiara la differenza tra i due approcci.
 
 Under deterministic evaluation, the best policy found in this nominal setting reaches the performance summarized in Table~\ref{tab:nominal_trpo_results}.
 
@@ -1009,7 +1009,7 @@ first direct validation of that claim in the present implementation \cite{Niu201
 
 
 % \subsection{Fidelity variance versus noise strength.}
-% \textbf{TODO:} Da correggere, è stato dato il grafico sbagliato.
+% %\textbf{TODO:} Da correggere, è stato dato il grafico sbagliato.
 
 \subsection{Fidelity variance versus noise strength}
 \label{subsec:fidelity_variance_vs_noise}
@@ -1042,7 +1042,7 @@ Taken together with Fig.~\ref{fig:avg_fidelity_vs_noise}, the variance curve the
 \subsection{Interpretation}
 \label{subsec:robustness_interpretation}
 
-% \textbf{TODO:} Da valutare se inserire l'altro grafico
+% %\textbf{TODO:} Da valutare se inserire l'altro grafico
 
 Taken together, the average-fidelity and fidelity-variance curves provide the clearest empirical validation of the central robustness claim of the present study. The key question is not whether all controllers degrade under stochastic control perturbations, which is unavoidable, but whether training in a noisy environment produces a control strategy that degrades \emph{more gracefully} than one trained only in the nominal setting. From this viewpoint, the most informative comparison is the one between the two TRPO agents. Since the nominal and noise-optimized controllers share the same policy architecture, the same physical model, and the same UFO objective, their different behavior under noisy evaluation must be attributed primarily to the environment used during training. The fact that the noise-optimized policy achieves both higher average fidelity and lower fidelity variance across the explored range of \(\sigma_{\mathrm{noise}}\) therefore shows that robustness is not a generic byproduct of reinforcement learning alone, but a property that is effectively learned through stochastic training \cite{Niu2019}.
 
@@ -1364,9 +1364,9 @@ The parameter-choice studies further reinforce the internal consistency of this 
 
 Taken together, these results support a precise interpretation of the validated framework. The reproduced control pipeline does not suggest that reinforcement learning is universally superior to direct gradient-based pulse optimization in every regime. Rather, it shows that the RL-based approach becomes especially compelling when the control problem is treated as a genuinely multi-objective and noise-aware task, where fidelity, leakage, runtime, and robustness must be balanced simultaneously. In this sense, the empirical evidence supports the view that the main value of the UFO framework lies in providing a unified and physically meaningful strategy for robust analog quantum control, rather than in offering a universally dominant nominal optimizer.
 
-% \textbf{TODO:} Inserire qui una frase conclusiva sintetica sui risultati definitivi dello studio delle architetture delle policy/value network, una volta consolidati i risultati finali.
+% %\textbf{TODO:} Inserire qui una frase conclusiva sintetica sui risultati definitivi dello studio delle architetture delle policy/value network, una volta consolidati i risultati finali.
 
-% \textbf{TODO:} Inserire qui una breve sintesi finale dei risultati definitivi della sensitivity analysis sui pesi della UFO cost function, se si riterrà opportuno richiamarli esplicitamente nella chiusura del capitolo empirico.
+% %\textbf{TODO:} Inserire qui una breve sintesi finale dei risultati definitivi della sensitivity analysis sui pesi della UFO cost function, se si riterrà opportuno richiamarli esplicitamente nella chiusura del capitolo empirico.
 
 \subsection{Agreement and discrepancies with the original paper}
 \label{subsec:agreement_discrepancies_original_paper}
@@ -1385,7 +1385,7 @@ The parameter studies reported in this chapter support exactly this interpretati
 
 For this reason, the present reproduction should be regarded as successful primarily at the level of the main qualitative claims rather than at the level of exact numerical duplication. The core conceptual picture advanced in the original paper is clearly supported: noisy-environment RL improves robustness, analog control can outperform standard gate synthesis in runtime, and the strongest gains emerge when the target gate is well aligned with the native interaction geometry of the device. At the same time, the thesis also refines that picture by showing more explicitly that nominal superiority is not automatic, that family-level performance is structurally non-uniform, and that the practical behavior of the framework must be interpreted in light of optimization difficulty and implementation-dependent trade-offs. In this sense, the relation between the present study and the original paper is not one of simple confirmation or contradiction, but rather one of substantial qualitative validation combined with a more granular and critical quantitative assessment.
 
-% \textbf{TODO:} Aggiornare questo paragrafo con un richiamo finale ai risultati definitivi del confronto tra diverse architetture di policy/value network, nel caso in cui essi modifichino leggermente l'interpretazione quantitativa delle discrepanze.
+% %\textbf{TODO:} Aggiornare questo paragrafo con un richiamo finale ai risultati definitivi del confronto tra diverse architetture di policy/value network, nel caso in cui essi modifichino leggermente l'interpretazione quantitativa delle discrepanze.
 
-% \textbf{TODO:} Valutare se aggiungere qui una frase conclusiva sui risultati definitivi della sensitivity analysis dei pesi UFO, qualora emergano indicazioni più forti sulla dipendenza quantitativa dal choice of scalarization.
+% %\textbf{TODO:} Valutare se aggiungere qui una frase conclusiva sui risultati definitivi della sensitivity analysis dei pesi UFO, qualora emergano indicazioni più forti sulla dipendenza quantitativa dal choice of scalarization.
 
