@@ -104,7 +104,7 @@ k=1,\dots,m,
 \end{equation}
 Equation~\eqref{eq:piecewise_constant_controls} turns the search for an admissible control field into a finite-dimensional optimization problem over the amplitudes $\{u_{k,\ell}\}$. This viewpoint is especially convenient because it connects naturally both with gradient-based pulse engineering and with reinforcement-learning formulations, where the control trajectory is built sequentially over discrete time steps \cite{Palao2003,Koch2022,Niu2019}.
 
-\begin{figure}[t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=\textwidth]{chapters/plots/control_dynamics_pipeline.pdf}
 % \begin{tikzpicture}[
@@ -180,8 +180,8 @@ This is the quantity most frequently minimized in practical control optimization
 
 In realistic devices, however, the implemented operation is not exactly unitary on the logical subspace, since calibration errors, stochastic fluctuations, decoherence, and leakage make the effective map better described by a quantum channel $\mathcal{E}$. 
 
-% \textbf{TODO:} da inserire qui la definizione di quantum channel 
-% \textbf{TODO:} decidere quale usare ( spostare nel caso la seconda frase da un altra parte)
+% %\textbf{TODO:} da inserire qui la definizione di quantum channel 
+% %\textbf{TODO:} decidere quale usare ( spostare nel caso la seconda frase da un altra parte)
 
 A \emph{quantum channel} is a linear map
 \begin{equation}
@@ -244,7 +244,7 @@ where the operators \(\{E_k\}\) are the Kraus operators associated with the chan
 % \label{eq:unitary_channel_special_case}
 % \end{equation}
 
-\textbf{TODO:} decidere quale footnote usare
+%\textbf{TODO:} decidere quale footnote usare
 
 In that more general setting, an experimentally meaningful notion of quality is the \emph{average gate fidelity}, defined by averaging over all pure input states with respect to the Haar measure
 % \footnote{    In Eq.~\eqref{eq:average_gate_fidelity_def}, the integral is taken with respect to the \emph{Haar measure} on the set of pure states. More precisely, if one identifies a pure state with a unit vector \(\ket{\psi}\) up to a global phase, then \(d\psi\) denotes the unique normalized Borel probability measure that is invariant under unitary transformations. In other words, for every measurable set \(A\) of pure states and every unitary operator \(U\), one has \(\mu(A)=\mu(UA)\), with normalization \(\int d\psi = 1\). This is the natural notion of a uniform distribution over pure states: no direction in Hilbert space is preferred over any other, and averages taken with respect to \(d\psi\) are therefore basis-independent \cite{Nielsen2002,Watrous2018}.}:
@@ -508,7 +508,7 @@ From a computational perspective, one may therefore distinguish two different no
 
 It is important, however, not to overstate the case. Direct analog control does not replace the circuit model as a fundamental description of quantum computation, nor does it eliminate the need for universal gate sets in fault-tolerant architectures. Rather, it provides a complementary layer of optimization that is particularly valuable in near-term devices and in hardware-aware quantum algorithms. The relevant question is not whether one should abandon universal discrete gates, but whether a given target operation should be implemented through a compiled sequence or through a direct continuous control trajectory. The answer depends on the interaction between algorithmic structure, hardware native couplings, noise, and control constraints. This is exactly the regime in which modern quantum-control methods, including reinforcement-learning-based approaches, become especially relevant \cite{Niu2019,Koch2022}.
 
-\begin{figure}[t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=\textwidth]{chapters/plots/synthesis_vs_analog_control.pdf}
 % \begin{tikzpicture}[
@@ -723,7 +723,7 @@ For this reason, it is often useful to describe a driven superconducting qubit d
 \end{equation}
 where $\omega_q$ is the fundamental transition frequency, $\alpha<0$ the weak anharmonicity, and $\Omega(t)$ an externally applied microwave drive. Equation~\eqref{eq:driven_weakly_anharmonic_mode} makes two points transparent. First, the creation and annihilation operators act on the full ladder of states and therefore naturally include higher-level dynamics. Second, the same control field that is intended to drive the $\ket{0}\leftrightarrow\ket{1}$ transition also couples, in principle, to $\ket{1}\leftrightarrow\ket{2}$ and higher transitions, with selectivity arising only because the spectrum is not exactly harmonic. The control task is therefore intrinsically multilevel.
 
-% \textbf{TODO:} Riguardare sto paragrafo e come tratta il reference paper, in particolare la eventuale trattazione della appendice
+% %\textbf{TODO:} Riguardare sto paragrafo e come tratta il reference paper, in particolare la eventuale trattazione della appendice
 
 This multilevel perspective is not merely a pedagogical refinement; it is the viewpoint adopted in the reference paper analyzed in this thesis. The gmon architecture is modeled by quantizing the circuit degrees of freedom in terms of bosonic modes and then deriving an effective rotating-wave Hamiltonian with explicit anharmonicity, tunable coupling, detuning controls, and microwave drives \cite{Niu2019}. In that formulation, each superconducting qubit is treated as a weakly anharmonic oscillator before projection onto the qubit basis, exactly in line with the general discussion above. This is the correct framework for studying high-performance control, because it preserves the higher excited levels that are responsible for leakage and because it allows one to assess whether a pulse remains confined to the intended logical sector.
 
@@ -743,7 +743,7 @@ Already with $d_{\mathrm{loc}}=3$, one obtains a $9$-dimensional physical space 
 
 In summary, superconducting qubits should be viewed as engineered nonlinear oscillators whose weak anharmonicity enables qubit selectivity but does not eliminate the presence of higher excited states. The logical qubit is encoded in the two lowest levels, yet the full control problem is inherently multilevel. This fact underlies the entire structure of modern superconducting quantum control: it explains why one uses bosonic or multilevel Hamiltonians at the modeling stage, why fast control can induce unwanted excitations, and why leakage must later be treated as an explicit optimization objective. The next paragraph will build directly on this point by introducing the computational subspace more carefully and defining leakage as population transfer outside it.
 
-\begin{figure}[t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.6\textwidth]{chapters/plots/weakly_anharmonic_ladder.pdf}
 % \begin{tikzpicture}[
@@ -963,8 +963,8 @@ It is also useful to distinguish leakage from ordinary logical errors that remai
 
 For this reason, the preservation of the computational subspace should be regarded as a structural requirement of quantum control, not merely as a secondary diagnostic. The goal is not only to approximate a target logical unitary but to do so while keeping the evolution effectively confined to $\mathcal{H}_{\mathrm{comp}}$. In the remainder of the thesis, this idea will reappear in a more quantitative form through explicit leakage penalties and bounds. In particular, the UFO framework studied later augments the gate-infidelity objective by a dedicated leakage term constructed from the block-off-diagonal dynamics of the full multilevel Hamiltonian \cite{Niu2019}.
 
-% \textbf{TODO:} Rendere più chiaro il disegno 
-\begin{figure}[t]
+% %\textbf{TODO:} Rendere più chiaro il disegno 
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.8\textwidth]{chapters/plots/computational_vs_leakage_subspace.pdf}
 % \begin{tikzpicture}[
@@ -1037,7 +1037,7 @@ The origin of this tradeoff can already be seen in the simplest driven weakly an
     \end{equation}
 where $\Omega(t)$ is the drive envelope, $\alpha=\omega_{12}-\omega_{01}<0$ is the anharmonicity, and $\lambda$ is the relative matrix element for the $\ket{1}\leftrightarrow\ket{2}$ transition.
 
-\textbf{TODO:} Decidere se mantenere la appendice
+%\textbf{TODO:} Decidere se mantenere la appendice
 
 The full derivation of equeation \eqref{eq:three_level_rotating_hamiltonian} is documented in the Appendix \ref{app:tswt_coherent_leakage_bound}.
 Equation~\eqref{eq:three_level_rotating_hamiltonian} makes the problem explicit: the same drive that implements logical rotations also couples to the leakage transition, which is only detuned by the finite anharmonicity $\alpha$. Thus, unlike in an ideal two-level system, faster control does not merely accelerate the intended dynamics; it also enhances the unwanted coupling to higher levels \cite{Motzoi2009,Gambetta2011,Krantz2019}.
@@ -1100,7 +1100,7 @@ However it is possible to derive analitically a leakage bound through the utiliz
     , where the accumulated coherent leakage is controlled not only by the size of the block-off-diagonal Hamiltonian but also by the rate at which it varies in time. 
     
 
-\textbf{TODO:} Decidere se tenerla o meno. 
+%\textbf{TODO:} Decidere se tenerla o meno. 
 The complete derivation is reported in Appendix~\ref{app:tswt_coherent_leakage_bound}.
 
 In schematic form, their bound reads
@@ -1140,7 +1140,7 @@ where $\varepsilon_{\mathrm{gate}}$ measures logical inaccuracy, $L[\bm{u}]$ is 
 
 From the viewpoint of superconducting-qubit physics, one may summarize the tradeoff as follows. Long pulses are usually easier to make spectrally selective and therefore tend to suppress leakage, but they suffer from greater exposure to decoherence and slow noise. Very short pulses reduce the total interaction time with the environment, but they broaden the pulse spectrum, enhance non-adiabaticity, and increase the risk of population transfer into higher levels. The practically relevant regime is therefore neither the slowest nor the fastest one in an absolute sense, but the regime in which runtime has been reduced as much as possible while leakage and control-induced errors remain acceptably small. This balance is one of the central organizing principles of high-fidelity gate design in weakly anharmonic superconducting systems \cite{Krantz2019,Werninghaus2021,Niu2019}.
 
-\begin{figure}[t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.75\textwidth]{chapters/plots/speed_leakage_tradeoff.pdf}
 % \begin{tikzpicture}[
@@ -1244,7 +1244,7 @@ p(y)=\mathrm{Tr}\!\left[\mathcal{M}_{y}(\rho)\right].
 \end{equation}
 Thus, unlike in classical control, the act of acquiring information modifies the system whose dynamics one is trying to steer. This makes genuine feedback control more delicate in the quantum regime, especially for fast gate operations where measurement latency and finite measurement fidelity can become serious bottlenecks \cite{Koch2022}.
 
-% \textbf{TODO:} Recheck if I want this in my thesis since
+% %\textbf{TODO:} Recheck if I want this in my thesis since
 
 In quantum-information experiments, however, the phrase \emph{closed-loop optimization} is often used in a broader and more practical sense. Rather than updating the control during a single gate execution, one performs repeated experimental shots with a fixed pulse $\bm{u}(t;\bm{\theta}_r)$, estimates a performance metric from the measurement outcomes, and then updates the pulse parameters between shots according to some classical optimization rule. If $\widehat{\mathcal{J}}_{\mathrm{exp}}(\bm{\theta}_r)$ denotes the experimentally estimated cost at iteration $r$, then the iterative update can be written schematically as
 \begin{equation}
@@ -1283,7 +1283,7 @@ where the first step is model-based and the second experimental. This hybrid log
 
 For the purposes of this thesis, the most important point is the following. The UFO framework analyzed later is an \emph{open-loop} control framework in the sense that the control pulse is optimized from a Hamiltonian model and then applied without measurement-based feedback during the gate. At the same time, its motivation is shaped by the practical limitations of closed-loop techniques: because repeated measurements are slow and because the exact error model is often unavailable, the framework seeks to encode robustness and leakage suppression directly into the cost function rather than outsourcing them to experimental feedback \cite{Niu2019}. The distinction developed in this subsection is therefore not merely terminological; it explains why the thesis focuses on analytic objectives and model-based control design, while still recognizing that future hardware-level implementations may benefit from hybrid or partially closed-loop refinements.
 
-\begin{figure}[t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.9\textwidth]{chapters/plots/open_closed_loop_control.pdf}
 % \begin{tikzpicture}[
@@ -1437,7 +1437,7 @@ B_{k,m}\cos \omega_{k,m} t
 \end{equation}
 where $u_k^{(0)}(t)$ is a reference pulse, the frequencies $\omega_{k,m}$ are chosen or randomized within a suitable range, and the coefficients $A_{k,m},B_{k,m}$ become the optimization variables. The conceptual advantage is clear: instead of optimizing hundreds or thousands of piecewise-constant amplitudes, one works in a much lower-dimensional space of coefficients that can naturally encode smoothness, bandwidth restrictions, and experimental simplicity. Because of this reduced parametrization, CRAB is particularly useful when gradients are expensive or unavailable, and it is often combined with gradient-free optimizers such as Nelder--Mead or simplex-type search strategies \cite{Caneva2011}. This basis-restricted perspective is also attractive in experimental closed-loop refinements, where each additional optimization variable may carry a substantial measurement cost.
 
-\textbf{TODO:} Decidere se voglio tenere Goat e krotov
+%\textbf{TODO:} Decidere se voglio tenere Goat e krotov
 
 A more recent method that addresses some of the limitations of both piecewise-constant gradient methods and purely gradient-free basis search is \emph{GOAT} (Gradient Optimization of Analytic conTrols) \cite{Machnes2018}. The guiding idea of GOAT is to keep the controls in a low-dimensional but analytic parameterization,
 \begin{equation}
@@ -1601,7 +1601,7 @@ The first is already nontrivial because it requires specifying the relevant unce
 
 For the purposes of this thesis, the most important takeaway is that robustness cannot be treated as an afterthought. A pulse optimized only for nominal gate fidelity may be scientifically interesting, but it is not yet a practically convincing control solution unless one also understands how it behaves under uncertainty, noise, and imperfect modeling. This is precisely why the literature moves beyond a purely nominal objective and evaluates control performance under a family of stochastic perturbations, using average fidelity and fidelity variance as practical diagnostics of robustness \cite{Niu2019}. The extension work proposed later in this thesis builds directly on this point by asking whether robustness learned under one uncertainty model generalizes to others.
 
-\begin{figure}[t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.8\textwidth]{chapters/plots/robustness_landscape_shift.pdf}
 % \begin{tikzpicture}[
@@ -1723,7 +1723,7 @@ Of course, RL is not automatically superior to classical optimal control. It int
 
 For the purposes of this thesis, the relevance of RL is therefore twofold. First, it offers a mathematically natural framework for sequential pulse construction in noisy and uncertain environments. Second, it provides a route to incorporating practical objectives such as leakage suppression, robustness to sampled perturbations, and gate-time reduction into a single reward function. This is precisely the role RL plays in the UFO framework analyzed later: the control problem is cast as a sequential decision process, the total objective is encoded into a reward/cost signal, and the agent learns pulse trajectories that balance fidelity, leakage, runtime, and robustness under stochastic control errors as it will be covered in section \ref{subsec:ufo_cost_function}. In this sense, RL is relevant not because quantum control is a machine-learning problem in disguise, but because the structure of many realistic quantum-control tasks already has the architecture of a sequential decision problem.
 
-\begin{figure}[t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.8\textwidth]{chapters/plots/rl_quantum_control_loop.pdf}
 % \begin{tikzpicture}[
@@ -1930,7 +1930,7 @@ For the purposes of this thesis, the key message is the following. Once the cont
 
 % \includegraphics[width=0.8\textwidth]{chapters/plots/continuous_action_trpo.pdf}
 \tikzexternaldisable
-\begin{figure}[t]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     box/.style={draw, rounded corners, minimum width=3.0cm, minimum height=1.0cm, align=center},
@@ -1953,7 +1953,7 @@ For the purposes of this thesis, the key message is the following. Once the cont
 
 \end{tikzpicture}
 \caption{Continuous-action policy optimization in quantum control. The policy maps the current state to a distribution over continuous control amplitudes, the quantum system returns the resulting trajectory information and reward, and TRPO updates the policy through a surrogate objective constrained by a KL trust region.
-\textbf{TODO:} add snippet
+%\textbf{TODO:} add snippet
 }
 \label{fig:continuous_action_trpo}
 \end{figure}
@@ -2081,7 +2081,7 @@ A useful principle is therefore to start from the \emph{physics} and only then t
 This is precisely the conceptual role played by the framework analyzed in the next chapter. The literature explicitly argues that an effective control cost function is essential for efficient optimization and for meaningful quantum control, and it constructs the UFO objective by combining gate infidelity, leakage penalties, total runtime, and boundary-condition penalties into a single scalar cost \cite{Niu2019}. That cost is then used as the reward signal for a continuous-variable policy-gradient agent trained with TRPO \cite{Niu2019}. In other words, the paper does not first design an RL agent and then ask what to optimize; it begins from the physics of the control problem and uses the reward as the mechanism for injecting that physics into the learning dynamics. This is exactly why reward design is the final and most important conceptual bridge between the generic RL background of this chapter and the paper-specific framework introduced next.
 
 
-\begin{figure}[t]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.8\textwidth]{chapters/plots/reward_design_bridge.pdf}
     %     \begin{tikzpicture}[
@@ -2102,7 +2102,7 @@ This is precisely the conceptual role played by the framework analyzed in the ne
         
     % \end{tikzpicture}
     \caption{Reward design as the interface between physics and learning. The relevant physical control objectives are first encoded into a scalar cost functional, which is then converted into the reward signal used by the RL algorithm to optimize the policy.
-    \textbf{TODO:} add snippet
+    %\textbf{TODO:} add snippet
     }
 \label{fig:reward_design_bridge}
 \end{figure}
@@ -2116,7 +2116,7 @@ This is precisely the conceptual role played by the framework analyzed in the ne
 % \subsection{Feed-Forward Neural Network for policy and value function estimation in continuous action spaces}
 % \label{subsec:feedforward_neural_network}
 
-% \textbf{TODO:} Disegnino dell'agente tipo quello del paper in images, con input, hidden layers, output, ecc. + citare soliti Lecun, Goodfellow, Bengio in deep learning etc
+% %\textbf{TODO:} Disegnino dell'agente tipo quello del paper in images, con input, hidden layers, output, ecc. + citare soliti Lecun, Goodfellow, Bengio in deep learning etc
 
 % \subsubsection{Policy function}
 % \label{subsubsec:policy_function}
@@ -2159,7 +2159,7 @@ where \(\theta=\{W^{(\ell)},b^{(\ell)}\}_{\ell=1}^{L}\) denotes the full set of 
 Given a differentiable objective function \(\mathcal{L}(\theta)\), the network parameters can then be updated by gradient-based optimization, with the required derivatives \(\nabla_{\theta}\mathcal{L}\) computed efficiently through the backpropagation algorithm, which applies the chain rule recursively from the output layer back to the earlier layers \cite{Rumelhart1986,Goodfellow2016}.
 In the present context, this makes feed-forward networks a natural choice for representing the policy and value functions: they are flexible enough to capture nonlinear control strategies, yet simple enough to remain fully compatible with the actor--critic and TRPO framework adopted in this thesis.
 
-\begin{figure}[t]
+\begin{figure}[htbp]
 \centering
 
 \begin{subfigure}[t]{0.38\textwidth}

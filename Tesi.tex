@@ -1,61 +1,228 @@
-\documentclass[11pt,a4paper]{report}
+% ============================================================
+%  THESIS – Main document
+%  Reinforcement-Learning Framework for Robust and Universal
+%  Analog Quantum Control on Superconducting Qubits
+% ============================================================
+\documentclass[11pt,a4paper,openright]{report}
 
-% Encoding and typography
+% ── Encoding and core typography ────────────────────────────
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{lmodern}
-\usepackage{microtype}
-% Nel preambolo:
+
+% ── Fonts: Palatino body + Euler math  ──────────────────────
+\usepackage{newpxtext}          % Palatino-like text
+\usepackage{newpxmath}          % matching math
+\usepackage{microtype}          % optical refinements
+\usepackage{setspace}           % line spacing control
+\onehalfspacing                 % 1.5 line spacing for readability
+
+% ── Page layout ─────────────────────────────────────────────
+\usepackage[
+  a4paper,
+  top=30mm,
+  bottom=30mm,
+  inner=30mm,
+  outer=25mm,
+  headheight=14pt
+]{geometry}
+
+% ── Colors ──────────────────────────────────────────────────
+\usepackage{xcolor}
+\definecolor{chaptercolor}{RGB}{0,51,102}     % deep navy
+\definecolor{sectioncolor}{RGB}{0,71,133}     % steel blue
+\definecolor{accentgold}{RGB}{180,150,60}     % muted gold accent
+\definecolor{rulecolor}{RGB}{0,51,102}        % decorative rules
+\definecolor{linkblue}{RGB}{0,80,158}         % hyperlink blue
+\definecolor{lightgray}{RGB}{245,245,245}     % background tint
+
+% ── Chapter and section styling (titlesec) ──────────────────
+\usepackage{titlesec}
+
+% Chapter heading: large number + navy rule + title
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries\color{chaptercolor}}
+  {\chaptertitlename\ \thechapter}{20pt}{\Huge}
+\titleformat{name=\chapter,numberless}[display]
+  {\normalfont\huge\bfseries\color{chaptercolor}}
+  {}{0pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{-20pt}{30pt}
+
+% Section headings
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{sectioncolor}}
+  {\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{sectioncolor!80!black}}
+  {\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\itshape\color{sectioncolor!60!black}}
+  {\thesubsubsection}{1em}{}
+
+% ── Headers and footers (fancyhdr) ──────────────────────────
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE]{\small\textit{\nouppercase{\leftmark}}}
+\fancyhead[RO]{\small\textit{\nouppercase{\rightmark}}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Plain style for chapter opening pages
+\fancypagestyle{plain}{%
+  \fancyhf{}%
+  \fancyfoot[C]{\thepage}%
+  \renewcommand{\headrulewidth}{0pt}%
+}
+
+% ── PGFPlots / TikZ ────────────────────────────────────────
 \usepackage{pgfplots}
 \usepackage{pgfplotstable}
 \pgfplotsset{compat=1.18}
 \usepgfplotslibrary{statistics, groupplots}
 \usepackage{subcaption}
-% Page layout
-\usepackage[a4paper,margin=1in]{geometry}
 
-% Math and symbols
-\usepackage{amsmath,amssymb,bm}
+% ── Math and symbols ────────────────────────────────────────
+\usepackage{amsmath,amssymb,amsfonts,bm}
 \usepackage{braket}
 
-% Graphics and figures
+% ── Graphics and figures ────────────────────────────────────
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta,positioning}
-
+\usetikzlibrary{arrows.meta,positioning,calc,decorations.pathreplacing,fit,backgrounds}
 \usepackage{graphicx}
 \usepackage{float}
+
+% ── Algorithms ──────────────────────────────────────────────
 \usepackage{algorithm}
 \usepackage{algpseudocode}
-\usepackage{cite} % opzionale ma utile
-% Cross-references and links
-\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
 
-\usepackage{amsmath,amssymb,amsfonts,bm}
-\usetikzlibrary{calc}
-\usetikzlibrary{positioning,arrows.meta,decorations.pathreplacing}
-\usetikzlibrary{positioning,arrows.meta,fit,backgrounds}
+% ── Bibliography ────────────────────────────────────────────
+\usepackage{cite}
 
+% ── Cross-references and links ──────────────────────────────
+\usepackage[
+  colorlinks=true,
+  linkcolor=linkblue,
+  citecolor=linkblue,
+  urlcolor=linkblue
+]{hyperref}
+
+% ── Table of contents styling ───────────────────────────────
+\usepackage{tocloft}
+\renewcommand{\cftchapfont}{\bfseries\color{chaptercolor}}
+\renewcommand{\cftchappagefont}{\bfseries\color{chaptercolor}}
+\renewcommand{\cftsecfont}{\color{sectioncolor}}
+\renewcommand{\cftsecpagefont}{\color{sectioncolor}}
+\setlength{\cftbeforechapskip}{8pt}
+\setlength{\cftbeforesecskip}{2pt}
+
+% ── Caption styling ─────────────────────────────────────────
+\usepackage[
+  font={small},
+  labelfont={bf,color=chaptercolor},
+  textfont={color=black},
+  format=hang,
+  margin=1cm
+]{caption}
+
+% ── TikZ externalize ───────────────────────────────────────
 \usetikzlibrary{external}
 \tikzexternalize[prefix=out/]
-\begin{document}
-\title{Reinforcement-Learning Framework for Robust and Universal Analog Quantum Control on Superconducting Qubits}
-\author{Francesco Minisini}
-\date{\today}
-\maketitle
-\tableofcontents
-\newpage
 
+% ============================================================
+%  DOCUMENT
+% ============================================================
+\begin{document}
+
+% ────────────────────────────────────────────────────────────
+%  TITLE  PAGE
+% ────────────────────────────────────────────────────────────
+\begin{titlepage}
+\thispagestyle{empty}
+
+\begin{center}
+
+% ── University / Institution ──
+\vspace*{10mm}
+{\Large\scshape University Of Milan}\\[4pt]
+{\normalsize\textit{Department of Physics}}\\[3pt]
+{\normalsize Bachelor of Science in Physics}
+
+\vspace{12mm}
+
+% ── Decorative gold rule ──
+{\color{accentgold}\rule{0.65\textwidth}{1.6pt}}
+
+\vspace{18mm}
+
+% ── Thesis title ──
+{\fontsize{22}{28}\selectfont\bfseries\color{chaptercolor}%
+  Reinforcement-Learning Framework\\[6pt]
+  for Robust and Universal\\[6pt]
+  Analog Quantum Control\\[6pt]
+  on Superconducting Qubits}
+
+\vspace{18mm}
+
+% ── Decorative gold rule ──
+{\color{accentgold}\rule{0.65\textwidth}{1.6pt}}
+
+\vspace{24mm}
+
+% ── Candidate / Supervisor block ──
+\begin{minipage}[t]{0.42\textwidth}
+  \raggedright
+  {\small\textsc{Supervisors}}\\[4pt]
+  {\large Prof.\ \textit{Morten Hjort-Jensen}}\\[4pt]
+  {\large Prof.\ \textit{Davide Emilio Galli}}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.42\textwidth}
+  \raggedleft
+  {\small\textsc{Candidate}}\\[4pt]
+  {\large\textbf{Francesco Giuseppe Minisini}}\\[3pt]
+  {\normalsize Student ID: \textit{40098A}}
+\end{minipage}
+
+\vfill
+
+% ── Bottom rule and academic year ──
+{\color{rulecolor}\rule{0.85\textwidth}{0.6pt}}\\[10pt]
+{\large\scshape Academic Year 2025\,--\,2026}
+
+\end{center}
+\end{titlepage}
+
+% ── Blank verso page after title ──
+\clearpage
+\thispagestyle{empty}
+\mbox{}
+\clearpage
+
+% ── Table of Contents ──
+\tableofcontents
+\clearpage
+
+% ============================================================
+%  CHAPTERS
+% ============================================================
 \include{chapters/01_introduction}
 \include{chapters/02_background}
 \include{chapters/03_implementation}
 \include{chapters/04_empirical_assessment}
 \include{chapters/05_conclusion}
 
+% ============================================================
+%  APPENDIX
+% ============================================================
 \appendix
 \include{chapters/appendix}
 
-\newpage
-\bibliographystyle{plain} % oppure unsrt, alpha, ieee
+% ============================================================
+%  BIBLIOGRAPHY
+% ============================================================
+\clearpage
+\bibliographystyle{plain}
 \bibliography{references}
 
 \end{document}

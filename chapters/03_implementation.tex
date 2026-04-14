@@ -38,7 +38,7 @@ This balance is exactly what makes the architecture particularly suitable for th
 
 For the purposes of the thesis, this subsection therefore plays a mainly motivational role. It identifies the gmon architecture as the physical stage on which the control problem is posed and explains why it is a natural setting for studying robust analog quantum control. The next paragraph will move from this architectural overview to the explicit mathematical model used in the paper, introducing the effective Hamiltonian and the corresponding control channels in more detail.
 
-\begin{figure}[t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.8\textwidth]{chapters/plots/gmon_architecture_schematic.pdf}
 % \begin{tikzpicture}[
@@ -191,7 +191,7 @@ For the structure of the thesis, the main role of the present subsection is ther
 
 % \includegraphics[width=0.8\textwidth]{chapters/plots/gmon_control_channels.pdf}
 \tikzexternaldisable
-\begin{figure}[t]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     box/.style={draw, rounded corners, minimum width=2.6cm, minimum height=1cm, align=center},
@@ -340,7 +340,7 @@ Here $\epsilon$ denotes the characteristic magnitude of the control-induced coup
 
 From the viewpoint of the thesis, the main importance of the present subsection is that it introduces the exact language in which this thesis formulates leakage. The computational space is not referred to generically, but specifically as the lowest-energy subspace $\Omega_0$; leakage is not described only as population outside the qubit basis, but as coupling from $\Omega_0$ to the higher subspaces $\Omega_1,\Omega_2,\dots$ through the block-off-diagonal Hamiltonian $\hat{H}_2(t)$. This notation is essential for the following subsection, where the time-dependent Schrieffer--Wolff transformation is introduced precisely to suppress and bound the effect of these inter-subspace couplings.
 
-\begin{figure}[t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.85\textwidth]{chapters/plots/paper_subspace_structure.pdf}
 % \begin{tikzpicture}[
@@ -460,7 +460,7 @@ It is worth stressing that the purpose of TSWT here is not to solve the dynamics
 
 For the structure of the thesis, this subsection therefore plays a purely motivational and conceptual role. It explains why the paper introduces the time-dependent Schrieffer--Wolff transformation before defining its leakage penalty. The next subsection will build on this framework more concretely by presenting the leakage-related bound itself and explaining how it enters the control objective as a penalty term.
 
-\begin{figure}[t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.8\textwidth]{chapters/plots/tswt_motivation.pdf}
 % \begin{tikzpicture}[
@@ -556,7 +556,7 @@ This is precisely why the paper elevates leakage from a post hoc error metric to
 
 For the structure of the thesis, Eq.~\eqref{eq:paper_leakage_bound} is the main mathematical outcome of the paper's leakage analysis. It takes the abstract discussion of TSWT and turns it into a concrete scalar quantity that can be inserted into the cost function. The next subsection will build directly on this result by introducing the full UFO objective, where \(L_{\mathrm{tot}}\) appears alongside gate infidelity, boundary-condition penalties, and total runtime.
 
-\begin{figure}[t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.9\textwidth]{chapters/plots/structure_leakage_bound.pdf}
 % \begin{tikzpicture}[
@@ -678,7 +678,7 @@ From the perspective of reinforcement learning, Eq.~\eqref{eq:ufo_cost_function}
 
 For the structure of the thesis, Eq.~\eqref{eq:ufo_cost_function} should be treated as the centerpiece of the paper-specific framework chapter. The earlier subsections prepare its ingredients: the gmon Hamiltonian defines the control model, the subspace decomposition identifies the leakage channels, and the TSWT analysis produces the leakage bound. The later subsections then explain how this cost function is used inside the reinforcement-learning formulation, and how the resulting controls are evaluated on the target gate family studied in the paper.
 
-\begin{figure}[t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.9\textwidth]{chapters/plots/ufo_cost_structure.pdf}
 % \begin{tikzpicture}[
@@ -808,7 +808,7 @@ This formulation is particularly natural for robust analog quantum control, beca
 For the structure of the thesis, this subsection is the bridge between the physics of the UFO objective and the algorithmic machinery of policy optimization. The next paragraph will build directly on it by explaining why the paper specifically chooses a continuous-variable policy-gradient method trained with trust-region policy optimization (TRPO), rather than a simpler gradient-descent or value-based RL approach.
 
 \tikzexternaldisable
-\begin{figure}[t]
+\begin{figure}[htbp]
 \centering
 % \includegraphics[width=0.8\textwidth]{chapters/plots/paper_rl_loop.pdf}
 \begin{tikzpicture}[
@@ -983,7 +983,7 @@ The paper also gives a conceptual argument for why TRPO should outperform direct
 There is also a more physical reason why a trust-region policy method is attractive here. Quantum control pulses are not arbitrary vectors; they are temporally correlated objects whose early and late segments interact through phase accumulation, transient leakage, and the final gate constraint. A useful optimizer must therefore capture \emph{nonlocal structure} across the trajectory. The paper emphasizes exactly this point, arguing that the policy neural network can learn nonlocal regularities of effective control solutions, and that these regularities are difficult to exploit with simpler local optimization schemes \cite{Niu2019}. In other words, TRPO is not chosen merely because it is a standard continuous-control RL algorithm; it is chosen because its policy-based formulation is compatible with the trajectory-level structure of analog quantum control.
 
 From the implementation viewpoint, the paper uses TRPO in an actor--critic architecture. Denoting the policy network by \(\pi_{\bm{\theta}}(a\mid s)\) and the value network by \(V_{\bm{\omega}}(s)\), the learning loop alternates between:
-\textbf{TODO:} PSEUDOCODE
+%\textbf{TODO:} PSEUDOCODE
 \begin{enumerate}
 \item sampling many episodes under the current stochastic policy,
 \item estimating discounted future rewards and advantages,
@@ -1002,7 +1002,7 @@ This makes it a particularly reasonable choice for the UFO optimization problem,
 
 In the structure of the thesis, this subsection should be read as the algorithmic complement of the previous one. The earlier subsection explained how the physics problem is cast as an RL environment; the present one explains why TRPO is the specific optimization engine chosen to solve it. The next subsection will complete the learning formulation by explaining how stochastic control noise is injected during training in order to promote robustness.
 
-\begin{figure}[t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.8\textwidth]{chapters/plots/trpo_trust_region.pdf}
 % \begin{tikzpicture}[
@@ -1129,7 +1129,7 @@ A further conceptual point is that the noisy training environment is aligned wit
 
 From the perspective of the thesis, this subsection is where robustness fully enters the learning formulation. Earlier subsections introduced robustness as a motivation and the UFO objective as a physically meaningful cost. The present subsection shows how the paper turns that idea into practice: the RL agent is trained on noisy Hamiltonian trajectories, and performance is judged by noisy average fidelity and fidelity variance. The next subsection will complete the framework by specifying the target family of two-qubit gates on which the method is trained and benchmarked.
 
-\begin{figure}[t]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.8\textwidth]{chapters/plots/stochastic_training_environment.pdf}
 % \begin{tikzpicture}[
@@ -1261,7 +1261,7 @@ Taken together, this implementation makes the direct gradient-based baseline a s
 \end{algorithmic}
 \end{algorithm}
 
-\textbf{TODO:} Da rileggere domani
+%\textbf{TODO:} Da rileggere domani
 
 \subsection{Baselines and comparison strategy}
 \label{subsec:baselines_comparison_strategy}
@@ -1366,7 +1366,7 @@ with each baseline probing a different aspect of this performance vector.
 \subsection{Main findings of the original paper}
 \label{subsec:main_findings_original_paper}
 
-% \textbf{TODO:} da sistemare 
+% %\textbf{TODO:} da sistemare 
 % FOR NOW AI GENERATED THIS SECTION (TO BE INCLUDED THE PAPERS ORIGINAL RESULTS)
 
 With the physical model, the UFO objective, the reinforcement-learning formulation, and the target gate family all in place, the main findings of the reference paper can now be stated clearly. The paper reports that training a TRPO-based reinforcement-learning agent in a stochastic control environment yields analog gate controls that are simultaneously fast, accurate, and substantially more robust to Gaussian control noise than the baseline methods considered \cite{Niu2019}. In other words, the central claim of the work is not merely that reinforcement learning can find workable controls, but that the combination of the UFO objective with noisy training leads to a qualitatively better balance between fidelity, robustness, and runtime than alternative approaches.
@@ -1431,4 +1431,4 @@ Taken together, the results of the paper may be summarized as follows:
 \end{equation}
 relative to the baseline methods studied in the work. This compact summary captures the three pillars of the paper's contribution: robustness, stability, and hardware efficiency.
 
-\textbf{TODO:} Aggiungere un diagramma parlante totale su environment fisico
+%\textbf{TODO:} Aggiungere un diagramma parlante totale su environment fisico
