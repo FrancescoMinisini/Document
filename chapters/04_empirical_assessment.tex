@@ -504,7 +504,7 @@ In this sense, Eq.~\eqref{eq:representative_target_gate} serves as the natural e
 
 %\textbf{TODO:} Da decidere se fare con o senza labels posso anche fare una versione  meno restrittiva
 
-% \subsection{Adam-baseline Results}
+% \subsection{Results for the Adam baseline}
 % \label{subsec:adam_baseline_results}
 
 % As a first non-RL reference, the representative target
@@ -655,7 +655,7 @@ In this sense, Eq.~\eqref{eq:representative_target_gate} serves as the natural e
 
 % Finally, the nominal TRPO experiment also motivates a careful reading of training curves. Because the controller is evaluated after every policy update and the code stores both the current evaluation cost and the time \(t_{\min}\) at which the minimum rollout cost is reached, the most informative training visualization is not simply fidelity versus iteration. A better representation is one that jointly tracks the evolution of evaluation cost, fidelity, leakage, and learned stopping time. In the present case, such a plot would show that the policy quickly enters a high-fidelity regime but continues to trade off leakage and runtime within the admissible \(180\,\mathrm{ns}\) window, eventually settling on a best deterministic solution around the \(T_{\mathrm{TRPO}}^{\mathrm{nom}}=116\,\mathrm{ns}\) scale. This makes the nominal TRPO subsection a natural bridge between the fixed-horizon analysis of the Adam baseline and the explicitly robustness-oriented analysis of the next subsection.
 
-\subsection{Adam-baseline Results}
+\subsection{Results for the Adam baseline}
 \label{subsec:adam_baseline_results}
 
 As a first non-RL reference, the representative target
