@@ -512,13 +512,13 @@ Equation~\eqref{eq:app_three_level_rotating_hamiltonian_final} makes the origin 
 
 \chapter{Algorithmic details}
 \label{app:algorithmic_details}
+This appendix collects compact algorithmic summaries of the main numerical procedures discussed in the thesis. Their purpose is not to replace the implementation details presented in the main text, but to provide the reader with a structured view of the operational workflow used in the simulations and experiments. The full code and experiment implementation is available in the GitHub repository: \href{https://github.com/FrancescoMinisini/RL-for-Universal-Analog-Quantum-Control-on-Gmon-Qubits}{FrancescoMinisini/RL-for-Universal-Analog-Quantum-Control}.
 
 \section{Environment step and rollout generation}
 \label{app:env_rollout}
 
-This appendix collects compact algorithmic summaries of the main numerical procedures discussed in the thesis. Their purpose is not to replace the implementation details presented in the main text, but to provide the reader with a structured view of the operational workflow used in the simulations and experiments.
 
-\begin{algorithm}[htbp]
+\begin{algorithm}[H]
 \caption{Quantum-control environment rollout used for policy interaction and data collection}
 \label{alg:env_rollout_appendix}
 \begin{algorithmic}[1]
@@ -551,11 +551,7 @@ This appendix collects compact algorithmic summaries of the main numerical proce
     \State append nominal and noisy controls to the trajectory history
     \State evaluate fidelity, leakage proxy, boundary cost, time cost, and total UFO cost
     \State assign the reward according to the selected reward rule
-    \State determine whether the episode terminates because of:
-    \begin{itemize}
-        \item maximum allowed runtime,
-        \item or sufficiently low cost (optionally with a minimum fidelity constraint)
-    \end{itemize}
+    \State control of termination conditions: maximum allowed runtime, or sufficiently low cost
     \State construct the next observation $o_{t+1}$
     \State store the transition
     \(
@@ -564,5 +560,96 @@ This appendix collects compact algorithmic summaries of the main numerical proce
     \State update $o_t \leftarrow o_{t+1}$, $U_t \leftarrow U_{t+1}$, and $t \leftarrow t+1$
 \EndWhile
 \State \Return trajectory transitions, control histories, reward history, cost history, fidelity history, and final episode statistics
+\end{algorithmic}
+\end{algorithm}
+
+\section{Incremental evaluation of the TSWT-based leakage estimator}
+\label{app:Incremental_TSWT}
+
+\begin{algorithm}[H]
+\caption{Incremental TSWT-based leakage estimator used during propagation}
+\label{alg:tswt_leakage_appendix}
+\begin{algorithmic}[1]
+\Require instantaneous Hamiltonian $H_t$, effective anharmonicity $\eta_t$, timestep $\Delta t$
+\Require previous quantities $S_1^{(t-1)}$, $S_2^{(t-1)}$, $H_{\mathrm{od}}^{(3)}(t-1)$, $H_{\mathrm{od}}^{(3)}(t-2)$
+\State decompose the Hamiltonian as
+\(
+H_t = H_0(t) + H_1(t) + H_2(t),
+\)
+where $H_0$ is the dominant block-diagonal part, $H_1$ is the residual block-diagonal correction, and $H_2$ is the block-off-diagonal contribution
+\State build the denominator matrix associated with the instantaneous gap structure
+\(
+\Delta_{jk}(t)=\eta_t\, c_{jk}
+\)
+for the relevant inter-subspace coefficients $c_{jk}$
+\State compute the first TSWT generator by solving the off-diagonal equation
+\(
+S_1(t)=\Delta(t)^{-1} H_2(t)
+\)
+restricted to the block-off-diagonal sector
+\If{$S_1^{(t-1)}$ is available}
+    \State estimate the time derivative
+    \(
+    \dot S_1(t)\approx \frac{S_1(t)-S_1(t-1)}{\Delta t}
+    \)
+\Else { set $\dot S_1(t)\leftarrow 0$}
+\EndIf
+\State compute the second TSWT generator from
+\(
+S_2(t)=\Delta(t)^{-1}\,\mathrm{OffDiag}\!\left([H_1(t),S_1(t)]-i\,\dot S_1(t)\right)
+\)
+\If{$S_2^{(t-1)}$ is available}
+    \State estimate the time derivative
+    \(
+    \dot S_2(t)\approx \frac{S_2(t)-S_2(t-1)}{\Delta t}
+    \)
+\Else {set $\dot S_2(t)\leftarrow 0$}
+\EndIf
+\State construct the residual third-order block-off-diagonal contribution
+\(
+R_t=[H_1(t),S_2(t)] + \frac{1}{3}[[H_2(t),S_1(t)],S_1(t)] - i\,\dot S_2(t)
+\)
+\State symmetrize and project it onto the block-off-diagonal sector:
+\(
+H_{\mathrm{od}}^{(3)}(t)=\mathrm{OffDiag}\!\left(\frac{R_t+R_t^\dagger}{2}\right)
+\)
+\State evaluate its spectral norm
+\(
+\nu_t=\left\|H_{\mathrm{od}}^{(3)}(t)\right\|
+\)
+and the instantaneous gap scale
+\(
+\Delta_t = |\eta_t|\,\kappa_{\eta}
+\)
+where $\kappa_{\eta}$ is the fixed unit-conversion factor used in the implementation
+\If{this is the first available sample}
+    \State store $\nu_t$ and $\Delta_t$ as the initial boundary data
+\EndIf
+\If{$H_{\mathrm{od}}^{(3)}(t-1)$ and $H_{\mathrm{od}}^{(3)}(t-2)$ are available}
+    \State estimate the discrete second derivative
+    \(
+    \ddot H_{\mathrm{od}}^{(3)}(t)\approx
+    \frac{H_{\mathrm{od}}^{(3)}(t)-2H_{\mathrm{od}}^{(3)}(t-1)+H_{\mathrm{od}}^{(3)}(t-2)}{\Delta t^2}
+    \)
+    \State update the accumulated integral contribution
+    \(
+    I_t \leftarrow I_{t-1}
+    +
+    \frac{\|\ddot H_{\mathrm{od}}^{(3)}(t)\|\,\Delta t}{\max(\Delta_t^2,\varepsilon)}
+    \)
+\EndIf
+\State store the current sample as the latest boundary data
+\State update the previous-memory variables for the next timestep
+\State define the current boundary term
+\(
+B_t=\frac{\nu_{\mathrm{first}}}{\Delta_{\mathrm{first}}}
++
+\frac{\nu_t}{\Delta_t}
+\)
+\State form the total leakage proxy
+\(
+L_t = B_t + I_t
+\)
+\State \Return $L_t$ together with its boundary and integral components
 \end{algorithmic}
 \end{algorithm}

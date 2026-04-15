@@ -458,7 +458,7 @@ Equation~\eqref{eq:tswt_suppression_order} is highly revealing. It shows that th
 
 It is worth stressing that the purpose of TSWT here is not to solve the dynamics exactly. Rather, it is to construct a rotated computational basis in which the physically relevant leakage channels are perturbatively exposed and organized. This rotated basis is more natural for control analysis because it distinguishes between errors that are intrinsic to the desired block-diagonal effective dynamics and errors that arise from residual inter-subspace coupling. In other words, TSWT provides the analytical language needed to say not just that leakage occurs, but \emph{why} it occurs and at which perturbative order it enters.
 
-For the structure of the thesis, this subsection therefore plays a purely motivational and conceptual role. It explains why the paper introduces the time-dependent Schrieffer--Wolff transformation before defining its leakage penalty. The next subsection will build on this framework more concretely by presenting the leakage-related bound itself and explaining how it enters the control objective as a penalty term.
+% For the structure of the thesis, this subsection therefore plays a purely motivational and conceptual role. It explains why the paper introduces the time-dependent Schrieffer--Wolff transformation before defining its leakage penalty. The next subsection will build on this framework more concretely by presenting the leakage-related bound itself and explaining how it enters the control objective as a penalty term.
 
 \begin{figure}[t]
 \centering
@@ -502,7 +502,7 @@ O\!\left(\frac{\epsilon^{3}}{\Delta^{2}}\right),
 \end{equation}
 where $\epsilon$ is the characteristic scale of the inter- and intra-subspace couplings and $\Delta$ is the minimum energy gap separating the computational subspace from the higher subspaces. Equation~\eqref{eq:Hod_order_after_tswt} is crucial: it expresses the fact that the direct leakage-inducing couplings have already been perturbatively suppressed to higher order by the TSWT. Leakage is therefore not controlled by the original raw off-diagonal Hamiltonian, but by the smaller residual coupling that remains after the rotated basis has been chosen appropriately.
 
-Starting from this residual Hamiltonian, the paper derives in Appendix B a practical upper bound for the accumulated coherent leakage,
+Starting from this residual Hamiltonian, as derived in Appendix~\ref{app:tswt_coherent_leakage_bound}, a practical upper bound for the accumulated coherent leakage is given by
 \begin{equation}
 L_{\mathrm{tot}}(T)
 \lesssim
@@ -552,6 +552,8 @@ From a control-theoretic perspective, the importance of Eq.~\eqref{eq:paper_leak
 \end{itemize}
 In this sense, the bound is not only a diagnostic; it is also an analytic design principle.
 
+The incremental evaluation of the TSWT-based leakage proxy used during simulation is summarized in Algorithm~\ref{alg:tswt_leakage_compact}, while a more explicit version of this estimator, closer to the actual numerical implementation, is reported in Appendix~\ref{app:Incremental_TSWT}.
+
 This is precisely why the paper elevates leakage from a post hoc error metric to an explicit optimization target. Instead of relying on randomized benchmarking or brute-force leakage estimation at the end of training, it introduces the bound \(L_{\mathrm{tot}}\) as a penalty term in the control objective. The significance of this move should not be understated. It means that the reinforcement-learning agent is not merely rewarded for producing a good final logical unitary, but is also discouraged, throughout optimization, from exploring pulse trajectories that are predicted to be leakage-prone by the perturbative physics of the full multilevel Hamiltonian \cite{Niu2019}.
 
 For the structure of the thesis, Eq.~\eqref{eq:paper_leakage_bound} is the main mathematical outcome of the paper's leakage analysis. It takes the abstract discussion of TSWT and turns it into a concrete scalar quantity that can be inserted into the cost function. The next subsection will build directly on this result by introducing the full UFO objective, where \(L_{\mathrm{tot}}\) appears alongside gate infidelity, boundary-condition penalties, and total runtime.
@@ -581,11 +583,24 @@ For the structure of the thesis, Eq.~\eqref{eq:paper_leakage_bound} is the main 
 \label{fig:structure_leakage_bound}
 \end{figure}
 
-
-% Requires in the preamble:
-% \usepackage{amsmath,amssymb,amsfonts,bm}
-% \usepackage{tikz}
-% \usetikzlibrary{positioning,arrows.meta}
+\begin{algorithm}[t]
+\caption{Incremental update of the TSWT-based leakage estimator}
+\label{alg:tswt_leakage_compact}
+\begin{algorithmic}[1]
+\Require instantaneous Hamiltonian $H_t$, effective anharmonicity $\eta_t$
+\State decompose $H_t$ into $H_0$, $H_1$, and $H_2$
+\State compute the first TSWT generator $S_1$
+\State estimate $\dot S_1$ from finite differences
+\State compute the second TSWT generator $S_2$
+\State estimate $\dot S_2$ from finite differences
+\State construct the residual third-order block-off-diagonal term $H_{\mathrm{od}}^{(3)}$
+\State evaluate its spectral norm and the instantaneous gap scale $\Delta_t$
+\State update the boundary contribution using the first and last samples
+\State update the integral contribution from the discrete second derivative of $H_{\mathrm{od}}^{(3)}$
+\State store the current quantities for the next step
+\State \Return updated leakage estimate
+\end{algorithmic}
+\end{algorithm}
 
 \subsection{The Universal Cost Function Optimization objective}
 \label{subsec:ufo_cost_function}
