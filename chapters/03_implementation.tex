@@ -152,6 +152,38 @@ f_1(t),f_2(t),\;
 \end{equation}
 This explicit decomposition is very useful in the thesis, because it makes clear which physical quantities the learning agent is allowed to shape.
 
+% \includegraphics[width=0.8\textwidth]{chapters/plots/gmon_control_channels.pdf}
+\tikzexternaldisable
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    box/.style={draw, rounded corners, minimum width=2.6cm, minimum height=1cm, align=center},
+    arrow/.style={-{Latex[length=2mm]}, thick},
+    node distance=1.4cm and 1.5cm
+]
+
+\node[box] (g) {$g(t)$\\tunable coupling};
+\node[box, below left=of g] (d1) {$\delta_1(t)$\\local detuning};
+\node[box, below right=of g] (d2) {$\delta_2(t)$\\local detuning};
+\node[box, below=of d1] (f1) {$f_1(t),\phi_1(t)$\\microwave drive};
+\node[box, below=of d2] (f2) {$f_2(t),\phi_2(t)$\\microwave drive};
+\node[box, right=3.0cm of g, minimum width=4.0cm, minimum height=3.2cm] (ham) {Effective Hamiltonian\\[0.3em]
+Bosonic model: Eq.~\eqref{eq:gmon_rwa_bosonic_hamiltonian}\\
+Qubit projection: Eq.~\eqref{eq:gmon_qubit_projected_hamiltonian}
+};
+
+\draw[arrow] (g) -- (ham);
+\draw[arrow] (d1) -- (ham);
+\draw[arrow] (d2) -- (ham);
+\draw[arrow] (f1) -- (ham);
+\draw[arrow] (f2) -- (ham);
+
+\end{tikzpicture}
+\caption{Control channels entering the effective gmon Hamiltonian. The tunable coupling $g(t)$, local detunings $\delta_j(t)$, and microwave amplitudes/phases $(f_j(t),\phi_j(t))$ together define the time-dependent control resources available for quantum gate optimization.}
+\label{fig:gmon_control_channels}
+\end{figure}
+\tikzexternalenable
+
 Although Eq.~\eqref{eq:gmon_rwa_bosonic_hamiltonian} is the correct model for studying multilevel dynamics and leakage, it is also helpful to project it onto the logical qubit basis in order to interpret the corresponding two-qubit control structure. After truncation to the qubit subspace, we can re-write the Hamiltonian as
 \begin{equation}
 \hat{H}_{\mathrm{qb}}(t)
@@ -189,37 +221,6 @@ A further important aspect of the paper is that the control problem is posed und
 
 For the structure of the thesis, the main role of the present subsection is therefore to identify the dynamical variables of the problem. Equation~\eqref{eq:gmon_rwa_bosonic_hamiltonian} gives the effective multilevel control model on which the optimization is performed, while Eq.~\eqref{eq:gmon_qubit_projected_hamiltonian} clarifies the corresponding logical meaning of the available controls. The next paragraph will build on this by specializing the computational and leakage subspaces in the notation of the paper, thereby preparing the ground for the analytical leakage treatment that follows.
 
-% \includegraphics[width=0.8\textwidth]{chapters/plots/gmon_control_channels.pdf}
-\tikzexternaldisable
-\begin{figure}[t]
-\centering
-\begin{tikzpicture}[
-    box/.style={draw, rounded corners, minimum width=2.6cm, minimum height=1cm, align=center},
-    arrow/.style={-{Latex[length=2mm]}, thick},
-    node distance=1.4cm and 1.5cm
-]
-
-\node[box] (g) {$g(t)$\\tunable coupling};
-\node[box, below left=of g] (d1) {$\delta_1(t)$\\local detuning};
-\node[box, below right=of g] (d2) {$\delta_2(t)$\\local detuning};
-\node[box, below=of d1] (f1) {$f_1(t),\phi_1(t)$\\microwave drive};
-\node[box, below=of d2] (f2) {$f_2(t),\phi_2(t)$\\microwave drive};
-\node[box, right=3.0cm of g, minimum width=4.0cm, minimum height=3.2cm] (ham) {Effective Hamiltonian\\[0.3em]
-Bosonic model: Eq.~\eqref{eq:gmon_rwa_bosonic_hamiltonian}\\
-Qubit projection: Eq.~\eqref{eq:gmon_qubit_projected_hamiltonian}
-};
-
-\draw[arrow] (g) -- (ham);
-\draw[arrow] (d1) -- (ham);
-\draw[arrow] (d2) -- (ham);
-\draw[arrow] (f1) -- (ham);
-\draw[arrow] (f2) -- (ham);
-
-\end{tikzpicture}
-\caption{Control channels entering the effective gmon Hamiltonian. The tunable coupling $g(t)$, local detunings $\delta_j(t)$, and microwave amplitudes/phases $(f_j(t),\phi_j(t))$ together define the time-dependent control resources available for quantum gate optimization.}
-\label{fig:gmon_control_channels}
-\end{figure}
-\tikzexternalenable
 
 
 \subsection{Computational and leakage subspaces in the paper's notation}
@@ -316,33 +317,9 @@ contains the couplings \emph{within} each subspace and is therefore block-diagon
 \end{equation}
 contains the couplings \emph{between} different subspaces and is therefore block-off-diagonal. This is the term responsible for direct coherent leakage from the computational sector into higher-energy sectors.
 
-This decomposition has a clear physical meaning in the present gmon model. The qubit operations one wants to realize logically are encoded in the dynamics of $\hat{H}_1(t)$ restricted to $\Omega_0$, since this term preserves the subspace structure. However, the actual experimental controls that produce the desired logical rotations and entangling interactions also generate the block-off-diagonal contribution $\hat{H}_2(t)$. Therefore, one cannot simply turn off the leakage-generating couplings without also removing the very controls that make universal gate implementation possible. This is precisely why leakage suppression is a nontrivial control-theoretic problem rather than a trivial projection argument \cite{Niu2019}.
-
-More concretely, $\hat{H}_1(t)$ contains not only the desired couplings within $\Omega_0$, but also the couplings within $\Omega_1$. Thus, the first leakage sector is not just a passive reservoir of unwanted states; it is itself dynamically structured. This point is important for two reasons. First, it explains why the dominant leakage cannot be understood simply as isolated transitions into a single stray level. Second, it motivates the later use of a transformed basis, since the full time-dependent dynamics involves a nontrivial interplay between intra-subspace and inter-subspace couplings.
-
-The perturbative regime assumed by the paper is expressed through a separation of scales:
-\begin{equation}
-\epsilon
-\sim
-\|\hat{H}_1(t)\|
-\sim
-\|\hat{H}_2(t)\|
-\ll
-\Delta,
-\label{eq:epsilon_delta_scale_separation}
-\end{equation}
-or equivalently
-\begin{equation}
-\frac{\epsilon}{\Delta} \ll 1.
-\label{eq:small_parameter_ratio}
-\end{equation}
-Here $\epsilon$ denotes the characteristic magnitude of the control-induced couplings, while $\Delta$ denotes the large energy gap separating the qubit sector from higher sectors. Equations~\eqref{eq:epsilon_delta_scale_separation}--\eqref{eq:small_parameter_ratio} are fundamental because they justify the perturbative treatment that follows in the next subsection. Intuitively, the control fields are assumed to be strong enough to generate nontrivial logical gates, but still weak enough relative to the inter-subspace energy gap that leakage can be treated systematically rather than completely overwhelming the dynamics.
-
-From the viewpoint of the thesis, the main importance of the present subsection is that it introduces the exact language in which this thesis formulates leakage. The computational space is not referred to generically, but specifically as the lowest-energy subspace $\Omega_0$; leakage is not described only as population outside the qubit basis, but as coupling from $\Omega_0$ to the higher subspaces $\Omega_1,\Omega_2,\dots$ through the block-off-diagonal Hamiltonian $\hat{H}_2(t)$. This notation is essential for the following subsection, where the time-dependent Schrieffer--Wolff transformation is introduced precisely to suppress and bound the effect of these inter-subspace couplings.
-
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.85\textwidth]{chapters/plots/paper_subspace_structure.pdf}
+\includegraphics[width=0.65\textwidth]{chapters/plots/paper_subspace_structure.pdf}
 % \begin{tikzpicture}[
 %     x=1.0cm, y=1.0cm,
 %     level/.style={draw, rounded corners, minimum width=6.2cm, minimum height=0.9cm, align=center, thick},
@@ -377,6 +354,31 @@ From the viewpoint of the thesis, the main importance of the present subsection 
 \caption{Subspace structure used in the paper. The computational sector is the lowest-energy subspace $\Omega_0$, while $\Omega_1,\Omega_2,\dots$ are higher-energy leakage subspaces. The block-diagonal term $\hat H_1(t)$ acts within each subspace, whereas the block-off-diagonal term $\hat H_2(t)$ couples different subspaces and induces leakage.}
 \label{fig:paper_subspace_structure}
 \end{figure}
+
+This decomposition has a clear physical meaning in the present gmon model. The qubit operations one wants to realize logically are encoded in the dynamics of $\hat{H}_1(t)$ restricted to $\Omega_0$, since this term preserves the subspace structure. However, the actual experimental controls that produce the desired logical rotations and entangling interactions also generate the block-off-diagonal contribution $\hat{H}_2(t)$. Therefore, one cannot simply turn off the leakage-generating couplings without also removing the very controls that make universal gate implementation possible. This is precisely why leakage suppression is a nontrivial control-theoretic problem rather than a trivial projection argument \cite{Niu2019}.
+
+More concretely, $\hat{H}_1(t)$ contains not only the desired couplings within $\Omega_0$, but also the couplings within $\Omega_1$. Thus, the first leakage sector is not just a passive reservoir of unwanted states; it is itself dynamically structured. This point is important for two reasons. First, it explains why the dominant leakage cannot be understood simply as isolated transitions into a single stray level. Second, it motivates the later use of a transformed basis, since the full time-dependent dynamics involves a nontrivial interplay between intra-subspace and inter-subspace couplings.
+
+The perturbative regime assumed by the paper is expressed through a separation of scales:
+\begin{equation}
+\epsilon
+\sim
+\|\hat{H}_1(t)\|
+\sim
+\|\hat{H}_2(t)\|
+\ll
+\Delta,
+\label{eq:epsilon_delta_scale_separation}
+\end{equation}
+or equivalently
+\begin{equation}
+\frac{\epsilon}{\Delta} \ll 1.
+\label{eq:small_parameter_ratio}
+\end{equation}
+Here $\epsilon$ denotes the characteristic magnitude of the control-induced couplings, while $\Delta$ denotes the large energy gap separating the qubit sector from higher sectors. Equations~\eqref{eq:epsilon_delta_scale_separation}--\eqref{eq:small_parameter_ratio} are fundamental because they justify the perturbative treatment that follows in the next subsection. Intuitively, the control fields are assumed to be strong enough to generate nontrivial logical gates, but still weak enough relative to the inter-subspace energy gap that leakage can be treated systematically rather than completely overwhelming the dynamics.
+
+From the viewpoint of the thesis, the main importance of the present subsection is that it introduces the exact language in which this thesis formulates leakage. The computational space is not referred to generically, but specifically as the lowest-energy subspace $\Omega_0$; leakage is not described only as population outside the qubit basis, but as coupling from $\Omega_0$ to the higher subspaces $\Omega_1,\Omega_2,\dots$ through the block-off-diagonal Hamiltonian $\hat{H}_2(t)$. This notation is essential for the following subsection, where the time-dependent Schrieffer--Wolff transformation is introduced precisely to suppress and bound the effect of these inter-subspace couplings.
+
 
 \section{Leakage treatment and control objective}
 
@@ -483,10 +485,7 @@ It is worth stressing that the purpose of TSWT here is not to solve the dynamics
 \label{fig:tswt_motivation}
 \end{figure}
 
-% Requires in the preamble:
-% \usepackage{amsmath,amssymb,amsfonts,bm}
-% \usepackage{tikz}
-% \usetikzlibrary{positioning,arrows.meta}
+
 
 \subsection{The leakage bound and its role as a control penalty}
 \label{subsec:leakage_bound_penalty}
@@ -543,21 +542,6 @@ has a different interpretation. It penalizes rapid temporal variation of the res
 
 One of the most attractive features of Eq.~\eqref{eq:paper_leakage_bound} is that it unifies the dominant leakage behavior in both off-resonant and on-resonant regimes. The paper argues that, after comparing the different terms arising from the direct-coupling and generalized adiabatic-theorem analyses, the bound in Eq.~\eqref{eq:paper_leakage_bound} captures the dominant leakage contribution in both regimes \cite{Niu2019}. More specifically, in slowly modulated off-resonant situations the boundary terms may dominate, whereas in faster on-resonant modulation regimes the time-derivative contribution becomes more important. This makes the bound especially valuable for optimization, since it does not apply only to one narrow operational regime.
 
-From a control-theoretic perspective, the importance of Eq.~\eqref{eq:paper_leakage_bound} lies in the fact that it is \emph{optimization-friendly}. Unlike a leakage estimate based purely on final-state population obtained after a full time evolution, the bound is written directly in terms of the effective Hamiltonian and its derivatives. This means that it can be evaluated as a physically meaningful soft penalty during optimization, and it also gives immediate qualitative guidance:
-\begin{itemize}
-\item reduce the magnitude of the residual block-off-diagonal coupling,
-\item enforce smooth temporal modulation,
-\item satisfy appropriate boundary conditions,
-\item keep the relevant energy gap from becoming too small.
-\end{itemize}
-In this sense, the bound is not only a diagnostic; it is also an analytic design principle.
-
-The incremental evaluation of the TSWT-based leakage proxy used during simulation is summarized in Algorithm~\ref{alg:tswt_leakage_compact}, while a more explicit version of this estimator, closer to the actual numerical implementation, is reported in Appendix~\ref{app:Incremental_TSWT}.
-
-This is precisely why the paper elevates leakage from a post hoc error metric to an explicit optimization target. Instead of relying on randomized benchmarking or brute-force leakage estimation at the end of training, it introduces the bound \(L_{\mathrm{tot}}\) as a penalty term in the control objective. The significance of this move should not be understated. It means that the reinforcement-learning agent is not merely rewarded for producing a good final logical unitary, but is also discouraged, throughout optimization, from exploring pulse trajectories that are predicted to be leakage-prone by the perturbative physics of the full multilevel Hamiltonian \cite{Niu2019}.
-
-For the structure of the thesis, Eq.~\eqref{eq:paper_leakage_bound} is the main mathematical outcome of the paper's leakage analysis. It takes the abstract discussion of TSWT and turns it into a concrete scalar quantity that can be inserted into the cost function. The next subsection will build directly on this result by introducing the full UFO objective, where \(L_{\mathrm{tot}}\) appears alongside gate infidelity, boundary-condition penalties, and total runtime.
-
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.9\textwidth]{chapters/plots/structure_leakage_bound.pdf}
@@ -582,6 +566,22 @@ For the structure of the thesis, Eq.~\eqref{eq:paper_leakage_bound} is the main 
 \caption{Structure of the leakage bound used in the paper. The total leakage penalty \(L_{\mathrm{tot}}\) combines two boundary contributions, associated with residual off-diagonal couplings at the initial and final times, with an integral term that penalizes rapid modulation of the effective block-off-diagonal Hamiltonian.}
 \label{fig:structure_leakage_bound}
 \end{figure}
+
+From a control-theoretic perspective, the importance of Eq.~\eqref{eq:paper_leakage_bound} lies in the fact that it is \emph{optimization-friendly}. Unlike a leakage estimate based purely on final-state population obtained after a full time evolution, the bound is written directly in terms of the effective Hamiltonian and its derivatives. This means that it can be evaluated as a physically meaningful soft penalty during optimization, and it also gives immediate qualitative guidance:
+\begin{itemize}
+\item reduce the magnitude of the residual block-off-diagonal coupling,
+\item enforce smooth temporal modulation,
+\item satisfy appropriate boundary conditions,
+\item keep the relevant energy gap from becoming too small.
+\end{itemize}
+In this sense, the bound is not only a diagnostic; it is also an analytic design principle.
+
+The incremental evaluation of the TSWT-based leakage proxy used during simulation is summarized in Algorithm~\ref{alg:tswt_leakage_compact}, while a more explicit version of this estimator, closer to the actual numerical implementation, is reported in Appendix~\ref{app:Incremental_TSWT}.
+
+This is precisely why the paper elevates leakage from a post hoc error metric to an explicit optimization target. Instead of relying on randomized benchmarking or brute-force leakage estimation at the end of training, it introduces the bound \(L_{\mathrm{tot}}\) as a penalty term in the control objective. The significance of this move should not be understated. It means that the reinforcement-learning agent is not merely rewarded for producing a good final logical unitary, but is also discouraged, throughout optimization, from exploring pulse trajectories that are predicted to be leakage-prone by the perturbative physics of the full multilevel Hamiltonian \cite{Niu2019}.
+
+For the structure of the thesis, Eq.~\eqref{eq:paper_leakage_bound} is the main mathematical outcome of the paper's leakage analysis. It takes the abstract discussion of TSWT and turns it into a concrete scalar quantity that can be inserted into the cost function. The next subsection will build directly on this result by introducing the full UFO objective, where \(L_{\mathrm{tot}}\) appears alongside gate infidelity, boundary-condition penalties, and total runtime.
+
 
 \begin{algorithm}[t]
 \caption{Incremental update of the TSWT-based leakage estimator}
@@ -685,14 +685,6 @@ where \(\chi,\beta,\mu,\kappa > 0\) are adjustable hyperparameters. Equation~\eq
 
 The conceptual importance of Eq.~\eqref{eq:ufo_cost_function} is not just that it contains several terms, but that it encodes them as \emph{soft constraints} rather than hard restrictions. This is a major design choice of the paper. Much of the previous literature had reduced leakage by turning off certain control channels entirely or by imposing strong structural restrictions on the admissible controls. While such hard constraints may simplify the problem or suppress certain error mechanisms, they can also impair the full controllability of the system. The UFO framework takes the opposite approach: it preserves access to all relevant independent control channels and instead penalizes physically undesirable behavior through tunable cost terms \cite{Niu2019}. This offers the optimizer more flexibility while still discouraging leakage, runtime inflation, and poor boundary behavior.
 
-This soft-constraint philosophy is one of the reasons the objective deserves to be called universal. The framework does not depend on a single special-purpose gate ansatz, nor does it assume that the best strategy is obtained by imposing rigid analytical restrictions on the control. Instead, it defines a physically motivated cost landscape over the full admissible control space. The optimizer is then free to explore that landscape and discover control solutions that balance the competing objectives according to the chosen weights. From a control-theoretic perspective, Eq.~\eqref{eq:ufo_cost_function} is therefore best viewed as a multi-objective scalarization of the realistic gate-design problem.
-
-Another important feature is that the UFO objective is modular. The paper explicitly notes that, when applying the framework to a different quantum-computing platform, the individual terms of the cost function can be modified so as to reflect the relevant underlying physics \cite{Niu2019}. For example, if a different hardware platform required alternative boundary conditions, bandwidth penalties, or noise-aware robustness measures, these could be incorporated by replacing or augmenting the corresponding terms. Thus, universality here should not be interpreted as meaning that one fixed formula solves every platform unchanged; rather, it means that the framework provides a reusable blueprint for constructing a physically meaningful optimization objective.
-
-From the perspective of reinforcement learning, Eq.~\eqref{eq:ufo_cost_function} is the crucial bridge between physics and algorithm. Once this scalar objective has been defined, it can be used directly as the quantity to be minimized, or equivalently as the negative reward to be maximized by the RL agent. This is why the UFO cost function occupies such a central position in the paper: it is the place where all the physics of the control problem is distilled into a form that is both analytically meaningful and numerically optimizable.
-
-For the structure of the thesis, Eq.~\eqref{eq:ufo_cost_function} should be treated as the centerpiece of the paper-specific framework chapter. The earlier subsections prepare its ingredients: the gmon Hamiltonian defines the control model, the subspace decomposition identifies the leakage channels, and the TSWT analysis produces the leakage bound. The later subsections then explain how this cost function is used inside the reinforcement-learning formulation, and how the resulting controls are evaluated on the target gate family studied in the paper.
-
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.9\textwidth]{chapters/plots/ufo_cost_structure.pdf}
@@ -721,6 +713,15 @@ For the structure of the thesis, Eq.~\eqref{eq:ufo_cost_function} should be trea
 \caption{Structure of the UFO objective. The full control cost is obtained by combining four physically motivated penalty terms: gate infidelity, accumulated leakage, violation of boundary conditions, and total runtime.}
 \label{fig:ufo_cost_structure}
 \end{figure}
+
+This soft-constraint philosophy is one of the reasons the objective deserves to be called universal. The framework does not depend on a single special-purpose gate ansatz, nor does it assume that the best strategy is obtained by imposing rigid analytical restrictions on the control. Instead, it defines a physically motivated cost landscape over the full admissible control space. The optimizer is then free to explore that landscape and discover control solutions that balance the competing objectives according to the chosen weights. From a control-theoretic perspective, Eq.~\eqref{eq:ufo_cost_function} is therefore best viewed as a multi-objective scalarization of the realistic gate-design problem.
+
+Another important feature is that the UFO objective is modular. The paper explicitly notes that, when applying the framework to a different quantum-computing platform, the individual terms of the cost function can be modified so as to reflect the relevant underlying physics \cite{Niu2019}. For example, if a different hardware platform required alternative boundary conditions, bandwidth penalties, or noise-aware robustness measures, these could be incorporated by replacing or augmenting the corresponding terms. Thus, universality here should not be interpreted as meaning that one fixed formula solves every platform unchanged; rather, it means that the framework provides a reusable blueprint for constructing a physically meaningful optimization objective.
+
+From the perspective of reinforcement learning, Eq.~\eqref{eq:ufo_cost_function} is the crucial bridge between physics and algorithm. Once this scalar objective has been defined, it can be used directly as the quantity to be minimized, or equivalently as the negative reward to be maximized by the RL agent. This is why the UFO cost function occupies such a central position in the paper: it is the place where all the physics of the control problem is distilled into a form that is both analytically meaningful and numerically optimizable.
+
+For the structure of the thesis, Eq.~\eqref{eq:ufo_cost_function} should be treated as the centerpiece of the paper-specific framework chapter. The earlier subsections prepare its ingredients: the gmon Hamiltonian defines the control model, the subspace decomposition identifies the leakage channels, and the TSWT analysis produces the leakage bound. The later subsections then explain how this cost function is used inside the reinforcement-learning formulation, and how the resulting controls are evaluated on the target gate family studied in the paper.
+
 
 
 \section{Reinforcement-learning formulation of the control problem}
@@ -787,29 +788,6 @@ G_0
 \end{equation}
 and maximizing expected return is equivalent to minimizing the expected UFO control cost over sampled pulse trajectories. In this way, the entire physics of the problem enters the RL agent only through the environment update in Eq.~\eqref{eq:paper_environment_update} and the reward signal in Eq.~\eqref{eq:paper_reward_from_cost}.
 
-The paper further interprets optimization as a sequence of episodes, each of which contains all the time steps of one complete control trajectory. The episode length is determined by the smaller of:
-\begin{equation}
-T_{\mathrm{episode}}
-=
-\min\!\left(
-T_{\max},\;
-T_{\mathrm{stop}}
-\right),
-\label{eq:episode_termination}
-\end{equation}
-where \(T_{\max}\) is a predefined maximum runtime and \(T_{\mathrm{stop}}\) is the time at which a satisfactory value of the UFO cost is reached \cite{Niu2019}. This means that the learning problem is not only about shaping the pulse amplitudes, but also about discovering sufficiently good controls within a finite horizon. The runtime penalty in the UFO objective and the stopping rule in Eq.~\eqref{eq:episode_termination} therefore work together to encourage short, high-quality trajectories.
-
-An important implementation detail is that the RL agent in the paper uses two neural networks. The first, the \emph{policy network}, maps the current state to a probability distribution over the next control action. The second, the \emph{value network}, estimates the discounted future reward associated with the current state \cite{Niu2019}. Denoting these schematically by
-\begin{equation}
-\pi_{\bm{\theta}}(a_n\mid s_n)
-\qquad \text{and} \qquad
-V_{\bm{\omega}}(s_n),
-\label{eq:paper_policy_value_networks}
-\end{equation}
-one sees that the control problem is implemented in actor--critic form: the policy network generates pulse proposals, while the value network evaluates their long-term quality and stabilizes training. The paper reports that both networks are fully connected with hidden-layer dimensions \(64\), \(32\), and \(32\), respectively \cite{Niu2019}. While this architectural detail is not the conceptual core of the method, it is useful to report it in the thesis because it clarifies the scale and practical implementation of the RL agent.
-
-From a control perspective, the most important conceptual point is that the environment state is not a low-dimensional hand-crafted summary such as ``current pulse amplitude'' or ``elapsed time'' alone. Instead, it contains information about the current simulated unitary gate. This is a strong design choice: it means the agent is trained to reason directly in terms of how much of the target operation has already been built, rather than purely in terms of local control variables. Such a state representation is well matched to gate synthesis, since the desired task is naturally expressed in terms of the evolving unitary transformation rather than a single state vector or observable.
-
 \tikzexternaldisable
 \begin{figure}[t]
 \centering
@@ -835,6 +813,30 @@ From a control perspective, the most important conceptual point is that the envi
 \label{fig:paper_rl_loop}
 \end{figure}
 \tikzexternalenable
+
+The paper further interprets optimization as a sequence of episodes, each of which contains all the time steps of one complete control trajectory. The episode length is determined by the smaller of:
+\begin{equation}
+T_{\mathrm{episode}}
+=
+\min\!\left(
+T_{\max},\;
+T_{\mathrm{stop}}
+\right),
+\label{eq:episode_termination}
+\end{equation}
+where \(T_{\max}\) is a predefined maximum runtime and \(T_{\mathrm{stop}}\) is the time at which a satisfactory value of the UFO cost is reached \cite{Niu2019}. This means that the learning problem is not only about shaping the pulse amplitudes, but also about discovering sufficiently good controls within a finite horizon. The runtime penalty in the UFO objective and the stopping rule in Eq.~\eqref{eq:episode_termination} therefore work together to encourage short, high-quality trajectories.
+
+An important implementation detail is that the RL agent in the paper uses two neural networks. The first, the \emph{policy network}, maps the current state to a probability distribution over the next control action. The second, the \emph{value network}, estimates the discounted future reward associated with the current state \cite{Niu2019}. Denoting these schematically by
+\begin{equation}
+\pi_{\bm{\theta}}(a_n\mid s_n)
+\qquad \text{and} \qquad
+V_{\bm{\omega}}(s_n),
+\label{eq:paper_policy_value_networks}
+\end{equation}
+one sees that the control problem is implemented in actor--critic form: the policy network generates pulse proposals, while the value network evaluates their long-term quality and stabilizes training. The paper reports that both networks are fully connected with hidden-layer dimensions \(64\), \(32\), and \(32\), respectively \cite{Niu2019}. While this architectural detail is not the conceptual core of the method, it is useful to report it in the thesis because it clarifies the scale and practical implementation of the RL agent.
+
+From a control perspective, the most important conceptual point is that the environment state is not a low-dimensional hand-crafted summary such as ``current pulse amplitude'' or ``elapsed time'' alone. Instead, it contains information about the current simulated unitary gate. This is a strong design choice: it means the agent is trained to reason directly in terms of how much of the target operation has already been built, rather than purely in terms of local control variables. Such a state representation is well matched to gate synthesis, since the desired task is naturally expressed in terms of the evolving unitary transformation rather than a single state vector or observable.
+
 
 The RL formulation of the paper can therefore be summarized as follows:
 \begin{itemize}
@@ -1015,6 +1017,29 @@ N_{\mathrm{batch}} = 20000
 \end{equation}
 episodes, the policy network is updated so as to maximize expected discounted future reward \emph{within the trusted region}, while the value network is updated to fit the new empirical returns \cite{Niu2019}. Thus, the optimization is performed not step by step on a single control trajectory, but statistically over a large ensemble of sampled episodes. This batch-based learning is well matched to TRPO, whose trust-region update is specifically designed to use sampled trajectory information efficiently and robustly.
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{chapters/plots/trpo_trust_region.pdf}
+% \begin{tikzpicture}[
+%     box/.style={draw, rounded corners, minimum width=3.2cm, minimum height=1cm, align=center},
+%     arrow/.style={-{Latex[length=2mm]}, thick},
+%     node distance=1.8cm and 1.8cm
+% ]
+
+% \node[box] (old) {current policy\\$\pi_{\bm{\theta}_{\mathrm{old}}}$};
+% \node[box, right=of old] (trust) {trusted region\\$D_{\mathrm{KL}}\le \delta_{\mathrm{TR}}$};
+% \node[box, right=of trust] (new) {updated policy\\$\pi_{\bm{\theta}}$};
+
+% \draw[arrow] (old) -- (trust);
+% \draw[arrow] (trust) -- (new);
+
+% \node[below=1.2cm of trust, align=center] (note) {policy improvement is allowed only if the new action distribution\\remains sufficiently close to the old one};
+
+% \end{tikzpicture}
+\caption{Geometric intuition behind the TRPO update. Rather than taking an unconstrained gradient step, the policy is improved only within a trust region defined by a KL-divergence constraint, which stabilizes learning in continuous and stochastic control environments.}
+\label{fig:trpo_trust_region}
+\end{figure}
+
 The paper also gives a conceptual argument for why TRPO should outperform direct optimization of pulse parameters. Direct gradient descent in very high-dimensional nonconvex landscapes is known to struggle with flat saddle regions and poorly conditioned directions, especially when gradients become small \cite{Niu2019}. In the present control problem, these difficulties are exacerbated by leakage, stochastic control noise, and the fact that the control trajectory must satisfy multiple competing objectives simultaneously. TRPO addresses this at the policy level: rather than approximating or computing the full Hessian of the raw control landscape, it performs a model-free second-order policy update that is constrained by the geometry of the policy distribution itself. In this sense, the algorithm imports second-order stabilization ideas into a setting where direct control-Hessian methods would be prohibitively expensive.
 
 There is also a more physical reason why a trust-region policy method is attractive here. Quantum control pulses are not arbitrary vectors; they are temporally correlated objects whose early and late segments interact through phase accumulation, transient leakage, and the final gate constraint. A useful optimizer must therefore capture \emph{nonlocal structure} across the trajectory. The paper emphasizes exactly this point, arguing that the policy neural network can learn nonlocal regularities of effective control solutions, and that these regularities are difficult to exploit with simpler local optimization schemes \cite{Niu2019}. In other words, TRPO is not chosen merely because it is a standard continuous-control RL algorithm; it is chosen because its policy-based formulation is compatible with the trajectory-level structure of analog quantum control.
@@ -1040,28 +1065,6 @@ This makes it a particularly reasonable choice for the UFO optimization problem,
 
 % In the structure of the thesis, this subsection should be read as the algorithmic complement of the previous one. The earlier subsection explained how the physics problem is cast as an RL environment; the present one explains why TRPO is the specific optimization engine chosen to solve it. The next subsection will complete the learning formulation by explaining how stochastic control noise is injected during training in order to promote robustness.
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.8\textwidth]{chapters/plots/trpo_trust_region.pdf}
-% \begin{tikzpicture}[
-%     box/.style={draw, rounded corners, minimum width=3.2cm, minimum height=1cm, align=center},
-%     arrow/.style={-{Latex[length=2mm]}, thick},
-%     node distance=1.8cm and 1.8cm
-% ]
-
-% \node[box] (old) {current policy\\$\pi_{\bm{\theta}_{\mathrm{old}}}$};
-% \node[box, right=of old] (trust) {trusted region\\$D_{\mathrm{KL}}\le \delta_{\mathrm{TR}}$};
-% \node[box, right=of trust] (new) {updated policy\\$\pi_{\bm{\theta}}$};
-
-% \draw[arrow] (old) -- (trust);
-% \draw[arrow] (trust) -- (new);
-
-% \node[below=1.2cm of trust, align=center] (note) {policy improvement is allowed only if the new action distribution\\remains sufficiently close to the old one};
-
-% \end{tikzpicture}
-\caption{Geometric intuition behind the TRPO update. Rather than taking an unconstrained gradient step, the policy is improved only within a trust region defined by a KL-divergence constraint, which stabilizes learning in continuous and stochastic control environments.}
-\label{fig:trpo_trust_region}
-\end{figure}
 
 % \begin{algorithm}[t]
 % \caption{Single-target TRPO training workflow}
@@ -1163,6 +1166,29 @@ Thus, training in a stochastic environment directly transforms the control probl
 
 This is one of the most elegant aspects of the paper's methodology. Robustness is not introduced through a separate outer-loop procedure or through repeated experimental recalibration, but through the RL environment itself. The environment becomes a sampling mechanism for control uncertainty, and the policy-gradient update uses these noisy rollouts to improve the expected performance of the control strategy. In this sense, stochastic training acts as an implicit regularizer: pulse trajectories that are overly fragile under small perturbations will exhibit poor average return and will therefore be disfavored during learning.
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{chapters/plots/stochastic_training_environment.pdf}
+% \begin{tikzpicture}[
+%     box/.style={draw, rounded corners, minimum width=3.0cm, minimum height=1cm, align=center},
+%     arrow/.style={-{Latex[length=2mm]}, thick},
+%     node distance=1.6cm and 1.6cm
+% ]
+
+% \node[box] (policy) {policy output\\ideal controls \(\bm{u}(t_k)\)};
+% \node[box, right=of policy] (noise) {Gaussian noise\\\(\bm{\xi}(t_k)\)};
+% \node[box, right=of noise] (env) {noisy Hamiltonian\\\(\hat H+\delta \hat H\)};
+% \node[box, below=of noise] (eval) {average fidelity\\variance};
+
+% \draw[arrow] (policy) -- (noise);
+% \draw[arrow] (noise) -- (env);
+% \draw[arrow] (env) -- (eval);
+
+% \end{tikzpicture}
+\caption{Training under stochastic control noise. The policy proposes ideal controls, Gaussian perturbations are added to produce a noisy Hamiltonian trajectory, and the resulting performance is evaluated statistically through average fidelity and fidelity variance.}
+\label{fig:stochastic_training_environment}
+\end{figure}
+
 The paper evaluates the success of this strategy through two key diagnostics. The first is the \emph{average gate fidelity} under noisy control realizations,
 \begin{equation}
 \overline{F}_{\mathrm{noisy}}
@@ -1187,6 +1213,7 @@ which quantifies the consistency of the gate performance across different noise 
 The use of fidelity variance is particularly insightful. It reflects the fact that robustness should not be understood only as good \emph{mean} performance, but also as small sensitivity to uncertainty. In other words, a robust control is not merely a control whose expected output is good; it is a control whose performance is also reproducible. This makes the paper's evaluation framework more physically meaningful than one based solely on nominal fidelity or even average fidelity alone \cite{Niu2019}. It also explains why the paper emphasizes reductions in both average noisy gate error and fidelity variance when comparing the RL solutions to baseline methods.
 
 A further conceptual point is that the noisy training environment is aligned with the physical error model of interest. The paper is not injecting arbitrary synthetic stochasticity for machine-learning convenience; it is perturbing the same control amplitudes that are subject to imperfections in actual superconducting hardware. Thus, the stochastic environment serves as a simple but physically interpretable proxy for experimental control uncertainty. This is important, because it distinguishes the methodology from generic noise-augmentation heuristics: the perturbations are chosen specifically to reflect the control channels that matter in the underlying Hamiltonian.
+
 
 A distinction that will be used repeatedly in the remainder of the thesis is that between \emph{nominal} and \emph{noise-optimized} RL training. In the nominal setting, the agent is trained in the deterministic environment, that is, without stochastic perturbations injected into the control channels during training. In the noise-optimized setting, instead, the same actor--critic architecture, the same TRPO update rule, and the same physical control model are retained, but the environment becomes stochastic, since sampled perturbations are added to the relevant Hamiltonian parameters at each control step. The importance of this distinction is conceptual rather than architectural: the two controllers do not correspond to different learning frameworks, but to the same framework trained under different distributions of dynamical trajectories. Stating this point explicitly is useful because it clarifies that the subsequent comparison between nominal and noise-optimized agents is meant to isolate the effect of stochastic training on robustness, rather than the effect of changing the policy model or the optimization algorithm.
 
@@ -1220,28 +1247,6 @@ At the implementation level, this expected noisy objective is sampled through re
 % From the perspective of the thesis, this subsection is where robustness fully enters the learning formulation. Earlier subsections introduced robustness as a motivation and the UFO objective as a physically meaningful cost. The present subsection shows how the paper turns that idea into practice: the RL agent is trained on noisy Hamiltonian trajectories, and performance is judged by noisy average fidelity and fidelity variance. 
 % The next subsection will complete the framework by specifying the target family of two-qubit gates on which the method is trained and benchmarked.
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.8\textwidth]{chapters/plots/stochastic_training_environment.pdf}
-% \begin{tikzpicture}[
-%     box/.style={draw, rounded corners, minimum width=3.0cm, minimum height=1cm, align=center},
-%     arrow/.style={-{Latex[length=2mm]}, thick},
-%     node distance=1.6cm and 1.6cm
-% ]
-
-% \node[box] (policy) {policy output\\ideal controls \(\bm{u}(t_k)\)};
-% \node[box, right=of policy] (noise) {Gaussian noise\\\(\bm{\xi}(t_k)\)};
-% \node[box, right=of noise] (env) {noisy Hamiltonian\\\(\hat H+\delta \hat H\)};
-% \node[box, below=of noise] (eval) {average fidelity\\variance};
-
-% \draw[arrow] (policy) -- (noise);
-% \draw[arrow] (noise) -- (env);
-% \draw[arrow] (env) -- (eval);
-
-% \end{tikzpicture}
-\caption{Training under stochastic control noise. The policy proposes ideal controls, Gaussian perturbations are added to produce a noisy Hamiltonian trajectory, and the resulting performance is evaluated statistically through average fidelity and fidelity variance.}
-\label{fig:stochastic_training_environment}
-\end{figure}
 
 % Requires in the preamble:
 % \usepackage{amsmath,amssymb,amsfonts,bm}
