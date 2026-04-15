@@ -1027,7 +1027,7 @@ From the implementation viewpoint, the paper uses TRPO in an actor--critic archi
 \item updating the policy network by solving the trust-region step,
 \item updating the value network to fit the newly sampled returns.
 \end{enumerate}
-The overall training workflow used for the single-target TRPO controller is explicitly reported in Appendix~\ref{app:}.
+The overall training workflow used for the single-target TRPO controller is explicitly reported in Appendix~\ref{app:trpo_single_target_detailed}.
 Although these are standard ingredients of modern policy-gradient RL, their role in the paper is highly specific: they provide a scalable optimization engine for a physically structured continuous-control problem in which leakage and stochastic robustness are part of the objective itself.
 
 For the purposes of the thesis, the main message of this subsection is therefore clear. The paper uses TRPO because it combines three properties that are especially desirable in robust analog quantum control:
@@ -1188,7 +1188,37 @@ The use of fidelity variance is particularly insightful. It reflects the fact th
 
 A further conceptual point is that the noisy training environment is aligned with the physical error model of interest. The paper is not injecting arbitrary synthetic stochasticity for machine-learning convenience; it is perturbing the same control amplitudes that are subject to imperfections in actual superconducting hardware. Thus, the stochastic environment serves as a simple but physically interpretable proxy for experimental control uncertainty. This is important, because it distinguishes the methodology from generic noise-augmentation heuristics: the perturbations are chosen specifically to reflect the control channels that matter in the underlying Hamiltonian.
 
-From the perspective of the thesis, this subsection is where robustness fully enters the learning formulation. Earlier subsections introduced robustness as a motivation and the UFO objective as a physically meaningful cost. The present subsection shows how the paper turns that idea into practice: the RL agent is trained on noisy Hamiltonian trajectories, and performance is judged by noisy average fidelity and fidelity variance. The next subsection will complete the framework by specifying the target family of two-qubit gates on which the method is trained and benchmarked.
+A distinction that will be used repeatedly in the remainder of the thesis is that between \emph{nominal} and \emph{noise-optimized} RL training. In the nominal setting, the agent is trained in the deterministic environment, that is, without stochastic perturbations injected into the control channels during training. In the noise-optimized setting, instead, the same actor--critic architecture, the same TRPO update rule, and the same physical control model are retained, but the environment becomes stochastic, since sampled perturbations are added to the relevant Hamiltonian parameters at each control step. The importance of this distinction is conceptual rather than architectural: the two controllers do not correspond to different learning frameworks, but to the same framework trained under different distributions of dynamical trajectories. Stating this point explicitly is useful because it clarifies that the subsequent comparison between nominal and noise-optimized agents is meant to isolate the effect of stochastic training on robustness, rather than the effect of changing the policy model or the optimization algorithm.
+
+At the implementation level, this expected noisy objective is sampled through repeated stochastic rollouts, in which the policy output is filtered, perturbed, and then propagated through the multilevel dynamics, as summarized in Algorithm~\ref{alg:stochastic_rollout_compact}, while a more explicit version, closer to the actual implementation and including the treatment of noisy control channels, phase wrapping, and stopping conditions, is reported in Appendix~\ref{app:stochastic_rollout}.
+
+\begin{algorithm}[t]
+\caption{Sampling a rollout in the stochastic training environment}
+\label{alg:stochastic_rollout_compact}
+\begin{algorithmic}[1]
+\Require policy $\pi_\theta$, initial unitary $U_0=\mathbb{I}$, target gate $U_{\mathrm{target}}$
+\State reset the environment, the bandwidth filter, and the leakage estimator
+\For{$k=0,1,\dots$ until termination}
+    \State construct the observation $o_k$ from the current propagated unitary
+    \State sample a policy action $a_k \sim \pi_\theta(\cdot \mid o_k)$
+    \State map $a_k$ to physical controls and apply the bandwidth filter
+    \If{noise-optimized training is enabled}
+        \State sample Gaussian perturbations for the relevant control channels and for the effective anharmonicity
+        \State build the noisy controls used at this step
+    \Else
+        \State use the filtered controls without perturbation
+    \EndIf
+    \State construct the one-step Hamiltonian and propagate
+    \State update the TSWT-based leakage estimate
+    \State evaluate the current UFO cost and corresponding reward
+    \State store the transition $(o_k,a_k,r_{k+1},o_{k+1})$
+    \State check the stopping condition
+\EndFor
+\State \Return the rollout used for policy-gradient training
+\end{algorithmic}
+\end{algorithm}
+% From the perspective of the thesis, this subsection is where robustness fully enters the learning formulation. Earlier subsections introduced robustness as a motivation and the UFO objective as a physically meaningful cost. The present subsection shows how the paper turns that idea into practice: the RL agent is trained on noisy Hamiltonian trajectories, and performance is judged by noisy average fidelity and fidelity variance. 
+% The next subsection will complete the framework by specifying the target family of two-qubit gates on which the method is trained and benchmarked.
 
 \begin{figure}[t]
 \centering

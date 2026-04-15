@@ -695,3 +695,58 @@ L_t = B_t + I_t
 \State save the best final agent
 \end{algorithmic}
 \end{algorithm}
+
+
+\section{Stochastic rollout}
+\label{app:stochastic_rollout}
+
+\begin{algorithm}[H]
+\caption{Detailed stochastic rollout generation for noise-optimized RL training}
+\label{alg:stochastic_rollout_appendix}
+\begin{algorithmic}[1]
+\Require policy $\pi_\theta$, environment configuration, target gate parameters $(\alpha,\gamma)$
+\State initialize the propagated unitary as $U_0=\mathbb{I}$
+\State set the current step counter to zero and the elapsed time to zero
+\State reset the exponential bandwidth filter
+\State reset the TSWT leakage estimator
+\State initialize empty histories for nominal controls, noisy controls, rewards, costs, and fidelities
+\While{the episode is not terminated}
+    \State construct the current observation $o_k$ from the propagated unitary 
+    \State sample a raw policy action from $\pi_\theta(\cdot\mid o_k)$ and apply it to control channels of the Hamiltonian
+    % \State apply the action squashing and map it to physical control parameters
+    % \State convert the bounded action into the seven control channels of the Hamiltonian
+    \State apply the bandwidth filter to obtain the physically smoothed controls
+    % \State wrap the phase controls modulo $2\pi$
+    \If{stochastic training is enabled}
+        \State sample a Gaussian perturbation for the effective anharmonicity $\eta_k$ and for the amplitude-like control channels
+        % \State sample Gaussian perturbations for the relevant amplitude-like control channels
+        \State add these perturbations to the filtered controls
+        % \State wrap the phase controls again modulo $2\pi$
+    \Else
+        \State keep the filtered controls unchanged
+        \State set $\eta_k$ equal to its nominal value
+    \EndIf
+    \State construct the step Hamiltonian $H_k = H(\tilde{\bm u}_k^{(\mathrm{noisy})},\eta_k)$
+    \State propagate the dynamics:
+    \(
+    U_{k+1}=\exp(-iH_k\Delta t)\,U_k
+    \)
+    \State update the TSWT leakage estimator with the current Hamiltonian
+    \State append the filtered controls to the nominal-control history and actually applied noisy controls to the noisy-control history
+    \State evaluate the current gate fidelity with respect to the target, the current leakage bound, the boundary and time penalties
+    \State assemble the current UFO cost
+    \If{dense reward mode is used}
+        \State set the reward equal to minus the current cost
+    \Else
+        \State assign zero intermediate reward and minus the cost only at termination
+    \EndIf
+    \State append reward, cost, and fidelity to their histories
+    \State increment the step counter and update the elapsed time
+    \If{the maximum time is reached or the cost threshold is reached}
+        \State terminate the episode
+    \EndIf
+    \State store the transition containing observation, action, reward, and continuation mask
+\EndWhile
+\State return the full rollout, including the transition list and the control histories
+\end{algorithmic}
+\end{algorithm}
