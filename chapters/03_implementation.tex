@@ -1027,6 +1027,7 @@ From the implementation viewpoint, the paper uses TRPO in an actor--critic archi
 \item updating the policy network by solving the trust-region step,
 \item updating the value network to fit the newly sampled returns.
 \end{enumerate}
+The overall training workflow used for the single-target TRPO controller is explicitly reported in Appendix~\ref{app:}.
 Although these are standard ingredients of modern policy-gradient RL, their role in the paper is highly specific: they provide a scalable optimization engine for a physically structured continuous-control problem in which leakage and stochastic robustness are part of the objective itself.
 
 For the purposes of the thesis, the main message of this subsection is therefore clear. The paper uses TRPO because it combines three properties that are especially desirable in robust analog quantum control:
@@ -1037,7 +1038,7 @@ For the purposes of the thesis, the main message of this subsection is therefore
 \end{itemize}
 This makes it a particularly reasonable choice for the UFO optimization problem, where the policy must learn high-quality pulse trajectories in a multilevel superconducting system under realistic control noise.
 
-In the structure of the thesis, this subsection should be read as the algorithmic complement of the previous one. The earlier subsection explained how the physics problem is cast as an RL environment; the present one explains why TRPO is the specific optimization engine chosen to solve it. The next subsection will complete the learning formulation by explaining how stochastic control noise is injected during training in order to promote robustness.
+% In the structure of the thesis, this subsection should be read as the algorithmic complement of the previous one. The earlier subsection explained how the physics problem is cast as an RL environment; the present one explains why TRPO is the specific optimization engine chosen to solve it. The next subsection will complete the learning formulation by explaining how stochastic control noise is injected during training in order to promote robustness.
 
 \begin{figure}[t]
 \centering
@@ -1062,10 +1063,33 @@ In the structure of the thesis, this subsection should be read as the algorithmi
 \label{fig:trpo_trust_region}
 \end{figure}
 
-% Requires in the preamble:
-% \usepackage{amsmath,amssymb,amsfonts,bm}
-% \usepackage{tikz}
-% \usetikzlibrary{positioning,arrows.meta}
+% \begin{algorithm}[t]
+% \caption{Single-target TRPO training workflow}
+% \label{alg:trpo_single_target_compact}
+% \begin{algorithmic}[1]
+% \Require target gate parameters $(\alpha,\gamma)$, training environment, evaluation environment
+% \State initialize the TRPO agent
+% \For{each training iteration}
+%     \State collect a batch of stochastic rollouts
+%     \State store transitions and terminal episode statistics
+%     \State update the policy and value networks with TRPO
+%     \State summarize batch-level training statistics
+%     \If{checkpoint saving is enabled at this iteration}
+%         \State save the current agent state
+%     \EndIf
+%     \If{deterministic evaluation is scheduled at this iteration}
+%         \State evaluate the current policy in the nominal environment
+%         \State save the corresponding control plan
+%         \If{the evaluation cost improves over the best previous one}
+%             \State update the best agent and best control plan
+%         \EndIf
+%     \EndIf
+%     \State log the iteration record
+% \EndFor
+% \State save the final agent and the final evaluated control plan
+% \State write a summary of the best and final results
+% \end{algorithmic}
+% \end{algorithm}
 
 \subsection{Training in a stochastic control environment}
 \label{subsec:stochastic_training_environment}

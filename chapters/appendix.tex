@@ -563,6 +563,7 @@ This appendix collects compact algorithmic summaries of the main numerical proce
 \end{algorithmic}
 \end{algorithm}
 
+\newpage
 \section{Incremental evaluation of the TSWT-based leakage estimator}
 \label{app:Incremental_TSWT}
 
@@ -651,5 +652,46 @@ B_t=\frac{\nu_{\mathrm{first}}}{\Delta_{\mathrm{first}}}
 L_t = B_t + I_t
 \)
 \State \Return $L_t$ together with its boundary and integral components
+\end{algorithmic}
+\end{algorithm}
+
+\newpage
+\section{Single-target TRPO training procedure}
+\label{app:trpo_single_target_detailed}
+\begin{algorithm}[H]
+\caption{Detailed single-target TRPO training procedure}
+\label{alg:trpo_single_target_appendix}
+\begin{algorithmic}[1]
+\Require target parameters $(\alpha,\gamma)$, number of iterations, episodes per batch, physical and training hyperparameters
+\State parse the target parameters and fix the random seed
+\State initialize the gmon system with the chosen physical parameters
+\State instantiate the training environment with stochastic noise enabled or disabled according to the chosen setting
+\State instantiate the evaluation environment in deterministic nominal mode
+\State build the TRPO configuration
+\State initialize the TRPO agent
+\State initialize the current best evaluation cost to $+\infty$
+\State initialize the parallel rollout collector
+\For{iteration $=1,\dots,N_{\mathrm{iter}}$}
+    \If{multiple workers are used}
+        \State collect rollouts in parallel until the prescribed batch size is reached
+    \Else { collect rollouts sequentially from the training environment}
+    \EndIf
+    \State extract from each rollout: observations, sampled raw actions, rewards, continuation masks
+    \State aggregate terminal statistics over the batch
+    \State perform one TRPO update of the policy and value networks
+    \State construct the training record for the current iteration
+    \If{deterministic evaluation is scheduled at this iteration}
+        \State run one nominal rollout with deterministic actions in the evaluation environment
+        \State extract: evaluation cost, fidelity, leakage, runtime, nominal filtered control sequence
+        \State serialize the evaluated control sequence as a control plan
+        \State add the evaluation metrics and plan path to the iteration record
+        \If{the evaluation cost is lower than the best one found so far}
+            \State update the best evaluation record
+            \State save the corresponding best control plan
+        \EndIf
+    \EndIf
+    \State write the iteration record to the training log
+\EndFor
+\State save the best final agent
 \end{algorithmic}
 \end{algorithm}
