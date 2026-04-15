@@ -1235,10 +1235,9 @@ Before discussing the comparison strategy in more detail, it is useful to state 
 Conceptually, the procedure belongs to the family of direct gradient-based quantum optimal-control methods discussed in subsection~\ref{subsec:classical_qoc_methods}. In particular, it is close in spirit to GRAPE, in the sense that the control field is discretized in time and the optimization is performed directly over the pulse parameters of a fixed target gate \cite{Khaneja2005,Koch2022}. At the same time, the present implementation is not meant as a strict textbook reproduction of the canonical GRAPE algorithm. Rather, it should be understood as a GRAPE-style direct pulse-search baseline in which the discretized controls are optimized numerically with Adam under the same multilevel Hamiltonian and the same UFO-inspired cost structure used elsewhere in the thesis. This distinction is worth stating explicitly, because it clarifies both the methodological continuity with classical optimal control and the specific implementation choices adopted here.
 
 For a fixed target gate \(U_{\mathrm{target}} = N(\alpha,\alpha,\gamma)\) and a fixed candidate gate duration \(T\), the control problem is discretized on a uniform time grid of step \(\Delta t\), so that
-\begin{equation}
+\(
 N_T = \frac{T}{\Delta t}
-\label{eq:adam_num_time_steps}
-\end{equation}
+\)
 time slices are used. The optimization variables are then the full time-discretized control trajectory
 \begin{equation}
 \Bigl\{
@@ -1271,12 +1270,13 @@ T \in \mathcal{T}_{\mathrm{cand}},
 and the resulting horizon-wise optimized solutions are then compared. This means that the Adam baseline should be interpreted as a \emph{family} of fixed-horizon pulse-optimization problems rather than as a single variable-time control policy. Such a design is fully reasonable in the present context. It allows the direct optimizer to search efficiently within each fixed temporal budget, while still making it possible to identify which runtime provides the best overall compromise among fidelity, leakage, boundary behavior, and total cost.
 
 Once all candidate horizons have been optimized, the corresponding solutions are reevaluated in a common deterministic setting using the same multilevel simulator. This post-optimization reevaluation is an important part of the pipeline, because it separates the internal optimizer output from the final reported physical metrics. In particular, for each candidate horizon the thesis records not only the optimizer-side best objective value, but also a full nominal evaluation including final cost, gate fidelity, total leakage, leakage decomposition, boundary penalty, and effective runtime. The best horizon is then selected on the basis of this systematic comparison, and the associated control plan is stored as the representative Adam baseline solution for the considered target gate.
+The overall workflow used for the single-target Adam baseline is summarized in Algorithm~\ref{alg:adam_baseline_horizon_sweep}.
 
-When required, the selected plan is further subjected to Monte Carlo robustness evaluation under sampled control perturbations. In this way, the baseline participates in the same robustness analysis as the RL-based solutions, rather than being restricted to purely nominal benchmarking. This is methodologically important, because it ensures that the later comparison between Adam and TRPO is not a comparison between a fully evaluated learning-based controller and a weakly characterized deterministic baseline. On the contrary, both methods are assessed under the same physical criteria, including noisy deployment when robustness is under study.
+When required (through the \texttt{noise-optimized} argument is set to true), the selected plan is further subjected to Monte Carlo robustness evaluation under sampled control perturbations. In this way, the baseline participates in the same robustness analysis as the RL-based solutions, rather than being restricted to purely nominal benchmarking. This is methodologically important, because it ensures that the later comparison between Adam and TRPO is not a comparison between a fully evaluated learning-based controller and a weakly characterized deterministic baseline. On the contrary, both methods are assessed under the same physical criteria, including noisy deployment when robustness is under study.
 
 Taken together, this implementation makes the direct gradient-based baseline a strong and scientifically meaningful reference. It is strong because it optimizes the full pulse trajectory directly on the multilevel Hamiltonian, rather than relying on a simplified gate-level abstraction. It is fair because it uses the same target gates, the same physical model, and the same cost-function logic as the RL framework. And it is informative because its structure is genuinely different from that of TRPO: the Adam baseline performs direct fixed-horizon pulse optimization in control space, whereas TRPO learns a stochastic sequential policy that implicitly balances control shape and stopping behavior. Precisely because of this difference, the comparison between the two approaches is methodologically useful. It does not ask whether one optimizer is universally better in the abstract, but whether policy-based learning offers an advantage over a strong direct pulse-search strategy on the same underlying analog quantum-control problem.
 
-\begin{algorithm}[t]
+\begin{algorithm}[H]
 \caption{Direct gradient-based baseline with horizon sweep}
 \label{alg:adam_baseline_horizon_sweep}
 \begin{algorithmic}[1]
