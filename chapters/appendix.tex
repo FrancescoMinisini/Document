@@ -508,3 +508,61 @@ In matrix form, in the ordered basis \(\{\ket{0},\ket{1},\ket{2}\}\), Eq.~\eqref
 \section{Physical interpretation}
 
 Equation~\eqref{eq:app_three_level_rotating_hamiltonian_final} makes the origin of leakage transparent. The same drive envelope \(\Omega(t)\) that implements the intended logical transition \(\ket{0}\leftrightarrow\ket{1}\) also couples \(\ket{1}\leftrightarrow\ket{2}\), while the finite anharmonicity \(\alpha\) provides only an imperfect spectral separation between the two transitions. As a result, increasing the drive strength in order to shorten the gate time simultaneously enhances the unwanted coupling to the first leakage level, which is the microscopic origin of the speed--leakage tradeoff discussed in the main text.
+
+
+\chapter{Algorithmic details}
+\label{app:algorithmic_details}
+
+\section{Environment step and rollout generation}
+\label{app:env_rollout}
+
+This appendix collects compact algorithmic summaries of the main numerical procedures discussed in the thesis. Their purpose is not to replace the implementation details presented in the main text, but to provide the reader with a structured view of the operational workflow used in the simulations and experiments.
+
+\begin{algorithm}[htbp]
+\caption{Quantum-control environment rollout used for policy interaction and data collection}
+\label{alg:env_rollout_appendix}
+\begin{algorithmic}[1]
+\Require quantum-control environment $\mathcal{E}$, policy $\pi_\theta$, deterministic flag
+\State initialize the propagated unitary as $U_0 \leftarrow \mathbb{I}$
+\State reset the environment state, filter memory, leakage estimator, and trajectory histories
+\State construct the initial observation $o_0$
+\State set $t \leftarrow 0$
+\While{the stopping condition is not satisfied}
+    \State sample the policy output from the current observation:
+    \(
+    (a_t, a_t^{\mathrm{raw}}) \sim \pi_\theta(o_t)
+    \)
+    \State map the bounded action $a_t$ to physical control parameters $u_t$
+    \State apply the bandwidth filter to obtain filtered controls $\tilde u_t$
+    \If{stochastic training is enabled}
+        \State sample additive control perturbations and noisy anharmonicity
+        \State construct noisy controls $\tilde u_t^{(\mathrm{noisy})}$ and effective parameter $\eta_t$
+    \Else{ set $\tilde u_t^{(\mathrm{noisy})} \leftarrow \tilde u_t$ and $\eta_t \leftarrow \eta_{\mathrm{base}}$}
+    \EndIf
+    \State build the instantaneous Hamiltonian
+    \(
+    H_t = H\!\left(\tilde u_t^{(\mathrm{noisy})}, \eta_t\right)
+    \)
+    \State propagate the dynamics
+    \(
+    U_{t+1} = e^{-i H_t \Delta t} U_t
+    \)
+    \State update the TSWT-based leakage estimator using $H_t$ and $\eta_t$
+    \State append nominal and noisy controls to the trajectory history
+    \State evaluate fidelity, leakage proxy, boundary cost, time cost, and total UFO cost
+    \State assign the reward according to the selected reward rule
+    \State determine whether the episode terminates because of:
+    \begin{itemize}
+        \item maximum allowed runtime,
+        \item or sufficiently low cost (optionally with a minimum fidelity constraint)
+    \end{itemize}
+    \State construct the next observation $o_{t+1}$
+    \State store the transition
+    \(
+    (o_t, a_t, a_t^{\mathrm{raw}}, r_{t+1}, o_{t+1}, \mathrm{mask}_t, \mathrm{info}_t)
+    \)
+    \State update $o_t \leftarrow o_{t+1}$, $U_t \leftarrow U_{t+1}$, and $t \leftarrow t+1$
+\EndWhile
+\State \Return trajectory transitions, control histories, reward history, cost history, fidelity history, and final episode statistics
+\end{algorithmic}
+\end{algorithm}

@@ -795,18 +795,6 @@ one sees that the control problem is implemented in actor--critic form: the poli
 
 From a control perspective, the most important conceptual point is that the environment state is not a low-dimensional hand-crafted summary such as ``current pulse amplitude'' or ``elapsed time'' alone. Instead, it contains information about the current simulated unitary gate. This is a strong design choice: it means the agent is trained to reason directly in terms of how much of the target operation has already been built, rather than purely in terms of local control variables. Such a state representation is well matched to gate synthesis, since the desired task is naturally expressed in terms of the evolving unitary transformation rather than a single state vector or observable.
 
-The RL formulation of the paper can therefore be summarized as follows:
-\begin{itemize}
-\item the \emph{state} encodes the current simulated gate \(U_n\),
-\item the \emph{action} specifies the continuous control parameters for the next time interval,
-\item the \emph{environment} propagates the noisy Schr\"odinger dynamics,
-\item the \emph{reward} is the negative UFO control cost,
-\item one \emph{episode} corresponds to a complete pulse trajectory for a target gate.
-\end{itemize}
-This formulation is particularly natural for robust analog quantum control, because it preserves the sequential character of pulse generation while allowing the physical optimization objective to be used directly as the reward signal.
-
-For the structure of the thesis, this subsection is the bridge between the physics of the UFO objective and the algorithmic machinery of policy optimization. The next paragraph will build directly on it by explaining why the paper specifically chooses a continuous-variable policy-gradient method trained with trust-region policy optimization (TRPO), rather than a simpler gradient-descent or value-based RL approach.
-
 \tikzexternaldisable
 \begin{figure}[t]
 \centering
@@ -832,6 +820,40 @@ For the structure of the thesis, this subsection is the bridge between the physi
 \label{fig:paper_rl_loop}
 \end{figure}
 \tikzexternalenable
+
+The RL formulation of the paper can therefore be summarized as follows:
+\begin{itemize}
+\item the \emph{state} encodes the current simulated gate \(U_n\),
+\item the \emph{action} specifies the continuous control parameters for the next time interval,
+\item the \emph{environment} propagates the noisy Schr\"odinger dynamics,
+\item the \emph{reward} is the negative UFO control cost,
+\item one \emph{episode} corresponds to a complete pulse trajectory for a target gate.
+\end{itemize}
+This formulation is particularly natural for robust analog quantum control, because it preserves the sequential character of pulse generation while allowing the physical optimization objective to be used directly as the reward signal.
+
+The interaction between the policy and the quantum-control environment is summarized in Algorithm~\ref{alg:env_step_compact}, while, for completeness, a more explicit episode-level version of the rollout procedure is reported in Appendix~\ref{app:env_rollout}.
+
+For the structure of the thesis, this subsection is the bridge between the physics of the UFO objective and the algorithmic machinery of policy optimization. The next paragraph will build directly on it by explaining why the paper specifically chooses a continuous-variable policy-gradient method trained with trust-region policy optimization (TRPO), rather than a simpler gradient-descent or value-based RL approach.
+
+\begin{algorithm}[htbp]
+\caption{Single environment step in the quantum-control RL setting}
+\label{alg:env_step_compact}
+\begin{algorithmic}[1]
+\Require current observation $o_t$, propagated unitary $U_t$, action $a_t$
+\State map $a_t$ to physical controls $u_t$
+\State apply the bandwidth filter to obtain $\tilde u_t$
+\State sample noisy controls $\tilde u_t^{(\mathrm{noisy})}$ and effective anharmonicity $\eta_t$ if stochastic training is enabled
+\State build the Hamiltonian $H_t = H(\tilde u_t^{(\mathrm{noisy})}, \eta_t)$
+\State propagate the dynamics: $U_{t+1} = e^{-i H_t \Delta t} U_t$
+\State update the TSWT-based leakage estimator
+\State evaluate the current cost $C_{t+1}$ and reward $r_{t+1}$
+\State check the stopping condition (time limit or cost threshold)
+\State construct the next observation $o_{t+1}$
+\State \Return $(o_{t+1}, r_{t+1}, \mathrm{done}, \mathrm{info})$
+\end{algorithmic}
+\caption{Interaction between the policy and the quantum-control environment}
+\end{algorithm}
+
 
 \subsection{Implementation of the policy and value networks}
 \label{subsec:implementation_policy_value_networks}
