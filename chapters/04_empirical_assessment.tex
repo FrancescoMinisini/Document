@@ -96,7 +96,7 @@ All experiments follow a common procedural logic. For a given target gate \(N(\a
 
 \section{Parameter-choice study}
 \label{sec:parameter_choice_study}
-\subsection{Aim and Structure}
+\subsection{Purpose and structure of the study}
 \label{subsec:parameter_choice_aim_and_structure}
 The empirical performance of the present control framework depends not only on the underlying physical model and on the definition of the UFO objective, but also on a number of methodological choices that must be fixed before a meaningful comparison can be carried out. This is especially true in the reinforcement-learning setting considered in this thesis, where optimization quality is affected simultaneously by the training configuration, by the expressive capacity of the policy and value networks, and by the scalarization adopted in the control cost. For this reason, parameter selection should not be treated as a minor implementation detail. On the contrary, it constitutes an explicit part of the experimental methodology, since different choices may alter convergence stability, final gate quality, robustness under noise, and even the apparent relative performance of the compared optimizers.
 
@@ -1351,8 +1351,8 @@ Taken together, these observations support the main conceptual message of this s
 
 \subsection{Summary of empirical evidence}
 \label{subsec:summary_empirical_evidence}
-\subsection{Summary of empirical evidence}
-\label{subsec:summary_empirical_evidence}
+% \subsection{Summary of empirical evidence}
+% \label{subsec:summary_empirical_evidence}
 
 The empirical results presented in this chapter support a coherent overall assessment of the validated control framework. First, the single-target study on the representative gate \(N(2.2,2.2,\pi/2)\) shows that the present implementation is able to produce high-quality analog controls in the full multilevel setting, both through direct pulse optimization and through reinforcement learning. In the purely nominal regime, the Adam baseline emerges as the strongest method on this benchmark, achieving the most favorable balance among fidelity, leakage, runtime, and total cost. This point is methodologically important, because it shows that the RL-based controller is not being compared against a weak reference, but against a meaningful direct-optimization baseline that already performs very well on the deterministic problem.
 
