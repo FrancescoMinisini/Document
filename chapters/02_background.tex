@@ -482,31 +482,6 @@ where $H_{\mathrm{d}}$ is the drift term and the $H_k$ are control generators. A
 \end{equation}
 Equation~\eqref{eq:lie_algebra_controllability} expresses the ideal mathematical limit of analog universality: if the available drift and control Hamiltonians generate all of $\mathfrak{su}(d)$, then any unitary in $SU(d)$ is reachable in principle through suitable time-dependent controls \cite{DAlessandro2007}. In practice, of course, reachability alone is not enough. One must still contend with finite amplitudes, bandwidth limits, leakage outside the computational subspace, calibration uncertainty, and noise. These constraints make the \emph{effective} implementation of arbitrary target gates highly nontrivial even when controllability holds in the abstract.
 
-The practical advantage of direct analog control is most pronounced when the target unitary is naturally aligned with the native interactions of the hardware. If a device Hamiltonian contains, for example, an entangling term of the form
-\begin{equation}
-H_{\mathrm{nat}}
-=
-J \left( \sigma_{1}^{x}\sigma_{2}^{x} + \sigma_{1}^{y}\sigma_{2}^{y} \right),
-\label{eq:native_entangling_hamiltonian}
-\end{equation}
-then free or weakly modulated evolution under this interaction generates the gate family
-\begin{equation}
-U_{\mathrm{nat}}(t)
-=
-\exp\!\left[
--\frac{i}{\hbar} t H_{\mathrm{nat}}
-\right]
-=
-\exp\!\left[
--i \theta(t)\left(\sigma_{1}^{x}\sigma_{2}^{x}+\sigma_{1}^{y}\sigma_{2}^{y}\right)
-\right],
-\label{eq:native_gate_family}
-\end{equation}
-with $\theta(t)=Jt/\hbar$. In such a situation, certain entangling operations may be realized almost directly by the device physics itself, possibly supplemented by a small number of local rotations, instead of being compiled into a longer generic circuit. This is precisely the type of hardware-structure exploitation that makes analog control attractive: the control procedure can adapt to the geometry and couplings of a given platform rather than forcing every task through a fixed universal template \cite{Koch2022,DAlessandro2007}.
-
-From a computational perspective, one may therefore distinguish two different notions of efficiency. The first is \emph{gate-set efficiency}, meaning how economically a target unitary can be decomposed into a prescribed universal library. The second is \emph{hardware efficiency}, meaning how economically that same unitary can be realized on a specific physical platform once its native interactions are taken into account. These notions need not coincide. A gate may admit an optimal decomposition within a discrete universal set and yet still be slower than a direct analog realization that exploits the natural Hamiltonian of the device. This tension is one of the central motivations of the present thesis, and it is made explicit in the corresponding literature, which compares direct analog controls with optimal gate-synthesis counterparts for a family of two-qubit gates and reports significant runtime reductions for some targets \cite{Niu2019}. In the following chapters, this distinction will become concrete in the superconducting-gmon setting, where a family of physically relevant two-qubit gates can be analyzed both from the perspective of optimal discrete synthesis and from that of direct pulse-level realization.
-
-It is important, however, not to overstate the case. Direct analog control does not replace the circuit model as a fundamental description of quantum computation, nor does it eliminate the need for universal gate sets in fault-tolerant architectures. Rather, it provides a complementary layer of optimization that is particularly valuable in near-term devices and in hardware-aware quantum algorithms. The relevant question is not whether one should abandon universal discrete gates, but whether a given target operation should be implemented through a compiled sequence or through a direct continuous control trajectory. The answer depends on the interaction between algorithmic structure, hardware native couplings, noise, and control constraints. This is exactly the regime in which modern quantum-control methods, including reinforcement-learning-based approaches, become especially relevant \cite{Niu2019,Koch2022}.
 
 \begin{figure}[t]
 \centering
@@ -566,6 +541,32 @@ It is important, however, not to overstate the case. Direct analog control does 
 \caption{Two conceptually distinct routes to implementing a target unitary. In the upper route, the gate is compiled into a sequence of elements from a finite universal set. In the lower route, one directly optimizes a continuous control protocol so that the full physical evolution approximates the target in a single coherent pulse sequence.}
 \label{fig:synthesis_vs_analog_control}
 \end{figure}
+
+The practical advantage of direct analog control is most pronounced when the target unitary is naturally aligned with the native interactions of the hardware. If a device Hamiltonian contains, for example, an entangling term of the form
+\begin{equation}
+H_{\mathrm{nat}}
+=
+J \left( \sigma_{1}^{x}\sigma_{2}^{x} + \sigma_{1}^{y}\sigma_{2}^{y} \right),
+\label{eq:native_entangling_hamiltonian}
+\end{equation}
+then free or weakly modulated evolution under this interaction generates the gate family
+\begin{equation}
+U_{\mathrm{nat}}(t)
+=
+\exp\!\left[
+-\frac{i}{\hbar} t H_{\mathrm{nat}}
+\right]
+=
+\exp\!\left[
+-i \theta(t)\left(\sigma_{1}^{x}\sigma_{2}^{x}+\sigma_{1}^{y}\sigma_{2}^{y}\right)
+\right],
+\label{eq:native_gate_family}
+\end{equation}
+with $\theta(t)=Jt/\hbar$. In such a situation, certain entangling operations may be realized almost directly by the device physics itself, possibly supplemented by a small number of local rotations, instead of being compiled into a longer generic circuit. This is precisely the type of hardware-structure exploitation that makes analog control attractive: the control procedure can adapt to the geometry and couplings of a given platform rather than forcing every task through a fixed universal template \cite{Koch2022,DAlessandro2007}.
+
+From a computational perspective, one may therefore distinguish two different notions of efficiency. The first is \emph{gate-set efficiency}, meaning how economically a target unitary can be decomposed into a prescribed universal library. The second is \emph{hardware efficiency}, meaning how economically that same unitary can be realized on a specific physical platform once its native interactions are taken into account. These notions need not coincide. A gate may admit an optimal decomposition within a discrete universal set and yet still be slower than a direct analog realization that exploits the natural Hamiltonian of the device. This tension is one of the central motivations of the present thesis, and it is made explicit in the corresponding literature, which compares direct analog controls with optimal gate-synthesis counterparts for a family of two-qubit gates and reports significant runtime reductions for some targets \cite{Niu2019}. In the following chapters, this distinction will become concrete in the superconducting-gmon setting, where a family of physically relevant two-qubit gates can be analyzed both from the perspective of optimal discrete synthesis and from that of direct pulse-level realization.
+
+It is important, however, not to overstate the case. Direct analog control does not replace the circuit model as a fundamental description of quantum computation, nor does it eliminate the need for universal gate sets in fault-tolerant architectures. Rather, it provides a complementary layer of optimization that is particularly valuable in near-term devices and in hardware-aware quantum algorithms. The relevant question is not whether one should abandon universal discrete gates, but whether a given target operation should be implemented through a compiled sequence or through a direct continuous control trajectory. The answer depends on the interaction between algorithmic structure, hardware native couplings, noise, and control constraints. This is exactly the regime in which modern quantum-control methods, including reinforcement-learning-based approaches, become especially relevant \cite{Niu2019,Koch2022}.
 
 
 \section{Physical setting: superconducting qubits and leakage}
@@ -1103,43 +1104,6 @@ However it is possible to derive analitically a leakage bound through the utiliz
 %\textbf{TODO:} Decidere se tenerla o meno. 
 The complete derivation is reported in Appendix~\ref{app:tswt_coherent_leakage_bound}.
 
-In schematic form, their bound reads
-\begin{equation}
-L_{\mathrm{tot}}
-\lesssim
-\frac{\|\hat{H}_{\mathrm{od}}(0)\|}{\Delta(0)}
-+
-\frac{\|\hat{H}_{\mathrm{od}}(T)\|}{\Delta(T)}
-+
-\int_{0}^{T}
-\frac{1}{\Delta(t)^{2}}
-\left\|
-\frac{d^{2}\hat{H}_{\mathrm{od}}(t)}{dt^{2}}
-\right\|
-dt,
-\label{eq:schematic_leakage_bound_speed_tradeoff}
-\end{equation}
-where $\Delta(t)$ denotes the relevant energy gap and $\hat{H}_{\mathrm{od}}(t)$ the effective block-off-diagonal Hamiltonian in the transformed basis \cite{Niu2019}. Equation~\eqref{eq:schematic_leakage_bound_speed_tradeoff} is highly instructive for the present discussion: it shows that leakage is aggravated both by large off-diagonal couplings and by rapid pulse modulation, since faster pulses typically make the derivative term larger. Thus, trying to shorten the gate time too aggressively can increase leakage even if the control amplitudes themselves remain moderate.
-
-The speed--leakage tradeoff is therefore not merely a matter of stronger fields; it is also a matter of pulse smoothness and spectral engineering. This is the physical motivation behind derivative-based correction schemes such as DRAG, where an additional quadrature proportional to the time derivative of the main pulse is introduced to cancel leakage-inducing terms order by order \cite{Motzoi2009,Gambetta2011}. More generally, modern optimal-control methods shape the pulse so that fast logical evolution is achieved while destructive interference suppresses net population transfer to higher levels. Experimental work on superconducting transmons confirms that this balance is nontrivial: very short gates can indeed be realized, but only with carefully optimized pulse shapes that explicitly control leakage \cite{Werninghaus2021}.
-
-At the level of control design, the existence of this tradeoff implies that gate optimization is intrinsically multi-objective. Let $\bm{u}(t)$ denote the control protocol and $T[\bm{u}]$ its final runtime. Then an abstract cost functional consistent with the preceding discussion is
-\begin{equation}
-\mathcal{J}[\bm{u}]
-=
-w_{F}\,\varepsilon_{\mathrm{gate}}[\bm{u}]
-+
-w_{L}\,L[\bm{u}]
-+
-w_{T}\,T[\bm{u}]
-+
-\cdots,
-\label{eq:speed_leakage_multiobjective}
-\end{equation}
-where $\varepsilon_{\mathrm{gate}}$ measures logical inaccuracy, $L[\bm{u}]$ is a leakage functional, and the omitted terms may encode boundary constraints, bandwidth penalties, fluence costs, or robustness objectives. Equation~\eqref{eq:speed_leakage_multiobjective} summarizes the central message of this subsection: making a gate faster is not automatically beneficial unless the resulting increase in leakage remains under control. This perspective is directly aligned with the philosophy of the UFO framework, which later combines gate infidelity, leakage, control constraints, and total runtime into a single optimization objective \cite{Niu2019}.
-
-From the viewpoint of superconducting-qubit physics, one may summarize the tradeoff as follows. Long pulses are usually easier to make spectrally selective and therefore tend to suppress leakage, but they suffer from greater exposure to decoherence and slow noise. Very short pulses reduce the total interaction time with the environment, but they broaden the pulse spectrum, enhance non-adiabaticity, and increase the risk of population transfer into higher levels. The practically relevant regime is therefore neither the slowest nor the fastest one in an absolute sense, but the regime in which runtime has been reduced as much as possible while leakage and control-induced errors remain acceptably small. This balance is one of the central organizing principles of high-fidelity gate design in weakly anharmonic superconducting systems \cite{Krantz2019,Werninghaus2021,Niu2019}.
-
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.75\textwidth]{chapters/plots/speed_leakage_tradeoff.pdf}
@@ -1179,6 +1143,44 @@ From the viewpoint of superconducting-qubit physics, one may summarize the trade
 \caption{Qualitative illustration of the speed--leakage tradeoff in weakly anharmonic superconducting qubits. Slower gates suffer more from decoherence and low-frequency noise, whereas faster gates typically increase leakage through stronger driving, broader spectral content, and larger non-adiabatic effects. The physically relevant control problem is therefore a compromise between these competing tendencies.}
 \label{fig:speed_leakage_tradeoff}
 \end{figure}
+
+In schematic form, their bound reads
+\begin{equation}
+L_{\mathrm{tot}}
+\lesssim
+\frac{\|\hat{H}_{\mathrm{od}}(0)\|}{\Delta(0)}
++
+\frac{\|\hat{H}_{\mathrm{od}}(T)\|}{\Delta(T)}
++
+\int_{0}^{T}
+\frac{1}{\Delta(t)^{2}}
+\left\|
+\frac{d^{2}\hat{H}_{\mathrm{od}}(t)}{dt^{2}}
+\right\|
+dt,
+\label{eq:schematic_leakage_bound_speed_tradeoff}
+\end{equation}
+where $\Delta(t)$ denotes the relevant energy gap and $\hat{H}_{\mathrm{od}}(t)$ the effective block-off-diagonal Hamiltonian in the transformed basis \cite{Niu2019}. Equation~\eqref{eq:schematic_leakage_bound_speed_tradeoff} is highly instructive for the present discussion: it shows that leakage is aggravated both by large off-diagonal couplings and by rapid pulse modulation, since faster pulses typically make the derivative term larger. Thus, trying to shorten the gate time too aggressively can increase leakage even if the control amplitudes themselves remain moderate.
+
+The speed--leakage tradeoff is therefore not merely a matter of stronger fields; it is also a matter of pulse smoothness and spectral engineering. This is the physical motivation behind derivative-based correction schemes such as DRAG, where an additional quadrature proportional to the time derivative of the main pulse is introduced to cancel leakage-inducing terms order by order \cite{Motzoi2009,Gambetta2011}. More generally, modern optimal-control methods shape the pulse so that fast logical evolution is achieved while destructive interference suppresses net population transfer to higher levels. Experimental work on superconducting transmons confirms that this balance is nontrivial: very short gates can indeed be realized, but only with carefully optimized pulse shapes that explicitly control leakage \cite{Werninghaus2021}.
+
+At the level of control design, the existence of this tradeoff implies that gate optimization is intrinsically multi-objective. Let $\bm{u}(t)$ denote the control protocol and $T[\bm{u}]$ its final runtime. Then an abstract cost functional consistent with the preceding discussion is
+\begin{equation}
+\mathcal{J}[\bm{u}]
+=
+w_{F}\,\varepsilon_{\mathrm{gate}}[\bm{u}]
++
+w_{L}\,L[\bm{u}]
++
+w_{T}\,T[\bm{u}]
++
+\cdots,
+\label{eq:speed_leakage_multiobjective}
+\end{equation}
+where $\varepsilon_{\mathrm{gate}}$ measures logical inaccuracy, $L[\bm{u}]$ is a leakage functional, and the omitted terms may encode boundary constraints, bandwidth penalties, fluence costs, or robustness objectives. Equation~\eqref{eq:speed_leakage_multiobjective} summarizes the central message of this subsection: making a gate faster is not automatically beneficial unless the resulting increase in leakage remains under control. This perspective is directly aligned with the philosophy of the UFO framework, which later combines gate infidelity, leakage, control constraints, and total runtime into a single optimization objective \cite{Niu2019}.
+
+From the viewpoint of superconducting-qubit physics, one may summarize the tradeoff as follows. Long pulses are usually easier to make spectrally selective and therefore tend to suppress leakage, but they suffer from greater exposure to decoherence and slow noise. Very short pulses reduce the total interaction time with the environment, but they broaden the pulse spectrum, enhance non-adiabaticity, and increase the risk of population transfer into higher levels. The practically relevant regime is therefore neither the slowest nor the fastest one in an absolute sense, but the regime in which runtime has been reduced as much as possible while leakage and control-induced errors remain acceptably small. This balance is one of the central organizing principles of high-fidelity gate design in weakly anharmonic superconducting systems \cite{Krantz2019,Werninghaus2021,Niu2019}.
+
 
 
 % Requires in the preamble:
@@ -1263,26 +1265,6 @@ where $\mathcal{A}$ denotes an optimization rule such as gradient descent, finit
 
 The practical strengths of closed-loop approaches are clear. Since the performance metric is measured directly on the physical device, systematic model errors, waveform distortions, and unknown hardware nonlinearities are automatically incorporated into the optimization. This can make closed-loop strategies more robust than purely model-based open-loop methods when the system is imperfectly characterized. Experimental studies indeed show that closed-loop quantum control can outperform open-loop control in settings where model inaccuracies or hardware distortions dominate the error budget \cite{Ferrie2015,Feng2018}. In addition, closed-loop schemes can target figures of merit that are directly operational, such as randomized-benchmarking-based performance estimates or experimentally reconstructed gate fidelities, rather than relying exclusively on idealized simulation objectives.
 
-The price paid for this robustness is experimental cost. Closed-loop methods generally require many repeated measurements, and therefore many experimental iterations, in order to estimate objective functions or gradients with acceptable statistical precision. In fast gate optimization this can become a serious limitation, since readout is often much slower than the gate itself and can perturb subsequent operations. This concern  is emphasized in modern literature: the authors note that many efforts to improve robustness against control errors have focused on closed-loop feedback optimization, but that frequent measurements remain relatively slow and can degrade later fidelities, making such approaches less practical for near-term devices \cite{Niu2019}. In contrast, their approach remains fundamentally open-loop during gate execution, while incorporating robustness and leakage suppression directly into an analytic cost function that can be optimized numerically.
-
-This distinction leads naturally to a hybrid viewpoint. Purely open-loop control is efficient when the model is accurate enough; purely closed-loop control is attractive when the device itself must reveal the relevant imperfections; and many modern workflows combine the two. A common strategy is to first compute a high-quality pulse from a detailed simulation and then refine or calibrate it experimentally through an iterative in situ procedure. Schematically, one may write
-\begin{equation}
-\bm{\theta}_{0}
-=
-\arg\min_{\bm{\theta}} \mathcal{J}_{\mathrm{model}}(\bm{\theta}),
-\qquad
-\bm{\theta}^{\star}
-=
-\mathrm{Refine}\!\left(
-\bm{\theta}_{0},
-\widehat{\mathcal{J}}_{\mathrm{exp}}
-\right),
-\label{eq:hybrid_open_closed_workflow}
-\end{equation}
-where the first step is model-based and the second experimental. This hybrid logic has become increasingly important in quantum control software and experimental practice, precisely because it attempts to combine the numerical efficiency of open-loop design with the hardware realism of closed-loop refinement \cite{Koch2022,Rossignolo2023}.
-
-For the purposes of this thesis, the most important point is the following. The UFO framework analyzed later is an \emph{open-loop} control framework in the sense that the control pulse is optimized from a Hamiltonian model and then applied without measurement-based feedback during the gate. At the same time, its motivation is shaped by the practical limitations of closed-loop techniques: because repeated measurements are slow and because the exact error model is often unavailable, the framework seeks to encode robustness and leakage suppression directly into the cost function rather than outsourcing them to experimental feedback \cite{Niu2019}. The distinction developed in this subsection is therefore not merely terminological; it explains why the thesis focuses on analytic objectives and model-based control design, while still recognizing that future hardware-level implementations may benefit from hybrid or partially closed-loop refinements.
-
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.9\textwidth]{chapters/plots/open_closed_loop_control.pdf}
@@ -1326,6 +1308,28 @@ For the purposes of this thesis, the most important point is the following. The 
 \caption{Schematic distinction between open-loop and closed-loop quantum control. In open-loop control, pulse design is performed from a model and the resulting pulse is applied without feedback during the gate. In closed-loop control, experimental information is fed back to improve the next control decision, either in real time or iteratively between repeated runs.}
 \label{fig:open_closed_loop_control}
 \end{figure}
+
+The price paid for this robustness is experimental cost. Closed-loop methods generally require many repeated measurements, and therefore many experimental iterations, in order to estimate objective functions or gradients with acceptable statistical precision. In fast gate optimization this can become a serious limitation, since readout is often much slower than the gate itself and can perturb subsequent operations. This concern  is emphasized in modern literature: the authors note that many efforts to improve robustness against control errors have focused on closed-loop feedback optimization, but that frequent measurements remain relatively slow and can degrade later fidelities, making such approaches less practical for near-term devices \cite{Niu2019}. In contrast, their approach remains fundamentally open-loop during gate execution, while incorporating robustness and leakage suppression directly into an analytic cost function that can be optimized numerically.
+
+This distinction leads naturally to a hybrid viewpoint. Purely open-loop control is efficient when the model is accurate enough; purely closed-loop control is attractive when the device itself must reveal the relevant imperfections; and many modern workflows combine the two. A common strategy is to first compute a high-quality pulse from a detailed simulation and then refine or calibrate it experimentally through an iterative in situ procedure. Schematically, one may write
+\begin{equation}
+\bm{\theta}_{0}
+=
+\arg\min_{\bm{\theta}} \mathcal{J}_{\mathrm{model}}(\bm{\theta}),
+\qquad
+\bm{\theta}^{\star}
+=
+\mathrm{Refine}\!\left(
+\bm{\theta}_{0},
+\widehat{\mathcal{J}}_{\mathrm{exp}}
+\right),
+\label{eq:hybrid_open_closed_workflow}
+\end{equation}
+where the first step is model-based and the second experimental. This hybrid logic has become increasingly important in quantum control software and experimental practice, precisely because it attempts to combine the numerical efficiency of open-loop design with the hardware realism of closed-loop refinement \cite{Koch2022,Rossignolo2023}.
+
+For the purposes of this thesis, the most important point is the following. The UFO framework analyzed later is an \emph{open-loop} control framework in the sense that the control pulse is optimized from a Hamiltonian model and then applied without measurement-based feedback during the gate. At the same time, its motivation is shaped by the practical limitations of closed-loop techniques: because repeated measurements are slow and because the exact error model is often unavailable, the framework seeks to encode robustness and leakage suppression directly into the cost function rather than outsourcing them to experimental feedback \cite{Niu2019}. The distinction developed in this subsection is therefore not merely terminological; it explains why the thesis focuses on analytic objectives and model-based control design, while still recognizing that future hardware-level implementations may benefit from hybrid or partially closed-loop refinements.
+
+
 
 \subsection{Classical optimal-control methods for quantum systems}
 \label{subsec:classical_qoc_methods}
@@ -1575,32 +1579,6 @@ H_{\mathcal{J}}(\bm{u}_{0})
 \end{equation}
 where $H_{\mathcal{J}}$ is the Hessian of the control objective. Robustness analysis based on such curvature information can be very informative, because it quantifies sensitivity to small perturbations in the controls. But it is also expensive in large systems: as the literature points out, canonical Hessian-based robustness analysis becomes computationally prohibitive as the number of control degrees of freedom grows, which is one reason the authors adopt a more scalable practical robustness definition \cite{Niu2019}. Thus, even diagnosing whether a pulse is robust can already be difficult, before one attempts to optimize robustness itself.
 
-Another complication is that different sources of robustness may conflict with one another. A control that is robust against amplitude noise may be fragile against detuning error; a control that is robust against quasistatic drift may be more sensitive to bandwidth truncation; a pulse that suppresses leakage may require longer duration and thus suffer more strongly from decoherence. In this sense, robustness is not usually a single-axis improvement but a multidimensional tradeoff problem. A more realistic objective is therefore often of the form
-\begin{equation}
-\mathcal{J}_{\mathrm{rob}}[\bm{u}]
-=
-w_{F}\,\varepsilon_{\mathrm{gate}}
-+
-w_{L}\,L
-+
-w_{T}\,T
-+
-w_{R}\,\mathcal{R}[\bm{u}],
-\label{eq:multiobjective_robustness}
-\end{equation}
-where $\mathcal{R}[\bm{u}]$ denotes a chosen robustness functional and the weights $\{w_F,w_L,w_T,w_R\}$ encode the tradeoff between fidelity, leakage, runtime, and robustness. There is generally no reason for these objectives to be simultaneously minimized by the same pulse. A robust-control problem is therefore often a Pareto problem rather than a single-objective one.
-
-In superconducting qubits, the robustness problem is made sharper by the multilevel character of the hardware. Parameter uncertainty does not merely perturb the logical gate within the computational subspace; it can alter detunings, anharmonicities, and couplings in a way that changes the leakage channels themselves. Thus, robustness against model uncertainty and robustness against leakage are intertwined rather than separable. This is one reason why robust pulse design in weakly anharmonic systems often requires the full multilevel Hamiltonian rather than a simplified two-level approximation \cite{Krantz2019,Propson2022}. The same observation is directly relevant for the reference paper: its robust RL optimization is performed in a stochastic environment where perturbations are injected into physically important control parameters, and the resulting performance is then judged by averaged noisy gate fidelity and fidelity variance rather than by nominal accuracy alone \cite{Niu2019}.
-
-It is therefore useful to distinguish two questions:
-\begin{enumerate}
-\item \emph{Robustness evaluation:} given a control pulse, how sensitive is it to perturbations?
-\item \emph{Robustness optimization:} how should the pulse be modified so as to reduce that sensitivity?
-\end{enumerate}
-The first is already nontrivial because it requires specifying the relevant uncertainty model and computing the corresponding sensitivity metric. The second is harder still because robustness must be optimized jointly with all the other physical criteria of the control problem. In that sense, robustness is difficult not because it is a secondary correction to nominal control, but because it fundamentally changes the optimization problem itself.
-
-For the purposes of this thesis, the most important takeaway is that robustness cannot be treated as an afterthought. A pulse optimized only for nominal gate fidelity may be scientifically interesting, but it is not yet a practically convincing control solution unless one also understands how it behaves under uncertainty, noise, and imperfect modeling. This is precisely why the literature moves beyond a purely nominal objective and evaluates control performance under a family of stochastic perturbations, using average fidelity and fidelity variance as practical diagnostics of robustness \cite{Niu2019}. The extension work proposed later in this thesis builds directly on this point by asking whether robustness learned under one uncertainty model generalizes to others.
-
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.8\textwidth]{chapters/plots/robustness_landscape_shift.pdf}
@@ -1640,6 +1618,34 @@ For the purposes of this thesis, the most important takeaway is that robustness 
 \caption{Schematic illustration of why robustness is difficult. A pulse that is optimal for a nominal model need not remain optimal when the Hamiltonian, noise parameters, or control transfer functions are perturbed. Robust optimization must account for an ensemble of such landscapes rather than for a single nominal one.}
 \label{fig:robustness_landscape_shift}
 \end{figure}
+
+Another complication is that different sources of robustness may conflict with one another. A control that is robust against amplitude noise may be fragile against detuning error; a control that is robust against quasistatic drift may be more sensitive to bandwidth truncation; a pulse that suppresses leakage may require longer duration and thus suffer more strongly from decoherence. In this sense, robustness is not usually a single-axis improvement but a multidimensional tradeoff problem. A more realistic objective is therefore often of the form
+\begin{equation}
+\mathcal{J}_{\mathrm{rob}}[\bm{u}]
+=
+w_{F}\,\varepsilon_{\mathrm{gate}}
++
+w_{L}\,L
++
+w_{T}\,T
++
+w_{R}\,\mathcal{R}[\bm{u}],
+\label{eq:multiobjective_robustness}
+\end{equation}
+where $\mathcal{R}[\bm{u}]$ denotes a chosen robustness functional and the weights $\{w_F,w_L,w_T,w_R\}$ encode the tradeoff between fidelity, leakage, runtime, and robustness. There is generally no reason for these objectives to be simultaneously minimized by the same pulse. A robust-control problem is therefore often a Pareto problem rather than a single-objective one.
+
+
+In superconducting qubits, the robustness problem is made sharper by the multilevel character of the hardware. Parameter uncertainty does not merely perturb the logical gate within the computational subspace; it can alter detunings, anharmonicities, and couplings in a way that changes the leakage channels themselves. Thus, robustness against model uncertainty and robustness against leakage are intertwined rather than separable. This is one reason why robust pulse design in weakly anharmonic systems often requires the full multilevel Hamiltonian rather than a simplified two-level approximation \cite{Krantz2019,Propson2022}. The same observation is directly relevant for the reference paper: its robust RL optimization is performed in a stochastic environment where perturbations are injected into physically important control parameters, and the resulting performance is then judged by averaged noisy gate fidelity and fidelity variance rather than by nominal accuracy alone \cite{Niu2019}.
+
+It is therefore useful to distinguish two questions:
+\begin{enumerate}
+\item \emph{Robustness evaluation:} given a control pulse, how sensitive is it to perturbations?
+\item \emph{Robustness optimization:} how should the pulse be modified so as to reduce that sensitivity?
+\end{enumerate}
+The first is already nontrivial because it requires specifying the relevant uncertainty model and computing the corresponding sensitivity metric. The second is harder still because robustness must be optimized jointly with all the other physical criteria of the control problem. In that sense, robustness is difficult not because it is a secondary correction to nominal control, but because it fundamentally changes the optimization problem itself.
+
+For the purposes of this thesis, the most important takeaway is that robustness cannot be treated as an afterthought. A pulse optimized only for nominal gate fidelity may be scientifically interesting, but it is not yet a practically convincing control solution unless one also understands how it behaves under uncertainty, noise, and imperfect modeling. This is precisely why the literature moves beyond a purely nominal objective and evaluates control performance under a family of stochastic perturbations, using average fidelity and fidelity variance as practical diagnostics of robustness \cite{Niu2019}. The extension work proposed later in this thesis builds directly on this point by asking whether robustness learned under one uncertainty model generalizes to others.
+
 
 \section{Machine learning and RL for control}
 \subsection{Why reinforcement learning is relevant for quantum control}
@@ -1693,36 +1699,6 @@ s_t = \bigl(t,y_0,y_1,\dots,y_{t-1}\bigr),
 \end{equation}
 then the same policy formalism becomes a closed-loop feedback controller. This flexibility is one reason RL has become attractive in quantum technologies: it can be used both to learn open-loop pulse sequences and, at least in principle, to learn adaptive feedback strategies within a single mathematical framework \cite{SuttonBarto2018,Giannelli2022}.
 
-Another reason RL is relevant is that many quantum-control objectives are naturally \emph{delayed}. A control action applied early in the pulse sequence may only reveal its true value at the final time, when fidelity, leakage, or some other terminal metric is evaluated. In such cases, it is often convenient to use a reward structure of the form
-\begin{equation}
-r_t =
-\begin{cases}
-0, & t<T,\\[0.3em]
--\mathcal{J}_{\mathrm{final}}, & t=T,
-\end{cases}
-\label{eq:sparse_terminal_reward}
-\end{equation}
-or, equivalently, a positive terminal reward based on fidelity,
-\begin{equation}
-r_T = F_{\mathrm{final}}.
-\label{eq:terminal_fidelity_reward}
-\end{equation}
-This sparse-reward structure is awkward for naive local optimization, but it is entirely natural in RL, where the goal is to learn sequences of actions whose value may only become apparent at the end of the episode. In this sense, RL is well suited to control problems in which the quality of a full pulse sequence matters more than the immediate effect of each individual control action \cite{Bukov2018,Giannelli2022}.
-
-RL is also attractive when stochasticity is intrinsic to the problem. If the environment contains random perturbations, sampled parameter drifts, or control noise, then the transition law becomes stochastic,
-\begin{equation}
-s_{t+1} \sim P(\,\cdot \mid s_t,a_t,\xi_t),
-\label{eq:stochastic_transition_rl}
-\end{equation}
-where $\xi_t$ represents a random disturbance. The policy objective in Eq.~\eqref{eq:rl_objective} then automatically becomes an expectation over noisy trajectories. This is a particularly natural way to formulate robust control: instead of first optimizing a nominal pulse and then testing it under perturbations, one can train the agent directly in a noisy environment and thereby encourage the policy to discover actions that perform well \emph{on average} across many stochastic realizations \cite{Niu2019}. 
-This thesis uses exactly this principle by training RL agents in environments with sampled control noise so as to optimize not only fidelity and runtime, but also robustness against stochastic control errors.
-
-A further advantage of RL is that it can exploit structure beyond local differential information. Classical gradient-based optimal control methods often update a pulse by using local derivatives of a cost functional with respect to control parameters. RL, by contrast, can treat the control problem as a long-horizon sequential optimization problem and may therefore exploit nonlocal regularities of the trajectory space. This perspective has been particularly fruitful in problems where the control landscape is highly nonconvex or where the action sequence has strong temporal dependencies. The literature stresses this point explicitly, arguing that deep RL can harness nonlocal regularities of noisy control trajectories and facilitate transfer learning between related control tasks \cite{Niu2019}. This is especially relevant for families of quantum gates that share common structure, because a learned policy or value representation may generalize across nearby targets better than a pulse optimized from scratch each time.
-
-Of course, RL is not automatically superior to classical optimal control. It introduces its own challenges: large sample requirements, sensitivity to reward shaping, instability during training, and the need to choose a suitable state representation and action parameterization. In addition, many RL algorithms were originally developed for generic machine-learning tasks rather than for the special structure of quantum dynamics. For this reason, a productive viewpoint is not to see RL as replacing optimal control, but rather as providing an alternative search strategy within the same control-theoretic framework \cite{Giannelli2022,Bukov2018}. In deterministic model-based settings, RL may be interpreted as learning to solve the same optimization problem attacked by GRAPE or Krotov, but by optimizing a policy over sequential decisions rather than directly differentiating a cost with respect to a fixed pulse vector.
-
-For the purposes of this thesis, the relevance of RL is therefore twofold. First, it offers a mathematically natural framework for sequential pulse construction in noisy and uncertain environments. Second, it provides a route to incorporating practical objectives such as leakage suppression, robustness to sampled perturbations, and gate-time reduction into a single reward function. This is precisely the role RL plays in the UFO framework analyzed later: the control problem is cast as a sequential decision process, the total objective is encoded into a reward/cost signal, and the agent learns pulse trajectories that balance fidelity, leakage, runtime, and robustness under stochastic control errors as it will be covered in section \ref{subsec:ufo_cost_function}. In this sense, RL is relevant not because quantum control is a machine-learning problem in disguise, but because the structure of many realistic quantum-control tasks already has the architecture of a sequential decision problem.
-
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.8\textwidth]{chapters/plots/rl_quantum_control_loop.pdf}
@@ -1747,6 +1723,38 @@ For the purposes of this thesis, the relevance of RL is therefore twofold. First
 \caption{Agent--environment view of quantum control in reinforcement learning. The agent chooses control actions, the quantum system evolves under those controls and possible noise, and the resulting state and reward are fed back to improve the policy. Depending on the choice of state representation, the same formalism can describe either open-loop pulse generation or closed-loop feedback control.}
 \label{fig:rl_quantum_control_loop}
 \end{figure}
+
+Another reason RL is relevant is that many quantum-control objectives are naturally \emph{delayed}. A control action applied early in the pulse sequence may only reveal its true value at the final time, when fidelity, leakage, or some other terminal metric is evaluated. In such cases, it is often convenient to use a reward structure of the form
+\begin{equation}
+r_t =
+\begin{cases}
+0, & t<T,\\[0.3em]
+-\mathcal{J}_{\mathrm{final}}, & t=T,
+\end{cases}
+\label{eq:sparse_terminal_reward}
+\end{equation}
+or, equivalently, a positive terminal reward based on fidelity,
+\begin{equation}
+r_T = F_{\mathrm{final}}.
+\label{eq:terminal_fidelity_reward}
+\end{equation}
+This sparse-reward structure is awkward for naive local optimization, but it is entirely natural in RL, where the goal is to learn sequences of actions whose value may only become apparent at the end of the episode. In this sense, RL is well suited to control problems in which the quality of a full pulse sequence matters more than the immediate effect of each individual control action \cite{Bukov2018,Giannelli2022}.
+
+
+RL is also attractive when stochasticity is intrinsic to the problem. If the environment contains random perturbations, sampled parameter drifts, or control noise, then the transition law becomes stochastic,
+\begin{equation}
+s_{t+1} \sim P(\,\cdot \mid s_t,a_t,\xi_t),
+\label{eq:stochastic_transition_rl}
+\end{equation}
+where $\xi_t$ represents a random disturbance. The policy objective in Eq.~\eqref{eq:rl_objective} then automatically becomes an expectation over noisy trajectories. This is a particularly natural way to formulate robust control: instead of first optimizing a nominal pulse and then testing it under perturbations, one can train the agent directly in a noisy environment and thereby encourage the policy to discover actions that perform well \emph{on average} across many stochastic realizations \cite{Niu2019}. 
+This thesis uses exactly this principle by training RL agents in environments with sampled control noise so as to optimize not only fidelity and runtime, but also robustness against stochastic control errors.
+
+A further advantage of RL is that it can exploit structure beyond local differential information. Classical gradient-based optimal control methods often update a pulse by using local derivatives of a cost functional with respect to control parameters. RL, by contrast, can treat the control problem as a long-horizon sequential optimization problem and may therefore exploit nonlocal regularities of the trajectory space. This perspective has been particularly fruitful in problems where the control landscape is highly nonconvex or where the action sequence has strong temporal dependencies. The literature stresses this point explicitly, arguing that deep RL can harness nonlocal regularities of noisy control trajectories and facilitate transfer learning between related control tasks \cite{Niu2019}. This is especially relevant for families of quantum gates that share common structure, because a learned policy or value representation may generalize across nearby targets better than a pulse optimized from scratch each time.
+
+Of course, RL is not automatically superior to classical optimal control. It introduces its own challenges: large sample requirements, sensitivity to reward shaping, instability during training, and the need to choose a suitable state representation and action parameterization. In addition, many RL algorithms were originally developed for generic machine-learning tasks rather than for the special structure of quantum dynamics. For this reason, a productive viewpoint is not to see RL as replacing optimal control, but rather as providing an alternative search strategy within the same control-theoretic framework \cite{Giannelli2022,Bukov2018}. In deterministic model-based settings, RL may be interpreted as learning to solve the same optimization problem attacked by GRAPE or Krotov, but by optimizing a policy over sequential decisions rather than directly differentiating a cost with respect to a fixed pulse vector.
+
+For the purposes of this thesis, the relevance of RL is therefore twofold. First, it offers a mathematically natural framework for sequential pulse construction in noisy and uncertain environments. Second, it provides a route to incorporating practical objectives such as leakage suppression, robustness to sampled perturbations, and gate-time reduction into a single reward function. This is precisely the role RL plays in the UFO framework analyzed later: the control problem is cast as a sequential decision process, the total objective is encoded into a reward/cost signal, and the agent learns pulse trajectories that balance fidelity, leakage, runtime, and robustness under stochastic control errors as it will be covered in section \ref{subsec:ufo_cost_function}. In this sense, RL is relevant not because quantum control is a machine-learning problem in disguise, but because the structure of many realistic quantum-control tasks already has the architecture of a sequential decision problem.
+
 
 \subsection{Policy optimization for continuous-action quantum control}
 \label{subsec:policy_optimization_continuous_actions}
@@ -1880,6 +1888,37 @@ then, under suitable assumptions, the objective gradient can be written as
 \end{equation}
 where $\rho^{\mu_{\bm{\theta}}}$ is the discounted state-visitation distribution under the deterministic policy \cite{Silver2014}. Deterministic methods can be highly effective in continuous control, especially when the action dimension is large. However, this thesis employs a stochastic policy optimized by TRPO, which is particularly attractive when one wants stable learning under noise and controlled exploration in a stochastic environment \cite{Schulman2015}.
 
+% \includegraphics[width=0.8\textwidth]{chapters/plots/continuous_action_trpo.pdf}
+\tikzexternaldisable
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    box/.style={draw, rounded corners, minimum width=3.0cm, minimum height=1.0cm, align=center},
+    arrow/.style={-{Latex[length=2mm]}, thick},
+    node distance=1.6cm and 1.8cm
+]
+
+\node[box] (state) {state $s_t$};
+\node[box, right=of state] (policy) {stochastic policy\\ $\pi_{\bm{\theta}}(a\mid s)$};
+\node[box, right=of policy] (action) {continuous action\\ $a_t=\bm{u}_t\in\mathbb{R}^m$};
+\node[box, below=of policy] (env) {quantum dynamics\\ + reward}; 
+\node[box, below=of action] (trpo) {TRPO update\\ maximize \eqref{eq:trpo_surrogate_objective}\\ subject to \eqref{eq:trpo_kl_constraint}};
+
+\draw[arrow] (state) -- (policy);
+\draw[arrow] (policy) -- (action);
+\draw[arrow] (action) -- (env);
+\draw[arrow] (env) -- (state);
+\draw[arrow] (env) -- (trpo);
+\draw[arrow] (trpo) -- (policy);
+
+\end{tikzpicture}
+\caption{Continuous-action policy optimization in quantum control. The policy maps the current state to a distribution over continuous control amplitudes, the quantum system returns the resulting trajectory information and reward, and TRPO updates the policy through a surrogate objective constrained by a KL trust region.
+%\textbf{TODO:} add snippet
+}
+\label{fig:continuous_action_trpo}
+\end{figure}
+\tikzexternalenable
+
 This brings us to the main algorithmic idea relevant for the thesis: \emph{trust-region policy optimization}. A naive policy-gradient update of the form
 \begin{equation}
 \bm{\theta}_{r+1}
@@ -1928,36 +1967,6 @@ There is also a conceptual reason why policy optimization is a good match for qu
 For the purposes of this thesis, the key message is the following. Once the control amplitudes are treated as continuous actions, reinforcement learning naturally leads to policy-gradient methods rather than to purely value-based discrete-action algorithms. Among policy-gradient methods, TRPO is especially relevant because it combines direct optimization of continuous stochastic policies with a principled mechanism for stabilizing updates through a trust-region constraint. This is why it forms the algorithmic core of the reference paper and why it provides the natural bridge between the general RL background developed so far and the specific deep-RL control framework analyzed in the following chapter.
 
 
-% \includegraphics[width=0.8\textwidth]{chapters/plots/continuous_action_trpo.pdf}
-\tikzexternaldisable
-\begin{figure}[t]
-\centering
-\begin{tikzpicture}[
-    box/.style={draw, rounded corners, minimum width=3.0cm, minimum height=1.0cm, align=center},
-    arrow/.style={-{Latex[length=2mm]}, thick},
-    node distance=1.6cm and 1.8cm
-]
-
-\node[box] (state) {state $s_t$};
-\node[box, right=of state] (policy) {stochastic policy\\ $\pi_{\bm{\theta}}(a\mid s)$};
-\node[box, right=of policy] (action) {continuous action\\ $a_t=\bm{u}_t\in\mathbb{R}^m$};
-\node[box, below=of policy] (env) {quantum dynamics\\ + reward}; 
-\node[box, below=of action] (trpo) {TRPO update\\ maximize \eqref{eq:trpo_surrogate_objective}\\ subject to \eqref{eq:trpo_kl_constraint}};
-
-\draw[arrow] (state) -- (policy);
-\draw[arrow] (policy) -- (action);
-\draw[arrow] (action) -- (env);
-\draw[arrow] (env) -- (state);
-\draw[arrow] (env) -- (trpo);
-\draw[arrow] (trpo) -- (policy);
-
-\end{tikzpicture}
-\caption{Continuous-action policy optimization in quantum control. The policy maps the current state to a distribution over continuous control amplitudes, the quantum system returns the resulting trajectory information and reward, and TRPO updates the policy through a surrogate objective constrained by a KL trust region.
-%\textbf{TODO:} add snippet
-}
-\label{fig:continuous_action_trpo}
-\end{figure}
-\tikzexternalenable
 
 \subsection{Reward design as the bridge between physics and reinforcement learning}
 \label{subsec:reward_design_bridge_physics_rl}
@@ -2055,32 +2064,6 @@ r_T = -\,\Phi(s_T).
 \end{equation}
 This decomposition is especially convenient in sequential pulse design, because it allows the control algorithm to receive intermediate feedback about properties such as action magnitude, smoothness, or deviation from boundary conditions before the final fidelity is known.
 
-A key lesson is that reward design determines the \emph{behavioral bias} of the learned policy. If the reward contains only terminal fidelity, then the agent is encouraged to maximize accuracy but has no direct incentive to avoid long runtimes, excessive pulse amplitudes, strong boundary discontinuities, or transient excursions into leakage states. Conversely, if leakage or runtime is weighted too strongly relative to fidelity, the agent may discover controls that are conservative but fail to realize the target gate accurately. Thus, the coefficients in Eq.~\eqref{eq:generic_physical_cost_rl} are not merely numerical hyperparameters: they encode the scientific priorities of the control problem. In a realistic quantum-control application, these tradeoff weights determine whether the learned policy prefers fast but aggressive gates, smooth but slower gates, or highly robust but somewhat less time-optimal ones \cite{Giannelli2022,Niu2019}.
-
-This point becomes even more important in stochastic environments. Suppose the dynamics depend on random disturbances $\xi_t$, representing amplitude fluctuations, parameter drift, or noise in the control electronics. Then the trajectory cost becomes random,
-\begin{equation}
-\mathcal{C}[\tau;\xi],
-\label{eq:stochastic_trajectory_cost}
-\end{equation}
-and the RL objective becomes
-\begin{equation}
-J(\bm{\theta})
-=
--\mathbb{E}_{\tau,\xi}
-\left[
-\mathcal{C}[\tau;\xi]
-\right].
-\label{eq:expected_robust_cost}
-\end{equation}
-Equation~\eqref{eq:expected_robust_cost} shows how robustness enters reward design naturally: by training in a stochastic environment and rewarding low expected cost, one asks the agent not merely to find a good pulse for a nominal model, but to find a control strategy that performs well on average across noisy realizations. This is one of the strongest conceptual advantages of the RL formulation for quantum control, since robustness can be built directly into the training objective instead of being added only as a post hoc evaluation criterion \cite{Niu2019}.
-
-At the same time, reward design in physics-based RL is delicate. A badly chosen reward may lead to \emph{reward hacking}, meaning that the agent exploits loopholes in the scalar objective rather than learning the intended physical behavior. In quantum control this can happen, for example, if a reward based only on projected logical fidelity allows large transient leakage that later returns to the computational subspace, or if a poorly scaled runtime penalty encourages premature episode termination rather than genuine fast gate synthesis. It can also happen if the reward mixes terms of very different numerical scales, making optimization dominated by whichever term has the largest magnitude rather than by the physically most important criterion. For this reason, professional reward design requires more than writing down a sum of penalties: it requires checking that the resulting scalar objective faithfully reflects the experimental and theoretical meaning of ``good control.''
-
-A useful principle is therefore to start from the \emph{physics} and only then translate it into reward form. One first asks: what quantities genuinely determine whether a control pulse is acceptable? For the present thesis, the answer includes at least target-gate accuracy, suppression of leakage, runtime, and compatibility with control constraints. Only after these quantities have been identified should one define the scalar reward. In that sense, RL does not remove the need for careful control theory; it makes the formulation of the control objective even more important, because the reward is the sole channel through which physical priorities are communicated to the learning algorithm \cite{Giannelli2022,SuttonBarto2018}.
-
-This is precisely the conceptual role played by the framework analyzed in the next chapter. The literature explicitly argues that an effective control cost function is essential for efficient optimization and for meaningful quantum control, and it constructs the UFO objective by combining gate infidelity, leakage penalties, total runtime, and boundary-condition penalties into a single scalar cost \cite{Niu2019}. That cost is then used as the reward signal for a continuous-variable policy-gradient agent trained with TRPO \cite{Niu2019}. In other words, the paper does not first design an RL agent and then ask what to optimize; it begins from the physics of the control problem and uses the reward as the mechanism for injecting that physics into the learning dynamics. This is exactly why reward design is the final and most important conceptual bridge between the generic RL background of this chapter and the paper-specific framework introduced next.
-
-
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.8\textwidth]{chapters/plots/reward_design_bridge.pdf}
@@ -2107,24 +2090,33 @@ This is precisely the conceptual role played by the framework analyzed in the ne
 \label{fig:reward_design_bridge}
 \end{figure}
 
-% Requires in the preamble:
-% \usepackage{amsmath,amssymb,amsfonts,bm}
-% \usepackage{tikz}
-% \usetikzlibrary{positioning,arrows.meta,fit}
+A key lesson is that reward design determines the \emph{behavioral bias} of the learned policy. If the reward contains only terminal fidelity, then the agent is encouraged to maximize accuracy but has no direct incentive to avoid long runtimes, excessive pulse amplitudes, strong boundary discontinuities, or transient excursions into leakage states. Conversely, if leakage or runtime is weighted too strongly relative to fidelity, the agent may discover controls that are conservative but fail to realize the target gate accurately. Thus, the coefficients in Eq.~\eqref{eq:generic_physical_cost_rl} are not merely numerical hyperparameters: they encode the scientific priorities of the control problem. In a realistic quantum-control application, these tradeoff weights determine whether the learned policy prefers fast but aggressive gates, smooth but slower gates, or highly robust but somewhat less time-optimal ones \cite{Giannelli2022,Niu2019}.
+
+This point becomes even more important in stochastic environments. Suppose the dynamics depend on random disturbances $\xi_t$, representing amplitude fluctuations, parameter drift, or noise in the control electronics. Then the trajectory cost becomes random,
+\begin{equation}
+\mathcal{C}[\tau;\xi],
+\label{eq:stochastic_trajectory_cost}
+\end{equation}
+and the RL objective becomes
+\begin{equation}
+J(\bm{\theta})
+=
+-\mathbb{E}_{\tau,\xi}
+\left[
+\mathcal{C}[\tau;\xi]
+\right].
+\label{eq:expected_robust_cost}
+\end{equation}
+Equation~\eqref{eq:expected_robust_cost} shows how robustness enters reward design naturally: by training in a stochastic environment and rewarding low expected cost, one asks the agent not merely to find a good pulse for a nominal model, but to find a control strategy that performs well on average across noisy realizations. This is one of the strongest conceptual advantages of the RL formulation for quantum control, since robustness can be built directly into the training objective instead of being added only as a post hoc evaluation criterion \cite{Niu2019}.
+
+At the same time, reward design in physics-based RL is delicate. A badly chosen reward may lead to \emph{reward hacking}, meaning that the agent exploits loopholes in the scalar objective rather than learning the intended physical behavior. In quantum control this can happen, for example, if a reward based only on projected logical fidelity allows large transient leakage that later returns to the computational subspace, or if a poorly scaled runtime penalty encourages premature episode termination rather than genuine fast gate synthesis. It can also happen if the reward mixes terms of very different numerical scales, making optimization dominated by whichever term has the largest magnitude rather than by the physically most important criterion. For this reason, professional reward design requires more than writing down a sum of penalties: it requires checking that the resulting scalar objective faithfully reflects the experimental and theoretical meaning of ``good control.''
+
+A useful principle is therefore to start from the \emph{physics} and only then translate it into reward form. One first asks: what quantities genuinely determine whether a control pulse is acceptable? For the present thesis, the answer includes at least target-gate accuracy, suppression of leakage, runtime, and compatibility with control constraints. Only after these quantities have been identified should one define the scalar reward. In that sense, RL does not remove the need for careful control theory; it makes the formulation of the control objective even more important, because the reward is the sole channel through which physical priorities are communicated to the learning algorithm \cite{Giannelli2022,SuttonBarto2018}.
+
+This is precisely the conceptual role played by the framework analyzed in the next chapter. The literature explicitly argues that an effective control cost function is essential for efficient optimization and for meaningful quantum control, and it constructs the UFO objective by combining gate infidelity, leakage penalties, total runtime, and boundary-condition penalties into a single scalar cost \cite{Niu2019}. That cost is then used as the reward signal for a continuous-variable policy-gradient agent trained with TRPO \cite{Niu2019}. In other words, the paper does not first design an RL agent and then ask what to optimize; it begins from the physics of the control problem and uses the reward as the mechanism for injecting that physics into the learning dynamics. This is exactly why reward design is the final and most important conceptual bridge between the generic RL background of this chapter and the paper-specific framework introduced next.
 
 
-% \subsection{Feed-Forward Neural Network for policy and value function estimation in continuous action spaces}
-% \label{subsec:feedforward_neural_network}
 
-% %\textbf{TODO:} Disegnino dell'agente tipo quello del paper in images, con input, hidden layers, output, ecc. + citare soliti Lecun, Goodfellow, Bengio in deep learning etc
-
-% \subsubsection{Policy function}
-% \label{subsubsec:policy_function}
-
-
-
-% \subsubsection{Value function}
-% \label{subsubsec:value_function}
 
 \subsection{Neural parameterization of policy and value functions}
 \label{subsec:neural_parameterization_policy_value}
