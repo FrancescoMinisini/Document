@@ -222,7 +222,6 @@ f_1(t),f_2(t),\,
     \begin{alertblock}{Why this matters}
     This is a \textbf{continuous 7-dimensional control problem} on a multilevel superconducting system of dimentionality after three-level truncation: {\scriptsize \(
 d_{\mathrm{phys}}=3^2=9,
-\qquad
 d_{\mathrm{comp}}=4
 \) }
     \end{alertblock}
@@ -423,49 +422,56 @@ Shot-to-shot stability under stochastic perturbations. \\[1em]
 %============================================================
 \section{Implementation}
 
-\begin{frame}{Framework reconstruction from scratch}
-\begin{columns}[T,onlytextwidth]
-    \column{0.52\textwidth}
-    \small
-    \begin{block}{What had to be implemented}
+% \begin{frame}{Framework reconstruction from scratch}
+% \begin{columns}[T,onlytextwidth]
+%     \column{0.52\textwidth}
+%     \small
+%     \begin{block}{What had to be implemented}
+%     \begin{itemize}
+%         \item multilevel gmon simulator
+%         \item bandwidth-limited control filtering
+%         \item TSWT-based leakage estimator
+%         \item RL environment and TRPO agent
+%         \item training, evaluation, and robustness pipelines
+%         \item runtime sweeps across the gate family
+%     \end{itemize}
+%     \end{block}
+
+%     \vspace{0.4em}
+%     \begin{alertblock}{Why this is relevant}
+%     The thesis contribution is not only empirical testing:
+%     it includes the \textbf{full reconstruction} of a nontrivial hybrid framework joining
+%     quantum simulation, leakage physics, and reinforcement learning.
+%     \end{alertblock}
+
+%     \column{0.48\textwidth}
+%     \centering
+%     \IfFileExists{figures/framework_overview.png}{
+%         \includegraphics[width=\linewidth]{figures/framework_overview.png}
+%     }{
+%         \IfFileExists{chapters/plots/paper_rl_loop.pdf}{
+%             \includegraphics[width=\linewidth]{chapters/plots/paper_rl_loop.pdf}
+%         }{
+%             \fbox{
+%                 \parbox[c][0.62\textheight][c]{0.92\linewidth}{
+%                     \centering
+%                     Put here your framework image\\[0.3em]
+%                     (the one you sent me),\\[0.4em]
+%                     or fallback to \texttt{paper\_rl\_loop.pdf}
+%                 }
+%             }
+%         }
+%     }
+% \end{columns}
+
+% % \presenterbox{Francesco G. Minisini}
+% \end{frame}
+
+\begin{frame}
+    lista di esperimenti runnati e motivazioni
     \begin{itemize}
-        \item multilevel gmon simulator
-        \item bandwidth-limited control filtering
-        \item TSWT-based leakage estimator
-        \item RL environment and TRPO agent
-        \item training, evaluation, and robustness pipelines
-        \item runtime sweeps across the gate family
+        \item 
     \end{itemize}
-    \end{block}
-
-    \vspace{0.4em}
-    \begin{alertblock}{Why this is relevant}
-    The thesis contribution is not only empirical testing:
-    it includes the \textbf{full reconstruction} of a nontrivial hybrid framework joining
-    quantum simulation, leakage physics, and reinforcement learning.
-    \end{alertblock}
-
-    \column{0.48\textwidth}
-    \centering
-    \IfFileExists{figures/framework_overview.png}{
-        \includegraphics[width=\linewidth]{figures/framework_overview.png}
-    }{
-        \IfFileExists{chapters/plots/paper_rl_loop.pdf}{
-            \includegraphics[width=\linewidth]{chapters/plots/paper_rl_loop.pdf}
-        }{
-            \fbox{
-                \parbox[c][0.62\textheight][c]{0.92\linewidth}{
-                    \centering
-                    Put here your framework image\\[0.3em]
-                    (the one you sent me),\\[0.4em]
-                    or fallback to \texttt{paper\_rl\_loop.pdf}
-                }
-            }
-        }
-    }
-\end{columns}
-
-% \presenterbox{Francesco G. Minisini}
 \end{frame}
 
 %------------------------------------------------------------
