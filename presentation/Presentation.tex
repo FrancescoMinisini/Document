@@ -169,20 +169,25 @@ Superconducting qubits are only \textbf{weakly anharmonic}, so fast control can 
 \begin{frame}{Physical model: gmon Hamiltonian and control channels}
 \small
 The effective bosonic Hamiltonian is
+\vspace{-1ex}
+{\scriptsize
 \[
-\hat{H}_{\mathrm{RWA}}(t)=
-\frac{\eta}{2}\sum_{j=1}^{2}\hat{n}_{j}(\hat{n}_{j}-1)
-+g(t)(\hat{a}_{2}^{\dagger}\hat{a}_{1}+\hat{a}_{1}^{\dagger}\hat{a}_{2})
-+\sum_{j=1}^{2}\delta_{j}(t)\hat{n}_{j}
-+\sum_{j=1}^{2} i f_{j}(t)
-\left(
-\hat{a}_{j}e^{i\phi_{j}(t)}-\hat{a}_{j}^{\dagger}e^{-i\phi_{j}(t)}
-\right).
-\]
+\begin{aligned}
+    \hat{H}_{\mathrm{RWA}}(t) &=
+    \underbrace{\frac{\eta}{2}\sum_{j=1}^{2}\hat{n}_{j}(\hat{n}_{j}-1)}_{\text{anharmonicity}}
+    + \underbrace{g(t)(\hat{a}_{2}^{\dagger}\hat{a}_{1}+\hat{a}_{1}^{\dagger}\hat{a}_{2})}_{\text{tunable coupling}} \\
+    &\quad + \underbrace{\sum_{j=1}^{2}\delta_{j}(t)\hat{n}_{j}}_{\text{local detuning}}
+    + \underbrace{\sum_{j=1}^{2} i f_{j}(t)
+    \left(
+    \hat{a}_{j}e^{i\phi_{j}(t)}-\hat{a}_{j}^{\dagger}e^{-i\phi_{j}(t)}
+    \right)}_{\text{microwave drive}}.
+\end{aligned}
+\]}
+\vspace{-1ex}
 
-\vspace{0.2em}
-The control vector is
-\[
+% \vspace{-0.2em}
+The control vector is:
+\(
 u(t)=
 \bigl(
 g(t),\,
@@ -190,17 +195,17 @@ g(t),\,
 f_1(t),f_2(t),\,
 \phi_1(t),\phi_2(t)
 \bigr).
-\]
+\)
 
-\vspace{0.2em}
-After three-level truncation:
-\[
-d_{\mathrm{phys}}=3^2=9,
-\qquad
-d_{\mathrm{comp}}=4.
-\]
+% \vspace{0.2em}
+% After three-level truncation:
+% \[
+% d_{\mathrm{phys}}=3^2=9,
+% \qquad
+% d_{\mathrm{comp}}=4.
+% \]
 
-\vspace{0.4em}
+% \vspace{-1em}
 \begin{columns}[T,onlytextwidth]
     \column{0.48\textwidth}
     \begin{block}{Meaning of the controls}
@@ -215,7 +220,11 @@ d_{\mathrm{comp}}=4.
 
     \column{0.48\textwidth}
     \begin{alertblock}{Why this matters}
-    This is a \textbf{continuous 7-dimensional control problem} on a multilevel superconducting system.
+    This is a \textbf{continuous 7-dimensional control problem} on a multilevel superconducting system of dimentionality after three-level truncation: {\scriptsize \(
+d_{\mathrm{phys}}=3^2=9,
+\qquad
+d_{\mathrm{comp}}=4
+\) }
     \end{alertblock}
 \end{columns}
 
@@ -223,60 +232,49 @@ d_{\mathrm{comp}}=4.
 \end{frame}
 
 %------------------------------------------------------------
-\begin{frame}{Leakage treatment and control objective}
+%------------------------------------------------------------
+\begin{frame}{Why this is a multi-objective control problem}
 \scriptsize
-\begin{columns}[T,onlytextwidth]
-    \column{0.56\textwidth}
-    To control leakage, the paper uses a \textbf{time-dependent Schrieffer--Wolff transformation}.
 
-    \vspace{0.4em}
-    The resulting leakage proxy is
-    \[
-    L_{\mathrm{tot}}(T)\lesssim
-    \frac{\|\hat{H}_{\mathrm{od}}(0)\|}{\Delta(0)}
-    +
-    \frac{\|\hat{H}_{\mathrm{od}}(T)\|}{\Delta(T)}
-    +
-    \int_{0}^{T}
-    \frac{1}{\Delta(t)^2}
-    \left\|
-    \frac{d^2 \hat{H}_{\mathrm{od}}(t)}{dt^2}
-    \right\|dt .
-    \]
+\begin{block}{UFO cost function}
+\[
+C=
+\underbrace{\chi(1-F)}_{\text{accuracy}}
++\underbrace{\beta L_{\mathrm{tot}}}_{\text{leakage}}
++\underbrace{\mu P_{\mathrm{bdry}}}_{\text{boundary}}
++\underbrace{\kappa T}_{\text{time}}
+\]
+\[
+F=\frac{1}{16}\left|\mathrm{Tr}\!\left(U^\dagger(T)U_{\mathrm{target}}\right)\right|^2,
+\qquad
+P_{\mathrm{bdry}}=\sum_{t\in\{0,T\}}\!\left[g(t)^2+f_1(t)^2+f_2(t)^2\right]
+\]
+\end{block}
 
-    \vspace{0.6em}
-    The full UFO objective is
-    \[
-    C=
-    \chi[1-F(U(T))]
-    +\beta L_{\mathrm{tot}}
-    +\mu P_{\mathrm{bdry}}
-    +\kappa T .
-    \]
+\vspace{-0.4em}
 
+\begin{block}{TSWT-based leakage proxy}
+\[
+L_{\mathrm{tot}}(T)\lesssim
+\frac{\|\hat H_{\mathrm{od}}(0)\|}{\Delta(0)}
++
+\frac{\|\hat H_{\mathrm{od}}(T)\|}{\Delta(T)}
++
+\int_0^T
+\frac{1}{\Delta(t)^2}
+\left\|
+\frac{d^2\hat H_{\mathrm{od}}(t)}{dt^2}
+\right\|dt
+\]
+\end{block}
 
-    \vspace{0.4em}
-    \begin{block}{Interpretation}
-    The optimizer must balance:
-    fidelity, leakage, pulse regularity, and runtime.
-    \end{block}
+\vspace{-0.4em}
 
-    \column{0.44\textwidth}
-    \centering
-    \IfFileExists{chapters/plots/ufo_cost_structure.pdf}{
-        \includegraphics[width=\linewidth]{chapters/plots/ufo_cost_structure.pdf}
-    }{
-        \fbox{
-            \parbox[c][0.60\textheight][c]{0.92\linewidth}{
-                \centering
-                Suggested figure:\\[0.3em]
-                \texttt{ufo\_cost\_structure.pdf}
-            }
-        }
-    }
-\end{columns}
+\begin{itemize}\itemsep2pt
+    \item We must optimize \textbf{four competing goals}: fidelity, leakage suppression, pulse regularity, and runtime.
+    \item The first two leakage terms are \textbf{boundary contributions}; the integral term penalizes \textbf{rapid pulse variations}.
+\end{itemize}
 
-% \presenterbox{Francesco G. Minisini}
 \end{frame}
 
 %------------------------------------------------------------
