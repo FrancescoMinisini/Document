@@ -232,48 +232,58 @@ d_{\mathrm{comp}}=4
 \end{frame}
 
 %------------------------------------------------------------
-%------------------------------------------------------------
 \begin{frame}{Why this is a multi-objective control problem}
-\scriptsize
+\small
 
-\begin{block}{UFO cost function}
+\begin{block}{UFO objective}
 \[
 C=
-\underbrace{\chi(1-F)}_{\text{accuracy}}
-+\underbrace{\beta L_{\mathrm{tot}}}_{\text{leakage}}
-+\underbrace{\mu P_{\mathrm{bdry}}}_{\text{boundary}}
-+\underbrace{\kappa T}_{\text{time}}
-\]
-\[
-F=\frac{1}{16}\left|\mathrm{Tr}\!\left(U^\dagger(T)U_{\mathrm{target}}\right)\right|^2,
-\qquad
-P_{\mathrm{bdry}}=\sum_{t\in\{0,T\}}\!\left[g(t)^2+f_1(t)^2+f_2(t)^2\right]
+\underbrace{\chi\!\left[1-F(U(T))\right]}_{\text{fidelity penalty}}
++\underbrace{\beta\,L_{\mathrm{tot}}(T)}_{\text{leakage penalty}}
++\underbrace{\mu\,P_{\mathrm{bdry}}}_{\text{boundary penalty}}
++\underbrace{\kappa\,T}_{\text{time penalty}}
 \]
 \end{block}
 
-\vspace{-0.4em}
+\vspace{0.2em}
 
-\begin{block}{TSWT-based leakage proxy}
+\scriptsize
+\[
+F(U(T))=\frac{1}{16}\left|\mathrm{Tr}\!\left(U^\dagger(T)\,U_{\mathrm{target}}\right)\right|^2,
+\qquad
+P_{\mathrm{bdry}}=\sum_{t\in\{0,T\}}\!\left[g(t)^2+f_1(t)^2+f_2(t)^2\right]
+\]
+% where \(f(t)^2=f_1(t)^2+f_2(t)^2\).
+
+% \vspace{0.35em}
+
+% \begin{block}{Why multi-objective?}
+\begin{itemize}\itemsep0.2em
+    \item A good pulse must be \textbf{accurate}, but also \textbf{fast}, \textbf{regular at the boundaries}, and \textbf{low-leakage}.
+    \item These goals are not automatically compatible: reducing one penalty can worsen another.
+\end{itemize}
+% \end{block}
+
+\vspace{0.2em}
+
+\begin{block}{Leakage term: physics-informed proxy}
+\scriptsize
 \[
 L_{\mathrm{tot}}(T)\lesssim
-\frac{\|\hat H_{\mathrm{od}}(0)\|}{\Delta(0)}
+\frac{\|\hat{H}_{\mathrm{od}}(0)\|}{\Delta(0)}
 +
-\frac{\|\hat H_{\mathrm{od}}(T)\|}{\Delta(T)}
+\frac{\|\hat{H}_{\mathrm{od}}(T)\|}{\Delta(T)}
 +
-\int_0^T
+\int_{0}^{T}
 \frac{1}{\Delta(t)^2}
 \left\|
-\frac{d^2\hat H_{\mathrm{od}}(t)}{dt^2}
+\frac{d^2 \hat{H}_{\mathrm{od}}(t)}{dt^2}
 \right\|dt
 \]
 \end{block}
 
-\vspace{-0.4em}
-
-\begin{itemize}\itemsep2pt
-    \item We must optimize \textbf{four competing goals}: fidelity, leakage suppression, pulse regularity, and runtime.
-    \item The first two leakage terms are \textbf{boundary contributions}; the integral term penalizes \textbf{rapid pulse variations}.
-\end{itemize}
+\scriptsize
+The first two terms penalize residual couplings at the pulse boundaries; the integral term penalizes rapid temporal variations.
 
 \end{frame}
 
