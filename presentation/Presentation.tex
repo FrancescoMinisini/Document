@@ -147,9 +147,7 @@ Superconducting qubits are only \textbf{weakly anharmonic}, so fast control can 
     
     \vspace{0.5em}
     \begin{itemize}
-        \item No public implementation was available
-        \item The whole framework had to be rebuilt from scratch
-        \item This included:
+        \item No public implementation was available, the whole framework had to be rebuilt from scratch. This included:
         \begin{itemize}
             \item multilevel quantum simulation
             \item TSWT-based leakage estimator
@@ -499,9 +497,9 @@ In RL, parameter choice strongly affects stability, convergence, robustness, and
         \item final choice: \((10,10,0.2,0.1)\)
     \end{itemize}
 
-    \vspace{0.4em}
+    \vspace{-0.4em}
     \centering
-    \includegraphics[width=0.95\linewidth, height=0.35\textheight, keepaspectratio]{images/ufo_weight_sweep_pareto.pdf}
+    \includegraphics[width=\linewidth, height=0.33\textheight, keepaspectratio]{images/ufo_weight_sweep_pareto.pdf}
 \end{columns}
 
 \vspace{0.5em}
@@ -513,49 +511,55 @@ In RL, parameter choice strongly affects stability, convergence, robustness, and
 %============================================================
 \section{Results}
 
-\begin{frame}{Single-target benchmark: Adam vs nominal TRPO}
-\begin{columns}[T,onlytextwidth]
-    \column{0.49\textwidth}
-    \small
-    Representative target:
-    \[
-    N(2.2,2.2,\pi/2)
-    \]
+\begin{frame}{Single-target optimization: Dynamics and Horizon}
+\small
+Representative target: \(N(2.2,2.2,\pi/2)\). We analyze the TRPO training evolution and the Adam runtime horizon.
 
-    \vspace{0.4em}
-    \begin{tabular}{lcc}
+\vspace{0.5em}
+\begin{columns}[c,onlytextwidth]
+    \column{0.48\textwidth}
+    \centering
+    \textbf{TRPO training dynamics}\\
+    \vspace{0.2em}
+    \includegraphics[width=0.95\linewidth, height=0.6\textheight, keepaspectratio]{images/nominal_trpo_training_curves.pdf}
+    
+    \column{0.48\textwidth}
+    \centering
+    \textbf{Single-target horizon sweep}\\
+    \vspace{0.2em}
+    \includegraphics[width=0.95\linewidth, height=0.6\textheight, keepaspectratio]{images/adam_single_target_horizon_sweep.pdf}
+\end{columns}
+
+    \centering
+    \footnotesize
+    \begin{tabular}{lcccc}
     \toprule
-    \textbf{Metric} & \textbf{Adam} & \textbf{Nominal TRPO} \\
+    \textbf{Method} & \textbf{Time (ns)} & \textbf{Cost} & \textbf{Fidelity} & \textbf{Leakage} \\
     \midrule
-    Runtime & \(70\) ns & \(116\) ns \\
-    Cost & \(0.1576\) & \(0.2982\) \\
-    Fidelity & \(0.99662\) & \(0.99415\) \\
-    Leakage & \(2.82\times10^{-4}\) & \(1.60\times10^{-3}\) \\
+    Adam & 70 & 0.157 & 0.9966 & \(2.8\times 10^{-4}\) \\
+    TRPO & 116 & 0.298 & 0.9941 & \(1.6\times 10^{-3}\) \\
     \bottomrule
     \end{tabular}
 
-    \vspace{0.5em}
-    \begin{alertblock}{Interpretation}
-    In the purely nominal single-target regime,
-    the direct Adam baseline remains stronger.
-    \end{alertblock}
+\end{frame}
 
-    \column{0.51\textwidth}
+%------------------------------------------------------------
+\begin{frame}{Adam vs TRPO and Family-wide evaluation}
+
+% \begin{block}{Single-target: Adam vs TRPO performance}
     \centering
-    \IfFileExists{chapters/plots/single_target_adam_vs_nominal_trpo.pdf}{
-        \includegraphics[width=\linewidth]{chapters/plots/single_target_adam_vs_nominal_trpo.pdf}
-    }{
-        \fbox{
-            \parbox[c][0.62\textheight][c]{0.92\linewidth}{
-                \centering
-                Suggested figure:\\[0.3em]
-                \texttt{single\_target\_adam\_vs\_nominal\_trpo.pdf}
-            }
-        }
-    }
-\end{columns}
+    \includegraphics[width=\linewidth, height=0.3\textheight, keepaspectratio]{images/single_target_adam_vs_nominal_trpo.pdf}
+    
+% \end{block}
 
-% \presenterbox{Francesco G. Minisini}
+% \begin{block}{Family-wide runtime sweep}
+\small
+Family-wide runtime sweep was also evaluated to mostly assess performance consistency across the target gate family of the Adam baseline.
+
+\vspace{0.1em}
+\centering
+\includegraphics[ height=0.5\textheight, keepaspectratio]{images/adam_family_sweep.pdf}
+% \end{block}
 \end{frame}
 
 %------------------------------------------------------------
