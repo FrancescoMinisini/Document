@@ -476,57 +476,38 @@ Shot-to-shot stability under stochastic perturbations. \\[1em]
 
 %------------------------------------------------------------
 \begin{frame}{Extended parameter study}
-\begin{columns}[T,onlytextwidth]
-    \column{0.56\textwidth}
-    \small
-    \begin{block}{This part was essential}
-    In RL, parameter choice is not a minor detail:
-    it strongly affects stability, convergence, robustness, and final control quality.
-    \end{block}
+\scriptsize
+In RL, parameter choice strongly affects stability, convergence, robustness, and final control quality. I performed an extended study on:
 
-    \vspace{0.3em}
-    I performed an extended study on:
+\vspace{0.3em}
+\begin{columns}[T,onlytextwidth]
+    \column{0.48\textwidth}
+    \textbf{Policy/value architectures}
     \begin{itemize}
-        \item \textbf{simulation/training parameters}
-        \begin{itemize}
-            \item \(\Delta t=2\,\mathrm{ns}\), \(T_{\max}=180\,\mathrm{ns}\)
-            \item \(\log \sigma_0=-1\), \(\delta_{\mathrm{KL}}=0.01\)
-            \item \(\sigma_{\mathrm{train}}=1\,\mathrm{MHz}\)
-        \end{itemize}
-        \item \textbf{policy/value architectures}
-        \begin{itemize}
-            \item sweep over 5 network topologies
-            \item final choice: \((64,32,32)\), paper-faithful and competitive
-        \end{itemize}
-        \item \textbf{UFO weights}
-        \begin{itemize}
-            \item sensitivity study over 36 configurations
-            \item final choice retained: \((10,10,0.2,0.1)\)
-        \end{itemize}
+        \item sweep over 5 network topologies
+        \item final choice: \((64,32,32)\)
+    \end{itemize}
+    
+    \vspace{0.4em}
+    \centering
+    \includegraphics[width=0.95\linewidth, height=0.35\textheight, keepaspectratio]{images/architecture_sweep_pareto.pdf}
+
+    \column{0.48\textwidth}
+    \textbf{UFO weights}
+    \begin{itemize}
+        \item sensitivity study over 36 configurations
+        \item final choice: \((10,10,0.2,0.1)\)
     \end{itemize}
 
-    \column{0.44\textwidth}
+    \vspace{0.4em}
     \centering
-    \IfFileExists{chapters/plots/ufo_weight_sweep_pareto.pdf}{
-        \includegraphics[width=\linewidth]{chapters/plots/ufo_weight_sweep_pareto.pdf}
-    }{
-        \IfFileExists{chapters/plots/architecture_sweep_pareto_combined.pdf}{
-            \includegraphics[width=\linewidth]{chapters/plots/architecture_sweep_pareto_combined.pdf}
-        }{
-            \fbox{
-                \parbox[c][0.62\textheight][c]{0.92\linewidth}{
-                    \centering
-                    Suggested figure:\\[0.3em]
-                    \texttt{ufo\_weight\_sweep\_pareto.pdf}\\
-                    or\\
-                    \texttt{architecture\_sweep\_pareto\_combined.pdf}
-                }
-            }
-        }
-    }
+    \includegraphics[width=0.95\linewidth, height=0.35\textheight, keepaspectratio]{images/ufo_weight_sweep_pareto.pdf}
 \end{columns}
 
-% \presenterbox{Francesco G. Minisini}
+\vspace{0.5em}
+\centering
+\includegraphics[width=0.95\linewidth, height=0.25\textheight, keepaspectratio]{images/ufo_weight_sweep_robustness.pdf}
+
 \end{frame}
 
 %============================================================
