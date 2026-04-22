@@ -237,7 +237,7 @@ The tested hidden-layer layouts were
 \label{eq:tested_hidden_sizes}
 \end{equation}
 
-To compare the candidate networks, several criteria were considered simultaneously. The primary selection metric was the best evaluation cost reached during training, since this is the quantity most directly aligned with the UFO objective. However, this scalar alone is not sufficient for a meaningful choice. A network could achieve a favorable total cost by trading leakage against fidelity or by settling into an unnecessarily long runtime. For this reason, the architecture comparison also tracked best evaluation fidelity, best evaluation leakage, effective evaluation runtime, and robustness under noisy deployment through the average fidelity at \(\sigma=1\,\mathrm{MHz}\). In this way, the architecture was not chosen solely by one scalar score, but by its overall position in the multi-objective trade-off relevant to the control problem.
+To compare the candidate networks, several criteria were considered simultaneously. The primary selection metric was the best evaluation cost reached during training, since this is the quantity most directly aligned with the UFO objective. However, this scalar alone is not sufficient for a meaningful choice. A network could achieve a favorable total cost by trading leakage against fidelity or by settling into an unnecessarily long runtime. For this reason, the architecture comparison also tracked best nominal fidelity, best evaluation leakage, effective evaluation runtime, and robustness under noisy deployment through the average fidelity at \(\sigma=1\,\mathrm{MHz}\). In this way, the architecture was not chosen solely by one scalar score, but by its overall position in the multi-objective trade-off relevant to the control problem.
 
 The results of the completed architecture sweep are summarized in Table~\ref{tab:architecture_sweep_results}. The first important observation is that the architecture \(64\text{-}64\text{-}64\) still achieves the best overall mean evaluation cost, together with the strongest mean robustness at \(\sigma=1\,\mathrm{MHz}\). In this restricted-budget setting, it therefore remains the strongest architecture in terms of the aggregated objective. However, the inclusion of the previously missing paper architecture \(64\text{-}32\text{-}32\) changes the interpretation in a nontrivial way. Its mean evaluation cost is only marginally worse than that of \(64\text{-}64\text{-}64\), while it achieves a slightly higher mean nominal fidelity and a lower mean leakage. In other words, the original paper layout is not dominated by a large margin; rather, it lies very close to the best-performing region of the sweep.
 
@@ -289,7 +289,7 @@ The deeper alternatives do not improve this picture. The architecture \(64\text{
 \centering
 \includegraphics[width=0.95\textwidth]{chapters/plots/architecture_sweep_pareto_combined.pdf}
 % \input{plots/architecture_sweep_pareto_combined.tex}
-\caption{Synthesis of the architecture performance trade-offs. The scatter plots contrast evaluation leakage against (a)~average fidelity at $\sigma=1\,\mathrm{MHz}$ and (b)~purely nominal evaluation fidelity. Different network depths and widths are encoded by distinct color markers (shared legend). Leakage minimization does not automatically act as a simple heuristic for robust fidelity guarantees: architectures that heavily suppress leakage often sacrifice absolute nominal accuracy or structural resilience.}
+\caption{Synthesis of the architecture performance trade-offs. The scatter plots contrast evaluation leakage against (a)~average fidelity at $\sigma=1\,\mathrm{MHz}$ and (b)~purely nominal nominal fidelity. Different network depths and widths are encoded by distinct color markers (shared legend). Leakage minimization does not automatically act as a simple heuristic for robust fidelity guarantees: architectures that heavily suppress leakage often sacrifice absolute nominal accuracy or structural resilience.}
 \label{fig:architecture_sweep_pareto}
 \end{figure}
 
@@ -630,7 +630,7 @@ In this sense, Eq.~\eqref{eq:representative_target_gate} serves as the natural e
 % \caption{Training curves for the nominal TRPO run on the representative target \(N(2.2,2.2,\pi/2)\). 
 % \textbf{(a)} evaluation cost versus policy iteration, with the best checkpoint (\(111\)) highlighted;
 % \textbf{(b)} evaluation gate time \(T\) and minimum-cost time \(t_{\min}\) versus iteration;
-% \textbf{(c)} evaluation fidelity and total leakage versus iteration, shown with dual vertical axes.
+% \textbf{(c)} nominal fidelity and total leakage versus iteration, shown with dual vertical axes.
 % The key visual message is that the controller rapidly reaches a high-fidelity regime, while the later part of training is mainly a refinement of the leakage and runtime tradeoff rather than a dramatic improvement in fidelity alone. 
 % Notably, the sharp spikes present in the evaluation cost correspond precisely to evaluation trials where the termination condition was not met early enough. Unable to quickly balance the leakage/speed tradeoff mentioned in section \ref{subsec:speed_leakage_tradeoff}, the execution saturates the simulation time boundary (\(180\,\mathrm{ns}\)) and accumulates significant time and boundary penalties.}
 % \label{fig:nominal_trpo_training_curves}
@@ -787,7 +787,7 @@ which is significant, but far from the order-of-magnitude speedups later reporte
 \caption{Training curves for the nominal TRPO run on the representative target \(N(2.2,2.2,\pi/2)\). 
 \textbf{(a)} evaluation cost versus policy iteration, with the best checkpoint (\(111\)) highlighted;
 \textbf{(b)} evaluation gate time \(T\) and minimum-cost time \(t_{\min}\) versus iteration;
-\textbf{(c)} evaluation fidelity and total leakage versus iteration, shown with dual vertical axes.
+\textbf{(c)} nominal fidelity and total leakage versus iteration, shown with dual vertical axes.
 The key visual message is that the controller rapidly reaches a high-fidelity regime, while the later part of training is mainly a refinement of the leakage and runtime tradeoff rather than a dramatic improvement in fidelity alone. 
 Notably, the sharp spikes present in the evaluation cost correspond precisely to evaluation trials where the termination condition was not met early enough. Unable to quickly balance the leakage/speed tradeoff mentioned in section \ref{subsec:speed_leakage_tradeoff}, the execution saturates the simulation time boundary (\(180\,\mathrm{ns}\)) and accumulates significant time and boundary penalties.}
 \label{fig:nominal_trpo_training_curves}
@@ -1159,7 +1159,7 @@ device to outperform standard compiled implementations over a nontrivial family 
     Curriculum optimization profile over the family $N(\alpha,\alpha,\pi/2)$.
     The three stacked panels trace the performance evolution and constraint fulfillment as a function of the target parameter $\alpha$:
     \textbf{(a)} Evaluation runtime and theoretically identified minimum-cost time. Noticeable bifurcations occur when the optimizer is unable to suppress the overall total cost below the early-termination threshold ($0.4$), forcing the practical runtime to detach from the optimal minimum in favor of a slower, suboptimal horizon;
-    \textbf{(b)} Nominal evaluation fidelity overlaid with the corresponding average fidelity validated under noisy testing conditions ($\sigma_{\mathrm{noise}} = 1.0\text{ MHz}$);
+    \textbf{(b)} Nominal nominal fidelity overlaid with the corresponding average fidelity validated under noisy testing conditions ($\sigma_{\mathrm{noise}} = 1.0\text{ MHz}$);
     \textbf{(c)} Leakage and boundary constraint costs mapped on a logarithmic axis\protect\footnotemark.
     }
     \label{fig:runtime_vs_alpha_curriculum}
