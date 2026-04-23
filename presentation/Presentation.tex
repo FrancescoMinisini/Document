@@ -232,7 +232,7 @@ d_{\mathrm{comp}}=4
 \begin{frame}{Why this is a multi-objective control problem}
 \small
 
-\begin{block}{UFO objective}
+\begin{block}{Universal Function}
 \[
 C=
 \underbrace{\chi\!\left[1-F(U(T))\right]}_{\text{fidelity penalty}}
@@ -465,16 +465,50 @@ Shot-to-shot stability under stochastic perturbations. \\[1em]
 % % \presenterbox{Francesco G. Minisini}
 % \end{frame}
 
-\begin{frame}
+%------------------------------------------------------------
+%------------------------------------------------------------
+\begin{frame}{Implemented controllers and experimental campaign}
+\scriptsize
 
-    distinzione tra noise optimized e nominal agent
-    
-    lista di esperimenti runnati e motivazioni
+% \begin{columns}[T,onlytextwidth]
+%     \column{0.55\textwidth}
+    \begin{block}{Controller variants implemented}
     \begin{itemize}
-        \item 
+        \item \textbf{Adam}: direct gradient-based pulse optimization
+        \item \textbf{Nominal TRPO}: RL trained in deterministic environment
+        \item \textbf{Noise-optimized TRPO}: RL trained with Gaussian perturbations
     \end{itemize}
-\end{frame}
+    \end{block}
 
+    
+    % \column{0.42\textwidth}
+    \begin{alertblock}{Key distinction}
+    The difference between \textbf{nominal} and \textbf{noise-optimized} TRPO is not the architecture, but strictly the \textbf{training environment}.
+    \end{alertblock}
+% \end{columns}
+
+\vspace{1.5em}
+
+\begin{block}{Main experiments performed}
+\vspace{0.4em}
+\begin{columns}[T,onlytextwidth]
+    \column{0.48\textwidth}
+    \begin{enumerate}
+        \item \textbf{Single-target benchmark}: \\ Adam vs TRPO on \(N(2.2,2.2,\pi/2)\)
+        \item \textbf{Robustness under noise}: \\ fidelity metrics vs noise strength
+        \item \textbf{Extended parameter study}: \\ architecture and UFO-weight sweep
+    \end{enumerate}
+    
+    \column{0.48\textwidth}
+    \begin{enumerate}
+        \setcounter{enumi}{3}
+        \item \textbf{Family-wide Adam sweep}: \\ baseline optimization across \(N(\alpha,\alpha,\pi/2)\)
+        \item \textbf{Curriculum runtime sweep}: \\ TRPO transfer across nearby targets
+    \end{enumerate}
+\end{columns}
+\end{block}
+
+\end{frame}
 %------------------------------------------------------------
 \begin{frame}{Extended parameter study}
 \scriptsize
@@ -670,6 +704,7 @@ Target parametrization: \(U_{\mathrm{target}}(\alpha)=N(\alpha,\alpha,\pi/2)\). 
 
     \column{0.63\textwidth}
     \centering
+    \vspace{-0.6em}
     \includegraphics[width=\linewidth, height=0.65\textheight, keepaspectratio]{images/runtime_vs_alpha.pdf}
 \end{columns}
 \end{frame}
