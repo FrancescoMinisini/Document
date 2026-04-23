@@ -466,6 +466,9 @@ Shot-to-shot stability under stochastic perturbations. \\[1em]
 % \end{frame}
 
 \begin{frame}
+
+    distinzione tra noise optimized e nominal agent
+    
     lista di esperimenti runnati e motivazioni
     \begin{itemize}
         \item 
@@ -563,107 +566,83 @@ Family-wide runtime sweep was also evaluated to mostly assess performance consis
 \end{frame}
 
 %------------------------------------------------------------
-\begin{frame}{Noise-optimized TRPO: representative training dynamics}
-\begin{columns}[T,onlytextwidth]
-    \column{0.42\textwidth}
-    \small
-    \begin{block}{What this plot shows}
-    A representative training run of the learned controller:
-    \end{block}
+% \begin{frame}{Noise-optimized TRPO: representative training dynamics}
+% \begin{columns}[T,onlytextwidth]
+%     \column{0.42\textwidth}
+%     \small
+%     \begin{block}{What this plot shows}
+%     A representative training run of the learned controller:
+%     \end{block}
 
-    \begin{itemize}
-        \item evaluation cost
-        \item execution time
-        \item fidelity
-        \item leakage
-    \end{itemize}
+%     \begin{itemize}
+%         \item evaluation cost
+%         \item execution time
+%         \item fidelity
+%         \item leakage
+%     \end{itemize}
 
-    \vspace{0.4em}
-    \begin{alertblock}{Interpretation}
-    Training is not monotonic: the policy must learn how to balance
-    fidelity, leakage, and runtime at the same time.
-    \end{alertblock}
+%     \vspace{0.4em}
+%     \begin{alertblock}{Interpretation}
+%     Training is not monotonic: the policy must learn how to balance
+%     fidelity, leakage, and runtime at the same time.
+%     \end{alertblock}
 
-    \vspace{0.3em}
-    Sharp spikes typically correspond to runs that fail to terminate early and saturate the time bound.
+%     \vspace{0.3em}
+%     Sharp spikes typically correspond to runs that fail to terminate early and saturate the time bound.
 
-    \column{0.58\textwidth}
-    \centering
-    \IfFileExists{chapters/plots/noise_optimized_trpo_training_curves.pdf}{
-        \includegraphics[width=\linewidth]{chapters/plots/noise_optimized_trpo_training_curves.pdf}
-    }{
-        \IfFileExists{chapters/plots/nominal_trpo_training_curves.pdf}{
-            \includegraphics[width=\linewidth]{chapters/plots/nominal_trpo_training_curves.pdf}
-        }{
-            \fbox{
-                \parbox[c][0.62\textheight][c]{0.92\linewidth}{
-                    \centering
-                    Put here the training-curves figure of the\\
-                    noise-optimized run.\\[0.4em]
-                    Current fallback:\\
-                    \texttt{nominal\_trpo\_training\_curves.pdf}
-                }
-            }
-        }
-    }
-\end{columns}
+%     \column{0.58\textwidth}
+%     \centering
+%     \IfFileExists{chapters/plots/noise_optimized_trpo_training_curves.pdf}{
+%         \includegraphics[width=\linewidth]{chapters/plots/noise_optimized_trpo_training_curves.pdf}
+%     }{
+%         \IfFileExists{chapters/plots/nominal_trpo_training_curves.pdf}{
+%             \includegraphics[width=\linewidth]{chapters/plots/nominal_trpo_training_curves.pdf}
+%         }{
+%             \fbox{
+%                 \parbox[c][0.62\textheight][c]{0.92\linewidth}{
+%                     \centering
+%                     Put here the training-curves figure of the\\
+%                     noise-optimized run.\\[0.4em]
+%                     Current fallback:\\
+%                     \texttt{nominal\_trpo\_training\_curves.pdf}
+%                 }
+%             }
+%         }
+%     }
+% \end{columns}
 
-% \presenterbox{Francesco G. Minisini}
-\end{frame}
+% % \presenterbox{Francesco G. Minisini}
+% \end{frame}
 
 %------------------------------------------------------------
-\begin{frame}{Robustness under stochastic control noise}
+\begin{frame}{Noise-optimized Agent: Robustness}
+\small
+Under Gaussian control noise, the \textbf{noise-optimized TRPO controller} becomes the strongest overall method. The key advantage is not just RL itself, but \textbf{RL trained in the correct stochastic environment}.
+
+\vspace{0.3em}
 \begin{columns}[T,onlytextwidth]
-    \column{0.50\textwidth}
-    \small
-    \begin{block}{Main empirical result}
-    Under Gaussian control noise, the \textbf{noise-optimized TRPO controller}
-    becomes the strongest overall method.
-    \end{block}
-
-    \vspace{0.4em}
+    \column{0.48\textwidth}
+    \textbf{Average fidelity}
     \begin{itemize}
-        \item highest \(\overline{F}(\sigma_{\mathrm{noise}})\)
-        \item lowest \(\mathrm{Var}(F)\)
-        \item better than:
-        \begin{itemize}
-            \item nominal TRPO
-            \item Adam baseline
-        \end{itemize}
+        \item retains highest \(\overline{F}(\sigma_{\mathrm{noise}})\)
+        \item outperforms Adam and nominal TRPO
     \end{itemize}
-
-    \vspace{0.4em}
-    \begin{alertblock}{Take-home message}
-    The advantage is not just RL itself, but
-    \textbf{RL trained in the correct stochastic environment}.
-    \end{alertblock}
-
-    \column{0.50\textwidth}
+    
+    \vspace{0.2em}
     \centering
-    \IfFileExists{chapters/plots/avg_fidelity_vs_noise.pdf}{
-        \includegraphics[width=\linewidth]{chapters/plots/avg_fidelity_vs_noise.pdf}\\[0.3em]
-    }{
-        \fbox{
-            \parbox[c][0.28\textheight][c]{0.92\linewidth}{
-                \centering
-                \texttt{avg\_fidelity\_vs\_noise.pdf}
-            }
-        }\\[0.3em]
-    }
-
-    \IfFileExists{chapters/plots/fidelity_variance_vs_noise.pdf}{
-        \includegraphics[width=\linewidth]{chapters/plots/fidelity_variance_vs_noise.pdf}
-    }{
-        \fbox{
-            \parbox[c][0.28\textheight][c]{0.92\linewidth}{
-                \centering
-                \texttt{fidelity\_variance\_vs\_noise.pdf}
-            }
-        }
-    }
+    \includegraphics[width=0.95\linewidth, height=0.55\textheight, keepaspectratio]{images/avg_fidelity_vs_noise.pdf}
+    
+    \column{0.48\textwidth}
+    \textbf{Fidelity variance}
+    \begin{itemize}
+        \item demonstrates lowest \(\mathrm{Var}(F)\)
+        \item superior structural stability under noise
+    \end{itemize}
+    
+    \vspace{0.2em}
+    \centering
+    \includegraphics[width=0.95\linewidth, height=0.55\textheight, keepaspectratio]{images/fidelity_variance_vs_noise.pdf}
 \end{columns}
-
-% \presenterbox{Francesco G. Minisini}
 \end{frame}
 
 %------------------------------------------------------------
