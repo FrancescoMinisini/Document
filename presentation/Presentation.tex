@@ -647,49 +647,31 @@ Under Gaussian control noise, the \textbf{noise-optimized TRPO controller} becom
 
 %------------------------------------------------------------
 \begin{frame}{Runtime across the gate family \(N(\alpha,\alpha,\pi/2)\)}
-\begin{columns}[T,onlytextwidth]
-    \column{0.52\textwidth}
-    \small
-    \[
-    U_{\mathrm{target}}(\alpha)=N(\alpha,\alpha,\pi/2)
-    \]
+\small
+Target parametrization: \(U_{\mathrm{target}}(\alpha)=N(\alpha,\alpha,\pi/2)\). The runtime landscape is \textbf{highly structured}, not uniform.
 
-    \vspace{0.4em}
-    \begin{itemize}
-        \item The runtime landscape is \textbf{highly structured}, not uniform.
-        \item A broad central region admits significantly faster analog solutions.
-        \item The analog controller stays below the gate-synthesis reference over a large part of the family.
-    \end{itemize}
+\vspace{0.4em}
+\begin{itemize}
+    \item A broad central region admits significantly faster analog solutions.
+    \item The analog controller stays below the gate-synthesis reference over a large part of the family.
+\end{itemize}
 
-    \vspace{0.4em}
+\begin{columns}[c,onlytextwidth]
+    \column{0.35\textwidth}
+    \vspace{0.2em}
     \begin{block}{Reference benchmark}
-    \[
-    T_{\mathrm{syn}} \approx 215\,\mathrm{ns}
-    \]
-    from optimal discrete gate synthesis.
+    \(T_{\mathrm{syn}} \approx 215\,\mathrm{ns}\) from optimal discrete gate synthesis.
     \end{block}
 
-    \vspace{0.4em}
+    \vspace{0.5em}
     \begin{alertblock}{Physical interpretation}
     The strongest speedups appear where the target gate is better aligned with the native hardware interaction.
     \end{alertblock}
 
-    \column{0.48\textwidth}
+    \column{0.63\textwidth}
     \centering
-    \IfFileExists{chapters/plots/runtime_vs_alpha.pdf}{
-        \includegraphics[width=\linewidth]{chapters/plots/runtime_vs_alpha.pdf}
-    }{
-        \fbox{
-            \parbox[c][0.62\textheight][c]{0.92\linewidth}{
-                \centering
-                Suggested figure:\\[0.3em]
-                \texttt{runtime\_vs\_alpha.pdf}
-            }
-        }
-    }
+    \includegraphics[width=\linewidth, height=0.65\textheight, keepaspectratio]{images/runtime_vs_alpha.pdf}
 \end{columns}
-
-% \presenterbox{Francesco G. Minisini}
 \end{frame}
 
 %============================================================
