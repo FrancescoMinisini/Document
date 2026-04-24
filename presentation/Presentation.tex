@@ -81,6 +81,26 @@
 \end{frame}
 
 \begin{frame}
+\frametitle{Context and qubit architecture}
+\begin{columns}
+    \column{0.48\textwidth}
+    \small
+            \begin{itemize}
+                \item For scalable and reliable quantum devices, high-fidelity, fast, and robust quantum gates are needed, their computational unit. 
+                \item Superconducting qubits are a leading platform, but makes control design challenging due to leakage and noise sensitivity.
+            \end{itemize}
+\column{0.48\textwidth}
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{images/weakly_anharmonic_ladder.pdf}
+\end{figure}
+\end{columns}
+\begin{alertblock}{Physical issue}
+Superconducting qubits are only \textbf{weakly anharmonic}, so fast control can easily excite unwanted higher levels.
+\end{alertblock}
+\end{frame}
+
+\begin{frame}
     \frametitle{Aims and Motivation}
     \vspace{5mm}
 
@@ -93,7 +113,7 @@
     \end{itemize}
 
     \vspace{0.5em}
-    \presenterbox{Francesco Giuseppe Minisini}
+    % \presenterbox{Francesco Giuseppe Minisini}
 \end{frame}
 
 \begin{frame}

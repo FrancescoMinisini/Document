@@ -1,0 +1,106 @@
+Stare assolutamtnte dentro 13 minuti e assolutamente abbassare il linguaggio per farsi capire Sintetizzare con keywords
+rimuovere 3 rossa
+Completa citazione
+Mettere le references
+Mettere la parte di ottimizzazione + estensione dei risultati
+Meglio tagliare su risultati e menzionare motivo tagli che spieegazione.
+Acronimi spiegare
+Eseguito anche esperimenti di transfer learning etc.. NELLE CONCLUSIONI rimuovere
+Parto dal GMON poi da fisice, e introdurre in maniera general il problema di controllo
+Meglio contrestualizzare che approfondire, troppo gergo.
+Sposto energy ladder con introduzione gmon, leakage, cosè il controllo
+1) Abbiamo bisogno di gate pche funzionano e ottimizzare...
+Fagli vedere la ladder. Gmon simulati da menzionare. Lekage subito (reinserire freccia). Mettere anche fidelity a parole povere?
+Sposto la PHYSICAL ISSUE nella prima per definire leakge
+
+Nella prima a mettere definizioni importanti.
+
+5) Assesment traduci + estasa menzione + bibliografia, rimuovere important point.
+
+La lista delle cose che ho fatto devono essere chiare, sono importanti.
+
+6) Primo termine misura energia livelli, 2 accoppiamento che pass
+
+Mostro l'hemiltoniana per mostrare i parametri di controllo per costruzione vettore la cui succ va a minimizzare la cost + colorare i parametri e rimuovere meaning of controls
+
+Tolgo e non discuto il why this matters. Risulta vuota, inserire immagine hardware e magari ripetere che è simulato.
+
+PREPARARSI MEGLIO SU COME AVVIENE IMPLEMENTAZIONE HARDWARE a livello divulgativo E tutto.
+
++ Slide a supporto per possibili domande, soprattutto quelle che farei fatica
+
+7) La definizione di leakage term: materiale supp
+
+Il primo termine penalizza mancanza di fid, il secondo penalizza il siste puo transire su livelli indesiderati, uno che mi assicura che i controlli sono spenti a inizio e al completamento dell operazione fisica richiesta sul device.
+
+Device posso usare se no apparato. TRANSIRE
+
+Anche le altre definizioni materiali supplementare
+
+dire che cosa è una cost function (oggetto che vogliamo minimizzare)
+
+RIBADIRE OTTIMIZZAZIONE MULTI OBBIETTIVO VA ESPLICITARE 
+
+Valutare se aggiungere qualcosa di estetico
+
+
+
+8) EXPECTETED RETURN = STIMA DELLA COST TOTALE A FINE OPERAZIONE 
+
+DA DIRE DA QUALCHE PARTE CHE LA COST FUNCTION è CUMULATIVA, SI SOMMA 
+
+L'ambiente 
+
+
+Come ho ottimizzato il funzionamento del gmon e ho usato rl, in cui agente viene in contatto con un ambiente e ottimizza la policy di comportamtnto e va a migliorare le performance del gmon
+
+In questa ambiente è gmon
+Policy nn è …
+poi
+Funzione costo
+
+Switchare 7 e 8
+
+
+Nell'allenamento, si ripetono diverse volte le operazioni/episodi, si salvano i cost totali le informaizioni e le si usano all'update dei pesi delle reti. In particolare la policy NN, è allenata con uno specifico algoritmo che gearantisce update stabili (TRPO).
+
+9) Togliere tutta, inserire a voce/E[F] nella ext. param study
+
+10) Togliere i riferimenti a quella precedente che non cè togliere TRPO.
+Chiamo agente ovunque
+
+Devo far capire che ho usato 2 techice di ottimizzazione: uno classico, uno RL agent IN DUE CONFIGURAZIONI DIVERSE che ho 
+per la stessa cosa.
+
+Stessa ctask con due ottimizzatori diversi, uno standard e Reinforcement learinig
+
+Possibili domande: che cosè ADAM, che cosè Nominal Agent etc..
+
+rIMUOVERE KEY DIFFERENCE, RIDONDANTE
+
+Riordinare main experiments
+
+sweep non si sa che cosa è, da rimuovere
+
+sopra metti un itemize per config agent
+
+11) Rimuovere le sweep, scrivere che sono gli hidden layers delle reti nuerali.
+Menzionare la legenda
+
+DIRE HO ESEGUITO UNA ESTENSIONE … Dove ho eseguito… Dico cosa mostrano i grafici e ho ottenuto nessuna correlazione
+
+O trovo qualcosa di interessante o togliere ufo cost function
+
+12) Aggiutstare trpo e N
+
+Capire dove mettere se no togliere. e separare eventualmente i grafici e nel caso menzionare di fare attenzione a x axis
+
+Valutare se mantenere o tutti rimuovere proprio la 12.
+
+
+14) descrivere bene
+
+16) Altri ESPERTIMENTI come … sono stati effettuati che per questione di tempo …
+
+è il momento di dire che cosa ho fatto  io e cosa in piu del paper cosa ho imparato ed è stato complicato.
+	
