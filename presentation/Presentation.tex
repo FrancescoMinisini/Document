@@ -240,7 +240,7 @@ Superconducting qubits are only \textbf{weakly anharmonic}, so fast control can 
         \item Quantum Environment simulator of two-qubit gmon architecture  
         % (through the qutip framework) 
         \item Leakage estimator
-        \item Full Reinforcement Learning pipeline, coupled with Trust Region Policy Optimization (TRPO)
+        \item Full Deep Reinforcement Learning pipeline (neural networks, training curriculum, evaluation), coupled with Trust Region Policy Optimization (TRPO)
         \item Optimization to make the framework computationally feasible
         \item Extended existing studies and performed an independent validation
         % \item compared nominal, noisy, and family-wide behavior
@@ -336,6 +336,7 @@ A solution to the control problem is a sequence of control vectors \[\{u(t)\}_{t
 
 %------------------------------------------------------------
 \begin{frame}{RL formulation}
+    TODO: Da sistemare le dimensioni dei nns e definire value e policy.
     \centering
     \begin{figure}
         \includegraphics[ height=0.8\textheight]{images/actor_critic_nn_control.pdf}
@@ -345,9 +346,14 @@ A solution to the control problem is a sequence of control vectors \[\{u(t)\}_{t
 %------------------------------------------------------------
 \begin{frame}{Why this is a multi-objective control problem}
 \small
+\begin{alertblock}{Cost Function and Multi-objective nature}
+    The cost function is the core metric that the agent is trained to minimize.
+    Therefore, the multi-objective nature of the control problem must be explicitly encoded in the cost function.
+\end{alertblock}
+
 
 \begin{block}{Universal Function Optimizaion (UFO) cost function}
-\[
+    \[
 C=
 \underbrace{\chi\!\left[1-F(U(T))\right]}_{\text{fidelity penalty}}
 +\underbrace{\beta\,L_{\mathrm{tot}}(T)}_{\text{leakage penalty}}
@@ -358,15 +364,6 @@ C=
 
 \vspace{0.2em}
 
-% \scriptsize
-% \[
-% F(U(T))=\frac{1}{16}\left|\mathrm{Tr}\!\left(U^\dagger(T)\,U_{\mathrm{target}}\right)\right|^2,
-% \qquad
-% P_{\mathrm{bdry}}=\sum_{t\in\{0,T\}}\!\left[g(t)^2+f_1(t)^2+f_2(t)^2\right]
-% \]
-% where \(f(t)^2=f_1(t)^2+f_2(t)^2\).
-
-% \vspace{0.35em}
 
 % \begin{block}{Why multi-objective?}
 \begin{itemize}\itemsep0.2em
@@ -452,45 +449,56 @@ C=
 %------------------------------------------------------------
 %------------------------------------------------------------
 \begin{frame}{Implemented controllers and experimental campaign}
-\scriptsize
+\small
 
 % \begin{columns}[T,onlytextwidth]
 %     \column{0.55\textwidth}
     \begin{block}{Controller variants implemented}
     \begin{itemize}
-        \item \textbf{Adam}: direct gradient-based pulse optimization
-        \item \textbf{Nominal TRPO}: RL trained in deterministic environment
-        \item \textbf{Noise-optimized TRPO}: RL trained with Gaussian perturbations
+        \item \textbf{Classical Optimization}: gradient descent-based pulse optimization (Adam) of the UFO cost. It rappresents the current SOTA, and is used as the main baseline for comparison.
+        \item \textbf{Reinforcement-Learning Agent} evaluated in two configurations:
+        \begin{itemize}
+            \small
+            \item \textbf{Noise-optimized Agent}: RL Agent trained with Gaussian perturbations on the control vector \(u_{applied} (t) = u(t) + \epsilon(t)\)
+            \item \textbf{Nominal Agent}: RL Agent trained in deterministic environment
+        \end{itemize}
     \end{itemize}
     \end{block}
 
     
     % \column{0.42\textwidth}
     \begin{alertblock}{Key distinction}
-    The difference between \textbf{nominal} and \textbf{noise-optimized} TRPO is not the architecture, but strictly the \textbf{training environment}. 
+    The difference between \textbf{nominal} and \textbf{noise-optimized} Agent is not the architecture, but strictly the \textbf{training environment}. 
     % If in nominal TROPO the suggested sample control vector is \(u(t) = tanh(\mu_\theta(s_t) + \sigma \hardman \epsilon_t)\) then mapped to range of each control parameter, in the noise-optimized version it is subject to further stochastic perturbations.
     \end{alertblock}
 % \end{columns}
 
-\vspace{1.5em}
-
+% \vspace{1.5em}
+\end{frame}
+\begin{frame}
+    \frametitle{Experiments performed}
 \begin{block}{Main experiments performed}
 \vspace{0.4em}
-\begin{columns}[T,onlytextwidth]
-    \column{0.48\textwidth}
+% \begin{columns}[T,onlytextwidth]
+%     \column{0.48\textwidth}
     \begin{enumerate}
-        \item \textbf{Single-target benchmark}: \\ Adam vs TRPO on \(N(2.2,2.2,\pi/2)\)
-        \item \textbf{Robustness under noise}: \\ fidelity metrics vs noise strength
-        \item \textbf{Extended parameter study}: \\ architecture and UFO-weight sweep
+        \item \textbf{Extensive parameter study}: 
+        \begin{itemize}
+            \item \textbf{neural network sizes and layouts} to look for the best tradeoff between performance and stability
+            \item \textbf{UFO cost function weights}, to observe the tradeoff between fidelity, leakage, and runtime with different weight configurations
+        \end{itemize}
+        
+        \item \textbf{Single-target benchmark}: Classical Optimization vs Nominal Agent
+        \item \textbf{Robustness under noise}: fidelity metrics vs noise strength
     \end{enumerate}
     
-    \column{0.48\textwidth}
+    % \column{0.48\textwidth}
     \begin{enumerate}
         \setcounter{enumi}{3}
-        \item \textbf{Family-wide Adam sweep}: \\ baseline optimization across \(N(\alpha,\alpha,\pi/2)\)
-        \item \textbf{Curriculum runtime sweep}: \\ TRPO transfer across nearby targets
+        \item \textbf{Consistency of performance of Classical Optimization}: baseline optimization across a countinuos gate family
+        \item \textbf{Transfer Learning Evaluation}: RL Agent transfer learning across nearby targets
     \end{enumerate}
-\end{columns}
+% \end{columns}
 \end{block}
 
 \end{frame}
