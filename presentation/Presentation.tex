@@ -503,61 +503,33 @@ C=
 
 \end{frame}
 %------------------------------------------------------------
-\begin{frame}{Extended parameter study}
-\scriptsize
-In RL, parameter choice strongly affects stability, convergence, robustness, and final control quality. I performed an extended study on:
 
-\vspace{0.3em}
-\begin{columns}[T,onlytextwidth]
-    \column{0.48\textwidth}
-    \textbf{Policy/value architectures}
-    \begin{itemize}
-        \item sweep over 5 network topologies
-        \item final choice: \((64,32,32)\)
-    \end{itemize}
-    
-    \vspace{0.4em}
-    \centering
-    \includegraphics[width=0.95\linewidth, height=0.35\textheight, keepaspectratio]{images/architecture_sweep_pareto.pdf}
-
-    \column{0.48\textwidth}
-    \textbf{UFO weights}
-    \begin{itemize}
-        \item sensitivity study over 36 configurations
-        \item final choice: \((10,10,0.2,0.1)\)
-    \end{itemize}
-
-    \vspace{-0.4em}
-    \centering
-    \includegraphics[width=\linewidth, height=0.33\textheight, keepaspectratio]{images/ufo_weight_sweep_pareto.pdf}
-\end{columns}
 
 % \vspace{0.5em}
 % \centering
 % \includegraphics[width=0.95\linewidth, height=0.25\textheight, keepaspectratio]{images/ufo_weight_sweep_robustness.pdf}
 
-\end{frame}
+
 
 %============================================================
 \section{Results}
 
-\begin{frame}{Single-target optimization: Dynamics and Horizon}
+\begin{frame}{Single-target optimization: Nominal RL agent vs Baseline}
 \small
-Representative target: \(N(2.2,2.2,\pi/2)\). We analyze the TRPO training evolution and the Adam runtime horizon.
 
-\vspace{0.5em}
+% \vspace{0.5em}
 \begin{columns}[c,onlytextwidth]
     \column{0.48\textwidth}
     \centering
-    \textbf{TRPO training dynamics}\\
+    \textbf{RL Agent training dynamics}\\
     \vspace{0.2em}
-    \includegraphics[width=0.95\linewidth, height=0.6\textheight, keepaspectratio]{images/nominal_trpo_training_curves.pdf}
+    \includegraphics[width=\linewidth, height=\textheight, keepaspectratio]{images/nominal_trpo_training_curves.pdf}
     
     \column{0.48\textwidth}
     \centering
     \textbf{Single-target horizon sweep}\\
     \vspace{0.2em}
-    \includegraphics[width=0.95\linewidth, height=0.6\textheight, keepaspectratio]{images/adam_single_target_horizon_sweep.pdf}
+    \includegraphics[width=\linewidth, height=\textheight, keepaspectratio]{images/adam_single_target_horizon_sweep.pdf}
 \end{columns}
 
     \centering
@@ -566,31 +538,31 @@ Representative target: \(N(2.2,2.2,\pi/2)\). We analyze the TRPO training evolut
     \toprule
     \textbf{Method} & \textbf{Time (ns)} & \textbf{Cost} & \textbf{Fidelity} & \textbf{Leakage} \\
     \midrule
-    Adam & 70 & 0.157 & 0.9966 & \(2.8\times 10^{-4}\) \\
-    TRPO & 116 & 0.298 & 0.9941 & \(1.6\times 10^{-3}\) \\
+    Baseline & 70 & 0.157 & 0.9966 & \(2.8\times 10^{-4}\) \\
+    RL Agent & 116 & 0.298 & 0.9941 & \(1.6\times 10^{-3}\) \\
     \bottomrule
     \end{tabular}
 
 \end{frame}
 
-%------------------------------------------------------------
-\begin{frame}{Adam vs TRPO and Family-wide evaluation}
+% %------------------------------------------------------------
+% \begin{frame}{Adam vs TRPO and Family-wide evaluation}
 
-% \begin{block}{Single-target: Adam vs TRPO performance}
-    \centering
-    \includegraphics[width=\linewidth, height=0.3\textheight, keepaspectratio]{images/single_target_adam_vs_nominal_trpo.pdf}
+% % \begin{block}{Single-target: Adam vs TRPO performance}
+%     \centering
+%     \includegraphics[width=\linewidth, height=0.3\textheight, keepaspectratio]{images/single_target_adam_vs_nominal_trpo.pdf}
     
-% \end{block}
+% % \end{block}
 
-% \begin{block}{Family-wide runtime sweep}
-\small
-Family-wide runtime sweep was also evaluated to mostly assess performance consistency across the target gate family of the Adam baseline.
+% % \begin{block}{Family-wide runtime sweep}
+% \small
+% Family-wide runtime sweep was also evaluated to mostly assess performance consistency across the target gate family of the Adam baseline.
 
-\vspace{0.1em}
-\centering
-\includegraphics[ height=0.5\textheight, keepaspectratio]{images/adam_family_sweep.pdf}
-% \end{block}
-\end{frame}
+% \vspace{0.1em}
+% \centering
+% \includegraphics[ height=0.5\textheight, keepaspectratio]{images/adam_family_sweep.pdf}
+% % \end{block}
+% \end{frame}
 
 %------------------------------------------------------------
 % \begin{frame}{Noise-optimized TRPO: representative training dynamics}
@@ -644,7 +616,7 @@ Family-wide runtime sweep was also evaluated to mostly assess performance consis
 %------------------------------------------------------------
 \begin{frame}{Noise-optimized Agent: Robustness}
 \small
-Under Gaussian control noise, the \textbf{noise-optimized TRPO controller} becomes the strongest overall method. The key advantage is not just RL itself, but \textbf{RL trained in the correct stochastic environment}.
+Under Gaussian control noise, the \textbf{noise-optimized TRPO controller} becomes the strongest method. The key advantage is not just RL itself, but \textbf{RL trained in the correct stochastic environment}.
 
 \vspace{0.3em}
 \begin{columns}[T,onlytextwidth]
@@ -889,5 +861,53 @@ Shot-to-shot stability under stochastic perturbations. \\[1em]
 % \presenterbox{Francesco G. Minisini}
 \end{frame}
 
+\begin{frame}{Extended parameter study}
+\scriptsize
+In RL, parameter choice strongly affects stability, convergence, robustness, and final control quality. I performed an extended study on:
+
+\vspace{0.3em}
+\begin{columns}[T,onlytextwidth]
+    \column{0.48\textwidth}
+    \textbf{Policy/value architectures}
+    \begin{itemize}
+        \item sweep over 5 network topologies
+        \item final choice: \((64,32,32)\)
+    \end{itemize}
+    
+    \vspace{0.4em}
+    \centering
+    \includegraphics[width=0.95\linewidth, height=0.35\textheight, keepaspectratio]{images/architecture_sweep_pareto.pdf}
+
+    \column{0.48\textwidth}
+    \textbf{UFO weights}
+    \begin{itemize}
+        \item sensitivity study over 36 configurations
+        \item final choice: \((10,10,0.2,0.1)\)
+    \end{itemize}
+
+    \vspace{-0.4em}
+    \centering
+    \includegraphics[width=\linewidth, height=0.33\textheight, keepaspectratio]{images/ufo_weight_sweep_pareto.pdf}
+\end{columns}
+\end{frame}
+
+------------------------------------------------------------
+\begin{frame}{Adam vs TRPO and Family-wide evaluation}
+
+% \begin{block}{Single-target: Adam vs TRPO performance}
+    \centering
+    \includegraphics[width=\linewidth, height=0.3\textheight, keepaspectratio]{images/single_target_adam_vs_nominal_trpo.pdf}
+    
+% \end{block}
+
+% \begin{block}{Family-wide runtime sweep}
+\small
+Family-wide runtime sweep was also evaluated to mostly assess performance consistency across the target gate family of the Adam baseline.
+
+\vspace{0.1em}
+\centering
+\includegraphics[ height=0.5\textheight, keepaspectratio]{images/adam_family_sweep.pdf}
+% \end{block}
+\end{frame}
 %------------------------------------------------------------
 \end{document}
