@@ -89,14 +89,20 @@
                 \item For scalable and reliable quantum devices, high-fidelity, fast, and robust quantum gates are needed. 
                 \item Superconducting qubits are a leading platform, but makes control design challenging due to leakage and noise sensitivity.
             \end{itemize}
-\column{0.48\textwidth}
-\begin{figure}[t]
-\centering
-\includegraphics[width=\textwidth]{images/weakly_anharmonic_ladder.pdf}
-\end{figure}
-\end{columns}
-\begin{alertblock}{Physical issue}
-Superconducting qubits are only \textbf{weakly anharmonic}, so fast control can easily excite unwanted higher levels.
+            
+            \column{0.48\textwidth}
+            \begin{figure}[t]
+                \centering
+                \includegraphics[width=\textwidth]{images/weakly_anharmonic_ladder.pdf}
+            \end{figure}
+        \end{columns}
+        \begin{block}{Analog quantum control}
+        \scriptsize
+        Implementation of a quantum operation by injecting control pulses at the Hamiltonian level, rather than decomposing it into a sequence of discrete logic gates.
+        \end{block}
+        \begin{alertblock}{Physical issue}
+        \scriptsize
+Superconducting qubits are only \textbf{weakly anharmonic}, so noise or fast control can easily excite unwanted higher levels. This phenomenon is called \textbf{leakage}. 
 \end{alertblock}
 \end{frame}
 
@@ -210,13 +216,15 @@ Superconducting qubits are only \textbf{weakly anharmonic}, so fast control can 
     % }
 % \end{columns}
 
-\vspace{0.8em}
+% \vspace{0.8em}
 \begin{alertblock}{Limitations of existing techniques}
-
+\scriptsize
+Powerful, but become brittle, model-dependent, and hard to scale in noisy high-dimensional settings.
 \end{alertblock}
-\vspace{0.8em}
+% \vspace{0.8em}
 \begin{block}{Why Deep Reinforcement Learning?}
-
+\scriptsize
+    They can exploit non-local regularities in control trajectories (inaccessible to classical methods), enable transfer learning between control tasks, reducing optimization cost for new target gates.
 \end{block}
 
 % \presenterbox{Francesco G. Minisini}
@@ -316,7 +324,7 @@ A solution to the control problem is a sequence of control vectors \[\{u(t)\}_{t
     % \column{0.48\textwidth}
     \begin{alertblock}{Why this matters}
     The Agent's output is \({\{u(t)\}}_{t=0}^T\), whose elements are directly applied to the system at each time step. 
-    Therefore \(u(t)\) is the \textbf{full control authority} of the agent, being the only media through which the agent interacts with the environment. 
+    Therefore \(u(t)\) is the \textbf{full control authority} of the agent, being the media through which the agent interacts with the environment. 
     
     % This is a \textbf{continuous 7-dimensional control problem} and the \textbf{only information} it receives about the system state is through the propagated unitary \(U(t)\) that results from applying this control vector.
     
@@ -691,36 +699,67 @@ Target parametrization: \(U_{\mathrm{target}}(\alpha)=N(\alpha,\alpha,\pi/2)\). 
 \begin{frame}{Conclusions}
 \small
 \begin{columns}[T,onlytextwidth]
-    \column{0.52\textwidth}
+    \column{0.48\textwidth}
     \begin{block}{Scientific conclusions}
     \begin{itemize}
-        \item The framework is physically meaningful and empirically credible.
+        % \item The framework is physically meaningful and empirically credible.
         \item In the nominal single-target regime, direct pulse optimization remains very strong.
         \item Under stochastic perturbations, noise-optimized RL becomes the best strategy.
         \item Analog control can outperform standard gate synthesis in runtime.
     \end{itemize}
     \end{block}
 
+    
     \column{0.48\textwidth}
     \begin{block}{What this thesis contributed}
-    \begin{itemize}
-        \item full reconstruction of the framework from scratch
-        \item implementation of simulation, leakage, and RL pipeline
-        \item extended parameter study
-        \item independent validation of strengths and limitations
-    \end{itemize}
+        \begin{itemize}
+            \item full reconstruction of the framework from scratch
+            % \item implementation of simulation, leakage, and RL pipeline
+            \item extended existing literature with a comprehensive parameter study and a runtime comparison across the gate family
+            \item implemented and compared a strong classical technique.
+        \end{itemize}
     \end{block}
 \end{columns}
 
-\vspace{0.5em}
+
+% \vspace{0.5em}
 \begin{alertblock}{Final message}
 The main value of this framework is not universal nominal dominance,
-but a \textbf{unified strategy for robust, leakage-aware, hardware-relevant analog quantum control}.
+but a \textbf{unified strategy for robust hardware-relevant analog quantum control}.
 \end{alertblock}
 
 % \presenterbox{Francesco G. Minisini}
 \end{frame}
 
+
+\begin{frame}{Additional work beyond the results shown here}
+\scriptsize
+
+\begin{block}{What is not fully shown in this presentation}
+Although I only presented the main results, the thesis also includes several additional analyses:
+\begin{itemize}
+    \item extended robustness comparisons under stochastic control noise
+    \item runtime analysis across the gate family for both the baseline and the RL controller
+    \item sensitivity studies on the UFO cost-function weights
+    \item neural-network architecture sweeps
+    \item transfer-learning behavior under curriculum training
+    \item exploration of training and simulation parameter choices
+\end{itemize}
+\end{block}
+
+\vspace{0.4em}
+
+\begin{alertblock}{What I had to build and learn}
+To carry out this thesis, I had to reconstruct the full framework from scratch and acquire working knowledge of:
+\begin{itemize}
+    \item QuTiP and multilevel quantum simulation, pytorch, autograd
+    \item classical optimization and both classical and deep reinforcement learning
+    \item policy-gradient methods and neural-network training
+    \item superconducting-qubit physics and quantum control
+\end{itemize}
+\end{alertblock}
+
+\end{frame}
 
 \begin{frame}
     \centering
