@@ -234,10 +234,10 @@ Superconducting qubits are only \textbf{weakly anharmonic}, so fast control can 
 
     % \vspace{0.4em}
     \begin{block}{What I specifically did}
-    No public implementation was available, the whole framework had to be rebuilt from scratch. This included:
+    Significant effort was spent on implementation: no public code was available, the whole framework had to be rebuilt from scratch. This included:
         \begin{itemize}
         % \item reconstructed the full framework from the paper
-        \item Quantum Environment two-qubit gmon architecture simulator 
+        \item Quantum Environment simulator of two-qubit gmon architecture  
         % (through the qutip framework) 
         \item Leakage estimator
         \item Full Reinforcement Learning pipeline, coupled with Trust Region Policy Optimization (TRPO)
@@ -299,7 +299,7 @@ The effective Hamiltonian is
 % \vspace{-0.2em}
 The control vector is:
 % at a generic time \(t\) is:
-\(
+\[
 u(t)=
 \bigl(
 g(t),\,
@@ -307,7 +307,7 @@ g(t),\,
 f_1(t),f_2(t),\,
 \phi_1(t),\phi_2(t)
 \bigr).
-\)
+\]
 
 A solution to the control problem is a sequence of control vectors \[\{u(t)\}_{t=0}^T\] .
 
@@ -325,13 +325,21 @@ A solution to the control problem is a sequence of control vectors \[\{u(t)\}_{t
     % This is a \textbf{continuous 7-dimensional control problem} 
     % and the \textbf{only information} it receives about the system state is through the propagated unitary \(U(t)\) that results from applying this control vector.
     % on a multilevel superconducting system of dimentionality after three-level truncation: {\scriptsize \(
-% d_{\mathrm{phys}}=3^2=9,
-% d_{\mathrm{comp}}=4
-% \) }
+        % d_{\mathrm{phys}}=3^2=9,
+        % d_{\mathrm{comp}}=4
+        % \) }
     \end{alertblock}
-% \end{columns}
-
+    % \end{columns}
+    
 % \presenterbox{Francesco G. Minisini}
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}{RL formulation}
+    \centering
+    \begin{figure}
+        \includegraphics[ height=0.8\textheight]{images/actor_critic_nn_control.pdf}
+    \end{figure}
 \end{frame}
 
 %------------------------------------------------------------
@@ -390,62 +398,6 @@ The first two terms penalize residual couplings at the pulse boundaries; the int
 
 \end{frame}
 
-%------------------------------------------------------------
-\begin{frame}{RL formulation}
-% \begin{columns}[T,onlytextwidth]
-%     \column{0.35\textwidth}
-%     % \small
-%     % \begin{block}{Target gate family}
-%     % \[
-%     % N(\alpha,\alpha,\gamma)=
-%     % \exp\!\left[
-%     % i\left(
-%     % \alpha\,\sigma_1^x\sigma_2^x+
-%     % \alpha\,\sigma_1^y\sigma_2^y+
-%     % \gamma\,\sigma_1^z\sigma_2^z
-%     % \right)
-%     % \right].
-%     % \]
-%     % \end{block}
-
-%     % \vspace{0.4em}
-%     % This is the family used throughout the numerical study.
-
-%     % \begin{itemize}
-%     %     \item continuously parametrized by \(\alpha,\gamma\)
-%     %     \item physically meaningful for the gmon interaction structure
-%     %     \item suitable for both single-target and family-wide analysis
-%     % \end{itemize}
-
-%     % \column{0.48\textwidth}
-%     \scriptsize
-%     \begin{block}{RL formulation}
-%     \begin{itemize}
-%         \item \textbf{state}: current propagated unitary \(U_t\)
-%         \item \textbf{action}: next continuous control vector
-%         \item \textbf{environment}: noisy multilevel quantum dynamics
-%         \item \textbf{reward}: negative UFO cost
-%         \item \textbf{algorithm}: TRPO actor--critic
-%     \end{itemize}
-%     \end{block}
-
-%     \column{0.6\textwidth}
-    \centering
-    % \vspace{1.5em}
-    \IfFileExists{images/actor_critic_nn_control.pdf}{
-        \includegraphics[ height=0.8\textheight]{images/actor_critic_nn_control.pdf}
-    }{
-        \fbox{
-            \parbox[c][0.62\textheight][c]{0.92\linewidth}{
-                \centering
-                Suggested figure:\\[0.3em]
-                \texttt{actor\_critic\_nn\_control.pdf}
-            }
-        }
-    }
-% \end{columns}
-% \presenterbox{Francesco G. Minisini}
-\end{frame}
 
 %------------------------------------------------------------
 \begin{frame}{Evaluation metrics \& target gate family}
