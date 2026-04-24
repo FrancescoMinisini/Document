@@ -358,12 +358,12 @@ C=
 
 \vspace{0.2em}
 
-\scriptsize
-\[
-F(U(T))=\frac{1}{16}\left|\mathrm{Tr}\!\left(U^\dagger(T)\,U_{\mathrm{target}}\right)\right|^2,
-\qquad
-P_{\mathrm{bdry}}=\sum_{t\in\{0,T\}}\!\left[g(t)^2+f_1(t)^2+f_2(t)^2\right]
-\]
+% \scriptsize
+% \[
+% F(U(T))=\frac{1}{16}\left|\mathrm{Tr}\!\left(U^\dagger(T)\,U_{\mathrm{target}}\right)\right|^2,
+% \qquad
+% P_{\mathrm{bdry}}=\sum_{t\in\{0,T\}}\!\left[g(t)^2+f_1(t)^2+f_2(t)^2\right]
+% \]
 % where \(f(t)^2=f_1(t)^2+f_2(t)^2\).
 
 % \vspace{0.35em}
@@ -399,81 +399,7 @@ P_{\mathrm{bdry}}=\sum_{t\in\{0,T\}}\!\left[g(t)^2+f_1(t)^2+f_2(t)^2\right]
 \end{frame}
 
 
-%------------------------------------------------------------
-\begin{frame}{Evaluation metrics \& target gate family}
-\scriptsize
 
-%     % \small
-\begin{block}{Target gate family used throughout the numerical study.} 
-\[
-N(\alpha,\alpha,\gamma)=
-\exp\!\left[
-i\left(
-\alpha\,\sigma_1^x\sigma_2^x+
-\alpha\,\sigma_1^y\sigma_2^y+
-\gamma\,\sigma_1^z\sigma_2^z
-\right)
-\right].
-\]
-\end{block}
-\vspace{0.4em}
-
-\begin{tabular}{p{0.18\linewidth} p{0.32\linewidth} p{0.42\linewidth}}
-\toprule
-\textbf{Metric} & \textbf{Definition} & \textbf{Physical meaning} \\
-\midrule
-Gate fidelity &
-\( \scriptstyle
-F_{\mathrm{gate}}=
-\frac{1}{16}\left|
-\mathrm{Tr}\!\left(
-U_{\mathrm{proj}}^\dagger(T)U_{\mathrm{target}}
-\right)\right|^2
-\)
-&
-Logical accuracy of the implemented two-qubit gate. \\[1em]
-
-Leakage proxy &
-\( \scriptstyle
-L_{\mathrm{tot}}(T)\lesssim
-\frac{\|\hat{H}_{\mathrm{od}}(0)\|}{\Delta(0)}
-+
-\frac{\|\hat{H}_{\mathrm{od}}(T)\|}{\Delta(T)}
-+
-\int_{0}^{T}
-\frac{1}{\Delta(t)^2}
-\left\|
-\frac{d^2 \hat{H}_{\mathrm{od}}(t)}{dt^2}
-\right\|dt
-\)
-&
-Estimated coherent population loss outside the computational subspace. \\[3em]
-
-Average fidelity under noise &
-\( \scriptstyle
-\overline{F}(\sigma)=
-\mathbb{E}[F]
-\)
-&
-Mean gate performance over many noisy Monte Carlo realizations. \\[1em]
-
-Fidelity variance &
-\( \scriptstyle
-\mathrm{Var}(F)=\mathbb{E}\big[(F-\overline{F})^2\big]
-\)
-&
-Shot-to-shot stability under stochastic perturbations. \\[1em]
-\bottomrule
-\end{tabular}
-
-% \vspace{0.4em}
-% \small
-% \begin{alertblock}{Key point}
-% A good controller must be not only accurate, but also fast, low-leakage, and robust.
-% \end{alertblock}
-
-% \presenterbox{Francesco G. Minisini}
-\end{frame}
 
 %============================================================
 \section{Implementation}
@@ -878,8 +804,81 @@ The first two terms penalize residual couplings at the pulse boundaries; the int
 \end{frame}
 
 \begin{frame}
-    \frametitle{Chose target gate}
-    
+    \frametitle{Choosen target gate family}
+\begin{block}{Target gate family used throughout the numerical study.} 
+\[
+N(\alpha,\alpha,\gamma)=
+\exp\!\left[
+i\left(
+\alpha\,\sigma_1^x\sigma_2^x+
+\alpha\,\sigma_1^y\sigma_2^y+
+\gamma\,\sigma_1^z\sigma_2^z
+\right)
+\right].
+\]
+\end{block}
+Why...
+\end{frame}
+
+%------------------------------------------------------------
+\begin{frame}{Evaluation metrics \& target gate family}
+    % TODO: add better def to avg F e ripensare magari a ste robe
+\small
+\begin{tabular}{p{0.18\linewidth} p{0.32\linewidth} p{0.42\linewidth}}
+\toprule
+\textbf{Metric} & \textbf{Definition} & \textbf{Physical meaning} \\
+\midrule
+Gate fidelity &
+\( \scriptstyle
+F_{\mathrm{gate}}=
+\frac{1}{16}\left|
+\mathrm{Tr}\!\left(
+U_{\mathrm{proj}}^\dagger(T)U_{\mathrm{target}}
+\right)\right|^2
+\)
+&
+Logical accuracy of the implemented two-qubit gate. \\[1em]
+
+Leakage proxy &
+\( \scriptstyle
+L_{\mathrm{tot}}(T)\lesssim
+\frac{\|\hat{H}_{\mathrm{od}}(0)\|}{\Delta(0)}
++
+\frac{\|\hat{H}_{\mathrm{od}}(T)\|}{\Delta(T)}
++
+\int_{0}^{T}
+\frac{1}{\Delta(t)^2}
+\left\|
+\frac{d^2 \hat{H}_{\mathrm{od}}(t)}{dt^2}
+\right\|dt
+\)
+&
+Estimated coherent population loss outside the computational subspace. \\[3em]
+
+Average fidelity under noise &
+\( \scriptstyle
+\overline{F}(\sigma)=
+\mathbb{E}[F]
+\)
+&
+Mean gate performance over many noisy Monte Carlo realizations. \\[1em]
+
+Fidelity variance &
+\( \scriptstyle
+\mathrm{Var}(F)=\mathbb{E}\big[(F-\overline{F})^2\big]
+\)
+&
+Shot-to-shot stability under stochastic perturbations. \\[1em]
+\bottomrule
+\end{tabular}
+
+% \vspace{0.4em}
+% \small
+% \begin{alertblock}{Key point}
+% A good controller must be not only accurate, but also fast, low-leakage, and robust.
+% \end{alertblock}
+
+% \presenterbox{Francesco G. Minisini}
 \end{frame}
 
 %------------------------------------------------------------
