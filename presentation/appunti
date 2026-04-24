@@ -104,3 +104,77 @@ Valutare se mantenere o tutti rimuovere proprio la 12.
 
 è il momento di dire che cosa ho fatto  io e cosa in piu del paper cosa ho imparato ed è stato complicato.
 	
+
+
+Giorno 2:
+10) Togliere tutto e mettere istogramma
+
+switch delle ultima e penultima
+
+Mettere freccia tratteggiata da 0 e 1 che va in mezzo ai due livelli energetiic
+Sintetizzare con freccietta al massimo
+
+2) Che rimane affidabile all'aumentare del numero di qubit
+
+3) Togliere limitations of existing techinques,
+lascio why deep reinforcement learning, ma togli il contenuto del box, solo a voce
+
+4) (togliere l'acronimo TRPO)
+
+5) Togliere il blocco rosso e mettere solo e questo sarà l'output del mio agente ad ogni timestep
+
+6) Togliere il delta H(n+1) e mettere cost al posto di reward, togliere next state U n+1
+Capire un connettivo 
+
+5) e 6) Chiamare u(t) a_t
+separo agente e environment
+sposto il value nn sotto,
+divido
+e menzionare l'environment
+
+da menzionare che il feedback dell'ambiente al agent è il calcolo della cost
+separo agente e environment
+
+Spiegare meglio brevemente il ruoo della Value NN
+
+8) Togliere SOTA
+Mettere in grassetto (Adam), e chiamarlo adam da qua in poi. Aggiungere U da cambiare in a
+
+
+11) Posso far partire l'insert posso farlo piu grande o rimuoverlo
+Da fare, tagliare sotto le assi delle y che non ci arriva fino a giu
+
+IMPORTANTE: Togliere tutta la 8, ritardare la distinzione tra noise e nomnial alla 11, spostare i due metodi implementati alla 12 (successiva)
+
+DA DIRE: Le linee continue sono medie mobile
+
+HO TRE AGENTI, Uno è stato ottimizzato (in training in presenza di noise di 1 MHz), ora osservo la fidelity media esponendo i tre agenti ad noise crescente, e osservo che quello allenato in presenza di noise funziona meglio perchè riduce la varianza della fidelity e 
+
+è IMPORTANTE MENZIONARE CHE nonostante il no è stato allenato con un valore fisso di 1MhZ di noise, questo mostra una generalizzazione della robustezza su tutto il dominio di noise testato sia per fid che per var ed è proprio il valore principale.
+
+Dall'ordine....
+
+Il che è coerente con i risultati della letteratura per adam questo è un miglioramento ...
+
+Questa non è solo una riproduzione ma un netto miglioreamento con il paragone con adam.
+
+11) Finita, ho ottenuto tanti altri risultati interessanti che per questioni di tempo non presento.
+
+4) Da menzionare a parole il fatto che è una tesi totalmente di simulazione non di misurazione.
+
+13) Introduco il lavoro:
+Ho replicato il framework in letteratura e ho valutato indipendentemente la sua performance estendendo e anche migliorando confronti...
+Applicando il RL al controllo di ...
+ho replicato migliorando in certi aspetti gli es...
+e apporfondendo lanalsi ottenendo che 1,2,3... chiudo
+
+13) 
+What this contributed
+Viene prima come questa tesi ha contribuito, tagliare il secondo punto
+Il terzo specifico adam tra parentesi
+Scientific:
+Togli il primo punto e il terzo punto
+
+Final message tolgo
+
+Faccio la slide delle conclusioni incui mostro solo quello. Le mie conclusioni

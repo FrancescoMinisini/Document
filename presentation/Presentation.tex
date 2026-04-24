@@ -96,14 +96,15 @@
                 \includegraphics[width=\textwidth]{images/weakly_anharmonic_ladder.pdf}
             \end{figure}
         \end{columns}
-        \begin{block}{Analog quantum control}
-        \scriptsize
-        Implementation of a quantum operation by injecting control pulses at the Hamiltonian level, rather than decomposing it into a sequence of discrete logic gates.
-        \end{block}
         \begin{alertblock}{Physical issue}
         \scriptsize
-Superconducting qubits are only \textbf{weakly anharmonic}, so noise or fast control can easily excite unwanted higher levels. This phenomenon is called \textbf{leakage}. 
+Superconducting qubits are \textbf{weakly anharmonic}, so noise or fast control can easily excite unwanted higher levels. This phenomenon is called \textbf{leakage}. 
 \end{alertblock}
+        \begin{block}{Analog quantum control}
+        \scriptsize
+        Implementation of a quantum operation by injecting control pulses at the Hamiltonian level.
+        % , rather than decomposing it into a sequence of discrete logic gates.
+        \end{block}
 \end{frame}
 
 % \begin{frame}
@@ -246,7 +247,7 @@ Powerful, but become brittle, model-dependent, and hard to scale in noisy high-d
         \begin{itemize}
         % \item reconstructed the full framework from the paper
         \item Quantum Environment simulator of two-qubit gmon architecture  
-        % (through the qutip framework) 
+        (through the QuTip framework) 
         \item Leakage estimator
         \item Full Deep Reinforcement Learning pipeline (neural networks, training curriculum, evaluation), coupled with Trust Region Policy Optimization (TRPO)
         \item Optimization to make the framework computationally feasible
@@ -316,7 +317,7 @@ f_1(t),f_2(t),\,
 \phi_1(t),\phi_2(t)
 \bigr).
 \]
-
+And this is going to be the output of the RL agent at each time step.
 A solution to the control problem is a sequence of control vectors \[\{u(t)\}_{t=0}^T\] .
 
 
@@ -375,7 +376,7 @@ C=
 
 % \begin{block}{Why multi-objective?}
 \begin{itemize}\itemsep0.2em
-    \item A good pulse must be \textbf{accurate}, but also \textbf{fast}, \textbf{regular at the boundaries}, and \textbf{low-leakage}.
+    % \item A good pulse must be \textbf{accurate}, but also \textbf{fast}, \textbf{regular at the boundaries}, and \textbf{low-leakage}.
     \item These goals are not automatically compatible: reducing one penalty can worsen another.
 \end{itemize}
 % \end{block}
@@ -664,34 +665,34 @@ Under Gaussian control noise, the \textbf{noise-optimized TRPO controller} becom
 \end{frame}
 
 %------------------------------------------------------------
-\begin{frame}{Runtime across the gate family \(N(\alpha,\alpha,\pi/2)\)}
-\small
-Target parametrization: \(U_{\mathrm{target}}(\alpha)=N(\alpha,\alpha,\pi/2)\). The runtime landscape is \textbf{highly structured}, not uniform.
+% \begin{frame}{Runtime across the gate family \(N(\alpha,\alpha,\pi/2)\)}
+% \small
+% Target parametrization: \(U_{\mathrm{target}}(\alpha)=N(\alpha,\alpha,\pi/2)\). The runtime landscape is \textbf{highly structured}, not uniform.
 
-\vspace{0.4em}
-\begin{itemize}
-    \item A broad central region admits significantly faster analog solutions.
-    \item The analog controller stays below the gate-synthesis reference over a large part of the family.
-\end{itemize}
+% \vspace{0.4em}
+% \begin{itemize}
+%     \item A broad central region admits significantly faster analog solutions.
+%     \item The analog controller stays below the gate-synthesis reference over a large part of the family.
+% \end{itemize}
 
-\begin{columns}[c,onlytextwidth]
-    \column{0.35\textwidth}
-    \vspace{0.2em}
-    \begin{block}{Reference benchmark}
-    \(T_{\mathrm{syn}} \approx 215\,\mathrm{ns}\) from optimal discrete gate synthesis.
-    \end{block}
+% \begin{columns}[c,onlytextwidth]
+%     \column{0.35\textwidth}
+%     \vspace{0.2em}
+%     \begin{block}{Reference benchmark}
+%     \(T_{\mathrm{syn}} \approx 215\,\mathrm{ns}\) from optimal discrete gate synthesis.
+%     \end{block}
 
-    \vspace{0.5em}
-    \begin{alertblock}{Physical interpretation}
-    The strongest speedups appear where the target gate is better aligned with the native hardware interaction.
-    \end{alertblock}
+%     \vspace{0.5em}
+%     \begin{alertblock}{Physical interpretation}
+%     The strongest speedups appear where the target gate is better aligned with the native hardware interaction.
+%     \end{alertblock}
 
-    \column{0.63\textwidth}
-    \centering
-    \vspace{-0.6em}
-    \includegraphics[width=\linewidth, height=0.65\textheight, keepaspectratio]{images/runtime_vs_alpha.pdf}
-\end{columns}
-\end{frame}
+%     \column{0.63\textwidth}
+%     \centering
+%     \vspace{-0.6em}
+%     \includegraphics[width=\linewidth, height=0.65\textheight, keepaspectratio]{images/runtime_vs_alpha.pdf}
+% \end{columns}
+% \end{frame}
 
 %============================================================
 \section{Conclusions}
@@ -941,7 +942,7 @@ In RL, parameter choice strongly affects stability, convergence, robustness, and
 \end{columns}
 \end{frame}
 
-------------------------------------------------------------
+% ------------------------------------------------------------
 \begin{frame}{Adam vs TRPO and Family-wide evaluation}
 
 % \begin{block}{Single-target: Adam vs TRPO performance}
@@ -958,6 +959,35 @@ Family-wide runtime sweep was also evaluated to mostly assess performance consis
 \centering
 \includegraphics[ height=0.5\textheight, keepaspectratio]{images/adam_family_sweep.pdf}
 % \end{block}
+\end{frame}
+
+\begin{frame}{Runtime across the gate family \(N(\alpha,\alpha,\pi/2)\)}
+\small
+Target parametrization: \(U_{\mathrm{target}}(\alpha)=N(\alpha,\alpha,\pi/2)\). The runtime landscape is \textbf{highly structured}, not uniform.
+
+\vspace{0.4em}
+\begin{itemize}
+    \item A broad central region admits significantly faster analog solutions.
+    \item The analog controller stays below the gate-synthesis reference over a large part of the family.
+\end{itemize}
+
+\begin{columns}[c,onlytextwidth]
+    \column{0.35\textwidth}
+    \vspace{0.2em}
+    \begin{block}{Reference benchmark}
+    \(T_{\mathrm{syn}} \approx 215\,\mathrm{ns}\) from optimal discrete gate synthesis.
+    \end{block}
+
+    \vspace{0.5em}
+    \begin{alertblock}{Physical interpretation}
+    The strongest speedups appear where the target gate is better aligned with the native hardware interaction.
+    \end{alertblock}
+
+    \column{0.63\textwidth}
+    \centering
+    \vspace{-0.6em}
+    \includegraphics[width=\linewidth, height=0.65\textheight, keepaspectratio]{images/runtime_vs_alpha.pdf}
+\end{columns}
 \end{frame}
 %------------------------------------------------------------
 \end{document}
