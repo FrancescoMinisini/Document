@@ -26,7 +26,12 @@
 \usepackage{caption}
 \captionsetup{labelformat=empty}
 \usetikzlibrary{arrows.meta, positioning}
+\usetikzlibrary{calc}
+\usetikzlibrary{positioning,arrows.meta,decorations.pathreplacing}
+\usetikzlibrary{positioning,arrows.meta,fit,backgrounds}
 
+\usetikzlibrary{external}
+\tikzexternalize[prefix=out/]
 %------------------------------------------------------------
 % Theme
 \usetheme{Madrid}
@@ -103,6 +108,51 @@
 
 \end{frame}
 
+\begin{frame}
+\begin{figure}[t]
+\centering
+% \includegraphics[width=0.6\textwidth]{chapters/plots/weakly_anharmonic_ladder.pdf}
+\begin{tikzpicture}[
+    x=1cm, y=1cm,
+    level/.style={thick},
+    drive/.style={-{Latex[length=2.2mm]}, thick},
+    brace/.style={decorate,decoration={brace,amplitude=6pt}},
+    lbl/.style={font=\small}
+]
+
+% Energy levels
+\draw[level] (0,0) -- (3.2,0) node[right, lbl] {$\ket{0}$};
+\draw[level] (0,1.2) -- (3.2,1.2) node[right, lbl] {$\ket{1}$};
+\draw[level] (0,2.75) -- (3.2,2.75) node[right, lbl] {$\ket{2}$};
+\draw[level] (0,3.8) -- (3.2,3.8) node[right, lbl] {$\ket{3}$};
+
+% Braces for transition spacings
+\draw[brace] (-0.25,0) -- (-0.25,1.2)
+    node[midway,left=8pt,lbl] {$\omega_{01}$};
+\draw[brace] (-0.25,1.2) -- (-0.25,2.75)
+    node[midway,left=8pt,lbl] {$\omega_{12}$};
+\draw[brace] (-0.25,2.75) -- (-0.25,3.8)
+    node[midway,left=8pt,lbl] {$\omega_{23}$};
+
+% Computational subspace highlight
+\draw[dashed, rounded corners, draw=blue!60!black] (-0.55,-0.3) rectangle (3.75,1.5);
+\node[lbl, blue!60!black] at (1.6,-0.65) {computational subspace};
+
+% Anharmonicity annotation
+\node[lbl] at (1.5,2.12) {$\alpha=\omega_{12}-\omega_{01}<0$};
+
+% Intended drive (solid arc)
+\draw[drive, <->] (3.85, 0.0) to [bend right=45] node[midway, right=6pt, lbl] {intended} (3.85, 1.3);
+
+% Leakage path (dashed arc)
+\draw[drive, dashed] (3.8, 1.6) to [bend right=45] node[midway, right=6pt, lbl] {leakage} (3.8, 2.65);
+\draw[drive, dashed] (3.8, 1.6) to [bend right=45] node[midway, right=6pt, lbl] {} (3.8, 3.8);
+
+\end{tikzpicture}
+% \caption{Schematic spectrum of a weakly anharmonic superconducting qubit. The two lowest levels define the computational subspace, while the higher levels remain physically present. Because the transition spacings are unequal but not widely separated, a drive resonant with the logical transition can still weakly couple to higher transitions, especially under strong or short pulses.}
+\label{fig:weakly_anharmonic_ladder}
+\end{figure}
+\end{frame}
 %============================================================
 \section{Motivation}
 
