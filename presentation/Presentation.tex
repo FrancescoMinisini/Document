@@ -75,6 +75,34 @@
     \titlepage
 \end{frame}
 
+\begin{frame}
+    \frametitle{Aims and Motivation}
+    \vspace{5mm}
+
+    \begin{itemize}
+        \item High-fidelity and fast quantum gates are critical for scalability, but current control strategies struggle with noise, leakage, and hardware constraints.
+        \item Traditional optimal control relies on accurate system models (are often unavailable or incomplete) and gradient-based methods, which scale poorly and are brittle to stochastic errors.
+        \item Closed-loop experimental optimization is often impractical due to slow measurements and degradation of gate fidelity.
+        \item As systems grow in size, control landscapes become high-dimensional and highly non-convex, moreover they become computationally intractable as system size increases.
+        % \item Analytic tools and Hessian-base (GRAPE / Krotov) robustness analyses become computationally intractable as system size increases.
+    \end{itemize}
+
+    \vspace{0.5em}
+    \presenterbox{Francesco Giuseppe Minisini}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Why Reinforcement Learning?}
+    \vspace{5mm}
+
+    \begin{itemize}
+        \item Reinforcement learning agents trained with TRPO are stable under sample noise and effective in stochastic and uncertain environments.
+        \item Deep RL can exploit non-local regularities in control trajectories that are inaccessible to local gradient-based methods.
+        \item Neural policies enable transfer learning between nearby control tasks, reducing optimization cost for new target gates.
+    \end{itemize}
+
+\end{frame}
+
 %============================================================
 \section{Motivation}
 
@@ -143,18 +171,13 @@ Superconducting qubits are only \textbf{weakly anharmonic}, so fast control can 
     \column{0.48\textwidth}
     \small
     \begin{alertblock}{Important point}
-    This was not a standard reproduction from an existing codebase.
-    
-    \vspace{0.5em}
-    \begin{itemize}
-        \item No public implementation was available, the whole framework had to be rebuilt from scratch. This included:
+    This was not a standard reproduction from an existing codebase. No public implementation was available, the whole framework had to be rebuilt from scratch. This included:
         \begin{itemize}
             \item multilevel quantum simulation
             \item TSWT-based leakage estimator
-            \item TRPO training pipeline
+            \item RL + TRPO  training pipeline for a continuous state and action control problem
             \item robustness and runtime experiments
         \end{itemize}
-    \end{itemize}
     \end{alertblock}
 \end{columns}
 
@@ -232,7 +255,7 @@ d_{\mathrm{comp}}=4
 \begin{frame}{Why this is a multi-objective control problem}
 \small
 
-\begin{block}{Universal Function}
+\begin{block}{Universal Function Optimizaion (UFO) cost function}
 \[
 C=
 \underbrace{\chi\!\left[1-F(U(T))\right]}_{\text{fidelity penalty}}
@@ -483,7 +506,8 @@ Shot-to-shot stability under stochastic perturbations. \\[1em]
     
     % \column{0.42\textwidth}
     \begin{alertblock}{Key distinction}
-    The difference between \textbf{nominal} and \textbf{noise-optimized} TRPO is not the architecture, but strictly the \textbf{training environment}.
+    The difference between \textbf{nominal} and \textbf{noise-optimized} TRPO is not the architecture, but strictly the \textbf{training environment}. 
+    % If in nominal TROPO the suggested sample control vector is \(u(t) = tanh(\mu_\theta(s_t) + \sigma \hardman \epsilon_t)\) then mapped to range of each control parameter, in the noise-optimized version it is subject to further stochastic perturbations.
     \end{alertblock}
 % \end{columns}
 
