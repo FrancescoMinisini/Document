@@ -100,156 +100,166 @@ Superconducting qubits are only \textbf{weakly anharmonic}, so fast control can 
 \end{alertblock}
 \end{frame}
 
-\begin{frame}
-    \frametitle{Aims and Motivation}
-    \vspace{5mm}
+% \begin{frame}
+%     \frametitle{Aims and Motivation}
+%     \vspace{5mm}
 
-    \begin{itemize}
-        \item High-fidelity and fast quantum gates are critical for scalability, but current control strategies struggle with noise, leakage, and hardware constraints.
-        \item Traditional optimal control relies on accurate system models (are often unavailable or incomplete) and gradient-based methods, which scale poorly and are brittle to stochastic errors.
-        \item Closed-loop experimental optimization is often impractical due to slow measurements and degradation of gate fidelity.
-        \item As systems grow in size, control landscapes become high-dimensional and highly non-convex, moreover they become computationally intractable as system size increases.
-        % \item Analytic tools and Hessian-base (GRAPE / Krotov) robustness analyses become computationally intractable as system size increases.
-    \end{itemize}
+%     \begin{itemize}
+%         \item High-fidelity and fast quantum gates are critical for scalability, but current control strategies struggle with noise, leakage, and hardware constraints.
+%         \item Traditional optimal control relies on accurate system models (are often unavailable or incomplete) and gradient-based methods, which scale poorly and are brittle to stochastic errors.
+%         \item Closed-loop experimental optimization is often impractical due to slow measurements and degradation of gate fidelity.
+%         \item As systems grow in size, control landscapes become high-dimensional and highly non-convex, moreover they become computationally intractable as system size increases.
+%         % \item Analytic tools and Hessian-base (GRAPE / Krotov) robustness analyses become computationally intractable as system size increases.
+%     \end{itemize}
 
-    \vspace{0.5em}
-    % \presenterbox{Francesco Giuseppe Minisini}
-\end{frame}
+%     \vspace{0.5em}
+%     % \presenterbox{Francesco Giuseppe Minisini}
+% \end{frame}
 
-\begin{frame}
-    \frametitle{Why Reinforcement Learning?}
-    \vspace{5mm}
+% \begin{frame}
+%     \frametitle{Why Reinforcement Learning?}
+%     \vspace{5mm}
 
-    \begin{itemize}
-        \item Reinforcement learning agents trained with TRPO are stable under sample noise and effective in stochastic and uncertain environments.
-        \item Deep RL can exploit non-local regularities in control trajectories that are inaccessible to local gradient-based methods.
-        \item Neural policies enable transfer learning between nearby control tasks, reducing optimization cost for new target gates.
-    \end{itemize}
+%     \begin{itemize}
+%         \item Reinforcement learning agents trained with TRPO are stable under sample noise and effective in stochastic and uncertain environments.
+%         \item Deep RL can exploit non-local regularities in control trajectories that are inaccessible to local gradient-based methods.
+%         \item Neural policies enable transfer learning between nearby control tasks, reducing optimization cost for new target gates.
+%     \end{itemize}
 
-\end{frame}
+% \end{frame}
 
-\begin{frame}
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.6\textwidth]{images/weakly_anharmonic_ladder.pdf}
-% \begin{tikzpicture}[
-%     x=1cm, y=1cm,
-%     level/.style={thick},
-%     drive/.style={-{Latex[length=2.2mm]}, thick},
-%     brace/.style={decorate,decoration={brace,amplitude=6pt}},
-%     lbl/.style={font=\small}
-% ]
+% \begin{frame}
+% \begin{figure}[t]
+% \centering
+% \includegraphics[width=0.6\textwidth]{images/weakly_anharmonic_ladder.pdf}
+% % \begin{tikzpicture}[
+% %     x=1cm, y=1cm,
+% %     level/.style={thick},
+% %     drive/.style={-{Latex[length=2.2mm]}, thick},
+% %     brace/.style={decorate,decoration={brace,amplitude=6pt}},
+% %     lbl/.style={font=\small}
+% % ]
 
-% % Energy levels
-% \draw[level] (0,0) -- (3.2,0) node[right, lbl] {$\ket{0}$};
-% \draw[level] (0,1.2) -- (3.2,1.2) node[right, lbl] {$\ket{1}$};
-% \draw[level] (0,2.75) -- (3.2,2.75) node[right, lbl] {$\ket{2}$};
-% \draw[level] (0,3.8) -- (3.2,3.8) node[right, lbl] {$\ket{3}$};
+% % % Energy levels
+% % \draw[level] (0,0) -- (3.2,0) node[right, lbl] {$\ket{0}$};
+% % \draw[level] (0,1.2) -- (3.2,1.2) node[right, lbl] {$\ket{1}$};
+% % \draw[level] (0,2.75) -- (3.2,2.75) node[right, lbl] {$\ket{2}$};
+% % \draw[level] (0,3.8) -- (3.2,3.8) node[right, lbl] {$\ket{3}$};
 
-% % Braces for transition spacings
-% \draw[brace] (-0.25,0) -- (-0.25,1.2)
-%     node[midway,left=8pt,lbl] {$\omega_{01}$};
-% \draw[brace] (-0.25,1.2) -- (-0.25,2.75)
-%     node[midway,left=8pt,lbl] {$\omega_{12}$};
-% \draw[brace] (-0.25,2.75) -- (-0.25,3.8)
-%     node[midway,left=8pt,lbl] {$\omega_{23}$};
+% % % Braces for transition spacings
+% % \draw[brace] (-0.25,0) -- (-0.25,1.2)
+% %     node[midway,left=8pt,lbl] {$\omega_{01}$};
+% % \draw[brace] (-0.25,1.2) -- (-0.25,2.75)
+% %     node[midway,left=8pt,lbl] {$\omega_{12}$};
+% % \draw[brace] (-0.25,2.75) -- (-0.25,3.8)
+% %     node[midway,left=8pt,lbl] {$\omega_{23}$};
 
-% % Computational subspace highlight
-% \draw[dashed, rounded corners, draw=blue!60!black] (-0.55,-0.3) rectangle (3.75,1.5);
-% \node[lbl, blue!60!black] at (1.6,-0.65) {computational subspace};
+% % % Computational subspace highlight
+% % \draw[dashed, rounded corners, draw=blue!60!black] (-0.55,-0.3) rectangle (3.75,1.5);
+% % \node[lbl, blue!60!black] at (1.6,-0.65) {computational subspace};
 
-% % Anharmonicity annotation
-% \node[lbl] at (1.5,2.12) {$\alpha=\omega_{12}-\omega_{01}<0$};
+% % % Anharmonicity annotation
+% % \node[lbl] at (1.5,2.12) {$\alpha=\omega_{12}-\omega_{01}<0$};
 
-% % Intended drive (solid arc)
-% \draw[drive, <->] (3.85, 0.0) to [bend right=45] node[midway, right=6pt, lbl] {intended} (3.85, 1.3);
+% % % Intended drive (solid arc)
+% % \draw[drive, <->] (3.85, 0.0) to [bend right=45] node[midway, right=6pt, lbl] {intended} (3.85, 1.3);
 
-% % Leakage path (dashed arc)
-% \draw[drive, dashed] (3.8, 1.6) to [bend right=45] node[midway, right=6pt, lbl] {leakage} (3.8, 2.65);
-% \draw[drive, dashed] (3.8, 1.6) to [bend right=45] node[midway, right=6pt, lbl] {} (3.8, 3.8);
+% % % Leakage path (dashed arc)
+% % \draw[drive, dashed] (3.8, 1.6) to [bend right=45] node[midway, right=6pt, lbl] {leakage} (3.8, 2.65);
+% % \draw[drive, dashed] (3.8, 1.6) to [bend right=45] node[midway, right=6pt, lbl] {} (3.8, 3.8);
 
-% \end{tikzpicture}
-% % \caption{Schematic spectrum of a weakly anharmonic superconducting qubit. The two lowest levels define the computational subspace, while the higher levels remain physically present. Because the transition spacings are unequal but not widely separated, a drive resonant with the logical transition can still weakly couple to higher transitions, especially under strong or short pulses.}
-\label{fig:weakly_anharmonic_ladder}
-\end{figure}
-\end{frame}
+% % \end{tikzpicture}
+% % % \caption{Schematic spectrum of a weakly anharmonic superconducting qubit. The two lowest levels define the computational subspace, while the higher levels remain physically present. Because the transition spacings are unequal but not widely separated, a drive resonant with the logical transition can still weakly couple to higher transitions, especially under strong or short pulses.}
+% \label{fig:weakly_anharmonic_ladder}
+% \end{figure}
+% \end{frame}
 %============================================================
 \section{Motivation}
 
 \begin{frame}{Why this problem matters}
-\begin{columns}[c,onlytextwidth]
-    \column{0.52\textwidth}
+% \begin{columns}[c,onlytextwidth]
+    % \column{0.52\textwidth}
     \small 
 
     % \vspace{0.4em}
     \begin{block}{Main difficulty}
     In superconducting qubits, gate design is not only a matter of logical accuracy. Fast pulse-level control must balance several competing goals:
-    \end{block}
-
+    
+    {\centering
     \begin{itemize}
         \item \textbf{high gate fidelity}
         \item \textbf{short runtime}
         \item \textbf{low leakage} outside the computational subspace
         \item \textbf{robustness} against control noise
     \end{itemize}
-
-    \column{0.46\textwidth}
-    \centering
-    \vspace{1.5em}
-    \IfFileExists{images/weakly_anharmonic_ladder.pdf}{
-        \includegraphics[width=\linewidth, height=0.5\textheight]{images/weakly_anharmonic_ladder.pdf}
-    }{
-        \fbox{
-            \parbox[c][0.62\textheight][c]{0.92\linewidth}{
-                \centering
-                Suggested figure:\\[0.3em]
-                \texttt{paper\_subspace\_structure.pdf}
-            }
-        }
     }
-\end{columns}
+\end{block}
+    % \column{0.46\textwidth}
+    % \centering
+    % \vspace{1.5em}
+    % \IfFileExists{images/weakly_anharmonic_ladder.pdf}{
+    %     \includegraphics[width=\linewidth, height=0.5\textheight]{images/weakly_anharmonic_ladder.pdf}
+    % }{
+    %     \fbox{
+    %         \parbox[c][0.62\textheight][c]{0.92\linewidth}{
+    %             \centering
+    %             Suggested figure:\\[0.3em]
+    %             \texttt{paper\_subspace\_structure.pdf}
+    %         }
+    %     }
+    % }
+% \end{columns}
 
 \vspace{0.8em}
-\begin{alertblock}{Physical issue}
-Superconducting qubits are only \textbf{weakly anharmonic}, so fast control can easily excite unwanted higher levels.
+\begin{alertblock}{Limitations of existing techniques}
+
 \end{alertblock}
+\vspace{0.8em}
+\begin{block}{Why Deep Reinforcement Learning?}
+
+\end{block}
 
 % \presenterbox{Francesco G. Minisini}
 \end{frame}
 
 %------------------------------------------------------------
 \begin{frame}{Thesis goals and main contribution}
-\begin{columns}[T,onlytextwidth]
-    \column{0.48\textwidth}
+% \begin{columns}[T,onlytextwidth]
+%     \column{0.48\textwidth}
     \small
     \begin{block}{Scientific goal}
     To assess whether the framework proposed by Niu \emph{et al.} is a credible strategy for
-    \textbf{robust analog quantum control}.
+    \textbf{robust analog quantum control} on simulated gmon qubits.
     \end{block}
 
-    \vspace{0.4em}
+    % \vspace{0.4em}
     \begin{block}{What I specifically did}
-    \begin{itemize}
-        \item reconstructed the full framework from the paper
-        \item implemented simulation, leakage estimation, and RL pipeline
-        \item performed an independent empirical validation
-        \item compared nominal, noisy, and family-wide behavior
+    No public implementation was available, the whole framework had to be rebuilt from scratch. This included:
+        \begin{itemize}
+        % \item reconstructed the full framework from the paper
+        \item Quantum Environment two-qubit gmon architecture simulator 
+        % (through the qutip framework) 
+        \item Leakage estimator
+        \item Full Reinforcement Learning pipeline, coupled with Trust Region Policy Optimization (TRPO)
+        \item Optimization to make the framework computationally feasible
+        \item Extended existing studies and performed an independent validation
+        % \item compared nominal, noisy, and family-wide behavior
     \end{itemize}
     \end{block}
 
 
-    \column{0.48\textwidth}
-    \small
-    \begin{alertblock}{Important point}
-    This was not a standard reproduction from an existing codebase. No public implementation was available, the whole framework had to be rebuilt from scratch. This included:
-        \begin{itemize}
-            \item multilevel quantum simulation
-            \item TSWT-based leakage estimator
-            \item RL + TRPO  training pipeline for a continuous state and action control problem
-            \item robustness and runtime experiments
-        \end{itemize}
-    \end{alertblock}
-\end{columns}
+    % \column{0.48\textwidth}
+    % \small
+    % \begin{alertblock}{Important point}
+    % This was not a standard reproduction from an existing codebase. No public implementation was available, the whole framework had to be rebuilt from scratch. This included:
+    %     \begin{itemize}
+    %         \item multilevel quantum simulation
+    %         \item TSWT-based leakage estimator
+    %         \item RL + TRPO  training pipeline for a continuous state and action control problem
+    %         \item robustness and runtime experiments
+    %     \end{itemize}
+    % \end{alertblock}
+% \end{columns}
 
 % \presenterbox{Francesco G. Minisini}
 \end{frame}
@@ -259,25 +269,36 @@ Superconducting qubits are only \textbf{weakly anharmonic}, so fast control can 
 
 \begin{frame}{Physical model: gmon Hamiltonian and control channels}
 \small
-The effective bosonic Hamiltonian is
+The effective Hamiltonian is
 \vspace{-1ex}
 {\scriptsize
 \[
-\begin{aligned}
-    \hat{H}_{\mathrm{RWA}}(t) &=
+    \hat{H}(t) =
     \underbrace{\frac{\eta}{2}\sum_{j=1}^{2}\hat{n}_{j}(\hat{n}_{j}-1)}_{\text{anharmonicity}}
-    + \underbrace{g(t)(\hat{a}_{2}^{\dagger}\hat{a}_{1}+\hat{a}_{1}^{\dagger}\hat{a}_{2})}_{\text{tunable coupling}} \\
-    &\quad + \underbrace{\sum_{j=1}^{2}\delta_{j}(t)\hat{n}_{j}}_{\text{local detuning}}
+    + \underbrace{g(t)(\hat{a}_{2}^{\dagger}\hat{a}_{1}+\hat{a}_{1}^{\dagger}\hat{a}_{2})}_{\text{tunable coupling}}
+    + \underbrace{\sum_{j=1}^{2}\delta_{j}(t)\hat{n}_{j}}_{\text{local detuning}}
     + \underbrace{\sum_{j=1}^{2} i f_{j}(t)
     \left(
     \hat{a}_{j}e^{i\phi_{j}(t)}-\hat{a}_{j}^{\dagger}e^{-i\phi_{j}(t)}
-    \right)}_{\text{microwave drive}}.
-\end{aligned}
+    \right)}_{\text{microwave drive}}
 \]}
+% \[
+% \begin{aligned}
+%     \hat{H}_{\mathrm{RWA}}(t) &=
+%     \underbrace{\frac{\eta}{2}\sum_{j=1}^{2}\hat{n}_{j}(\hat{n}_{j}-1)}_{\text{anharmonicity}}
+%     + \underbrace{g(t)(\hat{a}_{2}^{\dagger}\hat{a}_{1}+\hat{a}_{1}^{\dagger}\hat{a}_{2})}_{\text{tunable coupling}} \\
+%     &\quad + \underbrace{\sum_{j=1}^{2}\delta_{j}(t)\hat{n}_{j}}_{\text{local detuning}}
+%     + \underbrace{\sum_{j=1}^{2} i f_{j}(t)
+%     \left(
+%     \hat{a}_{j}e^{i\phi_{j}(t)}-\hat{a}_{j}^{\dagger}e^{-i\phi_{j}(t)}
+%     \right)}_{\text{microwave drive}}.
+% \end{aligned}
+% \]}
 \vspace{-1ex}
 
 % \vspace{-0.2em}
 The control vector is:
+% at a generic time \(t\) is:
 \(
 u(t)=
 \bigl(
@@ -288,35 +309,27 @@ f_1(t),f_2(t),\,
 \bigr).
 \)
 
-% \vspace{0.2em}
-% After three-level truncation:
-% \[
-% d_{\mathrm{phys}}=3^2=9,
-% \qquad
-% d_{\mathrm{comp}}=4.
-% \]
-
-% \vspace{-1em}
-\begin{columns}[T,onlytextwidth]
-    \column{0.48\textwidth}
-    \begin{block}{Meaning of the controls}
-    \begin{itemize}
-        \item \(g(t)\): tunable inter-qubit coupling
-        \item \(\delta_j(t)\): local detunings
-        \item \(f_j(t)\): microwave amplitudes
-        \item \(\phi_j(t)\): microwave phases
-    \end{itemize}
-    \end{block}
+A solution to the control problem is a sequence of control vectors \[\{u(t)\}_{t=0}^T\] .
 
 
-    \column{0.48\textwidth}
+
+    % \column{0.48\textwidth}
     \begin{alertblock}{Why this matters}
-    This is a \textbf{continuous 7-dimensional control problem} on a multilevel superconducting system of dimentionality after three-level truncation: {\scriptsize \(
-d_{\mathrm{phys}}=3^2=9,
-d_{\mathrm{comp}}=4
-\) }
+    The Agent's output is \({\{u(t)\}}_{t=0}^T\), whose elements are directly applied to the system at each time step. 
+    Therefore \(u(t)\) is the \textbf{full control authority} of the agent, being the only media through which the agent interacts with the environment. 
+    
+    % This is a \textbf{continuous 7-dimensional control problem} and the \textbf{only information} it receives about the system state is through the propagated unitary \(U(t)\) that results from applying this control vector.
+    
+    % This vector is the only media through which the RL agent interacts with the quantum system.
+    % This vector rapresents the \textbf{full control authority} of the agent, in other words the ouput of the agent is a sequence of control vector \(u(t)\) that is directly applied to the system.
+    % This is a \textbf{continuous 7-dimensional control problem} 
+    % and the \textbf{only information} it receives about the system state is through the propagated unitary \(U(t)\) that results from applying this control vector.
+    % on a multilevel superconducting system of dimentionality after three-level truncation: {\scriptsize \(
+% d_{\mathrm{phys}}=3^2=9,
+% d_{\mathrm{comp}}=4
+% \) }
     \end{alertblock}
-\end{columns}
+% \end{columns}
 
 % \presenterbox{Francesco G. Minisini}
 \end{frame}
