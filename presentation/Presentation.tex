@@ -86,7 +86,7 @@
     \column{0.48\textwidth}
     \small
             \begin{itemize}
-                \item For scalable and reliable quantum devices, high-fidelity, fast, and robust quantum gates are needed, their computational unit. 
+                \item For scalable and reliable quantum devices, high-fidelity, fast, and robust quantum gates are needed. 
                 \item Superconducting qubits are a leading platform, but makes control design challenging due to leakage and noise sensitivity.
             \end{itemize}
 \column{0.48\textwidth}
@@ -532,16 +532,27 @@ C=
     \includegraphics[width=\linewidth, height=\textheight, keepaspectratio]{images/adam_single_target_horizon_sweep.pdf}
 \end{columns}
 
-    \centering
-    \footnotesize
-    \begin{tabular}{lcccc}
-    \toprule
-    \textbf{Method} & \textbf{Time (ns)} & \textbf{Cost} & \textbf{Fidelity} & \textbf{Leakage} \\
-    \midrule
-    Baseline & 70 & 0.157 & 0.9966 & \(2.8\times 10^{-4}\) \\
-    RL Agent & 116 & 0.298 & 0.9941 & \(1.6\times 10^{-3}\) \\
-    \bottomrule
-    \end{tabular}
+\begin{columns}
+    \begin{column}{.7\textwidth}
+        \centering
+        \footnotesize
+        \begin{tabular}{lcccc}
+            \toprule
+            \textbf{Method} & \textbf{Time (ns)} & \textbf{Cost} & \textbf{Fidelity} & \textbf{Leakage} \\
+            \midrule
+            Baseline & 70 & 0.157 & 0.9966 & \(2.8\times 10^{-4}\) \\
+            RL Agent & 116 & 0.298 & 0.9941 & \(1.6\times 10^{-3}\) \\
+            \bottomrule
+        \end{tabular}
+    \end{column}
+    \begin{column}{.3\textwidth}
+        \scriptsize
+        \centering
+            \begin{block}{Reference benchmark}
+    \(T_{\mathrm{syn}} \approx 215\,\mathrm{ns}\) from optimal discrete gate synthesis.
+    \end{block}
+\end{column}
+\end{columns}
 
 \end{frame}
 
@@ -803,7 +814,7 @@ Why...
 %------------------------------------------------------------
 \begin{frame}{Evaluation metrics \& target gate family}
     % TODO: add better def to avg F e ripensare magari a ste robe
-\small
+\scriptsize
 \begin{tabular}{p{0.18\linewidth} p{0.32\linewidth} p{0.42\linewidth}}
 \toprule
 \textbf{Metric} & \textbf{Definition} & \textbf{Physical meaning} \\
