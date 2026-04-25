@@ -582,7 +582,7 @@ C=
     % \column{0.48\textwidth}
     \begin{enumerate}
         \setcounter{enumi}{3}
-        \item \textbf{Consistency of performance}: RL Agent vs baseline optimization
+        \item \textbf{Consistency of performance}: RL Agent vs Adam optimization
         \item \textbf{Transfer Learning Evaluation}: across nearby targets
     \end{enumerate}
 % \end{columns}
@@ -610,7 +610,7 @@ C=
             \toprule
             \textbf{Method} & \textbf{Time (ns)} & \textbf{Cost} & \textbf{Fidelity} & \textbf{Leakage} \\
             \midrule
-            Baseline & 70 & 0.157 & 0.9966 & \(2.8\times 10^{-4}\) \\
+            Adam & 70 & 0.157 & 0.9966 & \(2.8\times 10^{-4}\) \\
             RL Agent & 116 & 0.298 & 0.9941 & \(1.6\times 10^{-3}\) \\
             \bottomrule
         \end{tabular}
