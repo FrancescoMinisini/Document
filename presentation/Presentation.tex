@@ -519,55 +519,71 @@ C=
 
 %------------------------------------------------------------
 %------------------------------------------------------------
-\begin{frame}{Implemented controllers}
-\small
+% \begin{frame}{Implemented controllers}
+% \small
 
-% \begin{columns}[T,onlytextwidth]
-%     \column{0.55\textwidth}
-    \begin{block}{Controller variants implemented}
-    \begin{itemize}
-        \item \textbf{Classical Optimization}: gradient descent-based pulse optimization (Adam) of the UFO cost. It's used as the baseline for comparison.
-        \item \textbf{Reinforcement-Learning Agent} evaluated in two configurations:
-        \begin{itemize}
-            \small
-            \item \textbf{Noise-optimized Agent}: RL Agent trained with Gaussian perturbations on the control vector \(u_{applied} (t) = u(t) + \epsilon(t)\)
-            \item \textbf{Nominal Agent}: RL Agent trained in deterministic environment
-        \end{itemize}
-    \end{itemize}
-    \end{block}
+% % \begin{columns}[T,onlytextwidth]
+% %     \column{0.55\textwidth}
+%     \begin{block}{Controller variants implemented}
+%     \begin{itemize}
+%         \item \textbf{Classical Optimization}: gradient descent-based pulse optimization (Adam) of the UFO cost. It's used as the baseline for comparison.
+%         \item \textbf{Deep Reinforcement-Learning Agent} trained in various configurations.
+%         % \begin{itemize}
+%         %     \small
+%         %     \item \textbf{Noise-optimized Agent}: RL Agent trained with Gaussian perturbations on the control vector \(u_{applied} (t) = u(t) + \epsilon(t)\)
+%         %     \item \textbf{Nominal Agent}: RL Agent trained in deterministic environment
+%         % \end{itemize}
+%     \end{itemize}
+%     \end{block}
 
     
-    % \column{0.42\textwidth}
-    \begin{alertblock}{Key distinction}
-    The difference between \textbf{nominal} and \textbf{noise-optimized} Agent is not the architecture, but strictly the \textbf{training environment}. 
-    % If in nominal TROPO the suggested sample control vector is \(u(t) = tanh(\mu_\theta(s_t) + \sigma \hardman \epsilon_t)\) then mapped to range of each control parameter, in the noise-optimized version it is subject to further stochastic perturbations.
-    \end{alertblock}
-% \end{columns}
+%     % \column{0.42\textwidth}
+%     % \begin{alertblock}{Key distinction}
+%     % The difference between \textbf{nominal} and \textbf{noise-optimized} Agent is not the architecture, but strictly the \textbf{training environment}. 
+%     % % If in nominal TROPO the suggested sample control vector is \(u(t) = tanh(\mu_\theta(s_t) + \sigma \hardman \epsilon_t)\) then mapped to range of each control parameter, in the noise-optimized version it is subject to further stochastic perturbations.
+%     % \end{alertblock}
+% % \end{columns}
 
-% \vspace{1.5em}
-\end{frame}
+% % \vspace{1.5em}
+% \end{frame}
+
 \begin{frame}
     \frametitle{Experiments performed}
+    \begin{alertblock}{Controller variants implemented}
+    \begin{itemize}
+        \item \textbf{Classical Optimization}: gradient descent-based pulse optimization (Adam) of the UFO cost. It's used as the baseline for comparison.
+        \item \textbf{Reinforcement-Learning Agent} trained in multiple configurations.
+        % \begin{itemize}
+        %     \small
+        %     \item \textbf{Noise-optimized Agent}: RL Agent trained with Gaussian perturbations on the control vector \(u_{applied} (t) = u(t) + \epsilon(t)\)
+        %     \item \textbf{Nominal Agent}: RL Agent trained in deterministic environment
+        % \end{itemize}
+    \end{itemize}
+    \end{alertblock}
+
 \begin{block}{Main experiments performed}
-\vspace{0.4em}
+% \vspace{0.4em}
 % \begin{columns}[T,onlytextwidth]
 %     \column{0.48\textwidth}
+
     \begin{enumerate}
         \item \textbf{Extensive parameter study}: 
         \begin{itemize}
-            \item \textbf{neural network sizes and layouts} to look for the best tradeoff between performance and stability
-            \item \textbf{UFO cost function weights}, to observe the tradeoff between fidelity, leakage, and runtime with different weight configurations
+            \item \textbf{neural network sizes and layouts} 
+            % to look for the best tradeoff between performance and stability
+            \item \textbf{UFO cost function weights}
+            % to observe the tradeoff between fidelity, leakage, and runtime with different weight configurations
         \end{itemize}
         
-        \item \textbf{Single-target benchmark}: Classical Optimization vs Nominal Agent
+        \item \textbf{Single-target benchmark}: Adam vs RL Agent
         \item \textbf{Robustness under noise}: fidelity metrics vs noise strength
     \end{enumerate}
     
     % \column{0.48\textwidth}
     \begin{enumerate}
         \setcounter{enumi}{3}
-        \item \textbf{Consistency of performance of Classical Optimization}: baseline optimization across a countinuos gate family
-        \item \textbf{Transfer Learning Evaluation}: RL Agent transfer learning across nearby targets
+        \item \textbf{Consistency of performance}: RL Agent vs baseline optimization
+        \item \textbf{Transfer Learning Evaluation}: across nearby targets
     \end{enumerate}
 % \end{columns}
 \end{block}
