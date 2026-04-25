@@ -21,6 +21,8 @@
 \usepackage{comment}
 \usepackage{threeparttable}
 \usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
 \usepackage{hyperref}
 \usepackage[caption=false,font=normalsize,labelfont=sf,textfont=sf]{subfig}
 \usepackage{caption}
@@ -603,17 +605,22 @@ C=
 
 \begin{frame}{Single-target optimization: Nominal RL agent vs Baseline}
 \small
-
-        \centering
-        \footnotesize
-        \begin{tabular}{lcccc}
-            \toprule
-            \textbf{Method} & \textbf{Time (ns)} & \textbf{Cost} & \textbf{Fidelity} & \textbf{Leakage} \\
-            \midrule
-            Adam & 70 & 0.157 & 0.9966 & \(2.8\times 10^{-4}\) \\
-            RL Agent & 116 & 0.298 & 0.9941 & \(1.6\times 10^{-3}\) \\
-            \bottomrule
-        \end{tabular}
+\centering
+\begin{figure}
+    \centering
+    \input{images/single_target_adam_vs_nominal_trpo.tex}
+    % \caption{Single-target optimization: Nominal RL agent vs Baseline}
+    % \label{fig:single_target_adam_vs_nominal_trpo}
+\end{figure}
+        % \footnotesize
+        % \begin{tabular}{lcccc}
+        %     \toprule
+        %     \textbf{Method} & \textbf{Time (ns)} & \textbf{Cost} & \textbf{Fidelity} & \textbf{Leakage} \\
+        %     \midrule
+        %     Adam & 70 & 0.157 & 0.9966 & \(2.8\times 10^{-4}\) \\
+        %     RL Agent & 116 & 0.298 & 0.9941 & \(1.6\times 10^{-3}\) \\
+        %     \bottomrule
+        % \end{tabular}
 \end{frame}
 
 
