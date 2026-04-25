@@ -48,6 +48,8 @@
 \end{tikzpicture}%
 }
 
+\newcommand{\ctrl}[1]{\textcolor{red}{#1}}
+
 \captionsetup{
     font=small,
 }
@@ -93,59 +95,59 @@
             \column{0.48\textwidth}
             \begin{figure}[t]
                 \centering
-                % \includegraphics[width=\textwidth]{images/weakly_anharmonic_ladder.pdf}
-\begin{tikzpicture}[
-    x=1cm, y=1cm,
-    level/.style={thick},
-    drive/.style={-{Latex[length=2.2mm]}, thick},
-    brace/.style={decorate,decoration={brace,amplitude=6pt}},
-    lbl/.style={font=\small}
-]
+                \includegraphics[width=\textwidth]{images/weakly_anharmonic_ladder.pdf}
+% \begin{tikzpicture}[
+%     x=1cm, y=1cm,
+%     level/.style={thick},
+%     drive/.style={-{Latex[length=2.2mm]}, thick},
+%     brace/.style={decorate,decoration={brace,amplitude=6pt}},
+%     lbl/.style={font=\small}
+% ]
 
-% Energy levels
-\draw[level] (0,0) -- (3.2,0) node[right, lbl] {$\ket{0}$};
-\draw[level] (0,1.2) -- (3.2,1.2) node[right, lbl] {$\ket{1}$};
-\draw[level] (0,2.75) -- (3.2,2.75) node[right, lbl] {$\ket{2}$};
-\draw[level] (0,3.8) -- (3.2,3.8) node[right, lbl] {$\ket{3}$};
+% % Energy levels
+% \draw[level] (0,0) -- (3.2,0) node[right, lbl] {$\ket{0}$};
+% \draw[level] (0,1.2) -- (3.2,1.2) node[right, lbl] {$\ket{1}$};
+% \draw[level] (0,2.75) -- (3.2,2.75) node[right, lbl] {$\ket{2}$};
+% \draw[level] (0,3.8) -- (3.2,3.8) node[right, lbl] {$\ket{3}$};
 
-% Braces for transition spacings
-\draw[brace] (-0.25,0) -- (-0.25,1.2)
-    node[midway,left=8pt,lbl] {$\omega_{01}$};
-\draw[brace] (-0.25,1.2) -- (-0.25,2.75)
-    node[midway,left=8pt,lbl] {$\omega_{12}$};
-\draw[brace] (-0.25,2.75) -- (-0.25,3.8)
-    node[midway,left=8pt,lbl] {$\omega_{23}$};
+% % Braces for transition spacings
+% \draw[brace] (-0.25,0) -- (-0.25,1.2)
+%     node[midway,left=8pt,lbl] {$\omega_{01}$};
+% \draw[brace] (-0.25,1.2) -- (-0.25,2.75)
+%     node[midway,left=8pt,lbl] {$\omega_{12}$};
+% \draw[brace] (-0.25,2.75) -- (-0.25,3.8)
+%     node[midway,left=8pt,lbl] {$\omega_{23}$};
 
-% Computational subspace highlight
-\draw[dashed, rounded corners, draw=blue!60!black] (-0.55,-0.3) rectangle (3.75,1.5);
-\node[lbl, blue!60!black] at (1.6,-0.65) {computational subspace};
+% % Computational subspace highlight
+% \draw[dashed, rounded corners, draw=blue!60!black] (-0.55,-0.3) rectangle (3.75,1.5);
+% \node[lbl, blue!60!black] at (1.6,-0.65) {computational subspace};
 
-% Anharmonicity annotation
-\node[lbl] at (1.5,2.12) {$\alpha=\omega_{12}-\omega_{01}<0$};
+% % Anharmonicity annotation
+% \node[lbl] at (1.5,2.12) {$\alpha=\omega_{12}-\omega_{01}<0$};
 
-% --- INTENDED DRIVE (Inside the subspace) ---
-% OPZIONE A: Freccia dritta con doppia punta
-\draw[drive, <->] (2.6, 0.0) -- node[midway, left=2pt, lbl] {intended} (2.6, 1.2);
+% % --- INTENDED DRIVE (Inside the subspace) ---
+% % OPZIONE A: Freccia dritta con doppia punta
+% \draw[drive, <->] (2.6, 0.0) -- node[midway, left=2pt, lbl] {intended} (2.6, 1.2);
 
-% OPZIONE B: Due frecce curve (una su, una giù)
-% \draw[drive] (2.45, 0.0) to [bend left=30] (2.45, 1.2);
-% \draw[drive] (2.75, 1.2) to [bend left=30] node[midway, right=2pt, lbl] {intended} (2.75, 0.0);
+% % OPZIONE B: Due frecce curve (una su, una giù)
+% % \draw[drive] (2.45, 0.0) to [bend left=30] (2.45, 1.2);
+% % \draw[drive] (2.75, 1.2) to [bend left=30] node[midway, right=2pt, lbl] {intended} (2.75, 0.0);
 
-% --- LEAKAGE PATHS (Dashed arcs, moved closer to the ladder) ---
-% OPZIONE 1: Una freccia dal centro di 0,1 al centro di 2,3
-\draw[drive, dashed] (3.8, 0.6) to [bend right=30] node[midway, right=4pt, lbl] {leakage} (3.8, 3.275);
+% % --- LEAKAGE PATHS (Dashed arcs, moved closer to the ladder) ---
+% % OPZIONE 1: Una freccia dal centro di 0,1 al centro di 2,3
+% \draw[drive, dashed] (3.8, 0.6) to [bend right=30] node[midway, right=4pt, lbl] {leakage} (3.8, 3.275);
 
-% OPZIONE 2: Due frecce, da 0 e da 1, verso il centro di 2,3
-% \draw[drive, dashed] (3.8, 0.0) to [bend right=35] node[pos=0.65, right=4pt, lbl] {leakage} (3.8, 3.275);
-% \draw[drive, dashed] (3.8, 1.2) to [bend right=25] (3.8, 3.275);
+% % OPZIONE 2: Due frecce, da 0 e da 1, verso il centro di 2,3
+% % \draw[drive, dashed] (3.8, 0.0) to [bend right=35] node[pos=0.65, right=4pt, lbl] {leakage} (3.8, 3.275);
+% % \draw[drive, dashed] (3.8, 1.2) to [bend right=25] (3.8, 3.275);
 
-% OPZIONE 3: Quattro frecce, da 0 e 1 verso 2 e 3
-% \draw[drive, dashed] (3.8, 0.0) to [bend right=30] (3.8, 2.75);
-% \draw[drive, dashed] (3.8, 0.0) to [bend right=45] node[midway, right=4pt, lbl] {leakage} (3.8, 3.8);
-% \draw[drive, dashed] (3.8, 1.2) to [bend right=20] (3.8, 2.75);
-% \draw[drive, dashed] (3.8, 1.2) to [bend right=35] (3.8, 3.8);
+% % OPZIONE 3: Quattro frecce, da 0 e 1 verso 2 e 3
+% % \draw[drive, dashed] (3.8, 0.0) to [bend right=30] (3.8, 2.75);
+% % \draw[drive, dashed] (3.8, 0.0) to [bend right=45] node[midway, right=4pt, lbl] {leakage} (3.8, 3.8);
+% % \draw[drive, dashed] (3.8, 1.2) to [bend right=20] (3.8, 2.75);
+% % \draw[drive, dashed] (3.8, 1.2) to [bend right=35] (3.8, 3.8);
 
-\end{tikzpicture}
+% \end{tikzpicture}
             \end{figure}
         \end{columns}
         \begin{alertblock}{Physical issue}
@@ -339,11 +341,11 @@ The effective Hamiltonian is
 \[
     \hat{H}(t) =
     \underbrace{\frac{\eta}{2}\sum_{j=1}^{2}\hat{n}_{j}(\hat{n}_{j}-1)}_{\text{anharmonicity}}
-    + \underbrace{g(t)(\hat{a}_{2}^{\dagger}\hat{a}_{1}+\hat{a}_{1}^{\dagger}\hat{a}_{2})}_{\text{tunable coupling}}
-    + \underbrace{\sum_{j=1}^{2}\delta_{j}(t)\hat{n}_{j}}_{\text{local detuning}}
-    + \underbrace{\sum_{j=1}^{2} i f_{j}(t)
+    + \underbrace{\ctrl{g(t)}(\hat{a}_{2}^{\dagger}\hat{a}_{1}+\hat{a}_{1}^{\dagger}\hat{a}_{2})}_{\text{tunable coupling}}
+    + \underbrace{\sum_{j=1}^{2}\ctrl{\delta_{j}(t)}\hat{n}_{j}}_{\text{local detuning}}
+    + \underbrace{\sum_{j=1}^{2} i \ctrl{f_{j}(t)}
     \left(
-    \hat{a}_{j}e^{i\phi_{j}(t)}-\hat{a}_{j}^{\dagger}e^{-i\phi_{j}(t)}
+    \hat{a}_{j}e^{i\ctrl{\phi_{j}(t)}}-\hat{a}_{j}^{\dagger}e^{-i\ctrl{\phi_{j}(t)}}
     \right)}_{\text{microwave drive}}
 \]}
 % \[
@@ -361,26 +363,31 @@ The effective Hamiltonian is
 \vspace{-1ex}
 
 % \vspace{-0.2em}
+
+\begin{block}{Control vector: Agent's output}
 The control vector is:
 % at a generic time \(t\) is:
-\[
+\textbf{\[
 u(t)=
 \bigl(
 g(t),\,
 \delta_1(t),\delta_2(t),\,
 f_1(t),f_2(t),\,
 \phi_1(t),\phi_2(t)
-\bigr).
-\]
+\bigr)
+\]}
 And this is going to be the output of the RL agent at each time step.
-A solution to the control problem is a sequence of control vectors \[\{u(t)\}_{t=0}^T\] .
+\end{block}
+\begin{alertblock}{Solution to the control problem}
+A solution to the control problem is a sequence of control vectors \textbf {\[\{u(t)\}_{t=0}^T\]} 
+\end{alertblock}
 
 
 
     % \column{0.48\textwidth}
-    \begin{alertblock}{Why this matters}
-    The Agent's output is \({\{u(t)\}}_{t=0}^T\), whose elements are directly applied to the system at each time step. 
-    Therefore \(u(t)\) is the \textbf{full control authority} of the agent, being the media through which the agent interacts with the environment. 
+    % \begin{alertblock}{Why this matters}
+    % The Agent's output is \({\{u(t)\}}_{t=0}^T\), whose elements are directly applied to the system at each time step. 
+    % Therefore \(u(t)\) is the \textbf{full control authority} of the agent, being the media through which the agent interacts with the environment. 
     
     % This is a \textbf{continuous 7-dimensional control problem} and the \textbf{only information} it receives about the system state is through the propagated unitary \(U(t)\) that results from applying this control vector.
     
@@ -392,7 +399,7 @@ A solution to the control problem is a sequence of control vectors \[\{u(t)\}_{t
         % d_{\mathrm{phys}}=3^2=9,
         % d_{\mathrm{comp}}=4
         % \) }
-    \end{alertblock}
+    % \end{alertblock}
     % \end{columns}
     
 % \presenterbox{Francesco G. Minisini}
