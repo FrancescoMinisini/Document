@@ -1086,4 +1086,103 @@ Target parametrization: \(U_{\mathrm{target}}(\alpha)=N(\alpha,\alpha,\pi/2)\). 
 \end{columns}
 \end{frame}
 
+\begin{frame}{RL state}
+\scriptsize
+
+\begin{block}{Current propagator and state definition}
+The current propagated unitary is
+\[
+U_t=\mathcal{T}\exp\!\left(-i\int_0^t H(\tau)\,d\tau\right),
+\]
+so it represents the \textbf{time-evolution operator accumulated up to time \(t\)}.
+
+\vspace{0.3em}
+In the implementation, the RL state is built from the current propagator as
+\[
+s_t=
+\Bigl(
+\Re(\mathrm{vec}(U_t)),
+\Im(\mathrm{vec}(U_t)),
+t/T_{norm}
+\Bigr).
+\]
+With a three-level truncation for each mode:
+\[
+d_{\mathrm{phys}}=3^2=9
+\quad\Longrightarrow\quad
+U_t\in\mathbb{C}^{9\times 9},
+\]
+so the observation dimension is
+\[
+d_{\mathrm{obs}} = 2\cdot 9^2 + 1 = 163.
+\]
+\end{block}
+
+\end{frame}
+
+\begin{frame}{Policy }
+    \begin{block}{Policy network}
+    \textbf{Input:} current state \(s_t\)
+
+    \vspace{0.3em}
+    \textbf{Output:} parameters of a Gaussian policy
+    \[
+    \pi_\theta(a_t\mid s_t)
+    =\mathcal{N}\!\bigl(\mu_\theta(s_t),\,\Sigma_\theta\bigr),
+    \]
+    with
+    \[
+    \mu_\theta(s_t)\in\mathbb{R}^7,
+    \qquad
+    \Sigma_\theta=\mathrm{diag}(\sigma_1^2,\dots,\sigma_7^2).
+    \]
+
+    \vspace{0.3em}
+    After sampling and squashing:
+    \[
+    a_t=\tanh(\tilde a_t)\in[-1,1]^7,
+    \]
+    then rescaled to the physical controls
+    \[
+    u_t=
+    \bigl(
+    g_t,\delta_{1,t},\delta_{2,t},
+    f_{1,t},f_{2,t},
+    \phi_{1,t},\phi_{2,t}
+    \bigr).
+    \]
+    \end{block}
+
+\end{frame}
+
+\begin{frame}{Value network}
+    \centering
+
+    \begin{block}{Value network}
+    \textbf{Input:} current state \(s_t\)
+
+    \vspace{0.3em}
+    \textbf{Output:} scalar state value
+    \[
+    V_\omega(s_t)\in\mathbb{R}.
+    \]
+
+    \vspace{0.3em}
+    This estimates the expected discounted future reward:
+    \[
+    V_\omega(s_t)\approx
+    \mathbb{E}\!\left[
+    \sum_{k=t}^{T}\gamma^{\,k-t} r_k
+    \,\middle|\, s_t
+    \right].
+    \]
+
+    \vspace{0.4em}
+    \textbf{Interpretation:}
+    \begin{itemize}
+        \item the \textbf{policy} proposes the next control action,
+        \item the \textbf{value network} estimates how promising the current state is.
+    \end{itemize}
+    \end{block}
+\end{frame}
 \end{document}
