@@ -89,9 +89,9 @@
 \end{pgfonlayer}
 
 % Policy NN brace (right side)
-\draw[decorate, decoration={brace, amplitude=6pt, mirror}, thick, blue!70!black]
+\draw[decorate, decoration={brace, amplitude=6pt, mirror}, thick, black!70!black]
     (6.3,1.85) -- (6.3,4.15)
-    node[midway,right=0.25cm,align=left,text=blue!80!black] {
+    node[midway,right=0.25cm,align=left,text=black!80!black] {
         \textbf{Policy NN} $\pi_\theta$\\
         \textnormal{\scriptsize Input: $s_t$}\\
         \textnormal{\scriptsize Output: $\mu_\theta(s_t),\,\Sigma_\theta$}
@@ -172,10 +172,10 @@
     }
 \end{pgfonlayer}
 
-% Value NN brace (right side)
-\draw[decorate, decoration={brace, amplitude=6pt, mirror}, thick, green!60!black]
-    (18.2,6.75) -- (18.2,9.05)
-    node[midway,right=0.25cm,align=left,text=green!60!black] {
+% Value NN brace (left side)
+\draw[decorate, decoration={brace, amplitude=6pt}, thick, black!60!black]
+     (14.4,6.75) -- (14.4,9.05)
+    node[midway,left=0.25cm,align=right,text=black!60!black] {
         \textbf{Value NN} $V_\omega$\\
         \textnormal{\scriptsize Input: $s_{t+1}$}\\
         \textnormal{\scriptsize Output: $\in \mathbb{R}$}
@@ -194,7 +194,7 @@
     -- (state.west);
 \node[text=blue!80!black, font=\scriptsize\bfseries, anchor=east]
     at ([xshift=-0.3cm, yshift=.7cm]env.north)
-    {Inference loop: $s_t \to s_{t+1}$};
+    {Inference loop: $s_t \leftarrow s_{t+1}$};
 
 % Training loop: orange arrow from env.north, going right to Value NN input
 \draw[orangearr, rounded corners=8pt]
@@ -238,11 +238,11 @@
     s.t.\ $\mathbb{E}\!\left[D_{\mathrm{KL}}\!\left(\pi_{\theta_{\mathrm{old}}}\,\|\,\pi_\theta\right)\right]\leq\delta$};
 \draw[orangearr] (adv.south) -- (update.north);
 
-% TRPO Optimization brace (right side of update box)
-\draw[decorate, decoration={brace, amplitude=5pt, mirror}, thick, orange!80!black]
-    ([xshift=0.15cm]update.north east) -- ([xshift=0.15cm]update.south east)
-    node[midway,right=0.20cm,align=left,text=orange!80!black,font=\scriptsize] {
-        \textbf{TRPO}
+% TRPO Optimization brace (left side of update box)
+\draw[decorate, decoration={brace, amplitude=5pt}, thick, black!80!black]
+     ([xshift=-0.15cm]update.south west) -- ([xshift=-0.15cm]update.north west) 
+    node[midway,left=0.20cm,align=right,text=black!80!black,font=\scriptsize] {
+        \textbf{TRPO:} Trust Region \\ Policy Optimization
     };
 
 % dashed update arrow to policy (goes down, right under NN, then up to p24.east)
