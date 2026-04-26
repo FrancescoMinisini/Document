@@ -188,16 +188,17 @@
     -- ([xshift=-0.2cm]env.south west |- {(0,0.2)})
     -- (state.west);
 \node[text=blue!80!black, font=\scriptsize\bfseries, anchor=east]
-    at ([xshift=-0.4cm, yshift=0.5cm]env.north west)
+    at ([xshift=-0.3cm, yshift=.7cm]env.north)
     {Inference loop: $s_t \to s_{t+1}$};
 
 % Training loop: orange arrow from env.north, going right to Value NN input
 \draw[orangearr, rounded corners=8pt]
-    (env.north) -- ([yshift=0.5cm]env.north)
-    -- ([yshift=0.5cm]env.north east) -- ++(0.5,0.3)
+    (env.north) 
+    -- ([yshift=0.5cm]env.north)
+    % -- ([yshift=0.5cm]env.north east) -- ++(0.5,0.3)
     -| (15.9,9.3) -- (15.9,8.95);
 \node[text=orange!90!black, font=\scriptsize\bfseries, anchor=west]
-    at ([xshift=0.6cm, yshift=0.5cm]env.north east)
+    at ([xshift=0.6cm, yshift=0.7cm]env.north)
     {Training loop: $s_{t+1}$, $r_t$};
 
 % value text
