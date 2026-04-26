@@ -1,179 +1,214 @@
-        \begin{tikzpicture}[
-    node distance=0.6cm and 0.6cm,
-    bluenode/.style={circle, minimum size=0.5cm, inner sep=0pt, top color=blue!5, bottom color=blue!20, draw=blue!60!black},
-    greennode/.style={circle, minimum size=0.5cm, inner sep=0pt, top color=green!5, bottom color=green!20, draw=green!60!black},
-    envbox/.style={draw=gray!50!black, fill=gray!5, rounded corners, inner sep=10pt},
-    arr/.style={-{Latex[length=2mm]}, thick, gray!80!black},
-    infarr/.style={-{Latex[length=2.5mm]}, thick, blue!70!black, densely dashed},
-    trainarr/.style={-{Latex[length=2.5mm]}, thick, orange!80!black}
+\begin{tikzpicture}[
+    x=1cm,y=1cm,
+    >=Latex,
+    font=\small,
+    bluenode/.style={
+        circle,
+        minimum size=0.42cm,
+        inner sep=0pt,
+        draw=blue!70!black,
+        fill=blue!8
+    },
+    greennode/.style={
+        circle,
+        minimum size=0.42cm,
+        inner sep=0pt,
+        draw=green!60!black,
+        fill=green!10
+    },
+    envbox/.style={
+        draw=gray!60!black,
+        fill=gray!6,
+        rounded corners,
+        thick,
+        inner sep=10pt
+    },
+    trainbox/.style={
+        draw=orange!80!black,
+        rounded corners,
+        densely dashed,
+        thick,
+        inner sep=8pt
+    },
+    statebox/.style={
+        draw=blue!70!black,
+        rounded corners,
+        thick,
+        inner sep=6pt,
+        fill=blue!2
+    },
+    updatebox/.style={
+        draw=gray!60!black,
+        rounded corners,
+        thick,
+        inner sep=6pt,
+        fill=gray!4
+    },
+    arr/.style={-{Latex[length=2.2mm]}, thick},
+    bluearr/.style={-{Latex[length=2.2mm]}, thick, blue!80!black},
+    orangearr/.style={-{Latex[length=2.2mm]}, thick, orange!85!black},
+    infarr/.style={-{Latex[length=2.2mm]}, thick, blue!80!black, densely dashed},
+    updarr/.style={-{Latex[length=2.2mm]}, thick, orange!85!black, densely dashed}
 ]
 
-\pgfdeclarelayer{background}
-\pgfsetlayers{background,main}
+% -------------------------------------------------
+% POLICY STATE
+% -------------------------------------------------
+\node[statebox, align=center] (state) at (4.8,0.2)
+    {\textbf{State} $\, s_t = (U_t,t)$};
 
-% ===== STATE =====
-\node[align=center] (state) {\textbf{State} $s_t = (\mathrm{vec}(U_t),\, t)$};
+% Policy NN nodes
+\node[bluenode] (p11) at (3.2,2.1) {};
+\node[bluenode] (p12) at (4.3,2.1) {};
+\node[bluenode] (p13) at (5.4,2.1) {};
+\node[bluenode] (p14) at (6.5,2.1) {};
 
-% ===== POLICY NN =====
-% Layer 1 (input)
-\node[bluenode, above=0.7cm of state, xshift=-1cm] (p11) {};
-\node[bluenode, right=0.3cm of p11] (p12) {};
-\node[right=0.3cm of p12] (p1_dots) {$\dots$};
-\node[bluenode, right=0.3cm of p1_dots] (p13) {};
+\node[bluenode] (p21) at (3.0,3.0) {};
+\node[bluenode] (p22) at (4.0,3.0) {};
+\node (pdots)       at (4.8,3.0) {$\cdots$};
+\node[bluenode] (p23) at (5.6,3.0) {};
+\node[bluenode] (p24) at (6.6,3.0) {};
 
-% Layer 2 (hidden)
-\node[bluenode, above=0.7cm of p11, xshift=-0.4cm] (p21) {};
-\node[bluenode, right=0.3cm of p21] (p22) {};
-\node[right=0.3cm of p22] (p2_dots) {$\dots$};
-\node[bluenode, right=0.3cm of p2_dots] (p23) {};
-\node[bluenode, right=0.3cm of p23] (p24) {};
+\node[bluenode] (p31) at (3.2,3.9) {};
+\node[bluenode] (p32) at (4.3,3.9) {};
+\node[bluenode] (p33) at (5.4,3.9) {};
+\node[bluenode] (p34) at (6.5,3.9) {};
 
-% Layer 3 (output)
-\node[bluenode, above=0.7cm of p21, xshift=0.4cm] (p31) {};
-\node[bluenode, right=0.3cm of p31] (p32) {};
-\node[right=0.3cm of p32] (p3_dots) {$\dots$};
-\node[bluenode, right=0.3cm of p3_dots] (p33) {};
-
-% Connections for Policy NN
+% Policy connections
 \begin{pgfonlayer}{background}
-\foreach \i in {1,2,3}
-    \foreach \j in {1,2,3,4} {
-        \draw[gray!40, thin] (p1\i) -- (p2\j);
-    }
-\foreach \i in {1,2,3,4}
-    \foreach \j in {1,2,3} {
-        \draw[gray!40, thin] (p2\i) -- (p3\j);
-    }
+\foreach \a in {11,12,13,14}
+    \foreach \b in {21,22,23,24}
+        \draw[gray!50, thin] (p\a) -- (p\b);
+
+\foreach \a in {21,22,23,24}
+    \foreach \b in {31,32,33,34}
+        \draw[gray!50, thin] (p\a) -- (p\b);
 \end{pgfonlayer}
 
-\draw[arr] (state) -- (p12);
-\draw[arr] (state) -- (p1_dots);
-
-% Action
-\node[above=0.8cm of p32, xshift=0.4cm, align=center] (action) {\textbf{Action} $a_t \in \mathbb{R}^m$};
-\draw[arr] (p32) -- (action);
-\draw[arr] (p3_dots) -- (action);
-
-% ===== ENVIRONMENT =====
-\node[above=0.6cm of action, align=center] (H) {$\hat{H}_{t+1}$};
-\node[above=0.6cm of H, align=center] (U) {$U_{t+1} = \exp[-i\hat{H}_{t+1}\delta t]U_t$};
-\node[above=0.6cm of U, align=center] (cost) {\textbf{Reward} $r_t$ \textbf{\& Next State} $(U_{t+1}, t+1)$};
-
-\draw[arr] (action) -- (H);
-\draw[arr] (H) -- (U);
-\draw[arr] (U) -- (cost);
-
-\begin{pgfonlayer}{background}
-\node[envbox, fit=(action) (H) (cost) (U), inner xsep=1.0cm, inner ysep=0.4cm] (env) {};
-\end{pgfonlayer}
-
-% ===== FORK: INFERENCE vs TRAINING =====
-
-% --- Inference loop (blue dashed, curves left and back down to state) ---
-\draw[infarr, rounded corners=10pt]
-    (env.north west) ++(0.15,0) -- ++(0, 0.5)
-    -- ([xshift=-2.8cm]env.north west |- state.west) ++(0, 0.5)
-    -- ([xshift=-2.8cm]state.west)
-    -- (state.west);
-\node[text=blue!70!black, font=\scriptsize\bfseries, align=center,
-      rotate=90] at ([xshift=-2.4cm]env.west) {Inference: $s_{t+1}\!\to\! s_t$};
-
-% --- Training path (orange, goes right and up to Value NN) ---
-\draw[trainarr, rounded corners=8pt]
-    (env.north east) ++(-0.15,0) -- ++(0, 0.5)
-    node[right=0.15cm, text=orange!80!black, font=\scriptsize\bfseries] {Training};
-
-% ===== VALUE NN (Training only) =====
-\node[greennode, above=1.4cm of cost, xshift=-1.4cm] (v11) {};
-\node[greennode, right=0.3cm of v11] (v12) {};
-\node[right=0.3cm of v12] (v1_dots) {$\dots$};
-\node[greennode, right=0.3cm of v1_dots] (v13) {};
-\node[greennode, right=0.3cm of v13] (v14) {};
-
-\node[greennode, above=0.7cm of v11, xshift=-0.4cm] (v21) {};
-\node[greennode, right=0.3cm of v21] (v22) {};
-\node[right=0.3cm of v22] (v2_dots) {$\dots$};
-\node[greennode, right=0.3cm of v2_dots] (v23) {};
-\node[greennode, right=0.3cm of v23] (v24) {};
-
-\node[greennode, above=0.7cm of v21, xshift=0.4cm] (v31) {};
-\node[greennode, right=0.3cm of v31] (v32) {};
-\node[right=0.3cm of v32] (v3_dots) {$\dots$};
-\node[greennode, right=0.3cm of v3_dots] (v33) {};
-
-% Connections for Value NN
-\begin{pgfonlayer}{background}
-\foreach \i in {1,2,3,4}
-    \foreach \j in {1,2,3,4} {
-        \draw[gray!40, thin] (v1\i) -- (v2\j);
-    }
-\foreach \i in {1,2,3,4}
-    \foreach \j in {1,2,3} {
-        \draw[gray!40, thin] (v2\i) -- (v3\j);
-    }
-\end{pgfonlayer}
-
-\draw[trainarr] (cost) -- (v12);
-\draw[trainarr] (cost) -- (v1_dots);
-
-% Expected Return
-\node[above=0.7cm of v3_dots, xshift=-0.4cm, align=center] (vout) {\textbf{Expected Return} $V_\omega(s_{t+1})$};
-\draw[trainarr] (v31) -- (vout);
-\draw[trainarr] (v32) -- (vout);
-\draw[trainarr] (v33) -- (vout);
-
-% Advantage Estimation
-\node[above=0.6cm of vout, align=center] (advantage) {%
-    \textbf{Advantage Estimation} $\hat{A}_t = r_t + \gamma V_\omega(s_{t+1}) - V_\omega(s_t)$};
-\draw[trainarr] (vout) -- (advantage);
-
-% Policy Update
-\node[above=0.6cm of advantage, align=center] (update) {%
-    \textbf{Policy Update} (TRPO)};
-\draw[trainarr] (advantage) -- (update);
-
-% Dashed arrow from Policy Update back to Policy NN (weight update)
-\draw[trainarr, densely dashed, rounded corners=10pt]
-    (update.west) -- ++(-1.5, 0) |- ([yshift=0.15cm]p21.west)
-    node[pos=0.25, left, text=orange!80!black, font=\scriptsize, align=center] {$\theta \leftarrow \theta'$};
-
-% ===== ANNOTATIVE BRACES =====
-
-% AGENT brace (left side, covers only Policy NN + State)
-\draw[decorate, decoration={brace, amplitude=6pt, mirror}, thick, blue!60!black]
-    ([xshift=-0.5cm]env.south west |- state.south) -- ([xshift=-0.5cm]env.south west |- p33.north)
-    node[midway, left=0.3cm, text=blue!60!black] {\textbf{AGENT}};
-
-% ENVIRONMENT brace (right side)
-\draw[decorate, decoration={brace, amplitude=6pt}, thick]
-    ([xshift=0.2cm]env.north east) -- ([xshift=0.2cm]env.south east)
-    node[midway, right=0.3cm, align=left] {
-        \textbf{ENVIRONMENT}\\
-        \textnormal{\scriptsize Propagator \& noise handling}\\
-        \textnormal{\scriptsize Evaluates cost $\mathcal{C}$ giving reward $r_t$}
-    };
-
-% POLICY NN brace (right side)
-\coordinate (p_brace_bottom) at (env.south east |- p11.south);
-\coordinate (p_brace_top)    at (env.north east |- p33.north);
-\draw[decorate, decoration={brace, amplitude=6pt}, thick]
-    ([xshift=0.2cm]p_brace_top) -- ([xshift=0.2cm]p_brace_bottom)
-    node[midway, right=0.3cm, align=left] {
+% Policy brace
+\draw[decorate, decoration={brace, amplitude=6pt}, thick, blue!70!black]
+    (2.55,4.15) -- (2.55,1.85)
+    node[midway,left=0.25cm,align=left,text=blue!80!black] {
         \textbf{POLICY NN} $\pi_\theta$\\
-        \textnormal{\scriptsize Input: $s_t \in \mathbb{R}^{d_s}$, \; $d_s = d_{\mathrm{phys}}^2 + 1$}\\
-        \textnormal{\scriptsize Output: dist.\ params $\mu_\theta, \Sigma_\theta \in \mathbb{R}^m$}
+        \textnormal{\scriptsize Input: current state $s_t$}\\
+        \textnormal{\scriptsize Output: $\mu_\theta(s_t),\,\Sigma_\theta$}
     };
 
-% VALUE NN brace (right side)
-\coordinate (v_brace_bottom) at (env.south east |- v11.south);
-\coordinate (v_brace_top)    at (env.north east |- v33.north);
+% State to policy
+\draw[bluearr] (state.north) -- (4.8,1.85);
+
+% Inference loop
+\draw[infarr, rounded corners=10pt]
+    (state.west) -- ++(-1.5,0) -- ++(0,0.7);
+\node[text=blue!80!black, font=\scriptsize\bfseries] at (2.05,0.75) {Inference loop};
+
+% -------------------------------------------------
+% ACTION + ENVIRONMENT
+% -------------------------------------------------
+\node[align=center] (action) at (8.1,5.1)
+    {\textbf{Action} $\; a_t \in \mathbb{R}^m$};
+
+\draw[bluearr] (6.9,3.0) -- (7.8,3.0) |- (action.south);
+
+\node[align=center] (H) at (8.0,6.5) {$\hat{H}_{t+1}$};
+\node[align=center] (U) at (8.0,7.75)
+    {$U_{t+1}=\exp\!\left[-i\hat{H}_{t+1}\,\delta t\right]U_t$};
+\node[align=center] (cost) at (8.0,9.1)
+    {\textbf{Reward} $r_t$ \ \&\ \textbf{Next State} $(U_{t+1},t+1)$};
+
+\draw[arr, gray!75!black] (action.north) -- (H.south);
+\draw[arr, gray!75!black] (H.north) -- (U.south);
+\draw[arr, gray!75!black] (U.north) -- (cost.south);
+
+\begin{pgfonlayer}{background}
+\node[envbox, fit=(H)(U)(cost), inner xsep=0.85cm, inner ysep=0.45cm] (env) {};
+\end{pgfonlayer}
+
+% Environment brace
 \draw[decorate, decoration={brace, amplitude=6pt}, thick]
-    ([xshift=0.2cm]v_brace_top) -- ([xshift=0.2cm]v_brace_bottom)
-    node[midway, right=0.3cm, align=left] {
+    % ([xshift=-0.55cm]env.north west) -- ([xshift=-0.55cm]env.south west)
+    (0.9,5.6) -- (0.9,10.2) 
+    node[midway,left=0.35cm,align=center] {\textbf{ENVIRONMENT}};
+
+% -------------------------------------------------
+% TRAINING BLOCK (RIGHT)
+% -------------------------------------------------
+% Training box corners via fit later
+\node[font=\large\bfseries, text=orange!90!black] (trainingtitle) at (17.0,10.0) {TRAINING};
+
+% Value NN nodes
+\node[greennode] (v31) at (15.3,8.8) {};
+\node[greennode] (v32) at (16.5,8.8) {};
+
+\node[greennode] (v21) at (15.3,7.9) {};
+\node[greennode] (v22) at (16.5,7.9) {};
+
+\node (vdots)        at (15.9,7.15) {$\cdots$};
+
+\node[greennode] (v11) at (15.3,6.4) {};
+\node[greennode] (v12) at (16.5,6.4) {};
+
+\node[greennode] (voutnode) at (15.9,5.9) {};
+
+% Value NN connections
+\begin{pgfonlayer}{background}
+\foreach \a in {31,32}
+    \foreach \b in {21,22}
+        \draw[gray!50, thin] (v\a) -- (v\b);
+
+\foreach \a in {21,22}
+    \foreach \b in {11,12}
+        \draw[gray!50, thin] (v\a) -- (v\b);
+
+\foreach \a in {11,12}
+        \draw[gray!50, thin] (v\a) -- (voutnode);
+\end{pgfonlayer}
+
+% Value NN brace + text
+\draw[decorate, decoration={brace, amplitude=6pt}, thick, green!60!black]
+    (17.0,9.05) -- (17.0,5.75)
+    node[midway,right=0.30cm,align=left,text=green!60!black] {
         \textbf{VALUE NN} $V_\omega$\\
-        \textnormal{\scriptsize Input: $s_{t+1} \in \mathbb{R}^{d_s}$, \; $d_s = d_{\mathrm{phys}}^2 + 1$}\\
-        \textnormal{\scriptsize Output: scalar baseline $\in \mathbb{R}$}\\
-        \textnormal{\scriptsize\itshape (used only during training)}
+        \textnormal{\scriptsize Input: next state $s_{t+1}$}\\
+        \textnormal{\scriptsize Output: baseline $\in \mathbb{R}$}
     };
+
+% s_{t+1} arrow from environment to top input of Value NN
+\draw[orangearr] (env.east |- cost.center) -- ++(1.2,0)
+    node[midway,above,text=orange!90!black] {$s_{t+1}$}
+    |- (15.9,9.1) -- (15.9,8.95);
+
+% value text
+\node (vtext) at (15.9,4.8) {$V_\omega(s_{t+1})$};
+\draw[orangearr] (voutnode.south) -- (vtext.north);
+
+% advantage formula
+\node[align=center] (adv) at (15.9,3.55)
+    {$\hat{A}_t = r_t + \gamma\,V_\omega(s_{t+1}) - V_\omega(s_t)$};
+\draw[orangearr] (vtext.south) -- (adv.north);
+
+% policy update
+\node[updatebox, align=center] (update) at (15.9,2.05)
+    {\textbf{Policy Update (TRPO)}};
+\draw[orangearr] (adv.south) -- (update.north);
+
+% dashed update arrow to policy
+\draw[updarr, rounded corners=10pt]
+    (update.south) -- ++(0,-0.6) -- ++(-9.1,0)
+    node[midway,above,text=orange!90!black] {$\theta \leftarrow \theta'$}
+    -- (6.9,2.1);
+
+% Training box
+\begin{pgfonlayer}{background}
+\node[trainbox, fit=(v31)(v32)(v21)(v22)(v11)(v12)(voutnode)(vtext)(adv)(update)(trainingtitle),
+      inner xsep=0.6cm, inner ysep=0.45cm] (trainblock) {};
+\end{pgfonlayer}
+
+% -------------------------------------------------
+% AGENT BRACE (left, separate from environment)
+% -------------------------------------------------
+\draw[decorate, decoration={brace, amplitude=7pt},  thick, black!70!black]
+    (0.9,0.1) -- (0.9,5.5) 
+    node[midway,left=0.35cm,text=black!80!black] {\Large \textbf{AGENT}};
 
 \end{tikzpicture}
