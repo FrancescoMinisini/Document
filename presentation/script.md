@@ -1,53 +1,33 @@
-## Slide 0 — Title (Tempo indicativo: 20–25 secondi)
+# Slide 0 (14s)
+Buongiorno, sono Francesco Giuseppe Minisini e oggi presento il lavoro svolto per la mia tesi triennale. Il progetto si è sviluppato attorno a un'applicazione di Deep reinforcement learning su una task di quantum control su un'architettura di qubit superconduttori. 
 
-“Buongiorno a tutti, oggi vi presento il mio lavoro di tesi, intitolato Reinforcement-Learning Framework for Robust and Universal Analog Quantum Control on Superconducting Qubits.
+# Slide 1 (46s)
+Per lo sviluppo di quantum devices sempre piu complessi e affidabili, è necessaria la realizzazione di quantum gates ad alta fedeltà veloci e robusti al rumore.
 
-L’obiettivo della tesi è stato ricostruire e valutare criticamente un framework di controllo quantistico proposto in letteratura, basato su reinforcement learning, per la realizzazione di gate quantistici robusti su qubit superconduttivi.” 
+Un'architettura promettente risulta essere quella dei qubits superconduttori, dei circuiti ultracraffreddati che simulano un atomo artificiale, il cui ground state e primo livello eccitato sono utilizzati come sottospazio computazionale.
+
+I qubits superconduttori presentano però una debole anarmonicità, il che può permettere a rumore o controlli ad eccitare il sistema a livelli energetici superiori andando a perdere l'informazione quantistica. Questo processo si chiama Leakage.
+
+Ci tengo inoltre a specificare che la task di controllo quantistico analogico consiste nella esecuzione di una operazione quantistica manipolando la dinamica del sistema tramite l'introduzione di impulsi di controllo direttamente a livello dell'Hamiltoniana.
+
+# Slide 2 (1min 36s)
+
+L'implementazione di una operazione quantistica diversi obbiettivi devono essere soddisfatti simultaneamente:
+
+- Fedeltà dell'operazione
+- Bassa leakage
+- Robustezza al rumore
+- Esecuzione rapida esecuzione
+
+Il deep reinforcement Learining rappresenta una ottimo candidato per risolvere questo tipo di problemi:
+- il problema puo essere formulato come un Markov decision Process
+- l'agente puo sfruttare regolarità non locali nello spazio di traiettorie, inaccessibili a tecniche classiche 
+- transfer learding puo essere utilizzato per task simili 
+
+## Slide 3 
 
 
-## Slide 1 — Why this problem matters (Tempo indicativo: 55 secondi)
 
-“Il punto di partenza è che, nei qubit superconduttivi, progettare un gate quantistico non significa solo massimizzare la fedeltà logica.
-
-In pratica, bisogna bilanciare contemporaneamente più obiettivi fisici: ottenere un gate accurato, farlo in tempi brevi, limitare il leakage fuori dal sottospazio computazionale e rendere il controllo robusto rispetto al rumore.
-
-Il problema nasce dal fatto che questi sistemi non sono perfettamente a due livelli: sono solo debolmente anarmonici. Questo significa che, se il controllo è troppo rapido o troppo aggressivo, si rischia facilmente di eccitare livelli indesiderati.
-
-Quindi il controllo quantistico realistico, in questo contesto, è intrinsecamente un problema multi-obiettivo: non basta fare un gate corretto, bisogna farlo in modo fisicamente ben comportato.”
-
-## Slide 2 — Thesis goals and main contribution (Tempo indicativo: 1 minuto)
-
-“La tesi aveva un doppio obiettivo.
-
-Il primo era scientifico: capire se il framework proposto da Niu e collaboratori fosse davvero una strategia credibile per il controllo analogico robusto.
-
-Il secondo era metodologico: ricostruire il framework in modo indipendente e poi validarlo sperimentalmente.
-
-Ed è importante sottolineare un aspetto: questo non è stato un lavoro di semplice riproduzione da codice esistente. Non era disponibile una implementazione pubblica completa, quindi ho dovuto ricostruire l’intero framework da zero.
-
-Questo ha incluso la simulazione multilevel del sistema quantistico, la stima del leakage tramite la trasformazione di Schrieffer–Wolff dipendente dal tempo, l’ambiente di reinforcement learning con agente TRPO, e tutta la pipeline di training, valutazione, robustezza e analisi dei runtime.
-
-Quindi una parte molto rilevante della tesi è stata proprio la costruzione del framework, non solo la sua esecuzione.”
-
-## Slide 3 — Physical model: gmon Hamiltonian and control channels (Tempo indicativo: 1 minuto e 10 secondi)
-
-“Dal punto di vista fisico, il sistema considerato è un’architettura di tipo gmon, cioè due qubit superconduttivi debolmente anarmonici con accoppiamento modulabile.
-
-L’Hamiltoniana efficace in rotating-wave approximation contiene quattro ingredienti principali:
-l’anarmonicità, che rende il sistema multilevel;
-il termine di coupling tunabile, che genera la dinamica entangliante;
-i detuning locali;
-e i drive a microonde, con ampiezza e fase controllabili.
-
-Alla fine il problema di controllo è descritto da un vettore continuo a sette dimensioni:
-il coupling g(t),
-due detuning,
-due ampiezze di microonda,
-e due fasi.
-
-Questa è già una prima difficoltà importante: non stiamo ottimizzando pochi parametri discreti, ma una traiettoria di controllo continua in uno spazio a sette dimensioni, su un sistema fisico multilevel.
-
-Nel mio caso, per rendere la simulazione trattabile ma fisicamente significativa, ogni modo locale è stato troncato a tre livelli, ottenendo quindi uno spazio fisico di dimensione 9, mentre il sottospazio computazionale resta di dimensione 4.”
 
 ## Slide 4 — Why this is a multi-objective control problem (Tempo indicativo: 1 minuto e 15 secondi)
 
