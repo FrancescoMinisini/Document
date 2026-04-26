@@ -54,7 +54,7 @@
 % -------------------------------------------------
 % POLICY STATE
 % -------------------------------------------------
-\node[statebox, align=center] (state) at (4.8,0.2)
+\node[statebox, align=center] (state) at (4.4,0.2)
     {\textbf{State} $\, s_t = (U_t,t)$};
 
 % Policy NN nodes (layer 1 - input layer)
@@ -98,12 +98,7 @@
 %     };
 
 % State to policy
-\draw[bluearr] (state.north) -- (4.8,1.85);
-
-% Inference loop
-\draw[infarr, rounded corners=10pt]
-    (state.west) -- ++(-1.5,0) -- ++(0,0.7);
-\node[text=blue!80!black, font=\scriptsize\bfseries] at (2.05,0.75) {Inference loop};
+\draw[bluearr] (state.north) -- (4.4,1.85);
 
 % -------------------------------------------------
 % ACTION + ENVIRONMENT (centered above Policy NN)
@@ -137,8 +132,8 @@
 % -------------------------------------------------
 % TRAINING BLOCK (RIGHT)
 % -------------------------------------------------
-% Training box corners via fit later
-\node[font=\large\bfseries, text=orange!90!black] (trainingtitle) at (17.0,10.0) {TRAINING};
+% Training title (COMMENTED OUT)
+% \node[font=\large\bfseries, text=orange!90!black] (trainingtitle) at (17.0,10.0) {TRAINING};
 
 % Value NN nodes (layer 1 - input layer)
 \node[greennode] (v11) at (14.7,8.8) {};
@@ -181,10 +176,27 @@
 %         \textnormal{\scriptsize Output: baseline $\in \mathbb{R}$}
 %     };
 
-% s_{t+1} arrow from environment to top input of Value NN
-\draw[orangearr] (env.east |- cost.center) -- ++(1.2,0)
-    node[midway,above,text=orange!90!black] {$s_{t+1}$}
-    |- (15.9,9.1) -- (15.9,8.95);
+% -------------------------------------------------
+% LOOPS FROM ENVIRONMENT TOP
+% -------------------------------------------------
+
+% Inference loop: blue arrow from env top, going left between braces, down to state
+\draw[infarr, rounded corners=10pt]
+    (env.north west) -- ++(-0.15,0.4)
+    -- ([xshift=-0.2cm]env.south west |- {(0,0.2)})
+    -- (state.west);
+\node[text=blue!80!black, font=\scriptsize\bfseries, rotate=90, anchor=south]
+    at ([xshift=-0.55cm]env.south west |- {(0,2.8)})
+    {Inference loop: $s_t \to s_{t+1}$};
+% \node[text=blue!80!black, font=\scriptsize\bfseries, rotate=90]
+%     at ([xshift=-0.55cm]env.south west |- {(0,1.2)})
+%     {Inference loop};
+
+% Training loop: orange arrow from env top, going right to Value NN input
+\draw[orangearr, rounded corners=8pt] (env.north) -- ++(0.5,0.5)
+    node[above,text=orange!90!black,font=\scriptsize\bfseries] {Training loop}
+    -| (15.9,9.1) -- (15.9,8.95);
+\node[text=orange!90!black, font=\scriptsize] at (10.2,10.1) {$s_{t+1}$};
 
 % value text
 \node (vtext) at (15.9,4.8) {$V_\omega(s_{t+1})$};
@@ -206,11 +218,11 @@
     node[midway,above,text=orange!90!black] {$\theta \leftarrow \theta'$}
     -- (6.9,2.1);
 
-% Training box
-\begin{pgfonlayer}{background}
-\node[trainbox, fit=(v11)(v14)(v21)(v22)(v31)(v33)(vtext)(adv)(update)(trainingtitle),
-      inner xsep=0.6cm, inner ysep=0.45cm] (trainblock) {};
-\end{pgfonlayer}
+% Training box (COMMENTED OUT)
+% \begin{pgfonlayer}{background}
+% \node[trainbox, fit=(v11)(v14)(v21)(v22)(v31)(v33)(vtext)(adv)(update)(trainingtitle),
+%       inner xsep=0.6cm, inner ysep=0.45cm] (trainblock) {};
+% \end{pgfonlayer}
 
 % -------------------------------------------------
 % AGENT BRACE (left, aligned with environment brace)
