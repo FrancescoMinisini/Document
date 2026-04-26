@@ -178,25 +178,27 @@
 
 % -------------------------------------------------
 % LOOPS FROM ENVIRONMENT TOP
+% Both arrows start from env.north, go up, then split left/right
 % -------------------------------------------------
 
-% Inference loop: blue arrow from env top, going left between braces, down to state
+% Inference loop: blue arrow from env.north, going left past NW corner, down to state
 \draw[infarr, rounded corners=10pt]
-    (env.north west) -- ++(-0.15,0.4)
+    (env.north) -- ([yshift=0.5cm]env.north)
+    -- ([xshift=-0.2cm, yshift=0.5cm]env.north west)
     -- ([xshift=-0.2cm]env.south west |- {(0,0.2)})
     -- (state.west);
-\node[text=blue!80!black, font=\scriptsize\bfseries, rotate=90, anchor=south]
-    at ([xshift=-0.55cm]env.south west |- {(0,2.8)})
+\node[text=blue!80!black, font=\scriptsize\bfseries, anchor=east]
+    at ([xshift=-0.4cm, yshift=0.5cm]env.north west)
     {Inference loop: $s_t \to s_{t+1}$};
-% \node[text=blue!80!black, font=\scriptsize\bfseries, rotate=90]
-%     at ([xshift=-0.55cm]env.south west |- {(0,1.2)})
-%     {Inference loop};
 
-% Training loop: orange arrow from env top, going right to Value NN input
-\draw[orangearr, rounded corners=8pt] (env.north) -- ++(0.5,0.5)
-    node[above,text=orange!90!black,font=\scriptsize\bfseries] {Training loop}
-    -| (15.9,9.1) -- (15.9,8.95);
-\node[text=orange!90!black, font=\scriptsize] at (10.2,10.1) {$s_{t+1}$};
+% Training loop: orange arrow from env.north, going right to Value NN input
+\draw[orangearr, rounded corners=8pt]
+    (env.north) -- ([yshift=0.5cm]env.north)
+    -- ([yshift=0.5cm]env.north east) -- ++(0.5,0.3)
+    -| (15.9,9.3) -- (15.9,8.95);
+\node[text=orange!90!black, font=\scriptsize\bfseries, anchor=west]
+    at ([xshift=0.6cm, yshift=0.5cm]env.north east)
+    {Training loop: $s_{t+1}$, $r_t$};
 
 % value text
 \node (vtext) at (15.9,4.8) {$V_\omega(s_{t+1})$};
