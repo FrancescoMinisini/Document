@@ -88,14 +88,14 @@
     }
 \end{pgfonlayer}
 
-% Policy brace (COMMENTED OUT — to be repositioned later)
-% \draw[decorate, decoration={brace, amplitude=6pt}, thick, blue!70!black]
-%     (2.55,4.15) -- (2.55,1.85)
-%     node[midway,left=0.25cm,align=left,text=blue!80!black] {
-%         \textbf{POLICY NN} $\pi_\theta$\\
-%         \textnormal{\scriptsize Input: current state $s_t$}\\
-%         \textnormal{\scriptsize Output: $\mu_\theta(s_t),\,\Sigma_\theta$}
-%     };
+% Policy NN brace (right side)
+\draw[decorate, decoration={brace, amplitude=6pt, mirror}, thick, blue!70!black]
+    (6.3,1.85) -- (6.3,4.15)
+    node[midway,right=0.25cm,align=left,text=blue!80!black] {
+        \textbf{Policy NN} $\pi_\theta$\\
+        \textnormal{\scriptsize Input: $s_t$}\\
+        \textnormal{\scriptsize Output: $\mu_\theta(s_t),\,\Sigma_\theta$}
+    };
 
 % State to policy
 \draw[bluearr] (state.north) -- (4.4,1.85);
@@ -116,7 +116,12 @@
 \node[align=center] (cost) at (4.4,9.1)
     {\textbf{Reward} $r_t$ \ \& \textbf{Next State} $(U_{t+1},t+1)$};
 
+% Noise injection (compact annotation between action and H)
+\node[font=\scriptsize, text=red!70!black, align=center] (noise) at (6.2,5.8)
+    {\textit{if noise:}\\ $a_t + \epsilon_t$};
 \draw[arr, gray!75!black] (action.north) -- (H.south);
+\draw[-{Latex[length=1.8mm]}, densely dotted, red!70!black, thin]
+    (noise.west) -- (4.9,5.8);
 \draw[arr, gray!75!black] (H.north) -- (U.south);
 \draw[arr, gray!75!black] (U.north) -- (cost.south);
 
@@ -167,14 +172,14 @@
     }
 \end{pgfonlayer}
 
-% Value NN brace + text (COMMENTED OUT — to be repositioned later)
-% \draw[decorate, decoration={brace, amplitude=6pt}, thick, green!60!black]
-%     (18.4,9.05) -- (18.4,6.75)
-%     node[midway,right=0.30cm,align=left,text=green!60!black] {
-%         \textbf{VALUE NN} $V_\omega$\\
-%         \textnormal{\scriptsize Input: next state $s_{t+1}$}\\
-%         \textnormal{\scriptsize Output: baseline $\in \mathbb{R}$}
-%     };
+% Value NN brace (right side)
+\draw[decorate, decoration={brace, amplitude=6pt, mirror}, thick, green!60!black]
+    (18.2,6.75) -- (18.2,9.05)
+    node[midway,right=0.25cm,align=left,text=green!60!black] {
+        \textbf{Value NN} $V_\omega$\\
+        \textnormal{\scriptsize Input: $s_{t+1}$}\\
+        \textnormal{\scriptsize Output: $\in \mathbb{R}$}
+    };
 
 % -------------------------------------------------
 % LOOPS FROM ENVIRONMENT TOP
@@ -229,15 +234,22 @@
 
 % Policy update (TRPO optimization formulas)
 \node[updatebox, align=center, font=\scriptsize] (update) at (15.9,2.8)
-    {$\max_\theta \;\mathbb{E}\!\left[\dfrac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{\mathrm{old}}}(a_t\mid s_t)}\,\hat{A}_t\right]$\\[0.3em]
+    {$ \theta^\prime = \max_\theta \;\mathbb{E}\!\left[\dfrac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{\mathrm{old}}}(a_t\mid s_t)}\,\hat{A}_t\right]$\\[0.3em]
     s.t.\ $\mathbb{E}\!\left[D_{\mathrm{KL}}\!\left(\pi_{\theta_{\mathrm{old}}}\,\|\,\pi_\theta\right)\right]\leq\delta$};
 \draw[orangearr] (adv.south) -- (update.north);
 
-% dashed update arrow to policy
+% TRPO Optimization brace (right side of update box)
+\draw[decorate, decoration={brace, amplitude=5pt, mirror}, thick, orange!80!black]
+    ([xshift=0.15cm]update.north east) -- ([xshift=0.15cm]update.south east)
+    node[midway,right=0.20cm,align=left,text=orange!80!black,font=\scriptsize] {
+        \textbf{TRPO}
+    };
+
+% dashed update arrow to policy (goes down, right under NN, then up to p24.east)
 \draw[updarr, rounded corners=10pt]
     (update.south) -- ++(0,-0.6) -- ++(-9.1,0)
-    node[midway,above,text=orange!90!black] {$\theta \leftarrow \theta'$}
-    -- (6.9,2.1);
+    node[midway,below,text=orange!90!black] {Policy Parameter Update: $\pi_\theta \leftarrow \pi_\theta^{new}$ or $\theta \leftarrow \theta'$}
+    -- (p13.south east);
 
 % Training box (COMMENTED OUT)
 % \begin{pgfonlayer}{background}
