@@ -57,42 +57,45 @@
 \node[statebox, align=center] (state) at (4.8,0.2)
     {\textbf{State} $\, s_t = (U_t,t)$};
 
-% Policy NN nodes
+% Policy NN nodes (layer 1 - input layer)
 \node[bluenode] (p11) at (3.2,2.1) {};
-\node[bluenode] (p12) at (4.3,2.1) {};
-\node[bluenode] (p13) at (5.4,2.1) {};
-\node[bluenode] (p14) at (6.5,2.1) {};
+\node[bluenode] (p12) at (4.0,2.1) {};
+\node                   at (4.8,2.1) {$\dots$};
+\node[bluenode] (p13) at (5.6,2.1) {};
 
-\node[bluenode] (p21) at (3.0,3.0) {};
-\node[bluenode] (p22) at (4.0,3.0) {};
-\node (pdots)       at (4.8,3.0) {$\cdots$};
-\node[bluenode] (p23) at (5.6,3.0) {};
-\node[bluenode] (p24) at (6.6,3.0) {};
+% Policy NN nodes (layer 2 - hidden layer)
+\node[bluenode] (p21) at (2.8,3.0) {};
+\node[bluenode] (p22) at (3.6,3.0) {};
+\node                   at (4.4,3.0) {$\dots$};
+\node[bluenode] (p23) at (5.2,3.0) {};
+\node[bluenode] (p24) at (6.0,3.0) {};
 
+% Policy NN nodes (layer 3 - output layer)
 \node[bluenode] (p31) at (3.2,3.9) {};
-\node[bluenode] (p32) at (4.3,3.9) {};
-\node[bluenode] (p33) at (5.4,3.9) {};
-\node[bluenode] (p34) at (6.5,3.9) {};
+\node[bluenode] (p32) at (4.0,3.9) {};
+\node                   at (4.8,3.9) {$\dots$};
+\node[bluenode] (p33) at (5.6,3.9) {};
 
 % Policy connections
 \begin{pgfonlayer}{background}
-\foreach \a in {11,12,13,14}
-    \foreach \b in {21,22,23,24}
-        \draw[gray!50, thin] (p\a) -- (p\b);
-
-\foreach \a in {21,22,23,24}
-    \foreach \b in {31,32,33,34}
-        \draw[gray!50, thin] (p\a) -- (p\b);
+\foreach \i in {1,2,3}
+    \foreach \j in {1,2,3,4} {
+        \draw[gray!40, thin] (p1\i) -- (p2\j);
+    }
+\foreach \i in {1,2,3,4}
+    \foreach \j in {1,2,3} {
+        \draw[gray!40, thin] (p2\i) -- (p3\j);
+    }
 \end{pgfonlayer}
 
-% Policy brace
-\draw[decorate, decoration={brace, amplitude=6pt}, thick, blue!70!black]
-    (2.55,4.15) -- (2.55,1.85)
-    node[midway,left=0.25cm,align=left,text=blue!80!black] {
-        \textbf{POLICY NN} $\pi_\theta$\\
-        \textnormal{\scriptsize Input: current state $s_t$}\\
-        \textnormal{\scriptsize Output: $\mu_\theta(s_t),\,\Sigma_\theta$}
-    };
+% Policy brace (COMMENTED OUT — to be repositioned later)
+% \draw[decorate, decoration={brace, amplitude=6pt}, thick, blue!70!black]
+%     (2.55,4.15) -- (2.55,1.85)
+%     node[midway,left=0.25cm,align=left,text=blue!80!black] {
+%         \textbf{POLICY NN} $\pi_\theta$\\
+%         \textnormal{\scriptsize Input: current state $s_t$}\\
+%         \textnormal{\scriptsize Output: $\mu_\theta(s_t),\,\Sigma_\theta$}
+%     };
 
 % State to policy
 \draw[bluearr] (state.north) -- (4.8,1.85);
@@ -114,7 +117,7 @@
 \node[align=center] (U) at (8.0,7.75)
     {$U_{t+1}=\exp\!\left[-i\hat{H}_{t+1}\,\delta t\right]U_t$};
 \node[align=center] (cost) at (8.0,9.1)
-    {\textbf{Reward} $r_t$ \ \&\ \textbf{Next State} $(U_{t+1},t+1)$};
+    {\textbf{Reward} $r_t$ \ \& \textbf{Next State} $(U_{t+1},t+1)$};
 
 \draw[arr, gray!75!black] (action.north) -- (H.south);
 \draw[arr, gray!75!black] (H.north) -- (U.south);
@@ -136,42 +139,46 @@
 % Training box corners via fit later
 \node[font=\large\bfseries, text=orange!90!black] (trainingtitle) at (17.0,10.0) {TRAINING};
 
-% Value NN nodes
-\node[greennode] (v31) at (15.3,8.8) {};
-\node[greennode] (v32) at (16.5,8.8) {};
+% Value NN nodes (layer 1 - input layer)
+\node[greennode] (v11) at (14.7,8.8) {};
+\node[greennode] (v12) at (15.5,8.8) {};
+\node                    at (16.3,8.8) {$\dots$};
+\node[greennode] (v13) at (17.1,8.8) {};
+\node[greennode] (v14) at (17.9,8.8) {};
 
-\node[greennode] (v21) at (15.3,7.9) {};
-\node[greennode] (v22) at (16.5,7.9) {};
+% Value NN nodes (layer 2 - hidden layer)
+\node[greennode] (v21) at (14.7,7.9) {};
+\node[greennode] (v22) at (15.5,7.9) {};
+\node                    at (16.3,7.9) {$\dots$};
+\node[greennode] (v23) at (17.1,7.9) {};
+\node[greennode] (v24) at (17.9,7.9) {};
 
-\node (vdots)        at (15.9,7.15) {$\cdots$};
-
-\node[greennode] (v11) at (15.3,6.4) {};
-\node[greennode] (v12) at (16.5,6.4) {};
-
-\node[greennode] (voutnode) at (15.9,5.9) {};
+% Value NN nodes (layer 3 - output layer)
+\node[greennode] (v31) at (15.1,7.0) {};
+\node[greennode] (v32) at (15.9,7.0) {};
+\node                    at (16.7,7.0) {$\dots$};
+\node[greennode] (v33) at (17.5,7.0) {};
 
 % Value NN connections
 \begin{pgfonlayer}{background}
-\foreach \a in {31,32}
-    \foreach \b in {21,22}
-        \draw[gray!50, thin] (v\a) -- (v\b);
-
-\foreach \a in {21,22}
-    \foreach \b in {11,12}
-        \draw[gray!50, thin] (v\a) -- (v\b);
-
-\foreach \a in {11,12}
-        \draw[gray!50, thin] (v\a) -- (voutnode);
+\foreach \i in {1,2,3,4}
+    \foreach \j in {1,2,3,4} {
+        \draw[gray!40, thin] (v1\i) -- (v2\j);
+    }
+\foreach \i in {1,2,3,4}
+    \foreach \j in {1,2,3} {
+        \draw[gray!40, thin] (v2\i) -- (v3\j);
+    }
 \end{pgfonlayer}
 
-% Value NN brace + text
-\draw[decorate, decoration={brace, amplitude=6pt}, thick, green!60!black]
-    (17.0,9.05) -- (17.0,5.75)
-    node[midway,right=0.30cm,align=left,text=green!60!black] {
-        \textbf{VALUE NN} $V_\omega$\\
-        \textnormal{\scriptsize Input: next state $s_{t+1}$}\\
-        \textnormal{\scriptsize Output: baseline $\in \mathbb{R}$}
-    };
+% Value NN brace + text (COMMENTED OUT — to be repositioned later)
+% \draw[decorate, decoration={brace, amplitude=6pt}, thick, green!60!black]
+%     (18.4,9.05) -- (18.4,6.75)
+%     node[midway,right=0.30cm,align=left,text=green!60!black] {
+%         \textbf{VALUE NN} $V_\omega$\\
+%         \textnormal{\scriptsize Input: next state $s_{t+1}$}\\
+%         \textnormal{\scriptsize Output: baseline $\in \mathbb{R}$}
+%     };
 
 % s_{t+1} arrow from environment to top input of Value NN
 \draw[orangearr] (env.east |- cost.center) -- ++(1.2,0)
@@ -180,7 +187,7 @@
 
 % value text
 \node (vtext) at (15.9,4.8) {$V_\omega(s_{t+1})$};
-\draw[orangearr] (voutnode.south) -- (vtext.north);
+\draw[orangearr] (v32.south) -- (vtext.north);
 
 % advantage formula
 \node[align=center] (adv) at (15.9,3.55)
@@ -200,7 +207,7 @@
 
 % Training box
 \begin{pgfonlayer}{background}
-\node[trainbox, fit=(v31)(v32)(v21)(v22)(v11)(v12)(voutnode)(vtext)(adv)(update)(trainingtitle),
+\node[trainbox, fit=(v11)(v14)(v21)(v22)(v31)(v33)(vtext)(adv)(update)(trainingtitle),
       inner xsep=0.6cm, inner ysep=0.45cm] (trainblock) {};
 \end{pgfonlayer}
 
