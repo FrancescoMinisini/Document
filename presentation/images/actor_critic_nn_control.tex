@@ -199,20 +199,38 @@
     -| (15.9,9.3) -- (15.9,8.95);
 \node[text=orange!90!black, font=\scriptsize\bfseries, anchor=west]
     at ([xshift=0.6cm, yshift=0.7cm]env.north)
-    {Training loop: $s_{t+1}$, $r_t$};
+    {Training loop (once per batch): $s_{t+1}$, $r_t$};
 
-% value text
-\node (vtext) at (15.9,4.8) {$V_\omega(s_{t+1})$};
-\draw[orangearr] (v32.south) -- (vtext.north);
+% Value function output + definition
+\node[align=center] (vdef) at (15.9,5.8)
+    {$V_\omega(s_{t+1}) \approx \mathbb{E}\!\left[G_{t+1} \mid s_{t+1}\right]$};
+\draw[orangearr] (v32.south) -- (vdef.north);
 
 % advantage formula
-\node[align=center] (adv) at (15.9,3.55)
+\node[align=center] (adv) at (15.9,4.6)
     {$\hat{A}_t = r_t + \gamma\,V_\omega(s_{t+1}) - V_\omega(s_t)$};
-\draw[orangearr] (vtext.south) -- (adv.north);
+\draw[orangearr] (vdef.south) -- (adv.north);
 
-% policy update
-\node[updatebox, align=center] (update) at (15.9,2.05)
-    {\textbf{Policy Update (TRPO)}};
+% --- Value NN weight update (vertical column to the right) ---
+
+% Diagonal arrow from V_omega definition to value loss
+\node[align=center, font=\scriptsize, text=orange!90!black] (vloss) at (21.0,4.8)
+    {$L_\omega = \mathbb{E}\!\left[\left(V_\omega(s_{t+1}) - G_{t+1}\right)^{\!2}\right]$};
+\draw[updarr] (vdef.east) -- (vloss.north west);
+
+% % Value parameter update (vertical, below the loss)
+\node[align=center, font=\scriptsize, text=orange!90!black] (vupdate) at ([xshift=1.2cm, yshift= 0.2cm] v24.east)
+    {$\omega \leftarrow \omega'$};
+% \draw[updarr] (vloss.south) -- (vupdate.north);
+
+% Arrow from value update back up to Value NN
+\draw[updarr, rounded corners=8pt]
+    (vloss.north) |- (v24.east);
+
+% Policy update (TRPO optimization formulas)
+\node[updatebox, align=center, font=\scriptsize] (update) at (15.9,2.8)
+    {$\max_\theta \;\mathbb{E}\!\left[\dfrac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{\mathrm{old}}}(a_t\mid s_t)}\,\hat{A}_t\right]$\\[0.3em]
+    s.t.\ $\mathbb{E}\!\left[D_{\mathrm{KL}}\!\left(\pi_{\theta_{\mathrm{old}}}\,\|\,\pi_\theta\right)\right]\leq\delta$};
 \draw[orangearr] (adv.south) -- (update.north);
 
 % dashed update arrow to policy
