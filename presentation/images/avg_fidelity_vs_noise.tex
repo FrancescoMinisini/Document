@@ -2,33 +2,33 @@
     % Main Axis
     \begin{axis}[
         name=mainplot,
-        width=0.9\linewidth,
-        height=7.5cm,
+        width=\linewidth,
+        height=0.50\linewidth,
         xlabel={Noise strength $\sigma_{\mathrm{noise}}$ (MHz)},
         ylabel={Average Fidelity $\overline{F}$},
         xmin=0, xmax=3.6,
         ymin=0.65, ymax=1.02,
         grid=major,
         grid style={dashed, gray!30},
-        legend style={at={(0.98,0.98)}, anchor=north east, font=\footnotesize, cells={align=left}},
+        legend style={at={(0.02,0.04)}, anchor=south west, font=\footnotesize, cells={align=left}},
         each nth point=3,
         filter discard warning=false,
         unbounded coords=discard
     ]
+    % EWMA thickened lines
+    \addplot[color=blue!80!black, thick] table[x=sigma_mhz, y=adam_fidelity_ewma, col sep=comma] {../data/robustness_analysis/combined_ewma_data.csv};
+    \addlegendentry{Adam Baseline}
+    
+    \addplot[color=orange!80!red, thick] table[x=sigma_mhz, y=nominal_fidelity_ewma, col sep=comma] {../data/robustness_analysis/combined_ewma_data.csv};
+    \addlegendentry{Nominal RL}
+    
+    \addplot[color=teal!80!black, thick] table[x=sigma_mhz, y=noise_fidelity_ewma, col sep=comma] {../data/robustness_analysis/combined_ewma_data.csv};
+    \addlegendentry{Noise-Optimized RL}
         % Faint raw data for variance shading / Monte Carlo estimates
         \addplot[color=blue!80!black, opacity=0.15] table[x=sigma_mhz, y=adam_fidelity_raw, col sep=comma] {../data/robustness_analysis/combined_ewma_data.csv};
         \addplot[color=orange!80!red, opacity=0.15] table[x=sigma_mhz, y=nominal_fidelity_raw, col sep=comma] {../data/robustness_analysis/combined_ewma_data.csv};
         \addplot[color=teal!80!black, opacity=0.15] table[x=sigma_mhz, y=noise_fidelity_raw, col sep=comma] {../data/robustness_analysis/combined_ewma_data.csv};
 
-        % EWMA thickened lines
-        \addplot[color=blue!80!black, thick] table[x=sigma_mhz, y=adam_fidelity_ewma, col sep=comma] {../data/robustness_analysis/combined_ewma_data.csv};
-        \addlegendentry{Adam Baseline}
-        
-        \addplot[color=orange!80!red, thick] table[x=sigma_mhz, y=nominal_fidelity_ewma, col sep=comma] {../data/robustness_analysis/combined_ewma_data.csv};
-        \addlegendentry{Nominal TRPO}
-        
-        \addplot[color=teal!80!black, thick] table[x=sigma_mhz, y=noise_fidelity_ewma, col sep=comma] {../data/robustness_analysis/combined_ewma_data.csv};
-        \addlegendentry{Noise-Optimized TRPO}
     \end{axis}
 
     % Inset Axis
