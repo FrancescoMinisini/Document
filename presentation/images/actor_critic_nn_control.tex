@@ -51,7 +51,7 @@
 % Environment
 \node[above=0.6cm of action, align=center] (H) {$\hat{H}_{t+1}$};
 \node[above=0.6cm of H, align=center] (U) {$U_{t+1} = \exp[-i\hat{H}_{t+1}\delta t]U_t$};
-\node[above=0.6cm of U, align=center] (cost) {\textbf{Reward} $r_t$ \textbf{\& Next State} $U_{t+1}$};
+\node[above=0.6cm of U, align=center] (cost) {\textbf{Reward} $r_t$ \textbf{\& Next State} $(U_{t+1}, t+1)$};
 
 \draw[arr] (action) -- (H);
 \draw[arr] (H) -- (U);
