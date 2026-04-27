@@ -195,8 +195,8 @@
     -- ([xshift=-0.3cm]env.south west |- {(0,0.2)})
     -- (state.west);
 \node[text=blue!80!black, font=\scriptsize\bfseries, anchor=east]
-    at ([xshift=-0.3cm, yshift=.7cm]env.north)
-    {Inference loop: $s_t \leftarrow s_{t+1}$};
+    at ([xshift=-1.2cm, yshift=.7cm]env.north)
+    {$s_t \leftarrow s_{t+1}$};
 
 % Training loop: orange arrow from env.north, going right to Value NN input
 \draw[orangearr, rounded corners=8pt]
@@ -236,7 +236,7 @@ c_t+\gamma V_{\omega_{\mathrm{old}}}(s_{t+1}) - V_{\omega_{\mathrm{old}}}(s_t)$}
 
 % Policy update (TRPO optimization formulas)
 \node[updatebox, align=center, font=\scriptsize] (update) at (15.9,2.8)
-    {$ \theta^\prime = \max_\theta \;\mathbb{E}\!\left[\dfrac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{\mathrm{old}}}(a_t\mid s_t)}\,\hat{A}_t\right]$\\[0.3em]
+    {$ \max_\theta \;\mathbb{E}\!\left[\dfrac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{\mathrm{old}}}(a_t\mid s_t)}\,\hat{A}_t\right]$\\[0.3em]
     s.t.\ $\mathbb{E}\!\left[D_{\mathrm{KL}}\!\left(\pi_{\theta_{\mathrm{old}}}\,\|\,\pi_\theta\right)\right]\leq\delta$};
 \draw[orangearr] (adv.south) -- (update.north);
 
@@ -265,7 +265,7 @@ c_t+\gamma V_{\omega_{\mathrm{old}}}(s_{t+1}) - V_{\omega_{\mathrm{old}}}(s_t)$}
 % -------------------------------------------------
 \begin{pgfonlayer}{background}
 \draw[blue!70!black, thick , dotted, rounded corners=8pt, opacity= 0.9]
-    (infbox-bl) rectangle (infbox-tr);
+    (infbox-bl) rectangle ([xshift=.1cm]infbox-tr);
 \end{pgfonlayer}
 \node[font=\bfseries, text=blue!70!black, anchor=south west]
     at ([xshift=-1.5cm, yshift=1.05cm]env.north)
