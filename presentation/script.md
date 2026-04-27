@@ -50,7 +50,11 @@ Perciò, una soluzione al problema di controllo avrà la forma di una succession
 
 La formulazione RL della task consiste nella definizione di agente e ambiente. L'agente conincide  con un Policy NN, il quale dato l'input dello stato del sistema, approssima una gaussiana 7 dimensionale sullo spazio delle azioni, da cui poi viene estratta una azione. Viene quindi simulata l'azione all'interno dell'ambiente, la quale evolve il sistema a un nuovo stato che verrà poi rimandato all'agente per l'iterazione successiva.
 
-La fase di allenamento dell'agente è piu complessa ...  
+Il training avviene invece dopo aver raccolto una batch di transizioni. La value network stima il ritorno atteso degli stati e permette di calcolare l’advantage, cioè quanto l’azione scelta è stata migliore o peggiore del previsto.
+
+TRPO usa questi advantage per aggiornare la policy, mantenendo però la nuova policy vicina alla precedente tramite un vincolo di trust region. In parallelo, anche la value network viene aggiornata tramite una value loss, così da fornire stime migliori nelle batch successive.
+
+Quindi, in sintesi: la policy sceglie i controlli, l’ambiente simula la dinamica quantistica, la value network valuta la traiettoria, e TRPO aggiorna la policy una batch alla volta.
 
 # Slide 6 (45s)
 
