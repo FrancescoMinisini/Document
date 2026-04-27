@@ -205,19 +205,19 @@
     % -- ([yshift=0.5cm]env.north east) -- ++(0.5,0.3)
     -| (15.9,9.3) -- (15.9,8.95);
 \node[text=orange!90!black, font=\scriptsize\bfseries, anchor=west]
-    at ([xshift=0.6cm, yshift=0.7cm]env.north)
-    {Training loop (once per batch): $ \mathcal{B} = \left\{(s_t, a_t, c_t, s_{t+1})\right\}_{t=0}^{T-1}$};
+    at ([xshift=6.6cm, yshift=0.7cm]env.north)
+    {Training loop: $ \mathcal{B} = \left\{(s_t, a_t, c_t, s_{t+1})\right\}_{t=0}^{T-1}$};
 
 % Value function output + definition
 \node[align=center] (vdef) at (15.9,5.8)
     % {$V_\omega(s_{t+1}) \approx \mathbb{E}\!\left[G_{t+1} \mid s_{t+1}\right]$};
-    {Expected Cost under $ \pi_{\theta_{\mathrm{old}}} $ : $V_\omega(s_{t})$};
+    {\textbf{Expected Cost} under $ \pi_{\theta_{\mathrm{old}}} $ : $V_\omega(s_{t})$};
 \draw[orangearr] (v32.south) -- (vdef.north);
 
 % advantage formula
 \node[align=center] (adv) at (15.9,4.6)
     % {$\hat{A}_t = r_t + \gamma\,V_\omega(s_{t+1}) - V_\omega(s_t)$};
-    {Advantage: $\hat A_t =
+    {\textbf{Advantage:} $\hat A_t =
 c_t+\gamma V_{\omega_{\mathrm{old}}}(s_{t+1}) - V_{\omega_{\mathrm{old}}}(s_t)$};
 \draw[orangearr] (vdef.south) -- (adv.north);
 
@@ -225,13 +225,13 @@ c_t+\gamma V_{\omega_{\mathrm{old}}}(s_{t+1}) - V_{\omega_{\mathrm{old}}}(s_t)$}
 
 % Arrow from Value NN output directly to loss
 \node[align=center, font=\scriptsize, text=black!90!black] (vloss) at (11.0,4.8)
-    {Value Loss: $ L_\omega $ };
+    {\textbf{Value Loss:} $ L_\omega $ };
 \draw[updarr,rounded corners=8pt ] (adv.south) -- ([xshift=-.5cm, yshift=-.3cm]adv.south) -- ([yshift=-.6cm]vloss.south) -- (vloss.south);
 
 % Arrow from loss back to Value NN output (v31), with omega update label on the line
 \draw[updarr, rounded corners=8pt] (vloss.north) -- ( [yshift=1.2cm]vloss.north) -- ([xshift=-.7cm, yshift=-.6cm]v31.south west) -- (v31.south west)
-    node[midway, left=1cm, text=orange!90!black, font=\scriptsize]
-    { Update: $ V_{\pi_{\mathrm{old}}} \leftarrow  V_{\pi} $  or $\omega \leftarrow \omega'$};
+    node[midway, left=0.8cm, text=orange!90!black, font=\scriptsize]
+    { \textbf{Update:} $ V_{\pi_{\mathrm{old}}} \leftarrow  V_{\pi} $  or $\omega \leftarrow \omega'$};
 
 
 % Policy update (TRPO optimization formulas)
@@ -250,7 +250,7 @@ c_t+\gamma V_{\omega_{\mathrm{old}}}(s_{t+1}) - V_{\omega_{\mathrm{old}}}(s_t)$}
 % dashed update arrow to policy (goes down, right under NN, then up to p24.east)
 \draw[updarr, rounded corners=10pt]
     (update.south) -- ++(0,-0.6) -- ++(-9.1,0)
-    node[midway,below,text=orange!90!black] {Update: $\pi_\theta \leftarrow \pi_\theta^{new}$ or $\theta \leftarrow \theta'$}
+    node[midway, right = 1cm,below,text=orange!90!black] {\textbf{Update:} $\pi_\theta \leftarrow \pi_\theta^{new}$ or $\theta \leftarrow \theta'$}
     -- (p13.south east);
 
 
