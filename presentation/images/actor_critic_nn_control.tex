@@ -47,7 +47,7 @@
     arr/.style={-{Latex[length=2.2mm]}, thick},
     bluearr/.style={-{Latex[length=2.2mm]}, thick, blue!80!black},
     orangearr/.style={-{Latex[length=2.2mm]}, thick, orange!85!black},
-    infarr/.style={-{Latex[length=2.2mm]}, thick, blue!80!black, densely dashed},
+    infarr/.style={-{Latex[length=2.2mm]}, thick, blue!80!black},
     updarr/.style={-{Latex[length=2.2mm]}, thick, orange!85!black, densely dashed}
 ]
 
@@ -189,10 +189,10 @@
 % -------------------------------------------------
 
 % Inference loop: blue arrow from env.north, going left past NW corner, down to state
-\draw[infarr, rounded corners=10pt]
+\draw[infarr, , rounded corners=10pt]
     (env.north) -- ([yshift=0.5cm]env.north)
-    -- ([xshift=-0.2cm, yshift=0.5cm]env.north west)
-    -- ([xshift=-0.2cm]env.south west |- {(0,0.2)})
+    -- ([xshift=-0.3cm, yshift=0.5cm]env.north west)
+    -- ([xshift=-0.3cm]env.south west |- {(0,0.2)})
     -- (state.west);
 \node[text=blue!80!black, font=\scriptsize\bfseries, anchor=east]
     at ([xshift=-0.3cm, yshift=.7cm]env.north)
@@ -224,12 +224,12 @@ c_t+\gamma V_{\omega_{\mathrm{old}}}(s_{t+1}) - V_{\omega_{\mathrm{old}}}(s_t)$}
 % --- Value NN weight update (to the left, parallel with policy update) ---
 
 % Arrow from Value NN output directly to loss
-\node[align=center, font=\scriptsize, text=black!90!black] (vloss) at (11.0,4.8)
+\node[align=center, font=\scriptsize, text=black!90!black] (vloss) at (11.0,5.2)
     {\textbf{Value Loss:} $ L_\omega $ };
-\draw[updarr,rounded corners=8pt ] (adv.south) -- ([xshift=-.5cm, yshift=-.3cm]adv.south) -- ([yshift=-.6cm]vloss.south) -- (vloss.south);
+\draw[orangearr,rounded corners=8pt ] (adv.south) -- ([xshift=-.5cm, yshift=-.3cm]adv.south) -- ([yshift=-1cm]vloss.south) -- (vloss.south);
 
 % Arrow from loss back to Value NN output (v31), with omega update label on the line
-\draw[updarr, rounded corners=8pt] (vloss.north) -- ( [yshift=1.2cm]vloss.north) -- ([xshift=-.7cm, yshift=-.6cm]v31.south west) -- (v31.south west)
+\draw[updarr, rounded corners=8pt] (vloss.north) -- ( [yshift=.8cm]vloss.north) -- ([xshift=-.7cm, yshift=-.6cm]v31.south west) -- (v31.south west)
     node[midway, left=0.8cm, text=orange!90!black, font=\scriptsize]
     { \textbf{Update:} $ V_{\pi_{\mathrm{old}}} \leftarrow  V_{\pi} $  or $\omega \leftarrow \omega'$};
 
@@ -264,7 +264,7 @@ c_t+\gamma V_{\omega_{\mathrm{old}}}(s_{t+1}) - V_{\omega_{\mathrm{old}}}(s_t)$}
 % INFERENCE BOX (blue, no fill, behind everything)
 % -------------------------------------------------
 \begin{pgfonlayer}{background}
-\draw[blue!70!black, thick , dotted, rounded corners=8pt, opacity= 0.6]
+\draw[blue!70!black, thick , dotted, rounded corners=8pt, opacity= 0.9]
     (infbox-bl) rectangle (infbox-tr);
 \end{pgfonlayer}
 \node[font=\bfseries, text=blue!70!black, anchor=south west]
@@ -276,10 +276,10 @@ c_t+\gamma V_{\omega_{\mathrm{old}}}(s_{t+1}) - V_{\omega_{\mathrm{old}}}(s_t)$}
 % Same height as inference box, starts 0.2cm to its right
 % -------------------------------------------------
 \begin{pgfonlayer}{background}
-\draw[orange!80!black, thick, dotted, rounded corners=8pt, opacity= 0.6]
+\draw[orange!80!black, thick, dotted, rounded corners=8pt, opacity= 0.9]
     (infbox-tr |- infbox-bl) ++(0.2cm, 0)
     rectangle
-    ([xshift=1.3cm]v14.east |- infbox-tr);
+    ([xshift=1.4cm]v14.east |- infbox-tr);
 \end{pgfonlayer}
 \node[font=\bfseries, text=orange!80!black, anchor=south]
     at ($([xshift=0.2cm]infbox-tr)!0.5!([xshift=0.6cm]v14.east |- infbox-tr)$)
