@@ -6,9 +6,9 @@ Buongiorno, sono Francesco Giuseppe Minisini e oggi presento il lavoro svolto pe
 # Slide 1 (50s)
 Per lo sviluppo di quantum devices sempre piu complessi e affidabili, è necessaria la realizzazione di quantum gates ad alta fedeltà veloci e robusti al rumore.
 
-Un'architettura promettente risulta essere quella dei qubits superconduttori, dei circuiti ultracraffreddati che simulano un atomo artificiale, il cui ground state e primo livello eccitato sono utilizzati come sottospazio computazionale.
+Un'architettura promettente risulta essere quella dei qubits superconduttori: dei circuiti ultra-raffreddati che simulano il comportamento diun atomo artificiale, il cui ground state e primo livello eccitato sono utilizzati come sottospazio computazionale.
 
-I qubits superconduttori presentano però una debole anarmonicità, il che può permettere a rumore o controlli ad eccitare il sistema a livelli energetici superiori andando a perdere l'informazione quantistica. Questo processo si chiama Leakage.
+I qubits superconduttori presentano però una debole anarmonicità, il che può permettere a rumore o controlli ad eccitare il sistema a livelli energetici superiori andando a perdere l'informazione quantistica. Questo processo si chiama Leakage o perdita.
 
 Ci tengo inoltre a specificare che la task di controllo quantistico analogico consiste nella esecuzione di una operazione quantistica manipolando la dinamica del sistema tramite l'introduzione di impulsi di controllo direttamente a livello dell'Hamiltoniana.
 
