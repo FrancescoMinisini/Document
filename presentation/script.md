@@ -1,7 +1,9 @@
-# Slide 0 (14s)
+TEMPO TOTALE: circa 11 Minuti conservativi (10.40) leggendo
+
+# Slide 0 (20s)
 Buongiorno, sono Francesco Giuseppe Minisini e oggi presento il lavoro svolto per la mia tesi triennale. Il progetto si è sviluppato attorno a un'applicazione di Deep reinforcement learning su una task di quantum control su un'architettura di qubit superconduttori. 
 
-# Slide 1 (46s)
+# Slide 1 (50s)
 Per lo sviluppo di quantum devices sempre piu complessi e affidabili, è necessaria la realizzazione di quantum gates ad alta fedeltà veloci e robusti al rumore.
 
 Un'architettura promettente risulta essere quella dei qubits superconduttori, dei circuiti ultracraffreddati che simulano un atomo artificiale, il cui ground state e primo livello eccitato sono utilizzati come sottospazio computazionale.
@@ -10,7 +12,7 @@ I qubits superconduttori presentano però una debole anarmonicità, il che può 
 
 Ci tengo inoltre a specificare che la task di controllo quantistico analogico consiste nella esecuzione di una operazione quantistica manipolando la dinamica del sistema tramite l'introduzione di impulsi di controllo direttamente a livello dell'Hamiltoniana.
 
-# Slide 2 (1min 36s)
+# Slide 2 (1min 40s)
 
 L'implementazione di una operazione quantistica diversi obbiettivi devono essere soddisfatti simultaneamente:
 
@@ -46,7 +48,7 @@ Essi vanno perciò a formare il vettore di controllo, che costituisce proprio l'
 
 Perciò, una soluzione al problema di controllo avrà la forma di una successione di questi vettori di controllo.
 
-# Slide 5 ()
+# Slide 5 (1m 40s)
 
 La formulazione RL della task consiste nella definizione di agente e ambiente. L'agente conincide  con un Policy NN, il quale dato l'input dello stato del sistema, approssima una gaussiana 7 dimensionale sullo spazio delle azioni, da cui poi viene estratta una azione. Viene quindi simulata l'azione all'interno dell'ambiente, la quale evolve il sistema a un nuovo stato che verrà poi rimandato all'agente per l'iterazione successiva.
 
