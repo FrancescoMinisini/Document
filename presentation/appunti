@@ -178,3 +178,44 @@ Togli il primo punto e il terzo punto
 Final message tolgo
 
 Faccio la slide delle conclusioni incui mostro solo quello. Le mie conclusioni
+
+
+# MORTEN E GALLI FACCIATA
+
+Le citazioni essenziali le segno in linea
+
+Cognome del primo autore + rivista e anno
+
+Oltre al loop di inferenza abbiamo cè un loop di apprendimento, eseguito una volta a batch. Il cui scopo è aggiornare i pesi delle rete della policy andado ad ottimizzare per la costa function.
+
+Chiami una domanda:
+
+
+Nell'arco della mia tesi non ho utilizzato solo
+Ottimizzazione del vettore di controllo per mimizzare la funzione costo.
+
+Dire esattamente cosa ottimizzi nell'adam
+
+# IMPORTANTI
+1) Relatori (affiliazione di quella di morten)
+2) E OVUNQUE REFERENZE IN LINEA
+
+Dire chiaramente lo scopo e la riproduzione di quell'articolo da soffermarmi.
+
+4) No stressare -> sottolineo il fatto che... 
+
+10) Principali
+
+Specificare le ordinate dei grafici.
+
+Da qua sembrerebbe che Adam sia la strategia leggermente preferibile. Ma ...
+
+11) Specificare le ordinate
+
+Attenzione che nel training è stata utilizzata solo una sola frequenza di rumore, compresa anche quella ottimizza su tutto il dominio.
+
+Il reinforcement learning agent, sono state misurate per robustezza
+
+12) Non ho potuto mostrare tutta una serie di risultati, qui elencati, per questioni di tempo
+
+COST FUNCTION: il che garantisce che il vettore di controllo sia spendo a inizio e fine esperimento

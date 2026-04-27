@@ -19,7 +19,7 @@ L'implementazione di una operazione quantistica presenta diversi obbiettivi devo
 - Fedeltà dell'operazione
 - Bassa leakage
 - Robustezza al rumore
-- Esecuzione rapida esecuzione
+- Esecuzione rapida esecuzione  
 
 Il deep reinforcement Learining rappresenta una ottimo candidato per risolvere questo tipo di problemi:
 - il problema puo essere formulato come un Markov decision Process
