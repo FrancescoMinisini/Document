@@ -310,7 +310,8 @@ Superconducting qubits are \textbf{weakly anharmonic}, so noise or fast control 
         \item Full Deep Reinforcement Learning pipeline (neural networks, training curriculum, evaluation), coupled with Trust Region Policy Optimization 
         % (TRPO)
         \item Optimization to make the framework computationally feasible
-        \item Extended existing studies and performed an independent validation
+        % \item Extended existing studies and performed an independent validation
+        \item Experiment design and independent validation
         % \item compared nominal, noisy, and family-wide behavior
     \end{itemize}
     \end{block}
@@ -604,12 +605,12 @@ C=
 %============================================================
 \section{Results}
 
-\begin{frame}{Single-target optimization: Nominal RL agent vs Baseline}
+\begin{frame}{Single-target optimization: Nominal RL agent vs Adam}
 \small
 \centering
 \begin{figure}
     \begin{alertblock}{Interpretation}
-        In the purely nominal single-target regime,
+        In the nominal single-target regime,
         the direct Adam baseline remains stronger.
     \end{alertblock}
     \centering
@@ -703,8 +704,8 @@ C=
 %------------------------------------------------------------
 \begin{frame}{Noise-optimized Agent: Robustness}
 \small
-Under control noise, the \textbf{noise-optimized TRPO controller} is the strongest. The key advantage is not just RL, but \textbf{RL trained in stochastic environment}.
-TODO: SISTEMARE I GRAFICI: ingrandire, sistemare le legende (colore e ewma e 2 parole su noise optimized)
+Under control noise, the \textbf{noise-optimized RL agent} (trained with 1MHz noise) is the strongest. The key advantage is not just RL, but \textbf{RL trained in stochastic environment}.
+% TODO: SISTEMARE I GRAFICI: ingrandire, sistemare le legende (colore e ewma e 2 parole su noise optimized)
 
 \vspace{0.3em}
 \begin{columns}[T,onlytextwidth]

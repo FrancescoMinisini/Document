@@ -24,168 +24,81 @@ Il deep reinforcement Learining rappresenta una ottimo candidato per risolvere q
 - l'agente puo sfruttare regolarità non locali nello spazio di traiettorie, inaccessibili a tecniche classiche 
 - transfer learding puo essere utilizzato per task simili 
 
-## Slide 3 
+# Slide 3 (1min)
 
+L'obbiettivo scientifico della tesi è stato quello di implementare ed eseguire una valutazione indipendente del framework proposto nel paper di Nature Universal Quantum Control throu Deep Reinforcement  M. Y. Niu, S. Boixo, V. N. Smelyanskiy, and H. Neven.
 
+Ci tengo a specificare che, a causa di mancanza di codice pubblico, una gran parte del lavoro è stata l'implementazione del framework da zero, il quale è composto da diversi componenti. Ciascuno con le proprie sfide tecniche e conoscenze pregresse che ho dovuto acquisire.
 
+Tra cui:
+- Quantum Environment simulator of two-qubit gmon architecture   (through the QuTip framework) 
+- Leakage estimator
+- Full Deep Reinforcement Learning pipeline (neural networks, training curriculum, evaluation), coupled with Trust Region Policy Optimization 
+- Optimization to make the framework computationally feasible
+- Scrittura di ciascun esperimento e valutazione
+ 
+# Slide 4 (40s)
+Passando alla dinamica del sistema, viene qui riportata l'hemiltoniana del sistema. I primi tre termini sono nativi della architettura gmon, mentre l'ultimo termine descrive un microwave drive per il controllo delle operazioni.
 
-## Slide 4 — Why this is a multi-objective control problem (Tempo indicativo: 1 minuto e 15 secondi)
+Evidenziate in rosso sono i parametri regolabili dipendenti dal tempo, attraverso i quali l'agente cercherà di ottimizzare la dinamica del sistema. 
 
-“Questa slide mostra il cuore concettuale del framework: la funzione costo UFO.
+Essi vanno perciò a formare il vettore di controllo, che costituisce proprio l'output dell'agente.
 
-L’idea è che il problema venga esplicitamente formulato come problema multi-obiettivo. Il costo totale è la somma di quattro contributi.
+Perciò, una soluzione al problema di controllo avrà la forma di una successione di questi vettori di controllo.
 
-Il primo è la fidelity penalty, cioè quanto il gate implementato si discosta dal gate target.
+# Slide 5 ()
 
-Il secondo è la leakage penalty, che penalizza la perdita di popolazione fuori dal sottospazio computazionale.
+La formulazione RL della task consiste nella definizione di agente e ambiente. L'agente conincide  con un Policy NN, il quale dato l'input dello stato del sistema, approssima una gaussiana 7 dimensionale sullo spazio delle azioni, da cui poi viene estratta una azione. Viene quindi simulata l'azione all'interno dell'ambiente, la quale evolve il sistema a un nuovo stato che verrà poi rimandato all'agente per l'iterazione successiva.
 
-Il terzo è la boundary penalty, che impone che gli impulsi siano regolari agli estremi temporali, quindi che il pulse parta e finisca in modo ben controllato.
+La fase di allenamento dell'agente è piu complessa ...  
 
-L’ultimo è la time penalty, che scoraggia soluzioni troppo lunghe.
+# Slide 6 (45s)
 
-Questa struttura è molto importante perché rende esplicito che i vari obiettivi non sono automaticamente compatibili.
+La cost function è la metrica fondamnentale che viene minimizzata dall'agente. Per questo essa risulta una somma pesata esplicita di vari termini, ciascuno associato a uno degli obbiettivi precedentemente menzionati.
 
-In particolare, il termine di leakage non è un semplice numero empirico, ma una proxy fisicamente motivata, costruita a partire da una trasformazione di Schrieffer–Wolff dipendente dal tempo. I termini ai bordi penalizzano accoppiamenti residui all’inizio e alla fine del pulse, mentre il termine integrale penalizza variazioni temporali troppo brusche.
+Il primo per minimizzare l'infedeltà, il secodo per minimizzare la probabilità che il sistema transiti verso uno stato non computazionale, il terzo per garantire soddisfazione delle condizioni al contorno, e il quarto per minimizzare il tempo di esecuzione.
 
-Quindi il punto chiave è: il controllo qui non cerca solo di fare bene il gate, ma di farlo bene secondo più criteri fisici simultaneamente.”
+Importante sottolineare che questi non sono automaticamente compatibili tra loro, l'ottimizzazione per un obbiettivo potrebbe andare a penalizzare un altro. (possibile rimuovere)
 
-## Slide 5 — RL formulation (Tempo indicativo: 55 secondi)
+# Slide 7 (1m 20)
 
-“A questo punto il problema viene riformulato come problema di reinforcement learning continuo.
+Gli esperimenti eseguiti coinvolgono diverse varianti di agenti di controllo.
 
-L’agente osserva lo stato corrente del sistema, che nel framework è rappresentato a partire dal propagatore corrente, quindi da quanto del gate è già stato costruito.
+- Uno classico, basato su tecnica di gradient descent (Adam) pulse optimization della cost function precedentemente descritta.
+- E quello di RL in varie configurazioni.
 
-L’azione consiste nel proporre il prossimo vettore di controllo continuo.
+Gli esperimenti eseguiti sono multipli. In particolare:
+- Extensive parameter study:
+    - neural network sizes and layouts per studiarne i differenti trade-off tra performance e stabilità
+    - UFO cost function weights per studiare la relazione tra i differenti obbiettivi della cost function
+- Single-target benchmark: confronto tra performance di Adam e RL agent su task specifiche
+- Robustness under noise: robustezza dei risultati di Adam vs RL agent a diversi livelli di rumore
+- Consistency of performance: stabilità di performance di Adam vs RL agent su diversi target
+- Transfer Learning Evaluation: valutazione della capacità di transfer learning
 
-L’ambiente poi prende quell’azione, costruisce l’Hamiltoniana corrispondente, evolve il sistema quantistico multilevel e restituisce una reward, che è semplicemente il negativo della funzione costo UFO.
+# Slide 8 (25s)
 
-L’algoritmo usato è TRPO, cioè Trust Region Policy Optimization, in una formulazione actor–critic.
+Per vincoli di tempo, mostro solo i risultati essenziali.
 
-Due parole in piu su come e quando avvengono gli update delle nns considerando trpo
+Paragonando le performance dell RL agent con Adam, in condizioni nominali in un esperimento a target singolo, si notano superiori performance da parte della tecnica di ottimizzazione classica su metriche di fidelity leakage e runtime.
 
-Questa scelta è interessante perché il controllo dei pulse ha una struttura sequenziale naturale: il pulse viene costruito passo dopo passo, e il reinforcement learning è una maniera coerente di trattare questo processo come una decisione sequenziale in tempo.”
+# Slide 9 (1m 20s)
 
-## Slide 6 — Evaluation metrics & target gate family (Tempo indicativo: 1 minuto)
+Particolarmente interessante risulta essere invece la valutazione della robustezza delgi agenti sottoposti al rumore gaussiano.
+In questa valutazione è stata introdotta il cosiddetto agente noise optimized, allenato in un ambiente con rumore gaussiano fisso di 1 MHz.
 
-“Per valutare il framework, tutti gli esperimenti sono stati fatti su una famiglia continua di gate target, indicata qui come N(α,α,γ).
+I grafici mostrano la fedeltà media e la sua deviazione standard su un campione di 60 esperimenti per datapoint, il cui ambiente è sottoposto ad rumore gaussiano di deviazione standard crescente. (I risultati mostrati sono delle medie mobili).
 
-Questa famiglia è utile perché è abbastanza ricca da contenere gate fisicamente interessanti, ma allo stesso tempo abbastanza strutturata da permettere confronti sistematici.
+Come possiamo notare è una complessiva performace superiore da parte dell' agende allenato con rumore, sia in termini di fedeltà media, sia in termini di precisione su tutto il dominio testato.
 
-Le metriche usate sono quattro.
+Possiamo interpretare questo risultato come la capacità dell'agente di generalizzare e acquisire policy più conservative, risultando complessivamente meno sensibili a rumore esterno.
 
-La prima è la gate fidelity, che misura l’accuratezza logica del gate sul sottospazio computazionale.
+Da notare inoltre come l'agente Adam, ancora performi meglio di quello RL nominale, il che suggerisce che la miglior performance del agente noise optimized non sia dovuto ad una mera applicazione di RL, ma la sua capacità di generalizzare in ambiente rumoroso.
 
-La seconda è la leakage proxy, che stima quanto la dinamica esca dal sottospazio desiderato.
+# Slide 10 (40s)
 
-La terza è la average fidelity under noise, cioè la fedeltà media ottenuta facendo molte realizzazioni Monte Carlo in presenza di rumore.
+Qui sono invece elencati altri risultati interessanti ottenuti nella tesi ma non presentati più nel dettaglio per ragioni di tempo.
 
-La quarta è la fidelity variance, che misura la stabilità shot-to-shot: non basta avere una buona media, bisogna anche avere una bassa dispersione.
+Riassumendo, la tesi ha contribuito con la completa reimplementazione del framework e l'estensione della letteratura esistente, tramite vari risultati e un piu approfondito paragone tra la controparte classica.
 
-Queste metriche sono importanti perché separano chiaramente accuratezza nominale, comportamento multilevel e robustezza stocastica.”
-
-## Slide 7 — Implemented controllers and experimental campaign (Tempo indicativo: 1 minuto)
-
-“Prima di mostrare i risultati, qui chiarisco quali controller ho effettivamente implementato e quali campagne sperimentali ho eseguito.
-
-Ho considerato tre varianti principali.
-
-La prima è una baseline Adam, cioè ottimizzazione diretta dei pulse con gradient descent su orizzonti temporali fissati.
-
-La seconda è un agente TRPO nominale, addestrato in ambiente deterministico.
-
-La terza è un agente TRPO noise-optimized, cioè addestrato direttamente in presenza di perturbazioni gaussiane sui controlli e sull’anarmonicità efficace.
-
-La distinzione fondamentale tra nominal e noise-optimized non è nella fisica del modello né nell’architettura della rete, ma nell’ambiente di training.
-
-Su questa base ho poi eseguito una campagna sperimentale estesa:
-benchmark single-target,
-analisi di robustezza in funzione del rumore,
-sweep family-wide sui gate,
-curriculum runtime sweep,
-e studio sistematico dei parametri.
-
-Questo è importante perché la validazione del framework non si basa su un singolo esperimento, ma su una serie strutturata di test complementari.”
-
-## Slide 8 — Extended parameter study (Tempo indicativo: 1 minuto e 15 secondi)
-
-“Questa slide è molto importante, perché nel reinforcement learning le scelte dei parametri influenzano in modo forte stabilità, convergenza e qualità finale del controllo. Estensione della letteratura esistente.
-
-Per questo ho dedicato una parte estesa del lavoro a uno studio dei parametri in cui si è ripetuto una ottimizzazione di un single target su vari seed, con però un curriculum di apprendimento ridotto rispetto ai successivi risultati.
-
-Da un lato ho studiato l’architettura delle reti policy e value, confrontando diverse topologie. Il risultato è che la performance dipende in modo misurabile dalla capacità della rete, ma non in modo monotono: reti più grandi non migliorano automaticamente i risultati. Alla fine ho mantenuto l’architettura 64,32,32, che era anche quella più fedele al paper.
-
-Dall’altro lato ho fatto una sensitivity analysis sui pesi della funzione costo UFO. Questo è ancora più delicato, perché quei pesi non sono semplici iperparametri numerici: definiscono il bilanciamento fisico tra fedeltà, leakage, regolarità ai bordi e tempo.
-
-Il risultato importante è che la scelta originale del paper, cioè 10,10,0.2,0.1, è rimasta vicina alla regione migliore anche nella mia implementazione.
-
-Diverse osservazioni sono state eseguite sulla validità dei risultati e sulle limitazioni degli stessi esperimenti.
-
-Quindi questo studio mi ha permesso di fissare una configurazione finale stabile e interpretabile, evitando che i risultati dipendessero da tuning arbitrario.”
-
-Questi esperimenti sono stati ripetuti su vari seed e i valori plottati sono le averages di questi
-
-## Slide 9 — Single-target optimization: Dynamics and Horizon (Tempo indicativo: 1 minuto)
-
-“Passando ai risultati, il primo benchmark è sul gate rappresentativo N(2.2,2.2,π/2).
-
-A sinistra si vede la dinamica di training del controller TRPO nominale: quello che emerge è che la fedeltà entra abbastanza rapidamente in un regime alto, mentre la parte più difficile del training diventa il bilanciamento tra leakage, tempo e costo totale.
-
-A destra si vede invece lo sweep sugli orizzonti temporali della baseline Adam.
-
-Il risultato numerico è che, su questo singolo target nominale, Adam trova una soluzione migliore di TRPO: runtime più corto, costo più basso, fedeltà leggermente più alta e leakage significativamente più basso.
-
-Questo è un risultato metodologicamente importante, perché mostra che il reinforcement learning non domina automaticamente una forte baseline di ottimizzazione diretta nel regime deterministico.”
-
-## Slide 10 — Adam vs TRPO and Family-wide evaluation (Tempo indicativo: 55 secondi)
-
-“Qui rendo più esplicito il confronto.
-
-Sul singolo target nominale, Adam domina il TRPO nominale in tutte le metriche principali. Questo suggerisce che, quando il problema è fisso, deterministico e pienamente differenziabile, l’ottimizzazione diretta resta estremamente competitiva.
-
-Sotto, però, si vede anche lo sweep family-wide della baseline Adam sulla famiglia N(α,α,π/2). Ed è interessante notare che la difficoltà del problema non è uniforme lungo la famiglia: esiste una regione centrale molto più favorevole e regioni ai bordi decisamente più difficili.
-
-Questo punto sarà importante dopo, perché ci aiuta a distinguere tra difficoltà intrinseca della famiglia di gate e vantaggi specifici del framework RL.”
-
-## Slide 11 — Noise-optimized Agent: Robustness (Tempo indicativo: 1 minuto e 15 secondi)
-
-“Questa è probabilmente la slide più importante dei risultati.
-
-Quando introduco rumore gaussiano sui controlli, il controller noise-optimized diventa il migliore tra quelli considerati.
-
-Nel grafico di sinistra vedete la average fidelity in funzione dell’intensità del rumore: il controller addestrato in ambiente stocastico definisce praticamente l’inviluppo superiore della comparazione.
-
-Nel grafico di destra vedete la fidelity variance: anche qui il noise-optimized ha sistematicamente la dispersione minore.
-
-Questo è il risultato centrale della tesi sul lato robustezza. La differenza tra nominal TRPO e noise-optimized TRPO non è nell’architettura o nel modello fisico, ma solo nell’ambiente di training. Quindi il miglioramento non può essere attribuito genericamente al reinforcement learning, ma al fatto che la robustezza venga effettivamente appresa esponendo il controller al rumore già durante l’addestramento.
-
-In altre parole: il framework non è particolarmente convincente come nominal optimizer universale, ma diventa molto convincente quando il problema viene trattato come problema robusto.”
-
-## Slide 12 — Runtime across the gate family (Tempo indicativo: 1 minuto e 10 secondi)
-
-“L’ultima grande analisi riguarda il runtime lungo la famiglia N(α,α,π/2).
-
-Qui il dato importante è che il profilo dei runtime non è uniforme, ma altamente strutturato. C’è una regione centrale in cui i controlli analogici trovati dal framework sono molto più rapidi, e regioni ai bordi in cui il problema torna più difficile.
-
-Il confronto di riferimento è con il gate synthesis standard, che nel paper corrisponde a circa 215 nanosecondi.
-
-Su una parte ampia della famiglia, i controller analogici restano al di sotto di questa baseline, spesso anche in modo netto.
-
-La lettura fisica è che il vantaggio massimo appare quando il gate target è meglio allineato con l’interazione nativa dell’Hamiltoniana gmon. In quelle regioni il controller non deve “forzare” troppo il sistema: può sfruttare direttamente la struttura naturale del dispositivo.
-
-Quindi il vantaggio sul runtime non è casuale né uniforme: è un effetto fisicamente strutturato, che dipende dall’allineamento tra target gate e dinamica nativa del sistema.”
-
-## Slide 13 — Conclusions (Tempo indicativo: 1 minuto)
-
-“Per concludere, il quadro finale è il seguente.
-
-Sono riuscito a ricostruire da zero un framework complesso che combina simulazione quantistica multilevel, stima fisicamente motivata del leakage e reinforcement learning continuo.
-
-Dal punto di vista empirico, la tesi mostra che il reinforcement learning non è automaticamente superiore all’ottimizzazione diretta nel regime nominale single-target.
-
-Però mostra anche, in modo piuttosto chiaro, che quando il problema viene formulato nel modo corretto, cioè includendo esplicitamente il rumore nell’ambiente di training, allora il controller RL diventa la strategia più forte in termini di robustezza.
-
-Inoltre, l’analisi sui runtime supporta l’idea che il controllo analogico possa superare la gate synthesis standard in regioni della famiglia di gate ben allineate con la fisica nativa del dispositivo.
-
-Quindi il messaggio finale è questo: il valore principale di questo framework non sta in una superiorità nominale universale, ma nel fornire una strategia unificata, leakage-aware, robusta e fisicamente significativa per il controllo analogico quantistico realistico. Ma una definitiva superiorità, quantomeno per runtime metric rispetto a compiled circuit approach
-
-Grazie.”
+Tra le conclusioni scientifiche possiamo trarre che sotto perturbazioni stocastiche, l'agente allenato in ambiente rumoroso diventa la miglior strategia.
