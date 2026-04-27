@@ -279,10 +279,10 @@ c_t+\gamma V_{\omega_{\mathrm{old}}}(s_{t+1}) - V_{\omega_{\mathrm{old}}}(s_t)$}
 \draw[orange!80!black, thick, dotted, rounded corners=8pt, opacity= 0.6]
     (infbox-tr |- infbox-bl) ++(0.2cm, 0)
     rectangle
-    ([xshift=0.6cm]v14.east |- infbox-tr);
+    ([xshift=1.3cm]v14.east |- infbox-tr);
 \end{pgfonlayer}
-\node[font=\bfseries, text=orange!80!black, anchor=south east]
-    at ([xshift=0.5cm, yshift=1.05cm]env.north -| v14.east)
+\node[font=\bfseries, text=orange!80!black, anchor=south]
+    at ($([xshift=0.2cm]infbox-tr)!0.5!([xshift=0.6cm]v14.east |- infbox-tr)$)
     {\large Training Loop};
 
 % -------------------------------------------------
