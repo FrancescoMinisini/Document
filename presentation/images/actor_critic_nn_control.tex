@@ -217,20 +217,21 @@
 % advantage formula
 \node[align=center] (adv) at (15.9,4.6)
     % {$\hat{A}_t = r_t + \gamma\,V_\omega(s_{t+1}) - V_\omega(s_t)$};
-    {Advantage: $\hat{A}_t = Q_\pi(a_t|s_t)-V_\pi(s_t)$};
+    {Advantage: $\hat A_t =
+r_t+\gamma V_{\omega_{\mathrm{old}}}(s_{t+1}) - V_{\omega_{\mathrm{old}}}(s_t)$};
 \draw[orangearr] (vdef.south) -- (adv.north);
 
 % --- Value NN weight update (to the left, parallel with policy update) ---
 
 % Arrow from Value NN output directly to loss
 \node[align=center, font=\scriptsize, text=black!90!black] (vloss) at (11.0,4.8)
-    {Loss: Predicted Return - Measured Return};
-\draw[updarr] (adv.south) -- (vloss.south);
+    {Value Loss: $ L_\omega $ };
+\draw[updarr,rounded corners=8pt ] (adv.south) -- ([xshift=-.5cm, yshift=-.3cm]adv.south) -- ([yshift=-.6cm]vloss.south) -- (vloss.south);
 
 % Arrow from loss back to Value NN output (v31), with omega update label on the line
-\draw[updarr] (vloss.north) -- (v31.south west)
-    node[midway, left=0.1cm, text=orange!90!black, font=\scriptsize]
-    {$\omega \leftarrow \omega'$};
+\draw[updarr, rounded corners=8pt] (vloss.north) -- ( [yshift=1.2cm]vloss.north) -- ([xshift=-.7cm, yshift=-.6cm]v31.south west) -- (v31.south west)
+    node[midway, left=1cm, text=orange!90!black, font=\scriptsize]
+    { Update: $ V_{\pi_{\mathrm{old}}} \leftarrow  V_{\pi} $  or $\omega \leftarrow \omega'$};
 
 
 % Policy update (TRPO optimization formulas)
@@ -242,14 +243,14 @@
 % TRPO Optimization brace (left side of update box)
 \draw[decorate, decoration={brace, amplitude=5pt}, thick, black!80!black]
      ([xshift=-0.15cm]update.south west) -- ([xshift=-0.15cm]update.north west) 
-    node[midway,left=0.20cm,align=right,text=black!80!black,font=\scriptsize] {
+    node[midway,left=0.20cm,align=right,text=black!80!black,font=\small] {
         \textbf{TRPO:} Trust Region \\ Policy Optimization
     };
 
 % dashed update arrow to policy (goes down, right under NN, then up to p24.east)
 \draw[updarr, rounded corners=10pt]
     (update.south) -- ++(0,-0.6) -- ++(-9.1,0)
-    node[midway,below,text=orange!90!black] {Policy Parameter Update: $\pi_\theta \leftarrow \pi_\theta^{new}$ or $\theta \leftarrow \theta'$}
+    node[midway,below,text=orange!90!black] {Policy NN: $\pi_\theta \leftarrow \pi_\theta^{new}$ or $\theta \leftarrow \theta'$}
     -- (p13.south east);
 
 % Training box (COMMENTED OUT)
