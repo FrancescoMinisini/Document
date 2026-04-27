@@ -117,11 +117,11 @@
     {\textbf{Reward} $r_t$ \ \& \textbf{Next State} $(U_{t+1},t+1)$};
 
 % Noise injection (compact annotation between action and H)
-\node[font=\scriptsize, text=red!70!black, align=center] (noise) at (6.2,5.8)
-    {\textit{if noise:}\\ $a_t + \epsilon_t$};
-\draw[arr, gray!75!black] (action.north) -- (H.south);
-\draw[-{Latex[length=1.8mm]}, densely dotted, red!70!black, thin]
-    (noise.west) -- (4.9,5.8);
+% \node[font=\scriptsize, text=red!70!black, align=center] (noise) at (6.2,5.8)
+%     {\textit{if noise:}\\ $a_t + \epsilon_t$};
+% \draw[arr, gray!75!black] (action.north) -- (H.south);
+% \draw[-{Latex[length=1.8mm]}, densely dotted, red!70!black, thin]
+%     (noise.west) -- (4.9,5.8);
 \draw[arr, gray!75!black] (H.north) -- (U.south);
 \draw[arr, gray!75!black] (U.north) -- (cost.south);
 
@@ -250,7 +250,7 @@ r_t+\gamma V_{\omega_{\mathrm{old}}}(s_{t+1}) - V_{\omega_{\mathrm{old}}}(s_t)$}
 % dashed update arrow to policy (goes down, right under NN, then up to p24.east)
 \draw[updarr, rounded corners=10pt]
     (update.south) -- ++(0,-0.6) -- ++(-9.1,0)
-    node[midway,below,text=orange!90!black] {Policy NN: $\pi_\theta \leftarrow \pi_\theta^{new}$ or $\theta \leftarrow \theta'$}
+    node[midway,below,text=orange!90!black] {Update: $\pi_\theta \leftarrow \pi_\theta^{new}$ or $\theta \leftarrow \theta'$}
     -- (p13.south east);
 
 % Training box (COMMENTED OUT)
