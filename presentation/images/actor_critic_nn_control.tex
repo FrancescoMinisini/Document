@@ -131,7 +131,7 @@
 
 % Environment brace (anchored to env box)
 \draw[decorate, decoration={brace, amplitude=6pt}, thick]
-    ([xshift=-0.4cm]env.south west) -- ([xshift=-0.4cm]env.north west)
+    ([xshift=-1.0cm]env.south west) -- ([xshift=-1.0cm]env.north west)
     node[midway,left=0.35cm,align=center] {\large \textbf{Environment}};
 
 % -------------------------------------------------
@@ -253,17 +253,38 @@ c_t+\gamma V_{\omega_{\mathrm{old}}}(s_{t+1}) - V_{\omega_{\mathrm{old}}}(s_t)$}
     node[midway,below,text=orange!90!black] {Update: $\pi_\theta \leftarrow \pi_\theta^{new}$ or $\theta \leftarrow \theta'$}
     -- (p13.south east);
 
-% Training box (COMMENTED OUT)
-% \begin{pgfonlayer}{background}
-% \node[trainbox, fit=(v11)(v14)(v21)(v22)(v31)(v33)(vtext)(adv)(update)(trainingtitle),
-%       inner xsep=0.6cm, inner ysep=0.45cm] (trainblock) {};
-% \end{pgfonlayer}
+
+% -------------------------------------------------
+% INFERENCE BOX (blue, no fill, behind everything)
+% -------------------------------------------------
+\begin{pgfonlayer}{background}
+\draw[blue!70!black, thick , dotted, rounded corners=8pt, opacity= 0.6]
+    ([xshift=-2.5cm, yshift=-0.2cm]state.south west)
+    rectangle
+    ([xshift=1.4cm, yshift=1.2cm]env.north east);
+\end{pgfonlayer}
+\node[font=\bfseries, text=blue!70!black, anchor=south west]
+    at ([xshift=-1.5cm, yshift=1.05cm]env.north)
+    {\large Inference Loop};
+
+% -------------------------------------------------
+% TRAINING BOX (orange, no fill, behind everything)
+% -------------------------------------------------
+\begin{pgfonlayer}{background}
+\draw[orange!80!black, thick, dotted, rounded corners=8pt, opacity= 0.6]
+    ([xshift=-1.5cm, yshift=-1.4cm]update.south west)
+    rectangle
+    ([xshift=0.6cm, yshift=1.0cm]env.north -| v14.east);
+\end{pgfonlayer}
+\node[font=\bfseries, text=orange!80!black, anchor=south east]
+    at ([xshift=0.5cm, yshift=1.05cm]env.north -| v14.east)
+    {\large Training Loop};
 
 % -------------------------------------------------
 % AGENT BRACE (left, aligned with environment brace)
 % -------------------------------------------------
 \draw[decorate, decoration={brace, amplitude=7pt},  thick, black!70!black]
-    ([xshift=-0.4cm]env.south west |- {(0,0.1)}) -- ([xshift=-0.4cm]env.south west |- {(0,5.5)})
+    ([xshift=-1cm]env.south west |- {(0,0.1)}) -- ([xshift=-1cm]env.south west |- {(0,5.5)})
     node[midway,left=0.35cm,text=black!80!black] {\Large \textbf{Agent}};
 
 \end{tikzpicture}
