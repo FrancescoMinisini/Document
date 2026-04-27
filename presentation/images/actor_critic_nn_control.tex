@@ -177,9 +177,11 @@
      (14.4,6.75) -- (14.4,9.05)
     node[midway,left=0.25cm,align=right,text=black!60!black] {
         \textbf{Value NN} $V_\omega$\\
-        \textnormal{\scriptsize Input: $s_{t+1}$}\\
+        \textnormal{\scriptsize where $\omega$ approximate $ V_{\pi_{\mathrm{old}}} $} \\
+        \textnormal{\scriptsize Input: $s_{t}$}\\
         \textnormal{\scriptsize Output: $\in \mathbb{R}$}
     };
+
 
 % -------------------------------------------------
 % LOOPS FROM ENVIRONMENT TOP
@@ -209,27 +211,27 @@
 % Value function output + definition
 \node[align=center] (vdef) at (15.9,5.8)
     % {$V_\omega(s_{t+1}) \approx \mathbb{E}\!\left[G_{t+1} \mid s_{t+1}\right]$};
-    {Expected Return under $ \pi_{\theta_{\mathrm{old}}} $ : $V_\omega(s_{t+1})$};
+    {Expected Return under $ \pi_{\theta_{\mathrm{old}}} $ : $V_\omega(s_{t})$};
 \draw[orangearr] (v32.south) -- (vdef.north);
 
 % advantage formula
 \node[align=center] (adv) at (15.9,4.6)
     % {$\hat{A}_t = r_t + \gamma\,V_\omega(s_{t+1}) - V_\omega(s_t)$};
-    {Advantage: $\hat{A}_t = Q_\pi(\cdot|s_t)-V_\pi(s_t)$};
+    {Advantage: $\hat{A}_t = Q_\pi(a_t|s_t)-V_\pi(s_t)$};
 \draw[orangearr] (vdef.south) -- (adv.north);
 
-% --- Value NN weight update (to the left of Value NN) ---
+% --- Value NN weight update (to the left, parallel with policy update) ---
 
-% Diagonal arrow from V_omega definition to value loss (left side)
+% Arrow from Value NN output directly to loss
 \node[align=center, font=\scriptsize, text=black!90!black] (vloss) at (11.0,4.8)
-    % {$L_\omega = \mathbb{E}\!\left[\left(V_\omega(s_{t+1}) - G_{t+1}\right)^{\!2}\right]$};
     {Loss: Predicted Return - Measured Return};
-\draw[updarr] (vdef.west) -- (vloss.north east);
+\draw[updarr] (adv.south) -- (vloss.south);
 
-% Diagonal arrow from loss back up to leftmost output node (v31), with omega update label
+% Arrow from loss back to Value NN output (v31), with omega update label on the line
 \draw[updarr] (vloss.north) -- (v31.south west)
-    node[midway, , left=0.1cm, text=orange!90!black, font=\scriptsize]
+    node[midway, left=0.1cm, text=orange!90!black, font=\scriptsize]
     {$\omega \leftarrow \omega'$};
+
 
 % Policy update (TRPO optimization formulas)
 \node[updatebox, align=center, font=\scriptsize] (update) at (15.9,2.8)
