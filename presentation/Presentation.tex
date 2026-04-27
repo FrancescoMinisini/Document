@@ -578,7 +578,7 @@ C=
     \frametitle{Experiments performed}
     \begin{alertblock}{Controller variants implemented}
     \begin{itemize}
-        \item \textbf{Classical Optimization}: Optimizing the $a_t$ to minimize the UFO cost function via Gradient Descent (\textbf{ADAM}).
+        \item \textbf{Classical Optimization}: Optimizing the $\{a_t\}^T_{t=0}$ to minimize the UFO cost function via Gradient Descent (\textbf{ADAM}).
         % gradient descent-based pulse optimization (Adam) of the UFO 
         \item \textbf{Reinforcement-Learning Agent} trained in multiple configurations.
         % \begin{itemize}
@@ -1169,7 +1169,7 @@ d_{\mathrm{obs}} = 2\cdot 9^2 + 1 = 163.
     \vspace{0.3em}
     After sampling and squashing:
     \[
-    a_t=\tanh(\tilde a_t)\in[-1,1]^7,
+    a_t=\tanh(\tilde a_t)\in[-1,1]^7, \text{ where } \tilde a_t = \mu_\theta(s_t) + \Sigma_\theta^{1/2} \epsilon.
     \]
     then rescaled to the physical controls
     \[
