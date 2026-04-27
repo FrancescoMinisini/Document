@@ -114,12 +114,12 @@
 \node[align=center] (U) at (4.4,7.75)
     {$U_{t+1}=\exp\!\left[-i\hat{H}_{t+1}\,\delta t\right]U_t$};
 \node[align=center] (cost) at (4.4,9.1)
-    {\textbf{Reward} $r_t$ \ \& \textbf{Next State} $(U_{t+1},t+1)$};
+    {\textbf{Cost} $c_t$ \ \& \textbf{Next State} $(U_{t+1},t+1)$};
 
 % Noise injection (compact annotation between action and H)
 % \node[font=\scriptsize, text=red!70!black, align=center] (noise) at (6.2,5.8)
 %     {\textit{if noise:}\\ $a_t + \epsilon_t$};
-% \draw[arr, gray!75!black] (action.north) -- (H.south);
+\draw[arr, gray!75!black] (action.north) -- (H.south);
 % \draw[-{Latex[length=1.8mm]}, densely dotted, red!70!black, thin]
 %     (noise.west) -- (4.9,5.8);
 \draw[arr, gray!75!black] (H.north) -- (U.south);
@@ -206,19 +206,19 @@
     -| (15.9,9.3) -- (15.9,8.95);
 \node[text=orange!90!black, font=\scriptsize\bfseries, anchor=west]
     at ([xshift=0.6cm, yshift=0.7cm]env.north)
-    {Training loop (once per batch): $ \mathcal{B} = \left\{(s_t, a_t, r_t, s_{t+1})\right\}_{t=0}^{T-1}$};
+    {Training loop (once per batch): $ \mathcal{B} = \left\{(s_t, a_t, c_t, s_{t+1})\right\}_{t=0}^{T-1}$};
 
 % Value function output + definition
 \node[align=center] (vdef) at (15.9,5.8)
     % {$V_\omega(s_{t+1}) \approx \mathbb{E}\!\left[G_{t+1} \mid s_{t+1}\right]$};
-    {Expected Return under $ \pi_{\theta_{\mathrm{old}}} $ : $V_\omega(s_{t})$};
+    {Expected Cost under $ \pi_{\theta_{\mathrm{old}}} $ : $V_\omega(s_{t})$};
 \draw[orangearr] (v32.south) -- (vdef.north);
 
 % advantage formula
 \node[align=center] (adv) at (15.9,4.6)
     % {$\hat{A}_t = r_t + \gamma\,V_\omega(s_{t+1}) - V_\omega(s_t)$};
     {Advantage: $\hat A_t =
-r_t+\gamma V_{\omega_{\mathrm{old}}}(s_{t+1}) - V_{\omega_{\mathrm{old}}}(s_t)$};
+c_t+\gamma V_{\omega_{\mathrm{old}}}(s_{t+1}) - V_{\omega_{\mathrm{old}}}(s_t)$};
 \draw[orangearr] (vdef.south) -- (adv.north);
 
 % --- Value NN weight update (to the left, parallel with policy update) ---
