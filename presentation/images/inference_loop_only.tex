@@ -1,0 +1,175 @@
+\begin{tikzpicture}[
+    x=1cm,y=1cm,
+    >=Latex,
+    font=\small,
+    bluenode/.style={
+        circle,
+        minimum size=0.42cm,
+        inner sep=0pt,
+        draw=blue!70!black,
+        fill=blue!8
+    },
+    greennode/.style={
+        circle,
+        minimum size=0.42cm,
+        inner sep=0pt,
+        draw=green!60!black,
+        fill=green!10
+    },
+    envbox/.style={
+        draw=gray!60!black,
+        fill=gray!6,
+        rounded corners,
+        thick,
+        inner sep=10pt
+    },
+    trainbox/.style={
+        draw=orange!80!black,
+        rounded corners,
+        densely dashed,
+        thick,
+        inner sep=8pt
+    },
+    statebox/.style={
+        draw=blue!70!black,
+        rounded corners,
+        thick,
+        inner sep=6pt,
+        fill=blue!2
+    },
+    updatebox/.style={
+        draw=gray!60!black,
+        rounded corners,
+        thick,
+        inner sep=6pt,
+        fill=gray!4
+    },
+    arr/.style={-{Latex[length=2.2mm]}, thick},
+    bluearr/.style={-{Latex[length=2.2mm]}, thick, blue!80!black},
+    orangearr/.style={-{Latex[length=2.2mm]}, thick, orange!85!black},
+    infarr/.style={-{Latex[length=2.2mm]}, thick, blue!80!black},
+    updarr/.style={-{Latex[length=2.2mm]}, thick, orange!85!black, densely dashed}
+]
+
+% -------------------------------------------------
+% POLICY STATE
+% -------------------------------------------------
+\node[statebox, align=center] (state) at (4.4,0.2)
+    {\textbf{State} $\, s_t = (U_t,t)$};
+
+% Policy NN nodes (layer 1 - input layer)
+\node[bluenode] (p11) at (3.2,2.1) {};
+\node[bluenode] (p12) at (4.0,2.1) {};
+\node                   at (4.8,2.1) {$\dots$};
+\node[bluenode] (p13) at (5.6,2.1) {};
+
+% Policy NN nodes (layer 2 - hidden layer)
+\node[bluenode] (p21) at (2.8,3.0) {};
+\node[bluenode] (p22) at (3.6,3.0) {};
+\node                   at (4.4,3.0) {$\dots$};
+\node[bluenode] (p23) at (5.2,3.0) {};
+\node[bluenode] (p24) at (6.0,3.0) {};
+
+% Policy NN nodes (layer 3 - output layer)
+\node[bluenode] (p31) at (3.2,3.9) {};
+\node[bluenode] (p32) at (4.0,3.9) {};
+\node           (p3dots) at (4.8,3.9) {$\dots$};
+\node[bluenode] (p33) at (5.6,3.9) {};
+
+% Policy connections
+\begin{pgfonlayer}{background}
+\foreach \i in {1,2,3}
+    \foreach \j in {1,2,3,4} {
+        \draw[gray!40, thin] (p1\i) -- (p2\j);
+    }
+\foreach \i in {1,2,3,4}
+    \foreach \j in {1,2,3} {
+        \draw[gray!40, thin] (p2\i) -- (p3\j);
+    }
+\end{pgfonlayer}
+
+% Policy NN brace (right side)
+\draw[decorate, decoration={brace, amplitude=6pt, mirror}, thick, black!70!black]
+    (6.3,1.85) -- (6.3,4.15)
+    node[midway,right=0.25cm,align=left,text=black!80!black] {
+        \textbf{Policy NN} $\pi_\theta$\\
+        \textnormal{\scriptsize Input: $s_t$}\\
+        \textnormal{\scriptsize Output: $\mu_\theta(s_t),\,\Sigma_\theta$}
+    };
+
+% State to policy
+\draw[bluearr] (state.north) -- (4.4,1.85);
+
+% -------------------------------------------------
+% ACTION + ENVIRONMENT (centered above Policy NN)
+% -------------------------------------------------
+\node[align=center] (action) at (4.4,5.1)
+    {\textbf{Action} $\; a_t \in \mathbb{R}^m$};
+
+% Arrows from top of Policy NN going upward to Action
+\draw[bluearr] (p32) -- (action);
+\draw[bluearr] (p3dots) -- (action);
+
+\node[align=center] (H) at (4.4,6.5) {$\hat{H}_{t+1}$};
+\node[align=center] (U) at (4.4,7.75)
+    {$U_{t+1}=\exp\!\left[-i\hat{H}_{t+1}\,\delta t\right]U_t$};
+\node[align=center] (cost) at (4.4,9.1)
+    {\textbf{Cost} $c_t$ \ \& \textbf{Next State} $(U_{t+1},t+1)$};
+
+% Noise injection (compact annotation between action and H)
+% \node[font=\scriptsize, text=red!70!black, align=center] (noise) at (6.2,5.8)
+%     {\textit{if noise:}\\ $a_t + \epsilon_t$};
+\draw[arr, gray!75!black] (action.north) -- (H.south);
+% \draw[-{Latex[length=1.8mm]}, densely dotted, red!70!black, thin]
+%     (noise.west) -- (4.9,5.8);
+\draw[arr, gray!75!black] (H.north) -- (U.south);
+\draw[arr, gray!75!black] (U.north) -- (cost.south);
+
+\begin{pgfonlayer}{background}
+\node[envbox, fit=(H)(U)(cost), inner xsep=0.5cm, inner ysep=0.45cm] (env) {};
+\end{pgfonlayer}
+
+% Environment brace (anchored to env box)
+\draw[decorate, decoration={brace, amplitude=6pt}, thick]
+    ([xshift=-1.0cm]env.south west) -- ([xshift=-1.0cm]env.north west)
+    node[midway,left=0.35cm,align=center] {\large \textbf{Environment}};
+
+% -------------------------------------------------
+% LOOPS FROM ENVIRONMENT TOP
+% -------------------------------------------------
+
+% Inference loop: blue arrow from env.north, going left past NW corner, down to state
+\draw[infarr, , rounded corners=10pt]
+    (env.north) -- ([yshift=0.5cm]env.north)
+    -- ([xshift=-0.3cm, yshift=0.5cm]env.north west)
+    -- ([xshift=-0.3cm]env.south west |- {(0,0.2)})
+    -- (state.west);
+\node[text=blue!80!black, font=\scriptsize\bfseries, anchor=east]
+    at ([xshift=-1.2cm, yshift=.7cm]env.north)
+    {$s_t \leftarrow s_{t+1}$};
+
+% -------------------------------------------------
+% Define shared corners for aligned boxes
+% -------------------------------------------------
+\coordinate (infbox-bl) at ([xshift=-2.5cm, yshift=-0.2cm]state.south west);
+\coordinate (infbox-tr) at ([xshift=1.4cm, yshift=1.2cm]env.north east);
+
+% -------------------------------------------------
+% INFERENCE BOX (blue, no fill, behind everything)
+% -------------------------------------------------
+\begin{pgfonlayer}{background}
+\draw[blue!70!black, thick , dotted, rounded corners=8pt, opacity= 0.9]
+    (infbox-bl) rectangle ([xshift=.1cm]infbox-tr);
+\end{pgfonlayer}
+\node[font=\bfseries, text=blue!70!black, anchor=south west]
+    at ([xshift=-1.5cm, yshift=1.05cm]env.north)
+    {\large Inference Loop};
+
+% -------------------------------------------------
+% AGENT BRACE (left, aligned with environment brace)
+% -------------------------------------------------
+\draw[decorate, decoration={brace, amplitude=7pt},  thick, black!70!black]
+    ([xshift=-1cm]env.south west |- {(0,0.1)}) -- ([xshift=-1cm]env.south west |- {(0,5.5)})
+    node[midway,left=0.35cm,text=black!80!black] {\Large \textbf{Agent}};
+
+\end{tikzpicture}
