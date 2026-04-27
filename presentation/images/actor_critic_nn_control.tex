@@ -255,13 +255,17 @@ c_t+\gamma V_{\omega_{\mathrm{old}}}(s_{t+1}) - V_{\omega_{\mathrm{old}}}(s_t)$}
 
 
 % -------------------------------------------------
+% Define shared corners for aligned boxes
+% -------------------------------------------------
+\coordinate (infbox-bl) at ([xshift=-2.5cm, yshift=-0.2cm]state.south west);
+\coordinate (infbox-tr) at ([xshift=1.4cm, yshift=1.2cm]env.north east);
+
+% -------------------------------------------------
 % INFERENCE BOX (blue, no fill, behind everything)
 % -------------------------------------------------
 \begin{pgfonlayer}{background}
 \draw[blue!70!black, thick , dotted, rounded corners=8pt, opacity= 0.6]
-    ([xshift=-2.5cm, yshift=-0.2cm]state.south west)
-    rectangle
-    ([xshift=1.4cm, yshift=1.2cm]env.north east);
+    (infbox-bl) rectangle (infbox-tr);
 \end{pgfonlayer}
 \node[font=\bfseries, text=blue!70!black, anchor=south west]
     at ([xshift=-1.5cm, yshift=1.05cm]env.north)
@@ -269,12 +273,13 @@ c_t+\gamma V_{\omega_{\mathrm{old}}}(s_{t+1}) - V_{\omega_{\mathrm{old}}}(s_t)$}
 
 % -------------------------------------------------
 % TRAINING BOX (orange, no fill, behind everything)
+% Same height as inference box, starts 0.2cm to its right
 % -------------------------------------------------
 \begin{pgfonlayer}{background}
 \draw[orange!80!black, thick, dotted, rounded corners=8pt, opacity= 0.6]
-    ([xshift=-1.5cm, yshift=-1.4cm]update.south west)
+    (infbox-tr |- infbox-bl) ++(0.2cm, 0)
     rectangle
-    ([xshift=0.6cm, yshift=1.0cm]env.north -| v14.east);
+    ([xshift=0.6cm]v14.east |- infbox-tr);
 \end{pgfonlayer}
 \node[font=\bfseries, text=orange!80!black, anchor=south east]
     at ([xshift=0.5cm, yshift=1.05cm]env.north -| v14.east)
