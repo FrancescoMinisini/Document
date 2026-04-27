@@ -80,8 +80,15 @@
 % Title slide
 \begin{frame}
     \centering
-    \includegraphics[height=0.3\textheight,width=0.8\textwidth, keepaspectratio]{../tesiSCIENZE_TECNOLOGIE.jpg}
+    \includegraphics[height=0.2\textheight,width=0.8\textwidth, keepaspectratio]{../tesiSCIENZE_TECNOLOGIE.jpg}
     \titlepage
+    \vspace{-1.5em}
+    \begin{scriptsize}
+    \begin{tabular}{ll}
+    Supervisor: & \textbf{Prof. Morten Hjort-Jensen} -- University Of Oslo\\
+    Internal Supervisor: & \textbf{Prof. Davide Emilio Galli} \\
+    \end{tabular}
+    \end{scriptsize}
 \end{frame}
 
 \begin{frame}
@@ -154,13 +161,14 @@
         \end{columns}
         \begin{alertblock}{Physical issue}
         \scriptsize
-Superconducting qubits \cite{chen2014} are \textbf{weakly anharmonic}, so noise or fast control can easily excite unwanted higher levels. This phenomenon is called \textbf{leakage}. 
+Superconducting qubits are \textbf{weakly anharmonic}, so noise or fast control can easily excite unwanted higher levels. This phenomenon is called \textbf{leakage}. 
 \end{alertblock}
         \begin{block}{Analog quantum control}
         \scriptsize
         Implementation of a quantum operation by injecting control pulses at the Hamiltonian level.
         % , rather than decomposing it into a sequence of discrete logic gates.
         \end{block}
+% \let\thefootnote\relax\footnotetext{\tiny Chen, Y. et al., \emph{Qubit Architecture with High Coherence and Fast Tunable Coupling}, Phys. Rev. Lett. (2014).}
 \end{frame}
 
 % \begin{frame}
@@ -286,7 +294,8 @@ Superconducting qubits \cite{chen2014} are \textbf{weakly anharmonic}, so noise 
 
 \vspace{3em}
 \centering
-\textbf{\Large Why Deep Reinforcement Learning (RL)? \cite{sutton2018,koch2022}}
+\textbf{\Large Why Deep Reinforcement Learning (RL)?}
+\let\thefootnote\relax\footnotetext{\tiny Sutton, R. S. and Barto, A. G., \emph{Reinforcement Learning: An Introduction}, MIT press (2018). $\cdot$ Koch, C. P., \emph{Quantum Optimal Control in Quantum Technologies}, EPJ QT (2022).}
 \end{frame}
 
 %------------------------------------------------------------
@@ -297,7 +306,7 @@ Superconducting qubits \cite{chen2014} are \textbf{weakly anharmonic}, so noise 
 \begin{block}{Scientific goal}
 Assess whether the framework introduced in the 2019 Nature paper 
 \emph{Universal Quantum Control through Deep Reinforcement Learning}
-by Niu \emph{et al.}~\cite{niu2019} is a credible strategy for
+by Niu \emph{et al.} is a credible strategy for
 \textbf{robust analog quantum control} on simulated gmon qubits.
 \end{block}
 
@@ -333,6 +342,7 @@ by Niu \emph{et al.}~\cite{niu2019} is a credible strategy for
 % \end{columns}
 
 % \presenterbox{Francesco G. Minisini}
+\let\thefootnote\relax\footnotetext{\tiny Niu, M. Y. et al., \emph{Universal Quantum Control through Deep Reinforcement Learning}, EPJ Quantum Technology (2019).}
 \end{frame}
 
 %============================================================
@@ -340,7 +350,7 @@ by Niu \emph{et al.}~\cite{niu2019} is a credible strategy for
 
 \begin{frame}{Physical model: gmon Hamiltonian and control channels}
 \small
-The effective Hamiltonian \cite{niu2019} is
+The effective Hamiltonian is
 \vspace{-1ex}
 {\scriptsize
 \[
@@ -408,19 +418,21 @@ A solution to the control problem is a sequence of control vectors: \textbf {\[\
     % \end{columns}
 
 % \presenterbox{Francesco G. Minisini}
+\let\thefootnote\relax\footnotetext{\tiny Niu, M. Y. et al., \emph{Universal Quantum Control through Deep Reinforcement Learning}, EPJ Quantum Technology (2019).}
 \end{frame}
 
 %------------------------------------------------------------
-\begin{frame}{RL formulation: Inference Loop \cite{sutton2018,niu2019}}
+\begin{frame}{RL formulation: Inference Loop}
     \centering
     \begin{figure}
-         \hspace*{-2cm}\includegraphics[height=0.85\textheight, keepaspectratio]{images/inference_loop_only.pdf}
+         \hspace*{-2cm}\includegraphics[height=0.80\textheight, keepaspectratio]{images/inference_loop_only.pdf}
     % \input{images/inference_loop_only.tex}
     \end{figure}
+\let\thefootnote\relax\footnotetext{\tiny Sutton, R. S. and Barto, A. G., \emph{Reinforcement Learning: An Introduction}, MIT press (2018). $\cdot$ Niu, M. Y. et al., \emph{Universal Quantum Control through Deep Reinforcement Learning}, EPJ QT (2019).}
 \end{frame}
 
 %------------------------------------------------------------
-\begin{frame}{RL formulation: completes \cite{sutton2018,niu2019,schulman2015}}
+\begin{frame}{RL formulation: complete}
     % TODO: Da sistemare le dimensioni dei nns e definire value e policy.
     \centering
     \begin{figure}
@@ -428,6 +440,7 @@ A solution to the control problem is a sequence of control vectors: \textbf {\[\
         \hspace*{-.8cm}\includegraphics[width=\textwidth]{images/actor_critic_nn_control.pdf}
 % \input{images/actor_critic_nn_control.tex}
     \end{figure}
+\let\thefootnote\relax\footnotetext{\tiny Sutton, R. S. et al., \emph{Reinforcement Learning: An Introduction} (2018). $\cdot$ Niu, M. Y. et al., \emph{Universal Quantum Control...} (2019). $\cdot$ Schulman, J. et al., \emph{Trust Region Policy Optimization} (2015).}
 \end{frame}
 
 %------------------------------------------------------------
@@ -439,7 +452,7 @@ A solution to the control problem is a sequence of control vectors: \textbf {\[\
 \end{alertblock}
 
 
-\begin{block}{Universal Function Optimizaion (UFO) cost function \cite{niu2019}}
+\begin{block}{Universal Function Optimizaion (UFO) cost function}
     \[
 C=
 \underbrace{\chi\!\left[1-F(U(T))\right]}_{\text{fidelity penalty}}
@@ -479,7 +492,7 @@ C=
 
 % \scriptsize
 % The first two terms penalize residual couplings at the pulse boundaries; the integral term penalizes rapid temporal variations.
-
+\let\thefootnote\relax\footnotetext{\tiny Niu, M. Y. et al., \emph{Universal Quantum Control through Deep Reinforcement Learning}, EPJ Quantum Technology (2019).}
 \end{frame}
 
 
@@ -848,17 +861,17 @@ Although I only presented the main results, the thesis also includes several add
 To carry out this thesis, I had to reconstruct the full framework from scratch and acquire working knowledge of:
 \begin{itemize}
     \item QuTiP and multilevel quantum simulation, PyTorch, autograd
-    \item classical optimization and both classical and deep reinforcement learning \cite{sutton2018}
+    \item classical optimization and both classical and deep reinforcement learning
     \item policy-gradient methods and neural-network training
     \item superconducting-qubit physics and quantum control
 \end{itemize}
 \end{alertblock}
-
+\let\thefootnote\relax\footnotetext{\tiny Sutton, R. S. and Barto, A. G., \emph{Reinforcement Learning: An Introduction}, MIT press (2018).}
 \end{frame}
 
 \begin{frame}
     \frametitle{UFO terms insights}
-\begin{alertblock}{Universal Function Optimizaion (UFO) cost function \cite{niu2019}}
+\begin{alertblock}{Universal Function Optimizaion (UFO) cost function}
     \scriptsize
 \[
 C=
@@ -886,13 +899,13 @@ Being $U(T)$ the unitary evolution generated by a control protocol at final time
     where \(g(t), f_1(t), f_2(t)\) are the amplitude controllers at a given time \(t\). 
     This term forces (by penalizing) the control amplitude to be zero at the pulse boundaries, which can cause unwanted excitations and leakage after the termination of the episode.
 \end{block}
-
+\let\thefootnote\relax\footnotetext{\tiny Niu, M. Y. et al., \emph{Universal Quantum Control through Deep Reinforcement Learning}, EPJ Quantum Technology (2019).}
 \end{frame}
 
 
 \begin{frame}
     \frametitle{UFO terms insights}
-    \begin{block}{Leakage term: physics-informed proxy \cite{niu2019}}
+    \begin{block}{Leakage term: physics-informed proxy}
         \scriptsize
         % \small
         Considering the separated Hamiltonian in block form, \(\hat{H}_{\mathrm{od}}(t)\) is the off-diagonal block that couples the computational subspace to the leakage subspace, while \(\Delta(t)\) is the instantaneous energy gap between these subspaces. 
@@ -921,11 +934,12 @@ The first two terms penalize residual couplings at the pulse boundaries; the int
     T = \frac{t}{T_{\mathrm{norm}}}, \quad \text{with } T_{\mathrm{norm}}=60\,\mathrm{ns}
     \]
 \end{block}
+\let\thefootnote\relax\footnotetext{\tiny Niu, M. Y. et al., \emph{Universal Quantum Control through Deep Reinforcement Learning}, EPJ Quantum Technology (2019).}
 \end{frame}
 
 \begin{frame}
     \frametitle{Choosen target gate family}
-\begin{block}{Target gate family used throughout the numerical study \cite{niu2019}.} 
+\begin{block}{Target gate family used throughout the numerical study.} 
 \[
 N(\alpha,\alpha,\gamma)=
 \exp\!\left[
@@ -937,10 +951,11 @@ i\left(
 \right].
 \]
 \end{block}
+\let\thefootnote\relax\footnotetext{\tiny Niu, M. Y. et al., \emph{Universal Quantum Control through Deep Reinforcement Learning}, EPJ Quantum Technology (2019).}
 \end{frame}
 
 %------------------------------------------------------------
-\begin{frame}{Evaluation metrics \& target gate family \cite{niu2019}}
+\begin{frame}{Evaluation metrics \& target gate family}
     % TODO: add better def to avg F e ripensare magari a ste robe
 \scriptsize
 \begin{tabular}{p{0.18\linewidth} p{0.32\linewidth} p{0.42\linewidth}}
@@ -998,6 +1013,7 @@ Shot-to-shot stability under stochastic perturbations. \\[1em]
 % \end{alertblock}
 
 % \presenterbox{Francesco G. Minisini}
+\let\thefootnote\relax\footnotetext{\tiny Niu, M. Y. et al., \emph{Universal Quantum Control through Deep Reinforcement Learning}, EPJ Quantum Technology (2019).}
 \end{frame}
 
 \begin{frame}{Extended parameter study}
@@ -1051,7 +1067,7 @@ Family-wide runtime sweep was also evaluated to mostly assess performance consis
 
 \begin{frame}{Runtime across the gate family \(N(\alpha,\alpha,\pi/2)\)}
 \small
-Target parametrization: \(U_{\mathrm{target}}(\alpha)=N(\alpha,\alpha,\pi/2)\) \cite{niu2019}. The runtime landscape is \textbf{highly structured}, not uniform.
+Target parametrization: \(U_{\mathrm{target}}(\alpha)=N(\alpha,\alpha,\pi/2)\). The runtime landscape is \textbf{highly structured}, not uniform.
 
 \vspace{0.4em}
 \begin{itemize}
@@ -1063,7 +1079,7 @@ Target parametrization: \(U_{\mathrm{target}}(\alpha)=N(\alpha,\alpha,\pi/2)\) \
     \column{0.35\textwidth}
     \vspace{0.2em}
     \begin{block}{Reference benchmark}
-    \(T_{\mathrm{syn}} \approx 215\,\mathrm{ns}\) from optimal discrete gate synthesis \cite{vatan2004}.
+    \(T_{\mathrm{syn}} \approx 215\,\mathrm{ns}\) from optimal discrete gate synthesis.
     \end{block}
 
     \vspace{0.5em}
@@ -1076,6 +1092,7 @@ Target parametrization: \(U_{\mathrm{target}}(\alpha)=N(\alpha,\alpha,\pi/2)\) \
     \vspace{-0.6em}
     \includegraphics[width=\linewidth, height=0.65\textheight, keepaspectratio]{images/runtime_vs_alpha.pdf}
 \end{columns}
+% \let\thefootnote\relax\footnotetext{\tiny Niu, M. Y. et al., \emph{Universal Quantum Control through Deep Reinforcement Learning}, EPJ Quantum Technology (2019). $\cdot$ Vatan, F. and Williams, C., \emph{Optimal Quantum Circuits for General Two-Qubit Gates}, Phys. Rev. A (2004).}
 \end{frame}
 %------------------------------------------------------------
 \begin{frame}{Single-target: Training Dynamics and Horizon Sweep}
@@ -1100,7 +1117,7 @@ Target parametrization: \(U_{\mathrm{target}}(\alpha)=N(\alpha,\alpha,\pi/2)\) \
 \begin{frame}{RL state}
 \scriptsize
 
-\begin{block}{Current propagator and state definition \cite{niu2019}}
+\begin{block}{Current propagator and state definition}
 The current propagated unitary is
 \[
 U_t=\mathcal{T}\exp\!\left(-i\int_0^t H(\tau)\,d\tau\right),
@@ -1128,10 +1145,10 @@ so the observation dimension is
 d_{\mathrm{obs}} = 2\cdot 9^2 + 1 = 163.
 \]
 \end{block}
-
+\let\thefootnote\relax\footnotetext{\tiny Niu, M. Y. et al., \emph{Universal Quantum Control through Deep Reinforcement Learning}, EPJ Quantum Technology (2019).}
 \end{frame}
 
-\begin{frame}{Policy \cite{sutton2018}}
+\begin{frame}{Policy}
     \begin{block}{Policy network}
     \textbf{Input:} current state \(s_t\)
 
@@ -1163,10 +1180,10 @@ d_{\mathrm{obs}} = 2\cdot 9^2 + 1 = 163.
     \bigr).
     \]
     \end{block}
-
+\let\thefootnote\relax\footnotetext{\tiny Sutton, R. S. and Barto, A. G., \emph{Reinforcement Learning: An Introduction}, MIT press (2018).}
 \end{frame}
 
-\begin{frame}{Value network \cite{sutton2018}}
+\begin{frame}{Value network}
     \centering
 
     \begin{block}{Value network}
@@ -1195,6 +1212,7 @@ d_{\mathrm{obs}} = 2\cdot 9^2 + 1 = 163.
         \item the \textbf{value network} estimates how promising the current state is.
     \end{itemize}
     \end{block}
+\let\thefootnote\relax\footnotetext{\tiny Sutton, R. S. and Barto, A. G., \emph{Reinforcement Learning: An Introduction}, MIT press (2018).}
 \end{frame}
 
 \begin{frame}[allowframebreaks]{References}
