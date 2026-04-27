@@ -14,7 +14,7 @@ Ci tengo inoltre a specificare che la task di controllo quantistico analogico co
 
 # Slide 2 (1min 40s)
 
-L'implementazione di una operazione quantistica diversi obbiettivi devono essere soddisfatti simultaneamente:
+L'implementazione di una operazione quantistica presenta diversi obbiettivi devono essere soddisfatti simultaneamente:
 
 - Fedeltà dell'operazione
 - Bassa leakage
@@ -24,7 +24,7 @@ L'implementazione di una operazione quantistica diversi obbiettivi devono essere
 Il deep reinforcement Learining rappresenta una ottimo candidato per risolvere questo tipo di problemi:
 - il problema puo essere formulato come un Markov decision Process
 - l'agente puo sfruttare regolarità non locali nello spazio di traiettorie, inaccessibili a tecniche classiche 
-- transfer learding puo essere utilizzato per task simili 
+- transfer learning puo essere utilizzato per task simili 
 
 # Slide 3 (1min)
 
@@ -50,7 +50,7 @@ Perciò, una soluzione al problema di controllo avrà la forma di una succession
 
 # Slide 5 (1m 40s)
 
-La formulazione RL della task consiste nella definizione di agente e ambiente. L'agente conincide  con un Policy NN, il quale dato l'input dello stato del sistema, approssima una gaussiana 7 dimensionale sullo spazio delle azioni, da cui poi viene estratta una azione. Viene quindi simulata l'azione all'interno dell'ambiente, la quale evolve il sistema a un nuovo stato che verrà poi rimandato all'agente per l'iterazione successiva.
+La formulazione RL della task consiste nella definizione di agente e ambiente. L'agente conincide  con un Policy NN, il quale dato l'input dello stato del sistema, approssima una gaussiana 7 dimensionale sullo spazio delle azioni, da cui poi viene campionata una azione. Viene quindi simulata l'azione all'interno dell'ambiente, la quale evolve il sistema a un nuovo stato che verrà poi rimandato all'agente per l'iterazione successiva.
 
 Il training avviene invece dopo aver raccolto una batch di transizioni. La value network stima il ritorno atteso degli stati e permette di calcolare l’advantage, cioè quanto l’azione scelta è stata migliore o peggiore del previsto.
 
