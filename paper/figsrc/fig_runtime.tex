@@ -1,0 +1,93 @@
+% Standalone rebuild of the curriculum runtime sweep for the preprint.
+\documentclass[border=2pt]{standalone}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{groupplots}
+
+\newcommand{\datadir}{../../data}
+\newcommand{\runtimecsv}{\datadir/runtime_results/phase_final_results_log.csv}
+
+\begin{document}
+\begin{tikzpicture}
+\begin{groupplot}[
+    group style={group size=1 by 3, vertical sep=0.35cm},
+    width=12.4cm, height=4.0cm,
+    xmin=-0.12, xmax=3.26,
+    grid=major,
+    grid style={dashed, gray!30},
+    label style={font=\small},
+    tick label style={font=\footnotesize},
+    legend style={font=\scriptsize, cells={align=left}, draw=gray!60,
+                  fill=white, fill opacity=0.9, text opacity=1,
+                  row sep=0pt, inner sep=2pt},
+    unbounded coords=discard
+]
+
+% ------------------------------------------------------------ (a) runtime
+\nextgroupplot[
+    ylabel={Time (ns)},
+    ymin=0, ymax=272,
+    ytick={0,50,100,150,200,250},
+    xticklabels={\empty},
+    legend style={at={(0.5,0.04)}, anchor=south, legend columns=2}
+]
+    % optimal gate-synthesis reference
+    \draw[red!65!black, dash pattern=on 4pt off 2pt, thick]
+        (axis cs:-0.12,215) -- (axis cs:3.26,215);
+    \node[font=\scriptsize, red!55!black, anchor=north east, inner sep=1.5pt]
+        at (axis cs:3.22,213) {$T_{\mathrm{syn}}\approx215$\,ns (gate synthesis)};
+
+    \addplot[color=blue!80!white, mark=square*, thick, mark size=1.4pt]
+        table[x=alpha, y=eval_time_ns, col sep=comma] {\runtimecsv};
+    \addlegendentry{Evaluation runtime}
+
+    \addplot[color=red!80!black, only marks, mark=*, thick, mark size=1.7pt]
+        table[x=alpha, y expr={abs(\thisrow{eval_min_cost_time_ns} - \thisrow{eval_time_ns}) < 0.1 ? nan : \thisrow{eval_min_cost_time_ns}}, col sep=comma] {\runtimecsv};
+    \addlegendentry{Minimum-cost time}
+
+    \node[font=\small\bfseries, anchor=north west, fill=white, fill opacity=0.85, text opacity=1, inner sep=1.5pt] at (rel axis cs:0.008,0.97) {(a)};
+
+% ------------------------------------------------------------ (b) fidelity
+\nextgroupplot[
+    ylabel={Fidelity},
+    ymin=0.53, ymax=1.09,
+    ytick={0.6,0.7,0.8,0.9,1.0},
+    xticklabels={\empty},
+    legend style={at={(0.98,0.04)}, anchor=south east, legend columns=1}
+]
+    \addplot[color=red!80!black, mark=*, thick, mark size=1.4pt]
+        table[x=alpha, y=eval_fidelity, col sep=comma] {\runtimecsv};
+    \addlegendentry{Nominal fidelity}
+
+    \addplot[color=blue!80!white, mark=square*, thick, mark size=1.4pt]
+        table[x=alpha, y=robustness_sigma_1p0_average_fidelity, col sep=comma] {\runtimecsv};
+    \addlegendentry{$\overline{F}$ at $\sigma_{\mathrm{noise}}=1$\,MHz}
+
+    \node[font=\small\bfseries, anchor=north west, fill=white, fill opacity=0.85, text opacity=1, inner sep=1.5pt] at (rel axis cs:0.008,0.97) {(b)};
+
+% ------------------------------------------------------------ (c) constraints
+\nextgroupplot[
+    ymode=log,
+    ylabel={Penalty},
+    ymin=1e-11, ymax=1e2,
+    ytick={1e-10,1e-8,1e-6,1e-4,1e-2,1e0},
+    xlabel={Target parameter $\alpha$},
+    legend style={at={(0.02,0.04)}, anchor=south west, legend columns=2}
+]
+    \addplot[color=violet, mark=triangle*, thick, mark size=1.8pt]
+        table[x=alpha, y=eval_leakage, col sep=comma] {\runtimecsv};
+    \addlegendentry{Leakage $L_{\mathrm{tot}}$}
+
+    \addplot[color=orange, mark=x, thick, mark size=2.2pt]
+        table[x=alpha, y=avg_boundary_cost, col sep=comma] {\runtimecsv};
+    \addlegendentry{Boundary penalty}
+
+    \node[font=\small\bfseries, anchor=north west, fill=white, fill opacity=0.85, text opacity=1, inner sep=1.5pt] at (rel axis cs:0.008,0.97) {(c)};
+
+\end{groupplot}
+\end{tikzpicture}
+\end{document}
