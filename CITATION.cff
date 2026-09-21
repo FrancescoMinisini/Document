@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite the thesis as below."
+title: "Reinforcement-Learning Framework for Robust and Universal Analog Quantum Control on Superconducting Qubits (thesis sources)"
+authors:
+  - family-names: Minisini
+    given-names: Francesco Giuseppe
+repository-code: "https://github.com/FrancescoMinisini/Document"
+license: CC-BY-4.0
+preferred-citation:
+  type: thesis
+  title: "Reinforcement-Learning Framework for Robust and Universal Analog Quantum Control on Superconducting Qubits"
+  authors:
+    - family-names: Minisini
+      given-names: Francesco Giuseppe
+  thesis-type: "Bachelor's thesis"
+  department: "Department of Physics"
+  institution:
+    name: "University of Milan"
+  year: 2026
+  url: "https://github.com/FrancescoMinisini/Document"
