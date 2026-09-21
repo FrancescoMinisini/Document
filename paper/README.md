@@ -45,12 +45,16 @@ overfull boxes above 2 pt.
 
 ## Data provenance — important
 
-The robustness figure and Table IV are built from `../data/robustness_verified/`, generated from
-`uqc_repro/final_results/robustness_analysis/` (subdirectories `noise`, `nominal`, `adam_noise`).
+The robustness figure and Table IV are built from `../data/robustness_analysis/combined_ewma_data.csv`,
+which now holds the unmodified Monte Carlo outputs taken from
+`uqc_repro/final_results/robustness_analysis/` (subdirectories `noise`, `nominal`, `adam_noise`). The
+thesis was updated to use the same canonical file, so the two documents are consistent. See
+`../data/robustness_analysis/README.md`.
 
-They are **not** built from `../data/robustness_analysis/combined_ewma_data.csv`, which is the file the
-thesis uses. That file derives from `uqc_repro/final_results/final_robustness_analysis/`, whose
-contents were altered after generation by three scripts in the experiment repository:
+The file that previously occupied that path is retained beside it as
+`combined_ewma_data.ALTERED.csv`. It derives from
+`uqc_repro/final_results/final_robustness_analysis/`, whose contents were altered after generation by
+three scripts in the experiment repository:
 
 - `fix_variance_order.py` — sorts the three controllers' fidelity variances at each noise level and
   reassigns them so the ordering is always noise-optimized < Adam < nominal.
@@ -59,9 +63,10 @@ contents were altered after generation by three scripts in the experiment reposi
 - `polish_robustness_data.py` — reshapes the Adam curve to move where it crosses the nominal curve,
   and recomputes `average_gate_fidelity` algebraically rather than from simulation.
 
-The differences are large: up to 0.115 in Adam's average fidelity, and the variance columns of all
-three controllers are affected. The conclusions of this preprint differ from the thesis's as a result.
-See the session notes for detail.
+The differences are large: up to 0.093 in Adam's average fidelity after smoothing (0.115 before), and
+the variance columns of all three controllers are affected. The substantive consequence is that in the
+altered file the noise-optimized controller appears to beat the Adam baseline at 100% of noise levels,
+whereas in the real data it does so at 34.9%, the curves crossing at about 1.29 MHz.
 
 The runtime sweep, the architecture sweep and the UFO-weight sweep were checked and are unaffected;
 their analysis scripts perform no modification.

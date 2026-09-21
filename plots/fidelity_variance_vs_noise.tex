@@ -18,9 +18,15 @@
         unbounded coords=discard
     ]
         % Faint raw data for variance shading / Monte Carlo estimates
-        \addplot[color=blue!80!black, opacity=0.15] table[x=sigma_mhz, y=adam_variance_raw, col sep=comma] {data/robustness_analysis/combined_ewma_data.csv};
-        \addplot[color=orange!80!red, opacity=0.15] table[x=sigma_mhz, y=nominal_variance_raw, col sep=comma] {data/robustness_analysis/combined_ewma_data.csv};
-        \addplot[color=teal!80!black, opacity=0.15] table[x=sigma_mhz, y=noise_variance_raw, col sep=comma] {data/robustness_analysis/combined_ewma_data.csv};
+        \addplot[color=blue!80!black, opacity=0.15, forget plot] table[x=sigma_mhz, y=adam_variance_raw, col sep=comma] {data/robustness_analysis/combined_ewma_data.csv};
+        \addplot[color=orange!80!red, opacity=0.15, forget plot] table[x=sigma_mhz, y=nominal_variance_raw, col sep=comma] {data/robustness_analysis/combined_ewma_data.csv};
+        \addplot[color=teal!80!black, opacity=0.15, forget plot] table[x=sigma_mhz, y=noise_variance_raw, col sep=comma] {data/robustness_analysis/combined_ewma_data.csv};
+
+        % training-noise reference
+        \draw[gray!60, dashed, thick] (axis cs:1.0,1e-7) -- (axis cs:1.0,5e-2);
+        \node[font=\scriptsize, gray!40!black, anchor=south, fill=white,
+              fill opacity=0.85, text opacity=1, inner sep=1pt]
+            at (axis cs:1.0,1.1e-6) {$\sigma_{\mathrm{train}}$};
 
         % EWMA thickened lines
         \addplot[color=blue!80!black, thick] table[x=sigma_mhz, y=adam_variance_ewma, col sep=comma] {data/robustness_analysis/combined_ewma_data.csv};

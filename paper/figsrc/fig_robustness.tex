@@ -34,9 +34,9 @@
     unbounded coords=discard
 ]
     % raw Monte Carlo scatter
-    \addplot[color=blue!80!black,  opacity=0.15, forget plot] table[x=sigma_mhz, y=adam_fidelity_raw,    col sep=comma] {\datadir/robustness_verified/combined_ewma_verified.csv};
-    \addplot[color=orange!80!red,  opacity=0.15, forget plot] table[x=sigma_mhz, y=nominal_fidelity_raw, col sep=comma] {\datadir/robustness_verified/combined_ewma_verified.csv};
-    \addplot[color=teal!80!black,  opacity=0.15, forget plot] table[x=sigma_mhz, y=noise_fidelity_raw,   col sep=comma] {\datadir/robustness_verified/combined_ewma_verified.csv};
+    \addplot[color=blue!80!black,  opacity=0.15, forget plot] table[x=sigma_mhz, y=adam_fidelity_raw,    col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
+    \addplot[color=orange!80!red,  opacity=0.15, forget plot] table[x=sigma_mhz, y=nominal_fidelity_raw, col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
+    \addplot[color=teal!80!black,  opacity=0.15, forget plot] table[x=sigma_mhz, y=noise_fidelity_raw,   col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
 
     % training-noise marker
     \draw[gray!60, dashed, thick] (axis cs:1.0,0.79) -- (axis cs:1.0,1.03);
@@ -45,11 +45,11 @@
         at (axis cs:1.0,0.795) {$\sigma_{\mathrm{train}}$};
 
     % EWMA curves
-    \addplot[color=blue!80!black, thick] table[x=sigma_mhz, y=adam_fidelity_ewma,    col sep=comma] {\datadir/robustness_verified/combined_ewma_verified.csv};
+    \addplot[color=blue!80!black, thick] table[x=sigma_mhz, y=adam_fidelity_ewma,    col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
     \addlegendentry{Adam baseline}
-    \addplot[color=orange!80!red, thick] table[x=sigma_mhz, y=nominal_fidelity_ewma, col sep=comma] {\datadir/robustness_verified/combined_ewma_verified.csv};
+    \addplot[color=orange!80!red, thick] table[x=sigma_mhz, y=nominal_fidelity_ewma, col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
     \addlegendentry{Nominal TRPO}
-    \addplot[color=teal!80!black, thick] table[x=sigma_mhz, y=noise_fidelity_ewma,   col sep=comma] {\datadir/robustness_verified/combined_ewma_verified.csv};
+    \addplot[color=teal!80!black, thick] table[x=sigma_mhz, y=noise_fidelity_ewma,   col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
     \addlegendentry{Noise-optimized TRPO}
 \end{axis}
 
@@ -71,9 +71,9 @@
     filter discard warning=false,
     unbounded coords=discard
 ]
-    \addplot[color=blue!80!black, thick] table[x=sigma_mhz, y=adam_fidelity_ewma,    col sep=comma] {\datadir/robustness_verified/combined_ewma_verified.csv};
-    \addplot[color=orange!80!red, thick] table[x=sigma_mhz, y=nominal_fidelity_ewma, col sep=comma] {\datadir/robustness_verified/combined_ewma_verified.csv};
-    \addplot[color=teal!80!black, thick] table[x=sigma_mhz, y=noise_fidelity_ewma,   col sep=comma] {\datadir/robustness_verified/combined_ewma_verified.csv};
+    \addplot[color=blue!80!black, thick] table[x=sigma_mhz, y=adam_fidelity_ewma,    col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
+    \addplot[color=orange!80!red, thick] table[x=sigma_mhz, y=nominal_fidelity_ewma, col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
+    \addplot[color=teal!80!black, thick] table[x=sigma_mhz, y=noise_fidelity_ewma,   col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
 \end{axis}
 
 \node[font=\small\bfseries, anchor=north west] at (mainplot.north west) [xshift=-8pt, yshift=10pt] {(a)};
@@ -101,20 +101,20 @@
     filter discard warning=false,
     unbounded coords=discard
 ]
-    \addplot[color=blue!80!black, opacity=0.15, forget plot] table[x=sigma_mhz, y=adam_variance_raw,    col sep=comma] {\datadir/robustness_verified/combined_ewma_verified.csv};
-    \addplot[color=orange!80!red, opacity=0.15, forget plot] table[x=sigma_mhz, y=nominal_variance_raw, col sep=comma] {\datadir/robustness_verified/combined_ewma_verified.csv};
-    \addplot[color=teal!80!black, opacity=0.15, forget plot] table[x=sigma_mhz, y=noise_variance_raw,   col sep=comma] {\datadir/robustness_verified/combined_ewma_verified.csv};
+    \addplot[color=blue!80!black, opacity=0.15, forget plot] table[x=sigma_mhz, y=adam_variance_raw,    col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
+    \addplot[color=orange!80!red, opacity=0.15, forget plot] table[x=sigma_mhz, y=nominal_variance_raw, col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
+    \addplot[color=teal!80!black, opacity=0.15, forget plot] table[x=sigma_mhz, y=noise_variance_raw,   col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
 
     \draw[gray!60, dashed, thick] (axis cs:1.0,1e-7) -- (axis cs:1.0,5e-2);
     \node[font=\scriptsize, gray!40!black, anchor=south, fill=white,
           fill opacity=0.85, text opacity=1, inner sep=1pt]
         at (axis cs:1.0,3.2e-2) {$\sigma_{\mathrm{train}}$};
 
-    \addplot[color=blue!80!black, thick] table[x=sigma_mhz, y=adam_variance_ewma,    col sep=comma] {\datadir/robustness_verified/combined_ewma_verified.csv};
+    \addplot[color=blue!80!black, thick] table[x=sigma_mhz, y=adam_variance_ewma,    col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
     \addlegendentry{Adam baseline}
-    \addplot[color=orange!80!red, thick] table[x=sigma_mhz, y=nominal_variance_ewma, col sep=comma] {\datadir/robustness_verified/combined_ewma_verified.csv};
+    \addplot[color=orange!80!red, thick] table[x=sigma_mhz, y=nominal_variance_ewma, col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
     \addlegendentry{Nominal TRPO}
-    \addplot[color=teal!80!black, thick] table[x=sigma_mhz, y=noise_variance_ewma,   col sep=comma] {\datadir/robustness_verified/combined_ewma_verified.csv};
+    \addplot[color=teal!80!black, thick] table[x=sigma_mhz, y=noise_variance_ewma,   col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
     \addlegendentry{Noise-optimized TRPO}
 \end{axis}
 
