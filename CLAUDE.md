@@ -10,7 +10,7 @@ A LaTeX bachelor's thesis in physics (Reinforcement-Learning framework for robus
 - `presentation/Presentation.tex` — beamer defense slides.
 - `Summary/summary.tex` — a standalone plain-language summary (`article`, self-contained, no shared assets).
 
-There is no application code here; the simulation code that produced `data/` lives in a separate repository. Only its outputs (CSV/PNG) are checked in.
+There is no application code here; the simulation code that produced `data/` lives in the separate repository `../uqc_repro` (see `../CLAUDE.md`). Only its outputs (CSV/PNG) are checked in.
 
 ## Build
 
@@ -67,6 +67,8 @@ To change a figure: uncomment the source, build, take the resulting PDF (from th
 
 `plots/*.tex` address CSVs as `data/<dir>/<file>.csv` — valid only when `\input` from `Tesi.tex` at the repo root. The slide copies in `presentation/images/*.tex` use `../data/...` instead. When copying a plot between the two documents, fix this prefix.
 
+Render slide figures in a beamer context, not with `plots/_standalone_wrapper.tex`: the slides use beamer's sans-serif fonts (CMSS) and its text width. Build from `presentation/` a throwaway one-frame `\documentclass{beamer}` document that sets `\usetheme{Madrid}`, `\tikzexternalize` and `\tikzsetnextfilename{<name>}`, and inputs `images/<name>.tex`. Copy the externalized PDF to `images/<name>.pdf`, then delete the throwaway files.
+
 ## Document structure
 
 `Tesi.tex` holds the whole preamble and title page and `\include`s, in order:
@@ -87,6 +89,8 @@ Cross-reference label prefixes are used consistently and cited via `\eqref`/`\re
 ## Data
 
 `data/<experiment>/` pairs the CSVs consumed by `plots/*.tex` with the matplotlib PNGs originally produced by the simulation code. The PNGs are reference only — the thesis ships the pgfplots renderings, not the PNGs. Experiment directories: `adam`, `adam_vs_nominal_results`, `cost_function_sweep_results`, `nn_size_sweep_results`, `robustness_analysis`, `runtime_results`, `trpo_nominal_results`.
+
+`data/robustness_analysis/combined_ewma_data.csv` must stay byte-identical to the output of `uqc_repro/analysis/export_ewma_data.py`. Its README records the provenance. An earlier, altered version of this dataset is kept in the gitignored `archive/` folder: never plot it or quote numbers from it. The submitted snapshot `Thesis_Francesco_Giuseppe_Minisini_final.pdf` predates the correction and still shows the earlier robustness figures. Leave it unchanged.
 
 ## Misc
 

@@ -95,11 +95,11 @@ In questa valutazione è stata introdotta il cosiddetto agente noise optimized, 
 
 I grafici mostrano la fedeltà media e la sua deviazione standard su un campione di 60 esperimenti per datapoint, il cui ambiente è sottoposto ad rumore gaussiano di deviazione standard crescente. (I risultati mostrati sono delle medie mobili).
 
-Come possiamo notare è una complessiva performace superiore da parte dell' agende allenato con rumore, sia in termini di fedeltà media, sia in termini di precisione su tutto il dominio testato.
+Come possiamo notare, l'agente allenato con rumore supera sempre quello RL nominale, sia in fedeltà media sia in varianza, su tutto il dominio testato. Dato che i due agenti hanno stessa architettura e stesso algoritmo, questo vantaggio non è dovuto ad una mera applicazione di RL, ma all'allenamento in ambiente rumoroso.
 
-Possiamo interpretare questo risultato come la capacità dell'agente di generalizzare e acquisire policy più conservative, risultando complessivamente meno sensibili a rumore esterno.
+Il confronto con Adam invece dipende dal livello di rumore: l'agente noise optimized è migliore solo fino a circa 1.3 MHz in fedeltà media (circa 1.2 MHz in varianza), cioè poco sopra il rumore di 1 MHz usato in training. Oltre questo punto Adam diventa sia più accurato che più stabile.
 
-Da notare inoltre come l'agente Adam, ancora performi meglio di quello RL nominale, il che suggerisce che la miglior performance del agente noise optimized non sia dovuto ad una mera applicazione di RL, ma la sua capacità di generalizzare in ambiente rumoroso.
+Possiamo interpretare questo risultato come una strategia di compensazione calibrata sul livello di rumore visto in training, più che come una robustezza generica al rumore.
 
 # Slide 10 (40s)
 
@@ -107,4 +107,4 @@ Qui sono invece elencati altri risultati interessanti ottenuti nella tesi ma non
 
 Riassumendo, la tesi ha contribuito con la completa reimplementazione del framework e l'estensione della letteratura esistente, tramite vari risultati e un piu approfondito paragone tra la controparte classica.
 
-Tra le conclusioni scientifiche possiamo trarre che sotto perturbazioni stocastiche, l'agente allenato in ambiente rumoroso diventa la miglior strategia.
+Tra le conclusioni scientifiche possiamo trarre che sotto perturbazioni stocastiche l'agente allenato in ambiente rumoroso batte sempre quello nominale, ma supera Adam solo vicino al livello di rumore usato in training.

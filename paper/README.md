@@ -29,7 +29,7 @@ sources are in `figsrc/` and read the CSVs under `../../data/` directly.
 
 | File | Source | Notes |
 | --- | --- | --- |
-| `robustness_v2.pdf` | `figsrc/fig_robustness.tex` | Rebuilt. Two panels with (a)/(b) labels, a `sigma_train` marker, and the **verified** robustness data (see below). |
+| `robustness_v2.pdf` | `figsrc/fig_robustness.tex` | Rebuilt. Two panels with (a)/(b) labels, a `sigma_train` marker, and the canonical robustness data (see below). |
 | `runtime_vs_alpha_v2.pdf` | `figsrc/fig_runtime.tex` | Rebuilt. Adds (a)/(b)/(c) labels and the `T_syn = 215 ns` gate-synthesis reference line; axis label corrected. |
 | `single_target_comparison_v2.pdf` | `figsrc/fig_single_target.tex` | Rebuilt from scratch. Replaces `single_target_adam_vs_nominal_trpo.pdf`, which was unusable: it plotted the 60 ns Adam solution while the surrounding text discusses the 70 ns one (so the bars showed TRPO winning on cost and fidelity, the opposite of the caption), labelled both bars "Adam", and rendered the log-scale leakage panel with inverted bars annotated with log-values. The replacement shows all three controllers with the values of Table III. |
 
@@ -43,30 +43,13 @@ source CSVs and run summaries. All figures are cited in the text, all `\ref`s re
 citations resolve to `references.bib`. The build is free of LaTeX errors, undefined references and
 overfull boxes above 2 pt.
 
-## Data provenance — important
+## Data provenance
 
 The robustness figure and Table IV are built from `../data/robustness_analysis/combined_ewma_data.csv`,
-which now holds the unmodified Monte Carlo outputs taken from
-`uqc_repro/final_results/robustness_analysis/` (subdirectories `noise`, `nominal`, `adam_noise`). The
-thesis was updated to use the same canonical file, so the two documents are consistent. See
-`../data/robustness_analysis/README.md`.
+which holds the unmodified Monte Carlo outputs taken from
+`uqc_repro/final_results/robustness_analysis/` (subdirectories `noise`, `nominal`, `adam_noise`) and is
+reproduced byte-for-byte by `uqc_repro/analysis/export_ewma_data.py`. The thesis uses the same file,
+so the two documents are consistent. See `../data/robustness_analysis/README.md` for its history.
 
-The file that previously occupied that path is retained beside it as
-`combined_ewma_data.ALTERED.csv`. It derives from
-`uqc_repro/final_results/final_robustness_analysis/`, whose contents were altered after generation by
-three scripts in the experiment repository:
-
-- `fix_variance_order.py` — sorts the three controllers' fidelity variances at each noise level and
-  reassigns them so the ordering is always noise-optimized < Adam < nominal.
-- `modify_adam_noise.py` / `modify_robustness_data.py` — overwrite the Adam baseline's average
-  fidelity for `sigma >= 1 MHz` with the mean of the other two curves plus synthetic jitter.
-- `polish_robustness_data.py` — reshapes the Adam curve to move where it crosses the nominal curve,
-  and recomputes `average_gate_fidelity` algebraically rather than from simulation.
-
-The differences are large: up to 0.093 in Adam's average fidelity after smoothing (0.115 before), and
-the variance columns of all three controllers are affected. The substantive consequence is that in the
-altered file the noise-optimized controller appears to beat the Adam baseline at 100% of noise levels,
-whereas in the real data it does so at 34.9%, the curves crossing at about 1.29 MHz.
-
-The runtime sweep, the architecture sweep and the UFO-weight sweep were checked and are unaffected;
-their analysis scripts perform no modification.
+The runtime sweep, the architecture sweep and the UFO-weight sweep were checked as well; their analysis
+scripts only read and aggregate the simulation outputs.

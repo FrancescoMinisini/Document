@@ -148,15 +148,15 @@ IMPORTANTE: Togliere tutta la 8, ritardare la distinzione tra noise e nomnial al
 
 DA DIRE: Le linee continue sono medie mobile
 
-HO TRE AGENTI, Uno è stato ottimizzato (in training in presenza di noise di 1 MHz), ora osservo la fidelity media esponendo i tre agenti ad noise crescente, e osservo che quello allenato in presenza di noise funziona meglio perchè riduce la varianza della fidelity e 
+HO TRE AGENTI, Uno è stato ottimizzato (in training in presenza di noise di 1 MHz), ora osservo la fidelity media esponendo i tre agenti ad noise crescente, e osservo che quello allenato in presenza di noise batte sempre quello nominale, sia in fidelity media sia in varianza, ma batte Adam solo fino a circa 1.3 MHz (fid) / 1.2 MHz (var).
 
-è IMPORTANTE MENZIONARE CHE nonostante il no è stato allenato con un valore fisso di 1MhZ di noise, questo mostra una generalizzazione della robustezza su tutto il dominio di noise testato sia per fid che per var ed è proprio il valore principale.
+è IMPORTANTE MENZIONARE CHE il no è stato allenato con un valore fisso di 1 MHz di noise, e il suo vantaggio su Adam si ferma poco sopra quel valore: è una compensazione calibrata sul rumore di training, non una robustezza generale su tutto il dominio.
 
 Dall'ordine....
 
-Il che è coerente con i risultati della letteratura per adam questo è un miglioramento ...
+Il confronto noise vs nominal è coerente con la letteratura; il confronto con Adam invece ne delimita la portata.
 
-Questa non è solo una riproduzione ma un netto miglioreamento con il paragone con adam.
+Questa non è solo una riproduzione: il paragone con un Adam anch'esso noise-aware mostra fin dove arriva il vantaggio del RL allenato con rumore.
 
 11) Finita, ho ottenuto tanti altri risultati interessanti che per questioni di tempo non presento.
 
@@ -212,7 +212,7 @@ Da qua sembrerebbe che Adam sia la strategia leggermente preferibile. Ma ...
 
 11) Specificare le ordinate
 
-Attenzione che nel training è stata utilizzata solo una sola frequenza di rumore, compresa anche quella ottimizza su tutto il dominio.
+Attenzione che nel training è stata utilizzata una sola intensità di rumore (1 MHz): il vantaggio su Adam vale solo vicino a quel valore.
 
 Il reinforcement learning agent, sono state misurate per robustezza
 

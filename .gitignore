@@ -330,3 +330,6 @@ Tesi-figure*.pdf
 codeexport.config.psd1
 codebase.txt
 exported_cb/
+
+# Files removed from version control but kept on disk
+archive/

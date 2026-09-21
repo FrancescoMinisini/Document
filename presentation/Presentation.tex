@@ -728,7 +728,7 @@ C=
 %------------------------------------------------------------
 \begin{frame}{Noise-optimized Agent: Robustness}
 \small
-Under control noise, the \textbf{noise-optimized RL agent} (trained with 1MHz noise) is the strongest. The key advantage is not just RL, but \textbf{RL trained in stochastic environment} 
+Under control noise, the \textbf{noise-optimized RL agent} (trained with 1MHz noise) always beats \textbf{nominal RL}: the gain comes from \textbf{training in a stochastic environment}, not from RL alone. Its lead over the noise-aware \textbf{Adam} baseline holds only near the training noise%
 % (compare with \cite{niu2019})
 .
 % TODO: SISTEMARE I GRAFICI: ingrandire, sistemare le legende (colore e ewma e 2 parole su noise optimized)
@@ -738,8 +738,8 @@ Under control noise, the \textbf{noise-optimized RL agent} (trained with 1MHz no
     \column{0.48\textwidth}
     \textbf{Average fidelity}
     \begin{itemize}
-        \item retains highest \(\overline{F}(\sigma_{\mathrm{noise}})\)
-        \item outperforms Adam and nominal RL
+        \item above nominal RL at every \(\sigma_{\mathrm{noise}}\)
+        \item above Adam only up to \(\sigma_{\mathrm{noise}}\approx 1.3\,\mathrm{MHz}\); Adam leads beyond
     \end{itemize}
     
     \vspace{0.2em}
@@ -750,8 +750,8 @@ Under control noise, the \textbf{noise-optimized RL agent} (trained with 1MHz no
     \column{0.48\textwidth}
     \textbf{Fidelity variance}
     \begin{itemize}
-        \item demonstrates lowest \(\mathrm{Var}(F)\)
-        \item superior structural stability under noise
+        \item lower than nominal RL at every \(\sigma_{\mathrm{noise}}\)
+        \item lowest overall only up to \(\approx 1.2\,\mathrm{MHz}\); Adam is most stable beyond
     \end{itemize}
     
     \vspace{0.2em}
@@ -831,7 +831,7 @@ Although I only presented the main results, the thesis also includes several add
 \begin{itemize}
     % \item The framework is physically meaningful and empirically credible.
     % \item In the nominal single-target regime, direct pulse optimization remains very strong.
-    \item Under stochastic perturbations, noise-optimized RL becomes the most robust strategy.
+    \item Under stochastic perturbations, noise-optimized RL beats nominal RL everywhere, but beats the noise-aware Adam baseline only near its training noise.
     % \item Analog control can outperform standard gate synthesis in runtime.
 \end{itemize}
 \end{block}
