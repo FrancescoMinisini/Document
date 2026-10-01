@@ -1,0 +1,114 @@
+% Noise with memory: where the pulse shape enters, and what noise-aware optimization can do about it.
+% Data (all under ../../data/noise_memory_results/, written by uqc_repro/analysis/noise_with_memory.py):
+%   (a) filter_functions.csv     (b) correlation_time.csv     (c) plan_sensitivity.csv
+% Build: pdflatex fig_memory (from figsrc/).
+\documentclass[border=2pt]{standalone}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{groupplots}
+
+\newcommand{\datadir}{../../data/noise_memory_results}
+\newcommand{\ffcsv}{\datadir/filter_functions.csv}
+\newcommand{\ctcsv}{\datadir/correlation_time.csv}
+\newcommand{\pscsv}{\datadir/plan_sensitivity.csv}
+
+\definecolor{cNone}{RGB}{90,90,90}
+\definecolor{cWhite}{RGB}{31,78,160}
+\definecolor{cQS}{RGB}{190,40,60}
+\definecolor{cNom}{RGB}{224,109,30}
+\definecolor{cNoise}{RGB}{20,120,116}
+
+\pgfplotsset{
+  keep if/.style 2 args={
+    x filter/.append code={%
+      \edef\tempa{\thisrow{#1}}\edef\tempb{#2}%
+      \ifx\tempa\tempb\else\def\pgfmathresult{inf}\fi
+    }
+  }
+}
+
+\begin{document}
+\begin{tikzpicture}
+\begin{groupplot}[
+    group style={group size=3 by 1, horizontal sep=1.7cm},
+    width=6.3cm, height=5.3cm,
+    grid=major, grid style={dashed, gray!30},
+    label style={font=\small},
+    tick label style={font=\footnotesize},
+    legend style={font=\scriptsize, legend cell align=left, draw=gray!60, fill=white,
+                  fill opacity=0.92, text opacity=1, row sep=0pt, inner sep=2pt},
+    filter discard warning=false,
+    unbounded coords=discard
+]
+
+% ---------------------------------------------------------------- (a) filter functions
+\nextgroupplot[
+    xmode=log, ymode=log,
+    xlabel={Noise frequency (MHz)},
+    ylabel={Normalized filter function},
+    xmin=0.1, xmax=250, ymin=0.02, ymax=40,
+    legend style={at={(0.03,0.03)}, anchor=south west},
+]
+    \draw[black!55, thick] (axis cs:0.1,1) -- (axis cs:250,1);
+    \addplot[color=cNone, thick] table[x=frequency_mhz, y=normalized_filter_function_none, col sep=comma] {\ffcsv};
+    \addlegendentry{no training noise}
+    \addplot[color=cWhite, thick, densely dashed] table[x=frequency_mhz, y=normalized_filter_function_white, col sep=comma] {\ffcsv};
+    \addlegendentry{white}
+    \addplot[color=cQS, thick] table[x=frequency_mhz, y=normalized_filter_function_quasi_static, col sep=comma] {\ffcsv};
+    \addlegendentry{quasi-static}
+    \node[font=\small\bfseries, anchor=north east, fill=white, fill opacity=0.85, text opacity=1, inner sep=1.5pt] at (rel axis cs:0.98,0.98) {(a)};
+
+% ---------------------------------------------------------------- (b) correlation time
+\nextgroupplot[
+    xmode=log, ymode=log,
+    xlabel={Noise correlation time (ns)},
+    ylabel={Excess infidelity at $0.2\,$MHz},
+    xmin=0.25, xmax=4096, ymin=5e-4, ymax=3e-2,
+]
+    \addplot[color=cNone, thick, keep if={model}{none}, keep if={kind}{first_order}]
+        table[x=correlation_time_ns, y=excess_infidelity, col sep=comma] {\ctcsv};
+    \addplot[color=cWhite, thick, densely dashed, keep if={model}{white}, keep if={kind}{first_order}]
+        table[x=correlation_time_ns, y=excess_infidelity, col sep=comma] {\ctcsv};
+    \addplot[color=cQS, thick, keep if={model}{quasi_static}, keep if={kind}{first_order}]
+        table[x=correlation_time_ns, y=excess_infidelity, col sep=comma] {\ctcsv};
+    \addplot[color=cNone, only marks, mark=o, mark size=1.6pt, keep if={model}{none}, keep if={kind}{monte_carlo}]
+        table[x=correlation_time_ns, y=excess_infidelity, col sep=comma] {\ctcsv};
+    \addplot[color=cWhite, only marks, mark=square, mark size=1.5pt, keep if={model}{white}, keep if={kind}{monte_carlo}]
+        table[x=correlation_time_ns, y=excess_infidelity, col sep=comma] {\ctcsv};
+    \addplot[color=cQS, only marks, mark=triangle, mark size=1.9pt, keep if={model}{quasi_static}, keep if={kind}{monte_carlo}]
+        table[x=correlation_time_ns, y=excess_infidelity, col sep=comma] {\ctcsv};
+    \node[font=\scriptsize, anchor=south east, align=right, inner sep=1pt] at (rel axis cs:0.97,0.05)
+        {lines: first order;\\ symbols: Monte Carlo};
+    \node[font=\small\bfseries, anchor=north west, fill=white, fill opacity=0.85, text opacity=1, inner sep=1.5pt] at (rel axis cs:0.02,0.98) {(b)};
+
+% ---------------------------------------------------------------- (c) quasi-static excess vs duration
+\nextgroupplot[
+    xlabel={Pulse duration $T$ (ns)},
+    ylabel={Quasi-static excess infidelity ($10^{-3}$)},
+    xmin=55, xmax=190, ymin=0, ymax=18.5,
+    legend style={at={(0.97,0.03)}, anchor=south east},
+]
+    \addplot[color=cNom, only marks, mark=o, mark size=1.2pt, keep if={source}{trajectory_nominal}]
+        table[x=time_ns, y expr=1000*\thisrow{quasi_static_excess_0p1mhz}, col sep=comma] {\pscsv};
+    \addlegendentry{nominal TRPO plans}
+    \addplot[color=cNoise, only marks, mark=x, mark size=1.6pt, keep if={source}{trajectory_noise}]
+        table[x=time_ns, y expr=1000*\thisrow{quasi_static_excess_0p1mhz}, col sep=comma] {\pscsv};
+    \addlegendentry{noise-opt.\ TRPO plans}
+    \addplot[color=cNone, only marks, mark=*, mark size=2pt, keep if={source}{adam_none}]
+        table[x=time_ns, y expr=1000*\thisrow{quasi_static_excess_0p1mhz}, col sep=comma] {\pscsv};
+    \addlegendentry{Adam, no noise}
+    \addplot[color=cWhite, only marks, mark=square, mark size=1.6pt, keep if={source}{adam_white}]
+        table[x expr=\thisrow{time_ns}+3, y expr=1000*\thisrow{quasi_static_excess_0p1mhz}, col sep=comma] {\pscsv};
+    \addlegendentry{Adam, white}
+    \addplot[color=cQS, only marks, mark=triangle, mark size=1.9pt, keep if={source}{adam_quasi_static}]
+        table[x expr=\thisrow{time_ns}-3, y expr=1000*\thisrow{quasi_static_excess_0p1mhz}, col sep=comma] {\pscsv};
+    \addlegendentry{Adam, quasi-static}
+    \node[font=\small\bfseries, anchor=north west, fill=white, fill opacity=0.85, text opacity=1, inner sep=1.5pt] at (rel axis cs:0.02,0.98) {(c)};
+
+\end{groupplot}
+\end{tikzpicture}
+\end{document}

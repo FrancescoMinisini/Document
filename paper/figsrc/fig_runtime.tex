@@ -9,10 +9,12 @@
 \usepackage{pgfplots}
 \usepackage{pgfplotstable}
 \pgfplotsset{compat=1.18}
-\usepgfplotslibrary{groupplots}
+\usepgfplotslibrary{groupplots,fillbetween}
 
 \newcommand{\datadir}{../../data}
 \newcommand{\gscsv}{\datadir/gate_structure_results/runtime_vs_gate_structure.csv}
+% filter-limited exchange time (free end / end at zero), uqc_repro/analysis/exchange_area_bound.py
+\newcommand{\bandcsv}{\datadir/gate_structure_results/exchange_area_band.csv}
 
 \definecolor{cAdam}{RGB}{31,78,160}
 \definecolor{cTRPO}{RGB}{20,120,116}
@@ -50,7 +52,7 @@
     ymin=-8, ymax=288,
     ytick={0,50,100,150,200,250},
     xticklabels={\empty},
-    legend style={at={(0.5,1.03)}, anchor=south, legend columns=3}
+    legend style={at={(0.5,1.03)}, anchor=south, legend columns=4}
 ]
     \foreach \xm in {0.7854,1.5708,2.3562} {\edef\temp{\noexpand\draw[gray!55, dotted, thick] (axis cs:\xm,-8) -- (axis cs:\xm,246);}\temp}
     \node[font=\scriptsize, gray!40!black, anchor=south, inner sep=1pt] at (axis cs:0.7854,246) {iSWAP class};
@@ -63,6 +65,10 @@
     \node[font=\scriptsize, black!70, anchor=south east, inner sep=1.5pt]
         at (axis cs:2.02,150) {two-CNOT synthesis, $150$\,ns};
 
+    \addplot[name path=bandlow, draw=none, forget plot] table[x=alpha, y=t_free_end_ns, col sep=comma] {\bandcsv};
+    \addplot[name path=bandhigh, draw=none, forget plot] table[x=alpha, y=t_zero_end_ns, col sep=comma] {\bandcsv};
+    \addplot[gray!35, forget plot] fill between[of=bandlow and bandhigh];
+
     \addplot[color=cTRPO, only marks, mark=square*, mark size=1.7pt, keep if={method}{trpo_curriculum}, keep if={converged}{True}]
         table[x=alpha, y=runtime_ns, col sep=comma] {\gscsv};
     \addlegendentry{Curriculum TRPO, converged}
@@ -72,6 +78,8 @@
     \addplot[color=cAdam, mark=*, mark size=1.3pt, thick, keep if={method}{adam}]
         table[x=alpha, y=runtime_ns, col sep=comma] {\gscsv};
     \addlegendentry{Adam}
+    \addlegendimage{area legend, fill=gray!35, draw=none}
+    \addlegendentry{exchange area through the filter}
     \addplot[color=black!75, only marks, mark=diamond*, mark size=2.2pt, forget plot]
         coordinates {(0,20) (3.14159,20)};
     \node[font=\scriptsize, black!75, anchor=west, inner sep=1pt] at (axis cs:0.07,20) {local gate $\sigma^z\sigma^z$: one single-qubit layer, $20$\,ns};

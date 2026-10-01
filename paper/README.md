@@ -1,7 +1,7 @@
 # Preprint source bundle
 
 `preprint.tex` — *Robust analog two-qubit gates from deep reinforcement learning: an independent
-reproduction and family-resolved assessment.* REVTeX 4.2, APS two-column preprint style, 19 pages.
+reproduction and family-resolved assessment.* REVTeX 4.2, APS two-column preprint style, 21 pages.
 
 ## Build
 
@@ -14,8 +14,8 @@ pdflatex preprint
 
 No `-shell-escape` is needed: unlike the thesis, this document contains no live TikZ and no
 externalization. All figures are pre-rendered PDFs in `figures/`. `references.bib` here is the thesis
-bibliography plus five entries used only by the preprint (Zhang2003, Makhlin2002, VidalDawson2004,
-ShendeMarkovBullock2004, Foxen2020).
+bibliography plus ten entries used only by the preprint (Zhang2003, Makhlin2002, VidalDawson2004,
+ShendeMarkovBullock2004, Foxen2020, Green2012, Green2013, Cerfontaine2021, KhodjastehViola2009, Wu2019).
 
 ## Authorship
 
@@ -28,19 +28,38 @@ existing one and trim the first sentence of the acknowledgments.
 
 Six figures are reused unchanged from the thesis (`gmon_architecture_schematic`, `ufo_cost_structure`,
 `architecture_sweep_pareto_combined`, `ufo_weight_sweep_robustness`, `adam_single_target_horizon_sweep`,
-`adam_family_sweep`). Four were built for this paper; their pgfplots sources are in `figsrc/` and read the
+`adam_family_sweep`). Five were built for this paper; their pgfplots sources are in `figsrc/` and read the
 CSVs under `../data/` directly.
 
 | File | Source | Content |
 | --- | --- | --- |
-| `single_target_comparison_v3.pdf` | `figsrc/fig_single_target.tex` | Fig. 6: nominal cost, fidelity, leakage and runtime of Adam (70 ns) and the two TRPO agents, with both synthesis references. Values typed from the nominal re-evaluation of the stored plans (listed in the source header). |
-| `robustness_v3.pdf` | `figsrc/fig_robustness.tex` | Fig. 7: average fidelity and variance versus noise strength for the four controllers of Table III, from `data/robustness_analysis_3/`. |
-| `noise_training_mechanism.pdf` | `figsrc/fig_mechanism.tex` | Fig. 8: matched-history paired differences, closed versus open loop, excess infidelity versus duration with the first-order prediction. |
-| `runtime_vs_alpha_v3.pdf` | `figsrc/fig_runtime.tex` | Fig. 9: runtime, fidelity and leakage across `N(a, a, pi/2)` for the curriculum and the Adam sweep, with both synthesis references. |
+| `single_target_comparison_v3.pdf` | `figsrc/fig_single_target.tex` | Fig. 4: nominal cost, fidelity, leakage and runtime of Adam (70 ns) and the two TRPO agents, with both synthesis references. Values typed from the nominal re-evaluation of the stored plans (listed in the source header). |
+| `robustness_v3.pdf` | `figsrc/fig_robustness.tex` | Fig. 5: average fidelity and variance versus noise strength for the four controllers of Table II, from `data/robustness_analysis_3/`. |
+| `noise_training_mechanism.pdf` | `figsrc/fig_mechanism.tex` | Fig. 6: matched-history paired differences, closed versus open loop, excess infidelity versus duration with the first-order prediction. |
+| `noise_with_memory.pdf` | `figsrc/fig_memory.tex` | Fig. 7: filter functions of three 70 ns Adam pulses, excess infidelity against the noise correlation time, quasi-static excess infidelity against duration for all plans. |
+| `runtime_vs_alpha_v4.pdf` | `figsrc/fig_runtime.tex` | Fig. 8: runtime, fidelity and leakage across `N(a, a, pi/2)` for the curriculum and the Adam sweep, with both synthesis references and the bandwidth-limited exchange time (grey band). |
 
 Rebuild any of them with `pdflatex fig_<name>` from inside `figsrc/`, then copy the resulting PDF into
 `figures/` under the name above. The `*_v2.pdf` files in `figures/` belong to the version of 2026-09-07
-and are no longer included.
+and are no longer included; `runtime_vs_alpha_v3.pdf` is the version of 2026-09-22. Figure and table
+numbers above are those of the current version.
+
+## Changes of 2026-10-01
+
+Additions that use the stored runs, plus one new Adam experiment (minutes of CPU); no TRPO run was added.
+
+- **Noise with memory (Sec. V E, Fig. 7, Table IV).** Every stored plan replayed under quasi-static and
+  exponentially correlated noise, with the first-order (filter-function) prediction; Adam trained at fixed
+  horizons without noise, under white noise and under quasi-static noise, eight seeds each. White-noise
+  training helps in 0 of 24 runs; quasi-static training lowers the quasi-static sensitivity by 18-24%.
+- **First-order formula (Appendix C).** Eq. (21) is now presented as the white-noise limit of the
+  filter-function description, with the prior art cited, the exact per-plan rate and a per-channel table.
+- **Noise scales (Sec. VII C).** Dependence of the rate on the noise interval, noise injected before the
+  filter, and the equivalent dephasing time.
+- **Bandwidth limit (Sec. VI E, Fig. 8).** Shortest time in which the filtered, bounded coupling delivers
+  each target's exchange area; single-qubit rotation times under the same limit.
+- **Structure.** The architecture and weight sweeps moved from Sec. IV to Appendix D, with a summary in
+  Sec. III F; the simulator-step counts of the controllers are quoted in Sec. III C.
 
 ## Changes of 2026-09-22
 

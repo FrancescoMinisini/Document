@@ -59,13 +59,17 @@ nominal metric and is the most robust controller at every noise strength. Two TR
 only in the training noise produce deployed pulses of the same robustness: over eighty matched training
 iterations, the noise-trained pulse is the more robust one in at most a quarter of them. We show why.
 Against per-step white control noise, the open-loop robustness of any pulse is fixed to leading order by
-its nominal fidelity and its duration, at a rate that we derive from the Hamiltonian and verify on every
-pulse; the noisy objective is dominated by the response of the leakage bound to the noise itself; and what
-stochastic training teaches is feedback on the noisy state, which a deployed open-loop pulse cannot use.
+its nominal fidelity and its duration --- the white-noise limit of the filter-function picture --- at a
+rate that we compute from the Hamiltonian and verify on every pulse; the noisy objective is dominated by
+the response of the leakage bound to the noise itself; and what stochastic training changes is the
+policy's reaction to noisy states, which a deployed open-loop pulse cannot use. The direct optimizer
+confirms both sides of this: trained under white noise it gains nothing in $24$ runs out of $24$, trained
+under quasi-static noise it lowers the sensitivity of its pulses to that noise by about a fifth.
 Finally, every member of the benchmark subfamily $N(\alpha,\alpha,\pi/2)$ is an exchange rotation by
 $\alpha-\pi/2$, so the order-of-magnitude runtime gain reported near $\alpha=\pi/2$ sits around the
 identity. Against a target-specific two-CNOT synthesis the learned pulses are at most twice as fast, and
-the direct optimizer up to $3.75$ times. All code and data are public.
+the direct optimizer up to $3.75$ times; its pulses sit at the limit set by the model's control
+bandwidth, which the gate times of the synthesis reference do not respect. All code and data are public.
 \end{abstract}
 
 \maketitle
@@ -137,8 +141,11 @@ $19$--$25\%$ of them, at every noise strength.
 pulse is fixed to leading order by its nominal fidelity and duration, Eq.~\eqref{eq:whitenoise}, at a rate
 that we compute from the Hamiltonian and verify on every pulse we produced. In addition, the noisy
 objective is dominated by the leakage bound's response to the noise, which acts as a runtime penalty, and
-what stochastic training does teach is feedback on the noisy state: in closed loop the noise-trained
-agent is the more robust one, but a deployed pulse cannot use feedback.
+what stochastic training does change is the policy's reaction to noisy states: in closed loop the
+noise-trained agent is the more robust one, but a deployed pulse cannot use feedback. The same test with
+the direct optimizer, over eight seeds and three durations, agrees: white-noise training never helps, and
+training against quasi-static noise, where the pulse shape does enter, lowers the sensitivity by about a
+fifth (Sec.~\ref{sec:memory}).
 \item Every member of the subfamily $\Ntgt{\alpha}{\pi/2}$ is an exchange rotation by $\alpha-\pi/2$.
 The target at $\alpha=\pi/2$ is the identity, the order-of-magnitude runtime gain of
 Ref.~\cite{Niu2019} lies around it, and every non-local member needs two CNOTs, not three. Against that
@@ -147,11 +154,13 @@ fails to converge on a third of the family, and an exact mirror symmetry of the 
 failures are the optimizer's, not the targets'.
 \item The runtime advantage over compiled synthesis belongs to analog pulse-level control, not to the
 learning method: the direct optimizer alone is faster at every non-trivial target ($1.9$--$3.75\times$
-over two-CNOT synthesis), and its pulse length tracks the exchange angle $|\alpha-\pi/2|$.
+over two-CNOT synthesis), and its pulse length tracks the exchange angle $|\alpha-\pi/2|$, close to the
+shortest time in which the bandwidth-limited coupling can deliver it. Under the same bandwidth limit a
+single-qubit $\pi$ rotation takes at least $54\ns$, not the $20\ns$ assumed by the synthesis reference.
 \end{enumerate}
 
 Section~\ref{sec:framework} states the framework; Sec.~\ref{sec:methods} gives the implementation and
-the complete parameter set; Sec.~\ref{sec:modelsel} fixes the free parameters through two sweeps;
+the complete parameter set; Appendix~\ref{app:modelsel} fixes the free parameters through two sweeps;
 Secs.~\ref{sec:single}--\ref{sec:runtime} present the nominal, robustness and runtime results;
 Sec.~\ref{sec:discussion} confronts them with the original claims.
 
@@ -421,7 +430,9 @@ generates Eq.~\eqref{eq:exchange} once $|\int g\,dt|=2|\varepsilon|$, with $g$ i
 $20\MHz$ bound this takes at most $25\ns$ for any member. Pulse durations are therefore set by the
 bandwidth filter, the boundary conditions and the cost trade-off rather than by the amount of entangling
 action required: each pole of the filter~\eqref{eq:filter} has a time constant $1/(\pi B)\approx32\ns$,
-and a filtered step needs about $52\ns$ to reach half its amplitude.
+and a filtered step needs about $52\ns$ to reach half its amplitude. Section~\ref{sec:physicalinterp}
+makes this quantitative: the largest exchange area that a bounded control can deliver through the filter
+in a given time is a linear program, and it sets the scale of every runtime in this paper.
 
 % =========================================================================
 \section{Numerical implementation}
@@ -485,7 +496,8 @@ trained under the same noise model as the noise-optimized agent: at every Adam s
 cost of one trajectory perturbed at $\strain=1\MHz$, a single-sample stochastic gradient of
 $\mathbb{E}_\xi[C]$. Since the horizon is not a free variable of a single run, the procedure is
 repeated over $T\in\{40,50,\dots,180\}\ns$, with $400$ Adam iterations per horizon, learning rate
-$0.03$ and a single deterministic initialization (all amplitudes zero, phases $\pi$). Within a horizon
+$0.03$ and a single deterministic initialization (all amplitudes zero, phases $\pi$) --- $3.3\times10^5$
+simulator steps in all, against $9.5\times10^7$ for each TRPO agent, a factor of about $290$. Within a horizon
 the stored plan is the iterate with the lowest sampled loss, and the optimizer's own choice of horizon
 is the one with the lowest such loss. Because single-sample losses are noisy, we also re-evaluate every
 horizon's plan in the deterministic simulator and report both selections. One horizon takes about
@@ -555,7 +567,7 @@ single-target agents were trained in two stages; conflating them would misstate 
 \begin{table*}[t]
 \caption{Complete configuration, as actually run. The four right-hand columns are the two single-target
 TRPO agents (Secs.~\ref{sec:single}--\ref{sec:robust}), the architecture and UFO-weight sweeps
-(Sec.~\ref{sec:modelsel}) and the curriculum runtime sweep (Sec.~\ref{sec:runtime}); an entry spanning
+(Appendix~\ref{app:modelsel}) and the curriculum runtime sweep (Sec.~\ref{sec:runtime}); an entry spanning
 several columns applies to all of them. Every TRPO run except the nominal agent was trained with noise.}
 \label{tab:config}
 \footnotesize
@@ -612,116 +624,22 @@ sequence of stopping costs.}
 \footnotetext[3]{Nominal / noise-optimized agent.}
 \end{table*}
 
-% =========================================================================
-\section{Fixing the free parameters}
+\subsection{Free parameters}
 \label{sec:modelsel}
 
 Two ingredients of the framework are not determined by the physics: the capacity of the actor--critic
-networks and the relative weights in Eq.~\eqref{eq:ufo}. Both could silently drive the comparisons
-that follow, so we fix them first, on the representative target $\Ntgt{2.2}{\pi/2}$, under a reduced
-budget and before any production run. Every sweep run is noise-optimized at $\strain=1\MHz$.
-
-\subsection{Actor--critic architecture}
-\label{sec:arch}
-
-We swept five hidden-layer layouts of comparable scale, three seeds each, at $20$ policy iterations and
-$5000$ episodes per batch (Table~\ref{tab:arch}). Selection was not made on total cost alone, because
-a network can reach a favourable cost by trading leakage against fidelity or by settling on an
-unnecessarily long pulse; we therefore tracked nominal fidelity, leakage, runtime and robustness at
-$\snoise=1\MHz$ simultaneously.
-
-\begin{table}[t]
-\caption{Architecture sweep on $\Ntgt{2.2}{\pi/2}$, averaged over three seeds. Best value in each
-column in bold.}
-\label{tab:arch}
-\begin{ruledtabular}
-\begin{tabular}{lccccc}
-Hidden sizes & $\overline{C}_{\mathrm{eval}}$ & $\overline{F}_{\mathrm{eval}}$ & $\Fbar_{\sigma=1}$ & $\overline{T}$ (ns) & $\overline{L}$ ($10^{-4}$)\\
-\colrule
-$(64,64,64)$      & \textbf{0.3584} & 0.9941          & \textbf{0.9637} & \textbf{106.7} & 4.05 \\
-$(64,32,32)$      & 0.3592          & \textbf{0.9950} & 0.9622          & 111.3          & 3.67 \\
-$(64,64,64,32)$   & 0.3626          & 0.9926          & 0.9604          & 107.3          & 4.17 \\
-$(128,64,32)$     & 0.3630          & 0.9920          & 0.9616          & \textbf{106.7} & 4.22 \\
-$(128,64,32,32)$  & 0.3691          & 0.9906          & 0.9589          & 110.7          & \textbf{3.56} \\
-\end{tabular}
-\end{ruledtabular}
-\end{table}
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\columnwidth]{architecture_sweep_pareto_combined.pdf}
-\caption{Architecture trade-offs: evaluation leakage against (a) average fidelity at $\snoise=1\MHz$
-and (b) nominal fidelity. Leakage minimization is not a proxy for robustness --- the layout with the
-lowest leakage, $(128,64,32,32)$, has the worst aggregate cost and the weakest robustness.}
-\label{fig:archpareto}
-\end{figure}
-
-Two conclusions follow. First, architecture is not neutral: moderate changes in width and depth
-produce measurable differences in the final trade-off. Second, the dependence is not monotonic. The
-deepest model tested achieves the \emph{lowest} mean leakage of the sweep and simultaneously the
-\emph{worst} aggregate cost, the weakest robustness and the lowest nominal fidelity
-(Fig.~\ref{fig:archpareto}). Minimizing one term of a multi-objective cost is not a selection
-principle.
-
-The best aggregate performer is $(64,64,64)$, but its margin over the paper layout $(64,32,32)$ is
-$0.2\%$ in evaluation cost, and $(64,32,32)$ is in fact better in mean nominal fidelity and mean
-leakage. That margin is well inside the seed-to-seed spread: the three seeds of $(64,32,32)$ alone
-reach $\Fbar_{\sigma=1}=0.959$, $0.962$ and $0.965$. Given a margin that small, and a sweep run under a
-deliberately reduced budget --- which makes this a comparison of practical trainability rather than of
-asymptotic capacity --- we retain the paper architecture $(64,32,32)$ for all production runs. This
-maximizes comparability with Ref.~\cite{Niu2019} at negligible empirical cost. The same spread sets the
-resolution of every single-seed comparison later in the paper: differences of a few $10^{-3}$ in
-$\Fbar$ at $1\MHz$ between two individual runs are not significant on their own.
-
-\subsection{Sensitivity to the UFO weights}
-\label{sec:weights}
-
-The weights in Eq.~\eqref{eq:ufo} are part of the physical definition of the problem, not optimizer
-settings, so they deserve separate treatment. We swept
-$\chi\in\{5,10,20\}$, $\mu\in\{0.1,0.2,0.4\}$, $\kappa\in\{0.05,0.1,0.2,0.4\}$ at fixed $\beta=10$
-($36$ configurations, two seeds each, five iterations of $10\,000$ episodes with stopping cost $0.15$).
-Holding $\beta$ fixed makes the sweep a study of the ratios
-$\chi/\beta$, $\mu/\beta$, $\kappa/\beta$, which is the physically meaningful reading and keeps the
-design tractable.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\columnwidth]{ufo_weight_sweep_robustness.pdf}
-\caption{Sensitivity of the average fidelity at $\snoise=1\MHz$ to the UFO weights, shown separately
-for the fidelity weight $\chi$, the boundary weight $\mu$ and the runtime weight $\kappa$. Underweighting
-fidelity ($\chi=5$) opens a failure mode near $\Fbar\approx0.82$; $\mu=0.4$ is strongly bimodal;
-$\kappa$ has almost no effect in this fixed-horizon regime.}
-\label{fig:ufoweights}
-\end{figure}
-
-A methodological caveat governs the whole sweep: the best evaluation cost is \emph{not} a valid
-selection criterion across configurations, because different weights define different scalarizations
-and their numerical costs are not commensurable. Since all runs here terminate at the same evaluation
-time of $180\ns$, increasing $\kappa$ mostly adds a rigid offset. We therefore compare on physical
-quantities only --- nominal fidelity, leakage, and robustness at $\snoise=1\MHz$.
-
-The fidelity weight has the clearest effect (Fig.~\ref{fig:ufoweights}). At $\chi=5$ the distribution
-is broad and several runs collapse to $\Fbar\approx0.81$--$0.83$; at $\chi=10$ and $\chi=20$ it tightens
-around $0.92$--$0.95$. Underweighting logical accuracy relative to leakage lets the optimizer settle
-for controls that are clean but simply not the right gate. The boundary weight behaves
-non-monotonically: $\mu=0.2$ gives the best median trade-off, $\mu=0.1$ leaves slightly more leakage,
-and $\mu=0.4$ becomes strongly bimodal, producing both some of the best runs of the sweep and its worst
-lower-tail failures. Larger $\mu$ does reduce the leakage proxy on average --- the lowest-leakage region
-is often at $\mu=0.4$ --- but this does not translate into better robust control, which is the same
-lesson the architecture sweep taught. The runtime weight $\kappa$ is nearly inert here, for the
-structural reason noted above; its influence reappears in Sec.~\ref{sec:runtime}, where gate duration
-is the observable rather than a fixed boundary condition.
-
-The Pareto-favourable region is occupied jointly by $(\chi,\mu)\approx(10,0.2)$ and
-$(\chi,\mu)\approx(20,0.4)$, with the latter marginally ahead. Given two seeds and a small budget, that
-margin does not justify departing from the reference scalarization, so we retain
+networks and the relative weights in Eq.~\eqref{eq:ufo}. Both could silently drive the comparisons that
+follow, so we fixed them first, with two sweeps on the representative target $\Ntgt{2.2}{\pi/2}$ under a
+reduced budget (Appendix~\ref{app:modelsel}). Neither sweep gives a reason to depart from the published
+choices: the layout $(64,32,32)$ and the weights
 \begin{equation}
 (\chi,\beta,\mu,\kappa)=(10,10,0.2,0.1)
 \label{eq:weights}
 \end{equation}
-throughout. The useful conclusion is not the choice itself but its two components: the weights matter,
-in a physically interpretable way, and the original values sit close to the best region in an
-independent implementation.
+are within the seed-to-seed spread of the best configurations we found, and we use them throughout. The
+sweeps also give that spread: three seeds of the same configuration reach $\Fbar=0.959$, $0.962$ and
+$0.965$ at $\snoise=1\MHz$. Differences of a few $10^{-3}$ in $\Fbar$ between two individual runs are
+therefore not significant on their own, which sets the resolution of every single-seed comparison below.
 
 % =========================================================================
 \section{Single-target benchmark}
@@ -756,7 +674,9 @@ $0.1576$, fidelity $0.99662$, total leakage $2.82\times10^{-4}$ and boundary pen
 $4.28\times10^{-3}$. Direct pulse optimization thus reaches fidelity comfortably above $99\%$ with
 leakage in the $10^{-4}$ regime --- exactly the scale the leakage-aware objective is designed to
 produce. The optimizer's own noisy objective selects $60\ns$ instead, a plan with fidelity $0.98205$;
-Sec.~\ref{sec:noisyleak} explains why it prefers the shorter horizon.
+Sec.~\ref{sec:noisyleak} explains why it prefers the shorter horizon. The baseline is trained under noise
+to match the noise-optimized agent; optimized without noise at the same $70\ns$ it does better still,
+with fidelity $0.99939$ and cost $0.126$ (Sec.~\ref{sec:memory}).
 
 The horizon dependence (Fig.~\ref{fig:adamsweep}) is more informative than the optimum itself. Very
 short pulses fail badly: fidelity drops to $0.726$ at $40\ns$ and $0.882$ at $50\ns$, while the
@@ -963,7 +883,7 @@ $2.5\MHz$. The plans of the two histories have similar durations (median $98$ an
 nominal fidelity (median $0.9855$ and $0.9838$).
 
 Two caveats bound this result. The difference we measure is of the size of the seed-to-seed spread found
-in Sec.~\ref{sec:arch}, so a different pair of seeds could move it by a few $10^{-3}$ in either
+in Appendix~\ref{sec:arch}, so a different pair of seeds could move it by a few $10^{-3}$ in either
 direction; and the favourable comparison of the two selected plans above shows how easily one pair of
 plans can suggest the opposite. What the data do rule out is an improvement of the size reported in
 Ref.~\cite{Niu2019}: an order of magnitude in infidelity at $1\MHz$ would mean $\Fbar\approx0.996$ instead
@@ -988,7 +908,11 @@ reached the episode ceiling, where higher orders begin to matter.}
 
 Three observations explain the null result.
 
-\emph{First, under this noise model the pulse shape cannot buy robustness.} The noise is independent
+\emph{First, under this noise model the pulse shape cannot buy robustness.} This is the white-noise limit
+of the filter-function description of open-loop control~\cite{Green2012,Green2013,Cerfontaine2021}: the
+response of a pulse to noise is the overlap of the noise spectrum with a filter function fixed by the
+pulse, and a flat spectrum sees only the integral of that function, which the pulse shape does not change
+(Appendix~\ref{app:firstorder}). In the present model the argument is short. The noise is independent
 from one $2\ns$ step to the next. Moving a kick to the end of the pulse conjugates its generator $G$ by the
 evolution so far, and as long as that evolution keeps the computational subspace invariant, the
 first-order infidelity of the kick depends only on the variance
@@ -1010,7 +934,12 @@ $K=2.98\times10^{-4}\ns^{-1}\MHz^{-2}$ ($3.79\times10^{-4}$ without the step ave
 infidelity per unit duration at $1\MHz$ is $2.97\times10^{-4}$ and $2.99\times10^{-4}$ for the plans of the
 nominal and noise-optimized histories, with interquartile ranges within $\pm2\%$; at $0.5$ and $2\MHz$ it
 is $3.4$ and $2.7\times10^{-4}$, the drift reflecting higher orders and the approximate treatment of the
-leaking components. The value of $K$ matters less than the fact that it is the same for every plan:
+leaking components. Evaluated without the sinc approximation, with the exact response of every step
+(Appendix~\ref{app:firstorder}), the first-order rate of the $160$ plans of the two histories lies between
+$2.9794$ and $2.9805\times10^{-4}$: the pulse shape moves it by four parts in $10^4$. Two thirds of it
+come from the two drive amplitudes, $23\%$ from the coupling and $11\%$ from the detunings, and replaying
+the pulses with the noise on one channel at a time reproduces each share (Table~\ref{tab:channels}). The
+value of $K$ matters less than the fact that it is the same for every plan:
 excess infidelity and duration are correlated at $0.99$ across both histories, and the two Adam plans
 fall on the same line (Fig.~\ref{fig:mechanism}(c)). Against white control noise an open-loop pulse is
 robust only by being accurate and short. Every difference in Fig.~\ref{fig:robust} follows from those two
@@ -1029,7 +958,8 @@ below the stopping threshold: all $1.05\times10^6$ training episodes of the nois
 the $180\ns$ ceiling, so the co-optimization of stopping time that distinguishes the RL formulation was
 inactive throughout noisy training.
 
-\emph{Third, what stochastic training does teach is feedback, and feedback is not deployed.} During
+\emph{Third, what stochastic training changes is the policy's response to noisy states, and that
+response is not deployed.} During
 training the agent observes the noisy propagator and acts on it. We ran every checkpoint of both histories
 in the noisy environment at $1\MHz$, in closed loop and for the duration of its own plan, and compared it
 with the open-loop replay of that plan (Fig.~\ref{fig:mechanism}(b)). In closed loop the noise-optimized
@@ -1042,6 +972,99 @@ open-loop fidelities agree within $10^{-3}$ --- but it neither produces feedback
 changes the open-loop pulse. A robustness test carried out in the training environment would credit the
 noise-optimized agent with an advantage that its deployable pulses do not have.
 
+\subsection{Noise with memory, and the same test with the direct optimizer}
+\label{sec:memory}
+
+Equation~\eqref{eq:whitenoise} makes two predictions that can be tested without retraining an agent.
+The first is that the pulse shape should matter as soon as the noise is correlated in time; the second,
+that a noise-aware optimizer should then be able to use it, and should gain nothing under white noise.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{noise_with_memory.pdf}
+\caption{Noise with memory. (a) Filter functions, summed over the channels and normalized to their
+average over the Nyquist band, of three $70\ns$ Adam pulses for $\Ntgt{2.2}{\pi/2}$: optimized without
+noise, under white noise ($1\MHz$) and under quasi-static noise ($0.3\MHz$). The average is the same for
+the three (horizontal line); the low-frequency plateau is not. The peak at $200\MHz$ is the transition to
+the leakage levels. (b) Excess infidelity of the same pulses under exponentially correlated noise of
+standard deviation $0.2\MHz$ against its correlation time: first-order prediction of
+Eq.~\eqref{eq:firstorder} (lines) and Monte Carlo replay ($8000$ realizations, symbols). (c) Excess
+infidelity under quasi-static noise of $0.1\MHz$ against duration, for the plans of both TRPO histories
+and for Adam pulses optimized at $70$, $100$ and $130\ns$ under the three noise models (eight seeds for
+each stochastic model; the white and quasi-static symbols are shifted by $\pm3\ns$ for visibility).}
+\label{fig:memory}
+\end{figure*}
+
+\emph{Existing pulses.} We replayed every stored plan under quasi-static noise, one Gaussian offset per
+channel held for the whole pulse and redrawn for every shot, and evaluated Eq.~\eqref{eq:firstorder} for
+it (Appendix~\ref{app:firstorder}; the two agree within $3\%$ at $0.1\MHz$). At equal $\snoise$ the
+infidelity is $15$ to $23$ times the white-noise one for the controllers of Table~\ref{tab:single}, because
+the offsets of successive steps add coherently, and it grows as $T^2$ instead of $T$
+[Fig.~\ref{fig:memory}(c)]. Short pulses gain even more than under white noise: at $0.1\MHz$ the excess
+infidelity is $2.6\times10^{-3}$ and $3.6\times10^{-3}$ for the $60$ and $70\ns$ Adam plans, against
+$5.6\times10^{-3}$ and $8.0\times10^{-3}$ for the noise-optimized and nominal TRPO plans. The shape now
+enters, but among pulses that were not optimized for it, only weakly: divided by $T^2$, the sensitivity of
+the $160$ plans of the two TRPO histories spans $5.7$ to $6.3\times10^{-7}\ns^{-2}$, and the
+noise-optimized agent is not ahead. It has the higher average fidelity in $25\%$ of the matched iterations
+at $0.1\MHz$ and $20\%$ at $0.3\MHz$, and its sensitivity per $T^2$ differs from the nominal agent's by
+$0.3\times10^{-8}\ns^{-2}$ ($95\%$ interval $[-0.6,1.2]\times10^{-8}$). Training under white noise has not prepared the policy for noise with
+memory either.
+
+\emph{The direct optimizer under three noise models.} We then repeated the comparison of
+Sec.~\ref{sec:matched} with the gradient optimizer, where it costs minutes. At a fixed horizon, so that
+the duration cannot change, the pulse was optimized (i) on the deterministic objective, (ii) under the
+white training noise of the paper, $\strain=1\MHz$, and (iii) under quasi-static noise of $0.3\MHz$, one
+offset per channel and per trajectory, a single-sample version of ensemble-based robust
+control~\cite{Wu2019}; eight seeds for each stochastic model, horizons of $70$, $100$ and $130\ns$,
+otherwise the settings of Sec.~\ref{sec:controllers}. Table~\ref{tab:adammodels} gives the result.
+
+\begin{table}[t]
+\caption{Adam at fixed horizon $T$ under three training-noise models (mean over eight seeds for the
+stochastic ones; the noise-free optimization is deterministic). $1-F$: nominal infidelity. White:
+first-order excess infidelity at $1\MHz$, Eq.~\eqref{eq:firstorder}, and average fidelity $\Fbar$ from
+$2000$ realizations. Quasi-static: first-order excess infidelity at $0.1\MHz$, and $\Fbar$ at the training
+strength of $0.3\MHz$.}
+\label{tab:adammodels}
+\footnotesize
+\begin{ruledtabular}
+\begin{tabular}{clccccc}
+ & & & \multicolumn{2}{c}{White, $1\MHz$} & \multicolumn{2}{c}{Quasi-static}\\
+$T$ & Training & $1-F$ & excess & $\Fbar$ & excess & $\Fbar$\\
+(ns) & noise & ($10^{-3}$) & ($10^{-2}$) & & ($10^{-3}$) & $0.3\MHz$\\
+\colrule
+70  & none         & \textbf{0.6} & 2.085 & \textbf{0.9792} & 2.57 & 0.9762\\
+    & white        & 5.4  & 2.085 & 0.9757 & 3.04 & 0.9682\\
+    & quasi-static & 3.5  & 2.086 & 0.9767 & \textbf{2.01} & \textbf{0.9792}\\
+\colrule
+100 & none         & \textbf{0.3} & 2.980 & \textbf{0.9707} & 4.43 & 0.9602\\
+    & white        & 5.4  & 2.980 & 0.9667 & 4.73 & 0.9541\\
+    & quasi-static & 5.9  & 2.980 & 0.9663 & \textbf{3.38} & \textbf{0.9654}\\
+\colrule
+130 & none         & \textbf{0.2} & 3.874 & \textbf{0.9624} & 6.71 & \textbf{0.9411}\\
+    & white        & 10.3 & 3.874 & 0.9546 & 6.75 & 0.9334\\
+    & quasi-static & 16.4 & 3.874 & 0.9504 & \textbf{5.47} & 0.9393\\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+Under white noise the three models give the same first-order sensitivity to four digits, as
+Eq.~\eqref{eq:whitenoise} requires, and the only thing that white-noise training changes is the nominal
+fidelity, for the worse: none of the $24$ white-trained pulses is more accurate, or more robust against
+the very noise it was trained on, than the pulse optimized without noise at the same horizon. Its
+stochastic gradient costs $5$--$10\times10^{-3}$ in nominal fidelity and buys nothing. The null result of
+Sec.~\ref{sec:matched} is therefore not a peculiarity of the two TRPO runs: it recurs, with seeds, in an
+optimizer whose gradients are exact.
+
+Quasi-static training does what white training cannot. It lowers the quasi-static sensitivity in every
+one of the $24$ runs, by $18$--$24\%$ on average and with a spread of a few percent between seeds, by
+moving weight of the filter function away from zero frequency while leaving its average untouched
+[Fig.~\ref{fig:memory}(a)]; the three pulses coincide for correlation times below a few nanoseconds and
+separate beyond [Fig.~\ref{fig:memory}(b)]. The gain is modest, because a $70$--$130\ns$ pulse through a
+$10\MHz$ filter has little room for the refocusing structure of dynamically corrected
+gates~\cite{KhodjastehViola2009}, and it is paid for in nominal fidelity, so it shows in $\Fbar$ only once
+the noise is strong enough: at $0.1\MHz$ a single quasi-static-trained pulse beats the noise-free one, at
+the training strength of $0.3\MHz$ $19$ of $24$ do, against $2$ of $24$ white-trained ones.
+
 \subsection{Interpretation}
 
 The robustness mechanism proposed in Ref.~\cite{Niu2019} does not survive a controlled test in our
@@ -1052,7 +1075,9 @@ this is not an accident of our optimizer settings: against temporally uncorrelat
 nominal fidelity and duration determine open-loop robustness to leading order, whatever method produced
 the pulse. Robustness that depends on the pulse shape requires noise with memory --- quasi-static offsets,
 drift or low-frequency spectra --- which is what robust-control techniques are designed
-for~\cite{Koch2022} and what the UFO noise model does not contain.
+for~\cite{Koch2022} and what the UFO noise model does not contain. Section~\ref{sec:memory} shows both
+halves of this statement in the same optimizer: trained against quasi-static noise it lowers the
+sensitivity of its pulses by about a fifth, trained against white noise it lowers nothing.
 
 % =========================================================================
 \section{Runtime across the gate family}
@@ -1081,10 +1106,13 @@ across the family, and what the curriculum's history adds to it.
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.70\textwidth]{runtime_vs_alpha_v3.pdf}
+\includegraphics[width=0.70\textwidth]{runtime_vs_alpha_v4.pdf}
 \caption{Runtime across $\Ntgt{\alpha}{\pi/2}$. (a) Final evaluation runtime of the curriculum controller
 (filled squares: converged; open squares: not converged, the rollout running to the $180\ns$ ceiling) and
-horizon selected by the Adam baseline (circles). Dashed: generic synthesis reference of
+horizon selected by the Adam baseline (circles). Grey band: shortest time in which the coupling can deliver
+the exchange area $2|\alpha-\pi/2|$ through the bandwidth filter under the $20\MHz$ bound, without (lower
+edge) and with (upper edge) the condition that it returns to zero at the end of the pulse
+(Sec.~\ref{sec:physicalinterp}). Dashed: generic synthesis reference of
 Ref.~\cite{Niu2019}, $215\ns$; dotted: two-CNOT synthesis, Eq.~\eqref{eq:tsyntgt}, $150\ns$; diamonds:
 the local members $\sigma^z_1\sigma^z_2$, one layer of single-qubit gates. Vertical lines mark the
 identity target $\alpha=\pi/2$ and the iSWAP-equivalent targets $|\alpha-\pi/2|=\pi/4$. (b) Nominal
@@ -1238,6 +1266,29 @@ ends a local-gate alternative appears that the optimizer exploits only partly. T
 region of both sweeps is therefore the neighbourhood of the identity, not a basin of especially
 hardware-friendly entanglers.
 
+This can be made quantitative. The filter~\eqref{eq:filter} is linear, so the largest exchange area
+$\int g\,dt$ that a control bounded by $20\MHz$ can deliver in $N$ steps is a linear program, with or
+without the condition that the filtered coupling is back at zero at the last step, which the boundary term
+of Eq.~\eqref{eq:ufo} enforces softly. Requiring the area $2|\varepsilon|$ of Sec.~\ref{sec:structure}
+gives the band of Fig.~\ref{fig:runtime}(a): from $28$--$40\ns$ at $|\varepsilon|=0.16$ to $74$--$96\ns$
+at the ends of the family. It is an estimate for pulses that use the coupling alone, not a speed limit of
+the model; near the ends the optimizer also uses the detunings. The horizons selected by the direct
+optimizer lie inside the band for $20$ of the $26$ targets that are not pinned at the $40\ns$ grid
+minimum, and one grid step above it for one more. For $|\varepsilon|\le1.03$ its pulses deliver
+$75$--$99\%$ of the required area with the coupling; beyond, the detunings take over. The exceptions are
+the five targets with $|\varepsilon|\ge1.43$, where the selected $70\ns$ is shorter than even the lower
+edge: there the pulses are detuning pulses whose area, $2.77$--$2.80$, falls short of the $\pi$ that the
+local gate needs, which is why their fidelity stops at $0.94$--$0.97$. The converged curriculum pulses are
+$1.3$--$3.3$ times longer than the upper edge (median $1.8$). Within this model, then, the direct optimizer runs at the bandwidth limit
+and the learned pulses do not.
+
+The same linear program applies to the single-qubit gates of the synthesis reference. A rotation by
+$\pi$ needs a drive area $\pi/2$, which the filtered, bounded drive delivers in no less than $54\ns$, or
+$72\ns$ if it must end at zero, and a $\pi/2$ rotation needs $40$ and $56\ns$, against the $20\ns$ per
+layer assumed in Eqs.~\eqref{eq:tsyn} and~\eqref{eq:tsyntgt}. Both synthesis references therefore
+belong to hardware with a wider control bandwidth than the model in which the pulses are optimized, and
+the ratio between the two measures that mismatch as much as it measures analog control.
+
 % =========================================================================
 \section{Discussion}
 \label{sec:discussion}
@@ -1293,9 +1344,17 @@ One further point limits any quantitative comparison with Ref.~\cite{Niu2019}. B
 independent from step to step, the noise power per unit bandwidth is $\snoise^2\Delta t$, and $K$ in
 Eq.~\eqref{eq:whitenoise} is proportional to $\Delta t$: the same $\snoise$ describes a different physical
 noise level at a different time step, and it matters whether amplitudes are quoted in cyclic or angular
-units. Ref.~\cite{Niu2019} states neither its time step nor its convention for $\snoise$, and the fidelity
+units. Replaying our pulses with the noise redrawn every $0.5$, $1$, $4$ or $8\ns$ instead of every
+$2\ns$, at the same $\snoise$, multiplies the excess infidelity by $0.31$, $0.60$, $1.33$ and $2.5$--$2.6$,
+as the first-order rate predicts. It also matters where the noise enters. Added to the raw controls,
+before the bandwidth filter instead of after it, the same $\snoise$ costs our five pulses $5$ to $18$ times
+less infidelity, and reaches the Hamiltonian with the $32\ns$ memory of the filter. In physical terms, the
+detuning noise of our model at $\snoise=1\MHz$ and $\Delta t=2\ns$ is white frequency noise that dephases
+each qubit in $T_\varphi=2/[(2\pi\snoise)^2\Delta t]\approx25\,\mu\mathrm{s}$, and $3.5\MHz$ corresponds to
+$2\,\mu\mathrm{s}$. Ref.~\cite{Niu2019} states neither its time step nor its convention for $\snoise$, and the fidelity
 loss its Fig.~4 shows over $\snoise\in[0.1,3.5]\MHz$ is more than an order of magnitude smaller than the
-loss we obtain over the same nominal range for pulses of comparable length. The $\snoise$ axes of the two
+loss we obtain over the same nominal range for pulses of comparable length; a shorter time step, angular
+units or noise injected before the filter could each account for a difference of that size. The $\snoise$ axes of the two
 studies should not be identified, and no number in this paper at a given $\snoise$ should be compared with
 a number at the same $\snoise$ in Ref.~\cite{Niu2019}. The conclusions above do not depend on the scale:
 Eq.~\eqref{eq:whitenoise} holds at every noise strength, and the matched comparison is negative over the
@@ -1306,7 +1365,7 @@ whole range.
 Some differences are simply what independent reimplementation means. The two studies differ in
 discretization, filtering pipeline, stopping rules, curriculum schedule, training budget and evaluation
 protocol, and the optimization problem is high-dimensional and non-convex; exact numerical coincidence is
-not the appropriate standard. The parameter studies of Sec.~\ref{sec:modelsel} make the same point from
+not the appropriate standard. The parameter studies of Appendix~\ref{app:modelsel} make the same point from
 the other side: performance depends measurably on the architecture and interpretably on the UFO weights,
 and a single run of any configuration carries a seed-to-seed spread of several $10^{-3}$ in $\Fbar$ at
 $1\MHz$.
@@ -1325,8 +1384,10 @@ under a rotating-wave description, and real devices add transfer-function nonlin
 drift and measurement constraints that are not represented. The noise model is Gaussian and white, applied
 to control amplitudes and to $\eta$; it does not cover quasi-static drift, temporally correlated noise or
 open-system decoherence, and Eq.~\eqref{eq:whitenoise} is specific to it. For noise with memory the pulse
-shape does matter, and a noise-aware learner may then behave differently; that is the most important open
-question this work leaves.
+shape does matter. Section~\ref{sec:memory} shows that a gradient optimizer trained against quasi-static
+noise then gains about a fifth in sensitivity, and that agents trained under white noise do not; whether
+a policy trained under noise with memory finds such pulses, or better ones, we did not test, and it is the
+most important open question this work leaves.
 
 Each production agent was trained with a single seed, and we could not afford more runs. The matched
 comparison of training histories replaces part of what several seeds would give, but not all of it: the
@@ -1387,7 +1448,8 @@ synthesis reference at two CNOTs.
 
 The useful question for noise-aware learning in quantum control is therefore not how large its advantage is
 under white noise --- there, to leading order, there is none to be had --- but whether it finds pulse shapes
-that exploit noise with memory, and whether the robustness it reports is that of a deployable open-loop
+that exploit noise with memory, as a gradient optimizer trained against quasi-static noise already does
+to a modest degree, and whether the robustness it reports is that of a deployable open-loop
 pulse or of a feedback policy. Benchmarks that separate those two cases, and that state the time step and
 units of their noise model, would make results in this area comparable.
 
@@ -1488,6 +1550,168 @@ step; keep the iterate with the lowest sampled cost. The optimizer's own choice 
 the lowest sampled cost. Each horizon's stored plan is also re-evaluated deterministically for cost,
 fidelity, leakage, boundary penalty and runtime, and Table~\ref{tab:single} reports both selections, the
 $60\ns$ plan chosen by the sampled cost and the $70\ns$ plan chosen by the deterministic one.
+
+% =========================================================================
+\section{First-order response to control noise}
+\label{app:firstorder}
+
+Let the noise on channel $c$ take the value $\xi_{c,k}$ (in MHz) during step $k$, so that it adds
+$s\,\xi_{c,k}\hat G_c$ to the Hamiltonian $\hat H_k$ of that step, with $s=2\pi\times10^{-3}$ and
+$\hat G_c$ the operator that the channel multiplies in Eq.~\eqref{eq:hrwa}. To first order the noisy
+propagator is $U=U_0\bigl[1-is\sum_{c,k}\xi_{c,k}\tilde G_{c,k}\bigr]$, with the toggling-frame generators
+\begin{equation}
+\tilde G_{c,k}=W_k^\dagger\Bigl[\int_0^{\Delta t}e^{i\hat H_k\tau}\hat G_c\,e^{-i\hat H_k\tau}d\tau\Bigr]W_k ,
+\label{eq:generators-noise}
+\end{equation}
+where $U_0$ is the nominal propagator and $W_k$ its part up to the start of step $k$. For zero-mean
+Gaussian noise with covariance $\langle\xi_{c,k}\xi_{c',l}\rangle=\delta_{cc'}C(k,l)$, and a nominal gate
+that reaches its target, the average fidelity~\eqref{eq:favg} is, to leading order,
+\begin{align}
+1-\Fbar&\simeq1-\Fbar(0)+\frac{d}{d+1}\,s^2\sum_c\sum_{k,l}C(k,l)\,v_c(k,l),
+\nonumber\\
+v_c(k,l)&=\frac{\mathrm{Re}\,\mathrm{Tr}\bigl(P\tilde G_{c,k}\tilde G_{c,l}P\bigr)}{d}
+\nonumber\\
+&\quad-\frac{\mathrm{Tr}\bigl(P\tilde G_{c,k}P\bigr)\mathrm{Tr}\bigl(P\tilde G_{c,l}P\bigr)}{d^2}.
+\label{eq:firstorder}
+\end{align}
+For stationary noise the double sum is the overlap of the noise spectrum with the filter function
+$\Phi_c(f)=\sum_{k,l}v_c(k,l)\cos[2\pi f(t_k-t_l)]$ of the
+pulse~\cite{Green2012,Green2013,Cerfontaine2021}. White noise, $C(k,l)=\snoise^2\delta_{kl}$, keeps only
+the diagonal $v_c(k,k)$, which is the variance $V$ of Sec.~\ref{sec:noisyleak} evaluated on
+$\tilde G_{c,k}$ and does not depend on $W_k$ as long as the nominal evolution keeps the computational
+subspace invariant: this is Eq.~\eqref{eq:whitenoise}, and in the frequency domain it is the statement
+that the average of $\Phi_c$ over the Nyquist band is the same for every pulse of a given duration.
+Quasi-static noise, $C(k,l)=\snoise^2$, keeps the whole sum, $\Phi_c(0)$, in which generators at different
+times can add or cancel; that is where the pulse shape enters.
+
+We evaluate Eq.~\eqref{eq:generators-noise} exactly, in the eigenbasis of each $\hat H_k$, and check
+Eq.~\eqref{eq:firstorder} against Monte Carlo replays of the full dynamics with noise of the same
+covariance. Table~\ref{tab:channels} gives the white-noise case channel by channel.
+
+\begin{table}[t]
+\caption{White-noise infidelity rate per channel, in $10^{-5}\ns^{-1}\MHz^{-2}$: first-order value of
+Eq.~\eqref{eq:firstorder} and Monte Carlo replay with the noise on that channel alone ($\snoise=1\MHz$,
+$4000$ realizations). Ranges are over the five pulses of Sec.~\ref{sec:robust}.}
+\label{tab:channels}
+\begin{ruledtabular}
+\begin{tabular}{lcc}
+Channel & First order & Monte Carlo\\
+\colrule
+Detuning $\delta_1$ or $\delta_2$ & $1.579$--$1.580$ & $1.51$--$1.61$\\
+Drive amplitude $f_1$ or $f_2$    & $9.927$--$9.934$ & $9.67$--$9.92$\\
+Coupling $g$                      & $6.772$--$6.775$ & $6.59$--$6.87$\\
+Anharmonicity $\eta$              & $<0.002$         & $<0.002$\\
+\colrule
+All channels                      & $29.79$--$29.80$ & $28.5$--$29.5$\\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+% =========================================================================
+\section{Fixing the free parameters}
+\label{app:modelsel}
+
+Two ingredients of the framework are not determined by the physics: the capacity of the actor--critic
+networks and the relative weights in Eq.~\eqref{eq:ufo}. Both could silently drive the comparisons
+that follow, so we fix them first, on the representative target $\Ntgt{2.2}{\pi/2}$, under a reduced
+budget and before any production run. Every sweep run is noise-optimized at $\strain=1\MHz$.
+
+\subsection{Actor--critic architecture}
+\label{sec:arch}
+
+We swept five hidden-layer layouts of comparable scale, three seeds each, at $20$ policy iterations and
+$5000$ episodes per batch (Table~\ref{tab:arch}). Selection was not made on total cost alone, because
+a network can reach a favourable cost by trading leakage against fidelity or by settling on an
+unnecessarily long pulse; we therefore tracked nominal fidelity, leakage, runtime and robustness at
+$\snoise=1\MHz$ simultaneously.
+
+\begin{table}[t]
+\caption{Architecture sweep on $\Ntgt{2.2}{\pi/2}$, averaged over three seeds. Best value in each
+column in bold.}
+\label{tab:arch}
+\begin{ruledtabular}
+\begin{tabular}{lccccc}
+Hidden sizes & $\overline{C}_{\mathrm{eval}}$ & $\overline{F}_{\mathrm{eval}}$ & $\Fbar_{\sigma=1}$ & $\overline{T}$ (ns) & $\overline{L}$ ($10^{-4}$)\\
+\colrule
+$(64,64,64)$      & \textbf{0.3584} & 0.9941          & \textbf{0.9637} & \textbf{106.7} & 4.05 \\
+$(64,32,32)$      & 0.3592          & \textbf{0.9950} & 0.9622          & 111.3          & 3.67 \\
+$(64,64,64,32)$   & 0.3626          & 0.9926          & 0.9604          & 107.3          & 4.17 \\
+$(128,64,32)$     & 0.3630          & 0.9920          & 0.9616          & \textbf{106.7} & 4.22 \\
+$(128,64,32,32)$  & 0.3691          & 0.9906          & 0.9589          & 110.7          & \textbf{3.56} \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{architecture_sweep_pareto_combined.pdf}
+\caption{Architecture trade-offs: evaluation leakage against (a) average fidelity at $\snoise=1\MHz$
+and (b) nominal fidelity. Leakage minimization is not a proxy for robustness --- the layout with the
+lowest leakage, $(128,64,32,32)$, has the worst aggregate cost and the weakest robustness.}
+\label{fig:archpareto}
+\end{figure}
+
+Two conclusions follow. First, architecture is not neutral: moderate changes in width and depth
+produce measurable differences in the final trade-off. Second, the dependence is not monotonic. The
+deepest model tested achieves the \emph{lowest} mean leakage of the sweep and simultaneously the
+\emph{worst} aggregate cost, the weakest robustness and the lowest nominal fidelity
+(Fig.~\ref{fig:archpareto}). Minimizing one term of a multi-objective cost is not a selection
+principle.
+
+The best aggregate performer is $(64,64,64)$, but its margin over the paper layout $(64,32,32)$ is
+$0.2\%$ in evaluation cost, and $(64,32,32)$ is in fact better in mean nominal fidelity and mean
+leakage. That margin is well inside the seed-to-seed spread: the three seeds of $(64,32,32)$ alone
+reach $\Fbar_{\sigma=1}=0.959$, $0.962$ and $0.965$. Given a margin that small, and a sweep run under a
+deliberately reduced budget --- which makes this a comparison of practical trainability rather than of
+asymptotic capacity --- we retain the paper architecture $(64,32,32)$ for all production runs. This
+maximizes comparability with Ref.~\cite{Niu2019} at negligible empirical cost. The same spread sets the
+resolution of every single-seed comparison later in the paper: differences of a few $10^{-3}$ in
+$\Fbar$ at $1\MHz$ between two individual runs are not significant on their own.
+
+\subsection{Sensitivity to the UFO weights}
+\label{sec:weights}
+
+The weights in Eq.~\eqref{eq:ufo} are part of the physical definition of the problem, not optimizer
+settings, so they deserve separate treatment. We swept
+$\chi\in\{5,10,20\}$, $\mu\in\{0.1,0.2,0.4\}$, $\kappa\in\{0.05,0.1,0.2,0.4\}$ at fixed $\beta=10$
+($36$ configurations, two seeds each, five iterations of $10\,000$ episodes with stopping cost $0.15$).
+Holding $\beta$ fixed makes the sweep a study of the ratios
+$\chi/\beta$, $\mu/\beta$, $\kappa/\beta$, which is the physically meaningful reading and keeps the
+design tractable.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{ufo_weight_sweep_robustness.pdf}
+\caption{Sensitivity of the average fidelity at $\snoise=1\MHz$ to the UFO weights, shown separately
+for the fidelity weight $\chi$, the boundary weight $\mu$ and the runtime weight $\kappa$. Underweighting
+fidelity ($\chi=5$) opens a failure mode near $\Fbar\approx0.82$; $\mu=0.4$ is strongly bimodal;
+$\kappa$ has almost no effect in this fixed-horizon regime.}
+\label{fig:ufoweights}
+\end{figure}
+
+A methodological caveat governs the whole sweep: the best evaluation cost is \emph{not} a valid
+selection criterion across configurations, because different weights define different scalarizations
+and their numerical costs are not commensurable. Since all runs here terminate at the same evaluation
+time of $180\ns$, increasing $\kappa$ mostly adds a rigid offset. We therefore compare on physical
+quantities only --- nominal fidelity, leakage, and robustness at $\snoise=1\MHz$.
+
+The fidelity weight has the clearest effect (Fig.~\ref{fig:ufoweights}). At $\chi=5$ the distribution
+is broad and several runs collapse to $\Fbar\approx0.81$--$0.83$; at $\chi=10$ and $\chi=20$ it tightens
+around $0.92$--$0.95$. Underweighting logical accuracy relative to leakage lets the optimizer settle
+for controls that are clean but simply not the right gate. The boundary weight behaves
+non-monotonically: $\mu=0.2$ gives the best median trade-off, $\mu=0.1$ leaves slightly more leakage,
+and $\mu=0.4$ becomes strongly bimodal, producing both some of the best runs of the sweep and its worst
+lower-tail failures. Larger $\mu$ does reduce the leakage proxy on average --- the lowest-leakage region
+is often at $\mu=0.4$ --- but this does not translate into better robust control, which is the same
+lesson the architecture sweep taught. The runtime weight $\kappa$ is nearly inert here, for the
+structural reason noted above; its influence reappears in Sec.~\ref{sec:runtime}, where gate duration
+is the observable rather than a fixed boundary condition.
+
+The Pareto-favourable region is occupied jointly by $(\chi,\mu)\approx(10,0.2)$ and
+$(\chi,\mu)\approx(20,0.4)$, with the latter marginally ahead. Given two seeds and a small budget, that
+margin does not justify departing from the reference scalarization, so we retain the weights of Eq.~\eqref{eq:weights} throughout. The useful conclusion is not the choice itself but its two components: the weights matter,
+in a physically interpretable way, and the original values sit close to the best region in an
+independent implementation.
 
 % =========================================================================
 \bibliographystyle{apsrev4-2}
