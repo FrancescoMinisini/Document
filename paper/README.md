@@ -71,6 +71,10 @@ Additions that use the stored runs, plus one new Adam experiment (minutes of CPU
   sigma costs 16 times less infidelity than at 2 ns, which accounts for the scale gap with their Fig. 4.
   The noisy leakage bound scales as dt^-4, so the paper now says that its domination of the noisy
   objective is a property of this implementation and may not apply to the original.
+- **Why 2 ns, and the training noise (Secs. VII C, VII F).** The Limitations now say that the step was set
+  by the computational budget and that no agent was trained at a finer one. Sec. VII C adds that the
+  training noise of 1 MHz at 2 ns corresponds to about 4 MHz at 0.1 ns, above the range the original
+  evaluates, and that no agent was trained at the matched weaker level.
 - **Adam with the leakage bound on the noise-free controls (Sec. V E, Table IV rows marked with an
   asterisk).** The 51 runs were repeated with that choice. White-noise training still helps in none of
   24 runs (48 of 48 over both variants); its cost in nominal fidelity is roughly halved. The

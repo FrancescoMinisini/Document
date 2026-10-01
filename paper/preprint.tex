@@ -1400,6 +1400,11 @@ a number at the same $\snoise$ in Ref.~\cite{Niu2019}. The conclusions above do 
 Eq.~\eqref{eq:whitenoise} holds at every noise strength, and the matched comparison is negative over the
 whole range.
 
+The same applies to the training noise. Under the same assumptions, $\strain=1\MHz$ at $2\ns$ corresponds
+to about $4\MHz$ at $0.1\ns$, above the range evaluated in Ref.~\cite{Niu2019}. We did not train at the
+matched weaker level; by Eq.~\eqref{eq:whitenoise} the pulse-independence does not depend on it, but the
+quality of the trained agent may.
+
 The step matters in a second way. The part of the leakage bound that responds to white noise
 (Sec.~\ref{sec:noisyleak}) contains a fourth finite difference of the controls and scales as
 $\Delta t^{-4}$: replayed on finer grids, its growth of $3.8\times10^{-3}$ per ns at $2\ns$ becomes about $15$,
@@ -1505,6 +1510,11 @@ leakage bound accumulated from the noisy trajectory; we tested the alternative w
 (Sec.~\ref{sec:memory}) but did not retrain the agent with it. The matched comparison of
 Sec.~\ref{sec:matched} is therefore an illustration of Eq.~\eqref{eq:whitenoise}, not an independent test
 of the original training; the argument rests on that equation and on the direct-optimizer experiment.
+
+The time step of $2\ns$, about twenty times coarser than that of Ref.~\cite{Niu2019}, was set by the
+computational budget: each TRPO agent already takes $9.5\times10^7$ simulator steps, and the same number
+of episodes at $0.1\ns$ would take twenty times more. Its consequences for the noise scale and for the
+leakage bound are discussed in Sec.~\ref{sec:noisescales}; we did not train at a finer step.
 
 The direct optimizer is deliberately minimal --- one initialization and $400$ iterations per horizon on a
 $10\ns$ grid starting at $40\ns$ --- and is not a survey of gradient methods such as automatic-differentiation
