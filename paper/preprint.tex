@@ -64,8 +64,9 @@ rate that we compute from the Hamiltonian and verify on every pulse; in our impl
 objective is dominated by the response of the leakage bound to the noise itself; and what stochastic
 training changes is the
 policy's reaction to noisy states, which a deployed open-loop pulse cannot use. The direct optimizer
-confirms both sides of this: trained under white noise it gains nothing in $24$ runs out of $24$, trained
-under quasi-static noise it lowers the sensitivity of its pulses to that noise by about a fifth.
+confirms both sides of this: trained under white noise it gains nothing in $48$ runs out of $48$, with
+the leakage bound evaluated on the noisy or on the noise-free controls; trained under quasi-static noise
+it lowers the sensitivity of its pulses to that noise by about a fifth.
 Finally, every member of the benchmark subfamily $N(\alpha,\alpha,\pi/2)$ is an exchange rotation by
 $\alpha-\pi/2$, so the order-of-magnitude runtime gain reported near $\alpha=\pi/2$ sits around the
 identity. Against a target-specific two-CNOT synthesis the learned pulses are at most twice as fast, and
@@ -144,7 +145,8 @@ that we compute from the Hamiltonian and verify on every pulse we produced. In a
 objective is dominated by the leakage bound's response to the noise, which acts as a runtime penalty, and
 what stochastic training does change is the policy's reaction to noisy states: in closed loop the
 noise-trained agent is the more robust one, but a deployed pulse cannot use feedback. The same test with
-the direct optimizer, over eight seeds and three durations, agrees: white-noise training never helps, and
+the direct optimizer, over eight seeds and three durations, agrees: white-noise training never helps, whether or not
+the leakage bound sees the noise, and
 training against quasi-static noise, where the pulse shape does enter, lowers the sensitivity by about a
 fifth (Sec.~\ref{sec:memory}).
 \item Every member of the subfamily $\Ntgt{\alpha}{\pi/2}$ is an exchange rotation by $\alpha-\pi/2$.
@@ -1028,7 +1030,9 @@ otherwise the settings of Sec.~\ref{sec:controllers}. Table~\ref{tab:adammodels}
 stochastic ones; the noise-free optimization is deterministic). $1-F$: nominal infidelity. White:
 first-order excess infidelity at $1\MHz$, Eq.~\eqref{eq:firstorder}, and average fidelity $\Fbar$ from
 $2000$ realizations. Quasi-static: first-order excess infidelity at $0.1\MHz$, and $\Fbar$ at the training
-strength of $0.3\MHz$.}
+strength of $0.3\MHz$. Rows marked $\ast$: the leakage bound of the training objective is accumulated
+from the noise-free controls instead of the noisy Hamiltonian; under that choice the quasi-static rows
+change by less than $10^{-5}$ in every fidelity.}
 \label{tab:adammodels}
 \footnotesize
 \begin{ruledtabular}
@@ -1039,14 +1043,17 @@ $T$ & Training & $1-F$ & excess & $\Fbar$ & excess & $\Fbar$\\
 \colrule
 70  & none         & \textbf{0.6} & 2.085 & \textbf{0.9792} & 2.57 & 0.9762\\
     & white        & 5.4  & 2.085 & 0.9757 & 3.04 & 0.9682\\
+    & white$^{\ast}$ & 2.6 & 2.085 & 0.9776 & 2.79 & 0.9727\\
     & quasi-static & 3.5  & 2.086 & 0.9767 & \textbf{2.01} & \textbf{0.9792}\\
 \colrule
 100 & none         & \textbf{0.3} & 2.980 & \textbf{0.9707} & 4.43 & 0.9602\\
     & white        & 5.4  & 2.980 & 0.9667 & 4.73 & 0.9541\\
+    & white$^{\ast}$ & 3.7 & 2.980 & 0.9682 & 4.50 & 0.9569\\
     & quasi-static & 5.9  & 2.980 & 0.9663 & \textbf{3.38} & \textbf{0.9654}\\
 \colrule
 130 & none         & \textbf{0.2} & 3.874 & \textbf{0.9624} & 6.71 & \textbf{0.9411}\\
     & white        & 10.3 & 3.874 & 0.9546 & 6.75 & 0.9334\\
+    & white$^{\ast}$ & 8.2 & 3.874 & 0.9567 & 6.69 & 0.9346\\
     & quasi-static & 16.4 & 3.874 & 0.9504 & \textbf{5.47} & 0.9393\\
 \end{tabular}
 \end{ruledtabular}
@@ -1059,6 +1066,15 @@ the very noise it was trained on, than the pulse optimized without noise at the 
 stochastic gradient costs $5$--$10\times10^{-3}$ in nominal fidelity and buys nothing. The null result of
 Sec.~\ref{sec:matched} is therefore not a peculiarity of the two TRPO runs: it recurs, with seeds, in an
 optimizer whose gradients are exact.
+
+Part of that cost is specific to our objective, in which the leakage bound is accumulated from the noisy
+Hamiltonian and responds to the noise itself (Sec.~\ref{sec:noisyleak}). We therefore repeated the
+experiment with the bound taken from the noise-free controls, so that the noise enters the objective
+through the fidelity alone (rows marked $\ast$ in Table~\ref{tab:adammodels}). The cost of white-noise
+training in nominal fidelity falls from $4.8$, $5.1$ and $10.1\times10^{-3}$ to $2.0$, $3.5$ and
+$8.1\times10^{-3}$ at the three horizons, and the outcome is the same: again none of the $24$ pulses is more
+accurate, or more robust against white noise, than the one optimized without noise. Over the two variants
+white-noise training helped in none of $48$ runs.
 
 Quasi-static training does what white training cannot. It lowers the quasi-static sensitivity in every
 one of the $24$ runs, by $18$--$24\%$ on average and with a spread of a few percent between seeds, by
@@ -1378,7 +1394,8 @@ $250$ and $4200$ times larger at $1$, $0.5$ and $0.25\ns$. On a grid of a thousa
 accumulated from the noisy Hamiltonian would exceed every other term of the objective by orders of
 magnitude, so Ref.~\cite{Niu2019} presumably evaluates it otherwise; it does not say how. The second
 observation of Sec.~\ref{sec:noisyleak} is therefore a property of our implementation, and we cannot tell
-whether it applies to theirs.
+whether it applies to theirs. The direct-optimizer test of Sec.~\ref{sec:memory} was repeated without it,
+and its outcome did not change.
 
 \subsection{Why the discrepancies arise}
 
@@ -1397,8 +1414,9 @@ pulse --- follow from the formulation itself, and we would expect them in any fa
 are the reason we read the robustness results of Ref.~\cite{Niu2019} as not established, rather than as
 not reproduced for incidental reasons. The third, the domination of the noisy objective by the leakage
 bound, depends on where the bound is evaluated and on the time step (Sec.~\ref{sec:noisescales}); it
-explains our null result, and the direct optimizer of Sec.~\ref{sec:memory} shares it, but it may not
-carry over.
+shaped the training of our noise-optimized agent and may not carry over. The conclusion on white-noise
+training does not rest on it: the direct optimizer reaches it with the bound taken from the noisy and
+from the noise-free controls alike (Sec.~\ref{sec:memory}).
 
 \subsection{Relation to hardware}
 \label{sec:hardware}
@@ -1469,7 +1487,9 @@ difference between the two TRPO agents. Conclusions that rest on differences of 
 particular the sign of the difference between the two TRPO agents --- are therefore not established.
 Conclusions that rest on larger effects are: the absence of an order-of-magnitude robustness gain, the
 direct optimizer's lead of about $0.012$ in $\Fbar$ at $1\MHz$ (and its explanation by duration and
-nominal fidelity), and the runtime results.
+nominal fidelity), and the runtime results. The noise-optimized agent, moreover, was trained with the
+leakage bound accumulated from the noisy trajectory; we tested the alternative with the direct optimizer
+(Sec.~\ref{sec:memory}) but did not retrain the agent with it.
 
 The direct optimizer is deliberately minimal --- one initialization and $400$ iterations per horizon on a
 $10\ns$ grid starting at $40\ns$ --- and is not a survey of gradient methods such as automatic-differentiation

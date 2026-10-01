@@ -71,6 +71,10 @@ Additions that use the stored runs, plus one new Adam experiment (minutes of CPU
   sigma costs 16 times less infidelity than at 2 ns, which accounts for the scale gap with their Fig. 4.
   The noisy leakage bound scales as dt^-4, so the paper now says that its domination of the noisy
   objective is a property of this implementation and may not apply to the original.
+- **Adam with the leakage bound on the noise-free controls (Sec. V E, Table IV rows marked with an
+  asterisk).** The 51 runs were repeated with that choice. White-noise training still helps in none of
+  24 runs (48 of 48 over both variants); its cost in nominal fidelity is roughly halved. The
+  quasi-static results do not change. The TRPO agent was not retrained with this choice.
 
 ## Changes of 2026-09-22
 
