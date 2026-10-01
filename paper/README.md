@@ -75,6 +75,10 @@ Additions that use the stored runs, plus one new Adam experiment (minutes of CPU
   by the computational budget and that no agent was trained at a finer one. Sec. VII C adds that the
   training noise of 1 MHz at 2 ns corresponds to about 4 MHz at 0.1 ns, above the range the original
   evaluates, and that no agent was trained at the matched weaker level.
+- **Fidelities against the original (Secs. VII A, VII C).** The original's own numbers are now quoted:
+  average fidelity 0.995-0.98 over 0.1-3.5 MHz against 0.9925-0.713 here, with the rescaling by the
+  time-step factor (about 0.991 at 1 MHz, 0.975 at 3.5 MHz); and gate infidelity of order 1e-3 across the
+  family against 0.8-1.8e-2 on the 13 converged targets here, with 7 of 21 not converging.
 - **Adam with the leakage bound on the noise-free controls (Sec. V E, Table IV rows marked with an
   asterisk).** The 51 runs were repeated with that choice. White-noise training still helps in none of
   24 runs (48 of 48 over both variants); its cost in nominal fidelity is roughly halved. The

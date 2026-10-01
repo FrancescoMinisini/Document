@@ -1336,6 +1336,14 @@ tried within the seed-to-seed spread. The curriculum strategy works in the sense
 describes: once warm-started, seven of the thirteen non-trivial converged targets were solved within $20$
 iterations.
 
+The absolute fidelities are lower than those reported. Ref.~\cite{Niu2019} quotes gate infidelities of
+order $10^{-3}$ for every member of the family (its Fig.~3); our $13$ non-trivial converged targets have
+nominal infidelities of $0.8$--$1.8\times10^{-2}$, and $7$ of the $21$ targets do not converge
+(Sec.~\ref{sec:runtime}). On $\Ntgt{2.2}{\pi/2}$ the gap is smaller: at the lowest noise strength the
+average fidelity is $0.995$ there, against $0.9950$ and $0.9925$ for our nominal and noise-optimized
+agents (Table~\ref{tab:robust}). We have not identified the cause; the training budget, the single seed
+and the coarser time step are candidates.
+
 The qualitative runtime claim also holds: analog pulses on this hardware model are shorter than a
 CNOT-based synthesis of the same targets, and the advantage is largest near the centre of the family.
 
@@ -1393,7 +1401,11 @@ each, which for gates of about $100\ns$ is a step of about $0.1\ns$, twenty time
 does not state its convention for $\snoise$. At that step the same $\snoise$ costs sixteen times less
 infidelity, and the fidelity loss that its Fig.~4 shows over $\snoise\in[0.1,3.5]\MHz$ is indeed more
 than an order of magnitude smaller than the loss we obtain over the same nominal range for pulses of
-comparable length. The time step alone accounts for a difference of that size; angular units or noise
+comparable length. There the average fidelity of the noise-optimized controller stays between $0.995$ and
+$0.98$, within $0.007$ of the ideal at $1\MHz$; ours falls from $0.9925$ to $0.713$, with $0.966$ at
+$1\MHz$ (Table~\ref{tab:robust}). Dividing our loss relative to $0.1\MHz$ by sixteen gives about $0.991$
+at $1\MHz$ and $0.975$ at $3.5\MHz$, where the loss is too large for the first-order scaling to be more
+than indicative. The time step alone accounts for a difference of that size; angular units or noise
 injected before the filter would change it further. The $\snoise$ axes of the two studies should not be
 identified, and no number in this paper at a given $\snoise$ should be compared with
 a number at the same $\snoise$ in Ref.~\cite{Niu2019}. The conclusions above do not depend on the scale:
