@@ -60,8 +60,9 @@ only in the training noise produce deployed pulses of the same robustness: over 
 iterations, the noise-trained pulse is the more robust one in at most a quarter of them. We show why.
 Against per-step white control noise, the open-loop robustness of any pulse is fixed to leading order by
 its nominal fidelity and its duration --- the white-noise limit of the filter-function picture --- at a
-rate that we compute from the Hamiltonian and verify on every pulse; the noisy objective is dominated by
-the response of the leakage bound to the noise itself; and what stochastic training changes is the
+rate that we compute from the Hamiltonian and verify on every pulse; in our implementation the noisy
+objective is dominated by the response of the leakage bound to the noise itself; and what stochastic
+training changes is the
 policy's reaction to noisy states, which a deployed open-loop pulse cannot use. The direct optimizer
 confirms both sides of this: trained under white noise it gains nothing in $24$ runs out of $24$, trained
 under quasi-static noise it lowers the sensitivity of its pulses to that noise by about a fifth.
@@ -139,7 +140,7 @@ same robustness: over eighty matched iterations the noise-trained pulse is the m
 $19$--$25\%$ of them, at every noise strength.
 \item The reason is structural. Against per-step white control noise, the open-loop robustness of any
 pulse is fixed to leading order by its nominal fidelity and duration, Eq.~\eqref{eq:whitenoise}, at a rate
-that we compute from the Hamiltonian and verify on every pulse we produced. In addition, the noisy
+that we compute from the Hamiltonian and verify on every pulse we produced. In addition, in our implementation the noisy
 objective is dominated by the leakage bound's response to the noise, which acts as a runtime penalty, and
 what stochastic training does change is the policy's reaction to noisy states: in closed loop the
 noise-trained agent is the more robust one, but a deployed pulse cannot use feedback. The same test with
@@ -477,6 +478,9 @@ deliberate feature of the model: it probes sensitivity not only to imperfect pul
 to uncertainty in a device parameter that the controller cannot actuate at all. The noise is added
 after the bandwidth filter and is independent from one $2\ns$ step to the next, so it is white up to
 the $250\MHz$ Nyquist frequency of the grid, above the $200\MHz$ gap to the leakage sector.
+Ref.~\cite{Niu2019} discretizes its pulses more finely, in ``around one thousand time steps''; the
+filter time constant of $32\ns$ is well resolved at $2\ns$, so the noise-free control problem is
+essentially the same, but the step changes the meaning of $\snoise$ (Sec.~\ref{sec:noisescales}).
 
 Training noise and evaluation noise are kept separate. The nominal TRPO agent is optimized without
 perturbations. The noise-optimized TRPO agent and the Adam baseline are both optimized under this
@@ -676,7 +680,8 @@ leakage in the $10^{-4}$ regime --- exactly the scale the leakage-aware objectiv
 produce. The optimizer's own noisy objective selects $60\ns$ instead, a plan with fidelity $0.98205$;
 Sec.~\ref{sec:noisyleak} explains why it prefers the shorter horizon. The baseline is trained under noise
 to match the noise-optimized agent; optimized without noise at the same $70\ns$ it does better still,
-with fidelity $0.99939$ and cost $0.126$ (Sec.~\ref{sec:memory}).
+with fidelity $0.99939$ and cost $0.126$ (Sec.~\ref{sec:memory}); what then remains is the conditional
+phase of the higher levels (Sec.~\ref{sec:hardware}).
 
 The horizon dependence (Fig.~\ref{fig:adamsweep}) is more informative than the optimum itself. Very
 short pulses fail badly: fidelity drops to $0.726$ at $40\ns$ and $0.882$ at $50\ns$, while the
@@ -1339,26 +1344,41 @@ two-CNOT synthesis the converged curriculum pulses are $1.0$--$2.0\times$ faster
 $1.9$--$3.75\times$; the local members of the family need no entangling gate at all.
 
 \subsection{Comparing noise scales}
+\label{sec:noisescales}
 
 One further point limits any quantitative comparison with Ref.~\cite{Niu2019}. Because the kicks are
 independent from step to step, the noise power per unit bandwidth is $\snoise^2\Delta t$, and $K$ in
 Eq.~\eqref{eq:whitenoise} is proportional to $\Delta t$: the same $\snoise$ describes a different physical
 noise level at a different time step, and it matters whether amplitudes are quoted in cyclic or angular
-units. Replaying our pulses with the noise redrawn every $0.5$, $1$, $4$ or $8\ns$ instead of every
-$2\ns$, at the same $\snoise$, multiplies the excess infidelity by $0.31$, $0.60$, $1.33$ and $2.5$--$2.6$,
-as the first-order rate predicts. It also matters where the noise enters. Added to the raw controls,
+units. Replaying our pulses with the noise redrawn every $0.1$, $0.5$, $1$, $4$ or $8\ns$ instead of
+every $2\ns$, at the same $\snoise$, multiplies the excess infidelity by $0.06$, $0.31$, $0.6$, $1.3$ and
+$2.5$, as the first-order rate predicts to within $5\%$. It also matters where the noise enters. Added to the raw controls,
 before the bandwidth filter instead of after it, the same $\snoise$ costs our five pulses $5$ to $18$ times
 less infidelity, and reaches the Hamiltonian with the $32\ns$ memory of the filter. In physical terms, the
 detuning noise of our model at $\snoise=1\MHz$ and $\Delta t=2\ns$ is white frequency noise that dephases
 each qubit in $T_\varphi=2/[(2\pi\snoise)^2\Delta t]\approx25\,\mu\mathrm{s}$, and $3.5\MHz$ corresponds to
-$2\,\mu\mathrm{s}$. Ref.~\cite{Niu2019} states neither its time step nor its convention for $\snoise$, and the fidelity
-loss its Fig.~4 shows over $\snoise\in[0.1,3.5]\MHz$ is more than an order of magnitude smaller than the
-loss we obtain over the same nominal range for pulses of comparable length; a shorter time step, angular
-units or noise injected before the filter could each account for a difference of that size. The $\snoise$ axes of the two
-studies should not be identified, and no number in this paper at a given $\snoise$ should be compared with
+$2\,\mu\mathrm{s}$.
+
+Ref.~\cite{Niu2019} describes its pulses as piecewise constant with ``around one thousand time steps''
+each, which for gates of about $100\ns$ is a step of about $0.1\ns$, twenty times shorter than ours; it
+does not state its convention for $\snoise$. At that step the same $\snoise$ costs sixteen times less
+infidelity, and the fidelity loss that its Fig.~4 shows over $\snoise\in[0.1,3.5]\MHz$ is indeed more
+than an order of magnitude smaller than the loss we obtain over the same nominal range for pulses of
+comparable length. The time step alone accounts for a difference of that size; angular units or noise
+injected before the filter would change it further. The $\snoise$ axes of the two studies should not be
+identified, and no number in this paper at a given $\snoise$ should be compared with
 a number at the same $\snoise$ in Ref.~\cite{Niu2019}. The conclusions above do not depend on the scale:
 Eq.~\eqref{eq:whitenoise} holds at every noise strength, and the matched comparison is negative over the
 whole range.
+
+The step matters in a second way. The part of the leakage bound that responds to white noise
+(Sec.~\ref{sec:noisyleak}) contains a fourth finite difference of the controls and scales as
+$\Delta t^{-4}$: replayed on finer grids, its growth of $3.8\times10^{-3}$ per ns at $2\ns$ becomes about $15$,
+$250$ and $4200$ times larger at $1$, $0.5$ and $0.25\ns$. On a grid of a thousand steps a bound
+accumulated from the noisy Hamiltonian would exceed every other term of the objective by orders of
+magnitude, so Ref.~\cite{Niu2019} presumably evaluates it otherwise; it does not say how. The second
+observation of Sec.~\ref{sec:noisyleak} is therefore a property of our implementation, and we cannot tell
+whether it applies to theirs.
 
 \subsection{Why the discrepancies arise}
 
@@ -1370,12 +1390,65 @@ the other side: performance depends measurably on the architecture and interpret
 and a single run of any configuration carries a seed-to-seed spread of several $10^{-3}$ in $\Fbar$ at
 $1\MHz$.
 
-The main discrepancy, however, is not an implementation detail. Three properties of the UFO formulation
-under white control noise --- the pulse-independence of Eq.~\eqref{eq:whitenoise}, the domination of the
-noisy objective by the leakage bound, and the fact that a policy observing the noisy propagator learns
-feedback rather than open-loop robustness --- follow from the formulation itself, and we would expect them
-in any faithful implementation. They are the reason we read the robustness results of
-Ref.~\cite{Niu2019} as not established, rather than as not reproduced for incidental reasons.
+The main discrepancy, however, is not an implementation detail. Two properties of the UFO formulation
+under white control noise --- the pulse-independence of Eq.~\eqref{eq:whitenoise}, and the fact that a
+policy observing the noisy propagator learns to respond to it rather than to produce a robust open-loop
+pulse --- follow from the formulation itself, and we would expect them in any faithful implementation. They
+are the reason we read the robustness results of Ref.~\cite{Niu2019} as not established, rather than as
+not reproduced for incidental reasons. The third, the domination of the noisy objective by the leakage
+bound, depends on where the bound is evaluated and on the time step (Sec.~\ref{sec:noisescales}); it
+explains our null result, and the direct optimizer of Sec.~\ref{sec:memory} shares it, but it may not
+carry over.
+
+\subsection{Relation to hardware}
+\label{sec:hardware}
+
+This paper compares optimizers on a common model, and none of its fidelities is a statement about a
+device. Five remarks place that model against current hardware.
+
+\emph{Noise.} Frequency and amplitude noise in superconducting circuits is dominated by low-frequency
+components --- $1/f$ flux and charge noise and slow drift of the calibration~\cite{Krantz2019,Paladino2014}.
+Of the noise models of Sec.~\ref{sec:robust} the quasi-static one is therefore the closer to a device, and
+the white model of Ref.~\cite{Niu2019}, under which no training can help, the further.
+
+\emph{Decoherence.} The model is closed. Weak relaxation and pure dephasing, at rates $\Gamma_1=1/T_1$ and
+$\Gamma_\varphi=1/T_\varphi$ on each qubit, lower the average fidelity of any two-qubit gate of duration
+$T$ by $\tfrac{4}{5}T(\Gamma_1+\Gamma_\varphi)$, whatever the gate~\cite{Abad2022}: like white control
+noise, Markovian decoherence leaves a pulse nothing to exploit but its duration. For
+$T_1=T_\varphi=100\,\mu\mathrm{s}$, of the order of current processors ($T_1=68\,\mu\mathrm{s}$ in
+Ref.~\cite{GoogleQAI2025}), this is $1.1\times10^{-3}$ for the $70\ns$ Adam pulse and $1.9\times10^{-3}$
+for the $116\ns$ TRPO pulse: comparable to the nominal infidelities of Table~\ref{tab:single} and ordered,
+again, by duration. By the same formula the white noise of the model at $1\MHz$ costs as much as
+$T_1=T_\varphi\approx5\,\mu\mathrm{s}$, and the runtime weight of Eq.~\eqref{eq:ufo}, which prices a
+nanosecond at $\kappa/(\chi T_{\mathrm{norm}})=1.7\times10^{-4}$ of gate infidelity, corresponds to
+$T_1=T_\varphi\approx12\,\mu\mathrm{s}$. Both describe devices an order of magnitude less coherent than
+today's; a weight matched to current coherence would move the optimum of Eq.~\eqref{eq:ufo} towards
+longer and more accurate pulses.
+
+\emph{Bandwidth.} The $10\MHz$ filter is narrow by hardware standards. Sycamore processors, descendants of
+the gmon, drive single-qubit gates with $25\ns$ pulses and perform iSWAP-like gates by turning on a
+$20\MHz$ coupling for $12\ns$~\cite{Arute2019}: the amplitude bound of the present model, four to six
+times faster than the $54$--$72\ns$ that its filter allows for the same exchange angle
+(Sec.~\ref{sec:physicalinterp}). The runtimes of Sec.~\ref{sec:runtime} are thus set by a modelling choice
+of Ref.~\cite{Niu2019} more than by the coupler.
+
+\emph{Higher levels.} Those fast gates are not members of the benchmark family. The coupling shifts
+$\ket{11}$ through $\ket{02}$ and $\ket{20}$ by $4g^2/|\eta|$, so an exchange pulse carries a conditional
+phase $\phi=(4/|\eta|)\int g^2dt$; it is $\pi/6$ for the Sycamore gate~\cite{Arute2019}, and $\pi/5$ in
+our model for a square $20\MHz$ pulse of the same exchange angle. $\Ntgt{\alpha}{\pi/2}$ contains no such
+phase and local rotations cannot remove it, which leaves an otherwise perfect pulse with
+$1-F=\sin^2(\phi/4)$. This is what limits the pulses optimized without noise in Sec.~\ref{sec:memory}:
+their nominal infidelities, $6.1$, $2.8$ and $1.6\times10^{-4}$ at $70$, $100$ and $130\ns$, equal
+$\sin^2(\phi/4)$ to within $1\%$. In this model the fidelity of an exchange pulse therefore improves only
+as $1/T^2$, a trade-off that native gate sets avoid by making $\phi$ part of the
+gate~\cite{Foxen2020} or by cancelling it through the level structure of the coupler~\cite{Sung2021}.
+
+\emph{Absolute fidelity.} Two-qubit gates on tunable-coupler transmons reach a Pauli error of
+$3.8\times10^{-3}$ for a continuous fSim family on gmon qubits~\cite{Foxen2020}, and fidelities of
+$99.76\%$ and $99.87\%$ for CZ and iSWAP gates~\cite{Sung2021}, decoherence included. Closed-system
+fidelities of $0.982$--$0.997$ (Table~\ref{tab:single}) are not competitive pulse designs and are not
+offered as such. What transfers from this study is the comparison between methods and the two structural
+results of Sec.~\ref{sec:conclusion}, not the pulses.
 
 \subsection{Limitations}
 
@@ -1597,12 +1670,12 @@ $4000$ realizations). Ranges are over the five pulses of Sec.~\ref{sec:robust}.}
 \begin{tabular}{lcc}
 Channel & First order & Monte Carlo\\
 \colrule
-Detuning $\delta_1$ or $\delta_2$ & $1.579$--$1.580$ & $1.51$--$1.61$\\
-Drive amplitude $f_1$ or $f_2$    & $9.927$--$9.934$ & $9.67$--$9.92$\\
-Coupling $g$                      & $6.772$--$6.775$ & $6.59$--$6.87$\\
+Detuning $\delta_1$ or $\delta_2$ & $1.579$--$1.580$ & $1.50$--$1.59$\\
+Drive amplitude $f_1$ or $f_2$    & $9.927$--$9.934$ & $9.66$--$10.04$\\
+Coupling $g$                      & $6.772$--$6.775$ & $6.47$--$7.03$\\
 Anharmonicity $\eta$              & $<0.002$         & $<0.002$\\
 \colrule
-All channels                      & $29.79$--$29.80$ & $28.5$--$29.5$\\
+All channels                      & $29.79$--$29.80$ & $28.8$--$29.3$\\
 \end{tabular}
 \end{ruledtabular}
 \end{table}

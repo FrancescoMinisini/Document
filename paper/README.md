@@ -1,7 +1,7 @@
 # Preprint source bundle
 
 `preprint.tex` — *Robust analog two-qubit gates from deep reinforcement learning: an independent
-reproduction and family-resolved assessment.* REVTeX 4.2, APS two-column preprint style, 21 pages.
+reproduction and family-resolved assessment.* REVTeX 4.2, APS two-column preprint style, 22 pages.
 
 ## Build
 
@@ -14,8 +14,9 @@ pdflatex preprint
 
 No `-shell-escape` is needed: unlike the thesis, this document contains no live TikZ and no
 externalization. All figures are pre-rendered PDFs in `figures/`. `references.bib` here is the thesis
-bibliography plus ten entries used only by the preprint (Zhang2003, Makhlin2002, VidalDawson2004,
-ShendeMarkovBullock2004, Foxen2020, Green2012, Green2013, Cerfontaine2021, KhodjastehViola2009, Wu2019).
+bibliography plus fifteen entries used only by the preprint (Zhang2003, Makhlin2002, VidalDawson2004,
+ShendeMarkovBullock2004, Foxen2020, Green2012, Green2013, Cerfontaine2021, KhodjastehViola2009, Wu2019,
+Paladino2014, Abad2022, Arute2019, Sung2021, GoogleQAI2025).
 
 ## Authorship
 
@@ -60,6 +61,16 @@ Additions that use the stored runs, plus one new Adam experiment (minutes of CPU
   each target's exchange area; single-qubit rotation times under the same limit.
 - **Structure.** The architecture and weight sweeps moved from Sec. IV to Appendix D, with a summary in
   Sec. III F; the simulator-step counts of the controllers are quoted in Sec. III C.
+- **Relation to hardware (Sec. VII E).** Which noise is physical, what decoherence would cost and which
+  coherence time the runtime weight encodes, the control bandwidth and gate times of real gmon-type
+  processors, the conditional phase of the higher levels (it equals the residual infidelity of the
+  noise-free Adam pulses to 1%), and experimental gate fidelities. Every hardware number was checked
+  against its source.
+- **Time step of the original (Secs. III B, VII C, VII D).** The published Niu et al. says its pulses have
+  "around one thousand time steps"; the earlier text said the step was not stated. At 0.1 ns the same
+  sigma costs 16 times less infidelity than at 2 ns, which accounts for the scale gap with their Fig. 4.
+  The noisy leakage bound scales as dt^-4, so the paper now says that its domination of the noisy
+  objective is a property of this implementation and may not apply to the original.
 
 ## Changes of 2026-09-22
 
