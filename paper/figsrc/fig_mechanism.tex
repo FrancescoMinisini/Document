@@ -1,0 +1,124 @@
+% What stochastic training changes, and why it does not reach the deployed pulse.
+% Data (all under ../../data/, written by the uqc_repro/analysis scripts named below):
+%   (a) trajectory_robustness_results/trajectory_robustness_summary.csv  robustness_training_trajectories.py
+%   (b) closed_loop_results/closed_loop_vs_open_loop_summary.csv          closed_loop_vs_open_loop.py
+%   (c) white_noise_results/excess_vs_duration.csv                        white_noise_first_order.py
+% Build: pdflatex fig_mechanism (from figsrc/).
+\documentclass[border=2pt]{standalone}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{groupplots,statistics}
+
+\newcommand{\datadir}{../../data}
+\newcommand{\trajcsv}{\datadir/trajectory_robustness_results/trajectory_robustness_summary.csv}
+\newcommand{\excsv}{\datadir/white_noise_results/excess_vs_duration.csv}
+\pgfplotstableread[col sep=comma]{\datadir/closed_loop_results/closed_loop_vs_open_loop_summary.csv}\cltable
+% \boxstat{row}{column}{macro}: copy one cell of the summary table into a macro
+\newcommand{\boxstat}[3]{\pgfplotstablegetelem{#1}{#2}\of\cltable\global\let#3\pgfplotsretval}
+\newcommand{\loadbox}[6]{\boxstat{#1}{min}{#2}\boxstat{#1}{q1}{#3}\boxstat{#1}{median}{#4}\boxstat{#1}{q3}{#5}\boxstat{#1}{max}{#6}}
+\loadbox{0}{\AminA}{\AqoA}{\AmedA}{\AqtA}{\AmaxA}
+\loadbox{1}{\AminB}{\AqoB}{\AmedB}{\AqtB}{\AmaxB}
+\loadbox{2}{\AminC}{\AqoC}{\AmedC}{\AqtC}{\AmaxC}
+\loadbox{3}{\AminD}{\AqoD}{\AmedD}{\AqtD}{\AmaxD}
+% first-order rate K (ns^-1 MHz^-2), row "predicted_rate_per_ns_per_mhz2" with zero-order hold
+\pgfplotstableread[col sep=comma]{\datadir/white_noise_results/first_order_rate.csv}\ratetable
+\pgfplotstablegetelem{13}{quantity}\of\ratetable\let\ratename\pgfplotsretval
+\def\expectedname{predicted_rate_per_ns_per_mhz2}
+\ifx\ratename\expectedname\else\errmessage{first_order_rate.csv: row 13 is not the predicted rate}\fi
+\pgfplotstablegetelem{13}{value}\of\ratetable\let\Krate\pgfplotsretval
+
+\definecolor{cAdam}{RGB}{31,78,160}
+\definecolor{cNom}{RGB}{224,109,30}
+\definecolor{cNoise}{RGB}{20,120,116}
+
+\pgfplotsset{
+  keep if/.style 2 args={
+    x filter/.append code={%
+      \edef\tempa{\thisrow{#1}}\edef\tempb{#2}%
+      \ifx\tempa\tempb\else\def\pgfmathresult{inf}\fi
+    }
+  }
+}
+
+\begin{document}
+\begin{tikzpicture}
+\begin{groupplot}[
+    group style={group size=3 by 1, horizontal sep=1.7cm},
+    width=6.3cm, height=5.3cm,
+    grid=major, grid style={dashed, gray!30},
+    label style={font=\small},
+    tick label style={font=\footnotesize},
+    legend style={font=\scriptsize, legend cell align=left, draw=gray!60, fill=white,
+                  fill opacity=0.92, text opacity=1, row sep=0pt, inner sep=2pt},
+    filter discard warning=false,
+    unbounded coords=discard
+]
+
+% ---------------------------------------------------------------- (a) paired difference
+\nextgroupplot[
+    xlabel={Noise strength $\sigma_{\mathrm{noise}}$ (MHz)},
+    ylabel={$\overline{F}_{\mathrm{noise\text{-}opt.}}-\overline{F}_{\mathrm{nominal}}$ ($10^{-3}$)},
+    xmin=0, xmax=3.7, ymin=-32, ymax=6,
+]
+    \draw[black!60, thick] (axis cs:0,0) -- (axis cs:3.7,0);
+    \addplot[color=cNoise, mark=*, mark size=1.5pt, thick,
+             error bars/.cd, y dir=both, y explicit, error bar style={cNoise, thick}]
+        table[x=sigma_mhz,
+              y expr=1000*\thisrow{mean_fidelity_difference_noise_minus_nominal},
+              y error plus expr=1000*(\thisrow{difference_ci95_high}-\thisrow{mean_fidelity_difference_noise_minus_nominal}),
+              y error minus expr=1000*(\thisrow{mean_fidelity_difference_noise_minus_nominal}-\thisrow{difference_ci95_low}),
+              col sep=comma] {\trajcsv};
+    \node[font=\scriptsize, anchor=south west, align=left, inner sep=1pt] at (rel axis cs:0.04,0.05)
+        {matched iterations $21$--$100$;\\ mean and $95\%$ interval};
+    \node[font=\small\bfseries, anchor=north west, fill=white, fill opacity=0.85, text opacity=1, inner sep=1.5pt] at (rel axis cs:0.02,0.98) {(a)};
+
+% ---------------------------------------------------------------- (b) closed vs open loop
+\nextgroupplot[
+    ylabel={$\overline{F}$ at $1\,$MHz},
+    xmin=0.4, xmax=4.6,
+    ymin=0.92, ymax=0.972,
+    xtick={1,2,3,4},
+    xticklabels={{open\\loop}, {closed\\loop}, {open\\loop}, {closed\\loop}},
+    xticklabel style={font=\scriptsize, align=center},
+    clip=false,
+    yticklabel style={/pgf/number format/fixed, /pgf/number format/precision=2},
+    boxplot/draw direction=y,
+    boxplot/box extend=0.5,
+]
+    \addplot[color=cNom, fill=cNom!25, boxplot prepared={draw position=1, lower whisker=\AminA, lower quartile=\AqoA, median=\AmedA, upper quartile=\AqtA, upper whisker=\AmaxA}] coordinates {};
+    \addplot[color=cNom, fill=white, boxplot prepared={draw position=2, lower whisker=\AminB, lower quartile=\AqoB, median=\AmedB, upper quartile=\AqtB, upper whisker=\AmaxB}] coordinates {};
+    \addplot[color=cNoise, fill=cNoise!25, boxplot prepared={draw position=3, lower whisker=\AminC, lower quartile=\AqoC, median=\AmedC, upper quartile=\AqtC, upper whisker=\AmaxC}] coordinates {};
+    \addplot[color=cNoise, fill=white, boxplot prepared={draw position=4, lower whisker=\AminD, lower quartile=\AqoD, median=\AmedD, upper quartile=\AqtD, upper whisker=\AmaxD}] coordinates {};
+    \node[font=\small\bfseries, anchor=north west, fill=white, fill opacity=0.85, text opacity=1, inner sep=1.5pt] at (rel axis cs:0.02,0.98) {(b)};
+    \node[font=\scriptsize, color=cNom!80!black, anchor=north] at (axis cs:1.5,0.9095) {nominal TRPO};
+    \node[font=\scriptsize, color=cNoise!80!black, anchor=north] at (axis cs:3.5,0.9095) {noise-opt.\ TRPO};
+
+% ---------------------------------------------------------------- (c) excess infidelity vs duration
+\nextgroupplot[
+    xlabel={Pulse duration $T$ (ns)},
+    ylabel={$\overline{F}(0.1\,\mathrm{MHz})-\overline{F}(1\,\mathrm{MHz})$ ($10^{-2}$)},
+    xmin=50, xmax=190, ymin=1.2, ymax=5.8,
+    legend style={at={(0.03,0.97)}, anchor=north west},
+]
+    \addplot[black!70, dashed, thick, domain=50:190, samples=2] {100*\Krate*(1-0.01)*x};
+    \addlegendentry{first order, $K\sigma^2T$}
+    \addplot[color=cNom, only marks, mark=o, mark size=1.4pt, keep if={source}{trajectory_nominal}]
+        table[x=time_ns, y expr=100*\thisrow{excess_infidelity_1mhz}, col sep=comma] {\excsv};
+    \addlegendentry{nominal TRPO plans}
+    \addplot[color=cNoise, only marks, mark=x, mark size=1.8pt, keep if={source}{trajectory_noise}]
+        table[x=time_ns, y expr=100*\thisrow{excess_infidelity_1mhz}, col sep=comma] {\excsv};
+    \addlegendentry{noise-opt.\ TRPO plans}
+    \addplot[color=cAdam, only marks, mark=square*, mark size=2pt, keep if={source}{selected_adam70}]
+        table[x=time_ns, y expr=100*\thisrow{excess_infidelity_1mhz}, col sep=comma] {\excsv};
+    \addlegendentry{Adam, $60$ and $70\,$ns}
+    \addplot[color=cAdam, only marks, mark=square*, mark size=2pt, keep if={source}{selected_adam60}, forget plot]
+        table[x=time_ns, y expr=100*\thisrow{excess_infidelity_1mhz}, col sep=comma] {\excsv};
+    \node[font=\small\bfseries, anchor=south east, fill=white, fill opacity=0.85, text opacity=1, inner sep=1.5pt] at (rel axis cs:0.98,0.03) {(c)};
+
+\end{groupplot}
+\end{tikzpicture}
+\end{document}

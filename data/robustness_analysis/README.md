@@ -1,9 +1,15 @@
 # Robustness analysis data
 
+> **Warning.** The `noise_*` columns come from the plan in `uqc_repro/final_results/noise/`, which
+> targets `N(0, 0, pi/2)` (the alpha = 0 phase of the curriculum sweep) and is scored against that
+> target, not against `N(2.2, 2.2, pi/2)`. Comparisons between the `noise` columns and the other two
+> are therefore not valid. This file is kept because the thesis and the slides plot it. The preprint
+> uses `data/robustness_analysis_3/` instead, where every plan targets `N(2.2, 2.2, pi/2)`.
+
 ## `combined_ewma_data.csv`
 
-Used by `plots/avg_fidelity_vs_noise.tex`, `plots/fidelity_variance_vs_noise.tex`, the slide copies in
-`presentation/images/`, and the preprint's `paper/figsrc/fig_robustness.tex`.
+Used by `plots/avg_fidelity_vs_noise.tex`, `plots/fidelity_variance_vs_noise.tex` and the slide copies in
+`presentation/images/`. Until 2026-09-22 the preprint's `paper/figsrc/fig_robustness.tex` used it too.
 
 Built from the unmodified per-method Monte Carlo outputs of `benchmark_robustness.py` in
 `uqc_repro/final_results/robustness_analysis/` (subdirectories `noise`, `nominal`, `adam_noise`):

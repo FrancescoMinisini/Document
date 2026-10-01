@@ -1,8 +1,8 @@
 % Nominal single-target comparison on N(2.2,2.2,pi/2).
-% Values are taken directly from the run summaries and match Table III of the paper:
-%   Adam (best horizon, 70 ns) : C=0.1576  F=0.99662  L=2.82e-4  T=70
-%   TRPO nominal               : C=0.2982  F=0.99415  L=1.60e-3  T=116
-%   TRPO noise-optimized       : C=0.1840  F=0.99876  L=2.12e-3  T=90
+% Values are the nominal re-evaluations of the stored plans and match Table III of the paper:
+%   Adam (best horizon, 70 ns)            final_results/adam_noise_70ns   : C=0.1576  F=0.99662  L=2.82e-4  T=70
+%   TRPO nominal (iteration 111)          final_results/nominal           : C=0.2982  F=0.99415  L=1.60e-3  T=116
+%   TRPO noise-optimized (iteration 11)   final_results/trpo_noise_alpha_2.2 : C=0.3537  F=0.99078  L=4.73e-4  T=98
 \documentclass[border=2pt]{standalone}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
@@ -42,29 +42,29 @@
 ]
 
 % ---------------------------------------------------------------- (a) cost
-\nextgroupplot[title={(a) Nominal cost $C$}, ymin=0, ymax=0.36,
+\nextgroupplot[title={(a) Nominal cost $C$}, ymin=0, ymax=0.42,
                nodes near coords={\pgfmathprintnumber[fixed,precision=3]{\pgfplotspointmeta}}]
   \addplot[fill=cAdam,  draw=cAdam!60!black,  bar shift=0pt] coordinates {(Adam,0.1576)};
   \addplot[fill=cNom,   draw=cNom!60!black,   bar shift=0pt] coordinates {(Nom,0.2982)};
-  \addplot[fill=cNoise, draw=cNoise!60!black, bar shift=0pt] coordinates {(NO,0.1840)};
+  \addplot[fill=cNoise, draw=cNoise!60!black, bar shift=0pt] coordinates {(NO,0.3537)};
 
 % ------------------------------------------------------------ (b) fidelity
-\nextgroupplot[title={(b) Nominal fidelity $F$}, ymin=0.990, ymax=1.0008,
-               ytick={0.990,0.994,0.998},
+\nextgroupplot[title={(b) Nominal fidelity $F$}, ymin=0.985, ymax=1.0008,
+               ytick={0.985,0.990,0.995,1.000},
                yticklabel style={/pgf/number format/fixed,/pgf/number format/precision=3},
                nodes near coords={\pgfmathprintnumber[fixed,precision=5]{\pgfplotspointmeta}}]
   \addplot[fill=cAdam,  draw=cAdam!60!black,  bar shift=0pt] coordinates {(Adam,0.99662)};
   \addplot[fill=cNom,   draw=cNom!60!black,   bar shift=0pt] coordinates {(Nom,0.99415)};
-  \addplot[fill=cNoise, draw=cNoise!60!black, bar shift=0pt] coordinates {(NO,0.99876)};
+  \addplot[fill=cNoise, draw=cNoise!60!black, bar shift=0pt] coordinates {(NO,0.99078)};
 
 % ------------------------------------------------------------- (c) leakage
 \nextgroupplot[title={(c) Leakage $L_{\mathrm{tot}}$ ($10^{-3}$)},
-               ymin=0, ymax=2.75, ytick={0,0.5,1.0,1.5,2.0,2.5},
+               ymin=0, ymax=2.0, ytick={0,0.5,1.0,1.5},
                yticklabel style={/pgf/number format/fixed,/pgf/number format/precision=1},
                nodes near coords={\pgfmathprintnumber[fixed,precision=2]{\pgfplotspointmeta}}]
   \addplot[fill=cAdam,  draw=cAdam!60!black,  bar shift=0pt] coordinates {(Adam,0.282)};
   \addplot[fill=cNom,   draw=cNom!60!black,   bar shift=0pt] coordinates {(Nom,1.60)};
-  \addplot[fill=cNoise, draw=cNoise!60!black, bar shift=0pt] coordinates {(NO,2.12)};
+  \addplot[fill=cNoise, draw=cNoise!60!black, bar shift=0pt] coordinates {(NO,0.473)};
 
 % ------------------------------------------------------------- (d) runtime
 \nextgroupplot[title={(d) Runtime $T$ (ns)}, ymin=0, ymax=245,
@@ -74,9 +74,13 @@
       (rel axis cs:0,{215/245}) -- (rel axis cs:1,{215/245});
   \node[font=\tiny, red!55!black, anchor=north east, inner sep=1pt]
       at (rel axis cs:0.99,{213/245}) {$T_{\mathrm{syn}}=215$};
+  \draw[black!70, dash pattern=on 1.2pt off 1.6pt, thick]
+      (rel axis cs:0,{150/245}) -- (rel axis cs:1,{150/245});
+  \node[font=\tiny, black!70, anchor=south east, inner sep=1pt]
+      at (rel axis cs:0.99,{151/245}) {$T^{\mathrm{tgt}}_{\mathrm{syn}}=150$};
   \addplot[fill=cAdam,  draw=cAdam!60!black,  bar shift=0pt] coordinates {(Adam,70)};
   \addplot[fill=cNom,   draw=cNom!60!black,   bar shift=0pt] coordinates {(Nom,116)};
-  \addplot[fill=cNoise, draw=cNoise!60!black, bar shift=0pt] coordinates {(NO,90)};
+  \addplot[fill=cNoise, draw=cNoise!60!black, bar shift=0pt] coordinates {(NO,98)};
 
 \end{groupplot}
 \end{tikzpicture}

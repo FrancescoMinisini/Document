@@ -88,7 +88,9 @@ Cross-reference label prefixes are used consistently and cited via `\eqref`/`\re
 
 ## Data
 
-`data/<experiment>/` pairs the CSVs consumed by `plots/*.tex` with the matplotlib PNGs originally produced by the simulation code. The PNGs are reference only — the thesis ships the pgfplots renderings, not the PNGs. Experiment directories: `adam`, `adam_vs_nominal_results`, `cost_function_sweep_results`, `nn_size_sweep_results`, `robustness_analysis`, `runtime_results`, `trpo_nominal_results`.
+`data/<experiment>/` pairs the CSVs consumed by `plots/*.tex` with the matplotlib PNGs originally produced by the simulation code. The PNGs are reference only — the thesis ships the pgfplots renderings, not the PNGs. Experiment directories: `adam`, `adam_vs_nominal_results`, `cost_function_sweep_results`, `nn_size_sweep_results`, `robustness_analysis`, `runtime_results`, `trpo_nominal_results`. The preprint (`paper/figsrc/*.tex`) also reads `robustness_analysis_3`, `trajectory_robustness_results`, `closed_loop_results`, `white_noise_results`, `noisy_leakage_results` and `gate_structure_results`; `data/README.md` lists what writes each.
+
+The `noise_*` columns of `data/robustness_analysis/combined_ewma_data.csv`, plotted by the thesis and slides, come from a plan for `N(0, 0, π/2)` (see `../CLAUDE.md`). The preprint no longer uses that file.
 
 `data/robustness_analysis/combined_ewma_data.csv` must stay byte-identical to the output of `uqc_repro/analysis/export_ewma_data.py`. Its README records the provenance. An earlier, altered version of this dataset is kept in the gitignored `archive/` folder: never plot it or quote numbers from it. The submitted snapshot `Thesis_Francesco_Giuseppe_Minisini_final.pdf` predates the correction and still shows the earlier robustness figures. Leave it unchanged.
 

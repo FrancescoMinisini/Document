@@ -54,6 +54,15 @@ submitted PDF `Thesis_Francesco_Giuseppe_Minisini_final.pdf` predates the correc
 figures and the conclusions drawn from them differ from the current `Tesi.pdf`.
 [`data/robustness_analysis/README.md`](data/robustness_analysis/README.md) documents the difference.
 
+**Known issue in the thesis, the slides and the summary.** The controller they present as the
+noise-trained TRPO agent for `N(2.2, 2.2, π/2)` (the `noise` columns of
+`data/robustness_analysis/combined_ewma_data.csv` and the noise-optimized row of the single-target
+comparison) is a plan for `N(0, 0, π/2)`, scored against that target. The comparisons of stochastic
+training built on it are therefore not valid. The preprint in `paper/` replaces it with the genuine
+noise-trained run and its own data in `data/robustness_analysis_3/` and the other directories listed in
+[`data/README.md`](data/README.md); its conclusions about stochastic training are the opposite of the
+thesis's.
+
 ## Citation
 
 See [`CITATION.cff`](CITATION.cff).

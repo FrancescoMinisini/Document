@@ -1,5 +1,7 @@
-% Standalone rebuild of the robustness panels for the preprint.
-% Data paths are relative to this file's build directory (paper/figsrc/).
+% Robustness of the four controllers for N(2.2, 2.2, pi/2) on the dense noise grid.
+% Data: ../../data/robustness_analysis_3/combined_ewma_data.csv, written by
+% uqc_repro/analysis/export_ewma_data.py from uqc_repro/final_results/robustness_analysis_3/.
+% Build: pdflatex fig_robustness (from figsrc/).
 \documentclass[border=2pt]{standalone}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
@@ -7,9 +9,20 @@
 \usepackage{pgfplots}
 \usepackage{pgfplotstable}
 \pgfplotsset{compat=1.18}
-\usepgfplotslibrary{groupplots}
 
 \newcommand{\datadir}{../../data}
+\newcommand{\rcsv}{\datadir/robustness_analysis_3/combined_ewma_data.csv}
+
+\definecolor{cAdam}{RGB}{31,78,160}
+\definecolor{cNom}{RGB}{224,109,30}
+\definecolor{cNoise}{RGB}{20,120,116}
+
+\pgfplotsset{
+  a70/.style={color=cAdam, thick},
+  a60/.style={color=cAdam!55!white, thick, dashed},
+  nom/.style={color=cNom, thick},
+  noi/.style={color=cNoise, thick},
+}
 
 \begin{document}
 \begin{tikzpicture}
@@ -21,36 +34,35 @@
     xlabel={Noise strength $\sigma_{\mathrm{noise}}$ (MHz)},
     ylabel={Average fidelity $\overline{F}$},
     xmin=0, xmax=3.6,
-    ymin=0.55, ymax=1.03,
+    ymin=0.62, ymax=1.01,
     grid=major,
     grid style={dashed, gray!30},
     label style={font=\small},
     tick label style={font=\footnotesize},
     legend style={at={(0.98,0.98)}, anchor=north east, font=\scriptsize,
-                  cells={align=left}, draw=gray!60, fill=white, fill opacity=0.9,
+                  legend cell align=left, draw=gray!60, fill=white, fill opacity=0.9,
                   text opacity=1, row sep=0pt, inner sep=2pt},
     each nth point=3,
     filter discard warning=false,
     unbounded coords=discard
 ]
-    % raw Monte Carlo scatter
-    \addplot[color=blue!80!black,  opacity=0.15, forget plot] table[x=sigma_mhz, y=adam_fidelity_raw,    col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
-    \addplot[color=orange!80!red,  opacity=0.15, forget plot] table[x=sigma_mhz, y=nominal_fidelity_raw, col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
-    \addplot[color=teal!80!black,  opacity=0.15, forget plot] table[x=sigma_mhz, y=noise_fidelity_raw,   col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
+    \addplot[color=cAdam,  opacity=0.12, forget plot] table[x=sigma_mhz, y=adam70_fidelity_raw,  col sep=comma] {\rcsv};
+    \addplot[color=cNom,   opacity=0.12, forget plot] table[x=sigma_mhz, y=nominal_fidelity_raw, col sep=comma] {\rcsv};
+    \addplot[color=cNoise, opacity=0.12, forget plot] table[x=sigma_mhz, y=noise_fidelity_raw,   col sep=comma] {\rcsv};
 
-    % training-noise marker
-    \draw[gray!60, dashed, thick] (axis cs:1.0,0.79) -- (axis cs:1.0,1.03);
+    \draw[gray!60, dashed, thick] (axis cs:1.0,0.885) -- (axis cs:1.0,1.01);
     \node[font=\scriptsize, gray!40!black, anchor=north, fill=white,
           fill opacity=0.85, text opacity=1, inner sep=1pt]
-        at (axis cs:1.0,0.795) {$\sigma_{\mathrm{train}}$};
+        at (axis cs:1.0,0.885) {$\sigma_{\mathrm{train}}$};
 
-    % EWMA curves
-    \addplot[color=blue!80!black, thick] table[x=sigma_mhz, y=adam_fidelity_ewma,    col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
-    \addlegendentry{Adam baseline}
-    \addplot[color=orange!80!red, thick] table[x=sigma_mhz, y=nominal_fidelity_ewma, col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
-    \addlegendentry{Nominal TRPO}
-    \addplot[color=teal!80!black, thick] table[x=sigma_mhz, y=noise_fidelity_ewma,   col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
-    \addlegendentry{Noise-optimized TRPO}
+    \addplot[a70] table[x=sigma_mhz, y=adam70_fidelity_ewma,  col sep=comma] {\rcsv};
+    \addlegendentry{Adam, $70\,$ns}
+    \addplot[a60] table[x=sigma_mhz, y=adam60_fidelity_ewma,  col sep=comma] {\rcsv};
+    \addlegendentry{Adam, $60\,$ns}
+    \addplot[noi] table[x=sigma_mhz, y=noise_fidelity_ewma,   col sep=comma] {\rcsv};
+    \addlegendentry{Noise-opt.\ TRPO, $98\,$ns}
+    \addplot[nom] table[x=sigma_mhz, y=nominal_fidelity_ewma, col sep=comma] {\rcsv};
+    \addlegendentry{Nominal TRPO, $116\,$ns}
 \end{axis}
 
 % inset: low-noise magnification
@@ -59,7 +71,7 @@
     xshift=0.95cm, yshift=0.75cm,
     width=4.3cm, height=2.9cm,
     xmin=0.0, xmax=1.2,
-    ymin=0.955, ymax=1.003,
+    ymin=0.955, ymax=1.0,
     xtick={0, 0.4, 0.8, 1.2},
     ytick={0.96, 0.98, 1.00},
     yticklabel style={/pgf/number format/fixed, /pgf/number format/precision=2},
@@ -71,9 +83,10 @@
     filter discard warning=false,
     unbounded coords=discard
 ]
-    \addplot[color=blue!80!black, thick] table[x=sigma_mhz, y=adam_fidelity_ewma,    col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
-    \addplot[color=orange!80!red, thick] table[x=sigma_mhz, y=nominal_fidelity_ewma, col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
-    \addplot[color=teal!80!black, thick] table[x=sigma_mhz, y=noise_fidelity_ewma,   col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
+    \addplot[a70] table[x=sigma_mhz, y=adam70_fidelity_ewma,  col sep=comma] {\rcsv};
+    \addplot[a60] table[x=sigma_mhz, y=adam60_fidelity_ewma,  col sep=comma] {\rcsv};
+    \addplot[noi] table[x=sigma_mhz, y=noise_fidelity_ewma,   col sep=comma] {\rcsv};
+    \addplot[nom] table[x=sigma_mhz, y=nominal_fidelity_ewma, col sep=comma] {\rcsv};
 \end{axis}
 
 \node[font=\small\bfseries, anchor=north west] at (mainplot.north west) [xshift=-8pt, yshift=10pt] {(a)};
@@ -95,27 +108,29 @@
     label style={font=\small},
     tick label style={font=\footnotesize},
     legend style={at={(0.98,0.03)}, anchor=south east, font=\scriptsize,
-                  cells={align=left}, draw=gray!60, fill=white, fill opacity=0.9,
+                  legend cell align=left, draw=gray!60, fill=white, fill opacity=0.9,
                   text opacity=1, row sep=0pt, inner sep=2pt},
     each nth point=3,
     filter discard warning=false,
     unbounded coords=discard
 ]
-    \addplot[color=blue!80!black, opacity=0.15, forget plot] table[x=sigma_mhz, y=adam_variance_raw,    col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
-    \addplot[color=orange!80!red, opacity=0.15, forget plot] table[x=sigma_mhz, y=nominal_variance_raw, col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
-    \addplot[color=teal!80!black, opacity=0.15, forget plot] table[x=sigma_mhz, y=noise_variance_raw,   col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
+    \addplot[color=cAdam,  opacity=0.12, forget plot] table[x=sigma_mhz, y=adam70_variance_raw,  col sep=comma] {\rcsv};
+    \addplot[color=cNom,   opacity=0.12, forget plot] table[x=sigma_mhz, y=nominal_variance_raw, col sep=comma] {\rcsv};
+    \addplot[color=cNoise, opacity=0.12, forget plot] table[x=sigma_mhz, y=noise_variance_raw,   col sep=comma] {\rcsv};
 
     \draw[gray!60, dashed, thick] (axis cs:1.0,1e-7) -- (axis cs:1.0,5e-2);
     \node[font=\scriptsize, gray!40!black, anchor=south, fill=white,
           fill opacity=0.85, text opacity=1, inner sep=1pt]
         at (axis cs:1.0,3.2e-2) {$\sigma_{\mathrm{train}}$};
 
-    \addplot[color=blue!80!black, thick] table[x=sigma_mhz, y=adam_variance_ewma,    col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
-    \addlegendentry{Adam baseline}
-    \addplot[color=orange!80!red, thick] table[x=sigma_mhz, y=nominal_variance_ewma, col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
-    \addlegendentry{Nominal TRPO}
-    \addplot[color=teal!80!black, thick] table[x=sigma_mhz, y=noise_variance_ewma,   col sep=comma] {\datadir/robustness_analysis/combined_ewma_data.csv};
-    \addlegendentry{Noise-optimized TRPO}
+    \addplot[a70] table[x=sigma_mhz, y=adam70_variance_ewma,  col sep=comma] {\rcsv};
+    \addlegendentry{Adam, $70\,$ns}
+    \addplot[a60] table[x=sigma_mhz, y=adam60_variance_ewma,  col sep=comma] {\rcsv};
+    \addlegendentry{Adam, $60\,$ns}
+    \addplot[noi] table[x=sigma_mhz, y=noise_variance_ewma,   col sep=comma] {\rcsv};
+    \addlegendentry{Noise-opt.\ TRPO, $98\,$ns}
+    \addplot[nom] table[x=sigma_mhz, y=nominal_variance_ewma, col sep=comma] {\rcsv};
+    \addlegendentry{Nominal TRPO, $116\,$ns}
 \end{axis}
 
 \node[font=\small\bfseries, anchor=north west] at (varplot.north west) [xshift=-8pt, yshift=10pt] {(b)};
