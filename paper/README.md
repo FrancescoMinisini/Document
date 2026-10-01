@@ -1,7 +1,7 @@
 # Preprint source bundle
 
 `preprint.tex` — *Robust analog two-qubit gates from deep reinforcement learning: an independent
-reproduction and family-resolved assessment.* REVTeX 4.2, APS two-column preprint style, 22 pages.
+reproduction and family-resolved assessment.* REVTeX 4.2, APS two-column preprint style, 23 pages.
 
 ## Build
 

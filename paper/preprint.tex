@@ -53,24 +53,26 @@ two-qubit gate family
 $N(\alpha,\alpha,\gamma)=\exp[i(\alpha\sigma^x\sigma^x+\alpha\sigma^y\sigma^y+\gamma\sigma^z\sigma^z)]$ on a
 three-level gmon model, and compare its trust-region policy optimization (TRPO) agent with a direct
 gradient (GRAPE-style, Adam) optimizer that uses the same Hamiltonian, the same objective and the same
-training noise. The framework produces high-fidelity analog gates, but three of its central claims do not
-survive controlled tests. A single-start direct optimizer beats the policy-gradient controller on every
-nominal metric and is the most robust controller at every noise strength. Two TRPO agents that differ
-only in the training noise produce deployed pulses of the same robustness: over eighty matched training
-iterations, the noise-trained pulse is the more robust one in at most a quarter of them. We show why.
-Against per-step white control noise, the open-loop robustness of any pulse is fixed to leading order by
-its nominal fidelity and its duration --- the white-noise limit of the filter-function picture --- at a
-rate that we compute from the Hamiltonian and verify on every pulse; in our implementation the noisy
-objective is dominated by the response of the leakage bound to the noise itself; and what stochastic
-training changes is the
-policy's reaction to noisy states, which a deployed open-loop pulse cannot use. The direct optimizer
-confirms both sides of this: trained under white noise it gains nothing in $48$ runs out of $48$, with
-the leakage bound evaluated on the noisy or on the noise-free controls; trained under quasi-static noise
-it lowers the sensitivity of its pulses to that noise by about a fifth.
+training noise. The framework produces high-fidelity analog gates, but three of its central claims are
+not supported in our implementation, and for two of them the reason does not depend on the
+implementation. Against per-step white control noise, the open-loop robustness of any pulse is fixed to
+leading order by its nominal fidelity and its duration --- the white-noise limit of the filter-function
+picture --- at a rate that we compute from the Hamiltonian and verify on every pulse: no training
+procedure can buy robustness through the pulse shape. A direct optimizer confirms this over eight seeds and
+three durations. Trained under white noise it gains nothing in $48$ runs out of $48$, with the leakage
+bound evaluated on the noisy or on the noise-free controls; trained under quasi-static noise, where the
+shape does enter, it lowers the sensitivity of its pulses by about a fifth. Two TRPO agents that differ
+only in the training noise agree: their deployed pulses are equally robust within the seed-to-seed spread,
+and what stochastic training changes is the policy's reaction to noisy states, which an open-loop pulse
+cannot use. That comparison rests on one pair of seeds, and our noise-trained agent saw a leakage bound
+that responds to the noise, which the original may not have; we did not retrain it. In our implementation
+a single-start direct optimizer also beats the policy-gradient controller on every nominal metric and at
+every noise strength, which is a statement about our agents and not about reinforcement learning in
+general.
 Finally, every member of the benchmark subfamily $N(\alpha,\alpha,\pi/2)$ is an exchange rotation by
 $\alpha-\pi/2$, so the order-of-magnitude runtime gain reported near $\alpha=\pi/2$ sits around the
 identity. Against a target-specific two-CNOT synthesis the learned pulses are at most twice as fast, and
-the direct optimizer up to $3.75$ times; its pulses sit at the limit set by the model's control
+the direct optimizer up to $3.75$ times, at nominal fidelities of $0.98$ or more; its pulses sit at the limit set by the model's control
 bandwidth, which the gate times of the synthesis reference do not respect. All code and data are public.
 \end{abstract}
 
@@ -129,16 +131,22 @@ much the conclusions depend on the free parameters the original paper does not p
 actor--critic architecture and the UFO weights.
 
 \paragraph*{What we find.}
-The framework works as a pulse generator, but its central claims do not survive controlled tests.
+The framework works as a pulse generator, but its central claims are not supported by controlled tests
+in our implementation. Items 3 and 4 below do not depend on the implementation; items 1 and 2 do.
 \begin{enumerate}
 \item On the representative target $\Ntgt{2.2}{\pi/2}$, a single-start Adam optimizer beats both TRPO
 agents on \emph{every} nominal metric --- against the nominal agent, total cost $0.158$ versus $0.298$,
 runtime $70$ versus $116\ns$ and leakage $2.8\times10^{-4}$ versus $1.6\times10^{-3}$ --- and one of its
-two plans is the most robust controller at every noise strength.
+two plans is the most robust controller at every noise strength. This compares one gradient optimizer
+with our agents, whose curriculum fails on a third of the family (item 4); better-trained agents could
+narrow the gap.
 \item Stochastic training does not make the deployed pulse more robust. Two TRPO agents that share seed,
 architecture, objective and budget and differ only in the training noise produce open-loop pulses of the
 same robustness: over eighty matched iterations the noise-trained pulse is the more robust one in only
-$19$--$25\%$ of them, at every noise strength.
+$19$--$25\%$ of them, at every noise strength. The difference is of the size of the seed-to-seed spread,
+so its sign is not established; what the data exclude is a gain of the reported size. Our noise-trained
+agent also saw a leakage bound that responds to the noise (Sec.~\ref{sec:noisescales}), and we did not
+retrain it without.
 \item The reason is structural. Against per-step white control noise, the open-loop robustness of any
 pulse is fixed to leading order by its nominal fidelity and duration, Eq.~\eqref{eq:whitenoise}, at a rate
 that we compute from the Hamiltonian and verify on every pulse we produced. In addition, in our implementation the noisy
@@ -157,7 +165,7 @@ fails to converge on a third of the family, and an exact mirror symmetry of the 
 failures are the optimizer's, not the targets'.
 \item The runtime advantage over compiled synthesis belongs to analog pulse-level control, not to the
 learning method: the direct optimizer alone is faster at every non-trivial target ($1.9$--$3.75\times$
-over two-CNOT synthesis), and its pulse length tracks the exchange angle $|\alpha-\pi/2|$, close to the
+over two-CNOT synthesis, also for its $21$ solutions with fidelity above $0.98$), and its pulse length tracks the exchange angle $|\alpha-\pi/2|$, close to the
 shortest time in which the bandwidth-limited coupling can deliver it. Under the same bandwidth limit a
 single-qubit $\pi$ rotation takes at least $54\ns$, not the $20\ns$ assumed by the synthesis reference.
 \end{enumerate}
@@ -1250,11 +1258,14 @@ selected horizons span $40$--$80\ns$ with a median of $70\ns$ (Fig.~\ref{fig:ada
 of $132\ns$ for the converged curriculum targets, at comparable nominal fidelity (median $0.987$ against
 $0.988$) and better robustness at $\snoise=1\MHz$ (median $\Fbar=0.969$ against $0.955$) --- the latter as
 Eq.~\eqref{eq:whitenoise} predicts for shorter pulses. Against Eq.~\eqref{eq:tsyntgt} the $31$ non-local
-Adam solutions are faster by $1.9$--$3.75\times$ (median $2.1\times$); at the two local ends Adam's
+Adam solutions are faster by $1.9$--$3.75\times$ (median $2.1\times$), with the same range and median for
+the $21$ of them whose nominal fidelity exceeds $0.98$; at the two local ends Adam's
 $70\ns$ pulses, with fidelity $0.940$, are slower than a $20\ns$ layer of single-qubit gates. Three caveats
 apply to the Adam numbers: the horizon grid starts at $40\ns$, so the seven targets that sit at the grid
 minimum could be faster still; the horizon is selected by the noisy objective, which favours short pulses
-(Sec.~\ref{sec:noisyleak}); and nine of the $33$ solutions have nominal fidelity below $0.97$.
+(Sec.~\ref{sec:noisyleak}); and nine of the $33$ solutions have nominal fidelity below $0.97$. The
+synthesis times, moreover, are those of ideal gates with no infidelity attached, whereas the pulses set
+against them have fidelities of $0.98$--$0.99$.
 
 The runtime advantage over compiled synthesis is therefore a property of \emph{direct analog optimization
 on this hardware model}, not a benefit conferred by reinforcement learning.
@@ -1330,7 +1341,7 @@ CNOT-based synthesis of the same targets, and the advantage is largest near the 
 
 \subsection{What does not}
 
-Three claims do not survive, and a fourth needs a different reading.
+Three claims are not supported in our implementation, and a fourth needs a different reading.
 
 \emph{Nominal superiority.} On $\Ntgt{2.2}{\pi/2}$ a single-start Adam optimization beats both TRPO agents
 on cost, runtime, leakage and fidelity (Table~\ref{tab:single}). The SGD baseline of Ref.~\cite{Niu2019}
@@ -1339,7 +1350,9 @@ fidelity on this same target stays near $0.75$--$0.77$ over the whole noise rang
 reconstruct why; the gap between the two gradient baselines is larger than any gap between RL and
 gradient optimization that we observe. With a gradient optimizer that works, the reported two orders of
 magnitude in infidelity over SGD do not reproduce: at every noise strength our direct optimizer is ahead
-of the RL controllers.
+of the RL controllers. This is the least general of our findings. It sets one gradient optimizer against
+our TRPO agents, which reach cost $0.30$--$0.35$ where the optimizer reaches $0.16$ and whose curriculum
+fails on a third of the family (Sec.~\ref{sec:runtime}); a better-trained agent could narrow it.
 
 \emph{Robustness from stochastic training.} In a controlled comparison, noise-aware training does not make
 the deployed pulse more robust (Sec.~\ref{sec:matched}), and Eq.~\eqref{eq:whitenoise} explains why it
@@ -1489,14 +1502,19 @@ Conclusions that rest on larger effects are: the absence of an order-of-magnitud
 direct optimizer's lead of about $0.012$ in $\Fbar$ at $1\MHz$ (and its explanation by duration and
 nominal fidelity), and the runtime results. The noise-optimized agent, moreover, was trained with the
 leakage bound accumulated from the noisy trajectory; we tested the alternative with the direct optimizer
-(Sec.~\ref{sec:memory}) but did not retrain the agent with it.
+(Sec.~\ref{sec:memory}) but did not retrain the agent with it. The matched comparison of
+Sec.~\ref{sec:matched} is therefore an illustration of Eq.~\eqref{eq:whitenoise}, not an independent test
+of the original training; the argument rests on that equation and on the direct-optimizer experiment.
 
 The direct optimizer is deliberately minimal --- one initialization and $400$ iterations per horizon on a
 $10\ns$ grid starting at $40\ns$ --- and is not a survey of gradient methods such as automatic-differentiation
 GRAPE or Krotov. The comparison is between one RL framework and one gradient optimizer on one hardware
 model, not a ranking of control methodologies, and it does not include model-based
 RL~\cite{Khalid2023}. Finally, both production TRPO agents and the curriculum's first target were trained
-in stages with changing stopping costs, as documented in Table~\ref{tab:config}.
+in stages with changing stopping costs, as documented in Table~\ref{tab:config}. Nor do we survey earlier
+comparisons between reinforcement learning and gradient methods in quantum control. That gradients do
+well when the model is known is not new; what this paper adds is the mechanism of
+Eq.~\eqref{eq:whitenoise} and the structure of the benchmark family.
 
 \subsection{Relation to subsequent work}
 
@@ -1523,8 +1541,8 @@ stochastic control environment --- and compared it with a direct gradient optimi
 Hamiltonian, the same objective and the same training noise.
 
 The framework works: it produces high-fidelity analog gates, faster than a compiled implementation, and its
-published hyperparameters are close to optimal in our hands. Three of its headline claims, however, do not
-survive controlled tests. A single-start direct optimizer beats the policy-gradient controller on every
+published hyperparameters are close to optimal in our hands. Three of its headline claims, however, are
+not supported in our implementation. A single-start direct optimizer beats our policy-gradient controller on every
 nominal metric and, against control noise, at every noise strength. Training the policy under noise does
 not make its deployed pulses more robust than those of an identical agent trained without noise; what it
 changes is the agent's closed-loop behaviour, which open-loop pulses do not inherit. And the
