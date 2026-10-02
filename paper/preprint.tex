@@ -64,8 +64,9 @@ bound evaluated on the noisy or on the noise-free controls; trained under quasi-
 shape does enter, it lowers the sensitivity of its pulses by about a fifth. Two TRPO agents that differ
 only in the training noise agree: their deployed pulses are equally robust within the seed-to-seed spread,
 and what stochastic training changes is the policy's reaction to noisy states, which an open-loop pulse
-cannot use. That comparison rests on one pair of seeds, and our noise-trained agent saw a leakage bound
-that responds to the noise, which the original may not have; we did not retrain it. In our implementation
+cannot use. Three further pairs of agents, retrained with the leakage bound taken from the noise-free
+controls, give the same result: the noise-trained pulses are the more robust ones in about a quarter of
+the matched iterations, by the margin that their durations and nominal fidelities predict. In our implementation
 a single-start direct optimizer also beats the policy-gradient controller on every nominal metric and at
 every noise strength, which is a statement about our agents and not about reinforcement learning in
 general.
@@ -145,8 +146,9 @@ architecture, objective and budget and differ only in the training noise produce
 same robustness: over eighty matched iterations the noise-trained pulse is the more robust one in only
 $19$--$25\%$ of them, at every noise strength. The difference is of the size of the seed-to-seed spread,
 so its sign is not established; what the data exclude is a gain of the reported size. Our noise-trained
-agent also saw a leakage bound that responds to the noise (Sec.~\ref{sec:noisescales}), and we did not
-retrain it without.
+agent also saw a leakage bound that responds to the noise (Sec.~\ref{sec:noisescales}). Three further
+pairs of agents, with three seeds and the bound taken from the noise-free controls, repeat the result:
+the noise-trained pulse is the more robust one in $24$--$28\%$ of the matched iterations at $1\MHz$.
 \item The reason is structural. Against per-step white control noise, the open-loop robustness of any
 pulse is fixed to leading order by its nominal fidelity and duration, Eq.~\eqref{eq:whitenoise}, at a rate
 that we compute from the Hamiltonian and verify on every pulse we produced. In addition, in our implementation the noisy
@@ -632,7 +634,9 @@ Closed-loop test & $\snoise$ & \multicolumn{4}{c}{$1\MHz$, $100$ samples}\\
 \footnotetext[1]{Both agents: iterations $1$--$100$ with $10\,000$ episodes per batch and
 $C_{\mathrm{term}}=0.40$, from the same seed. They then continued with $C_{\mathrm{term}}=0.30$: the
 nominal agent for $15$ iterations with $5000$ episodes per batch, the noise-optimized one for $5$
-iterations with $10\,000$.}
+iterations with $10\,000$. The three further pairs of Sec.~\ref{sec:matched} (seeds $1$, $2$, $3$) have
+the settings of iterations $1$--$100$, with the leakage bound of the noise-trained agents accumulated
+from the noise-free controls.}
 \footnotetext[2]{Also the advancement threshold. The cold-start target $\alpha=0$ used a hand-tuned
 sequence of stopping costs.}
 \footnotetext[3]{Nominal / noise-optimized agent.}
@@ -904,6 +908,54 @@ plans can suggest the opposite. What the data do rule out is an improvement of t
 Ref.~\cite{Niu2019}: an order of magnitude in infidelity at $1\MHz$ would mean $\Fbar\approx0.996$ instead
 of $0.96$, far outside the spread of either history.
 
+\emph{Three seeds, with the leakage bound taken from the noise-free controls.} The noise-optimized agent
+above was trained with a leakage bound that responds to the noise itself (Sec.~\ref{sec:noisyleak}), and
+it is one seed. We therefore trained three further pairs of agents, with seeds $1$, $2$ and $3$ and the
+settings of the matched iterations ($100$ iterations of $10\,000$ episodes, $C_{\mathrm{term}}=0.40$). In
+these the noise-trained agent accumulates the leakage bound from the noise-free controls, so that the
+training noise enters its objective through the fidelity alone. The runs use a batched implementation of
+the environment, which agrees with the original one to $10^{-13}$ in the cost at every step but draws
+different random numbers, so its seed $1$ is not the pair above. The $600$ plans were evaluated exactly
+as before (Table~\ref{tab:seeds}).
+
+\begin{table}[t]
+\caption{Matched comparison for three seeds, with the leakage bound of the noise-trained agents taken
+from the noise-free controls; iterations $21$--$100$. Fraction of iterations in which the noise-trained
+plan has the higher $\Fbar$ at $1\MHz$; mean paired difference in $\Fbar$ (noise-trained minus nominal)
+at three noise strengths; mean difference in duration and in nominal fidelity; and the difference at
+$1\MHz$ that Eq.~\eqref{eq:whitenoise} predicts from those two. The last column is the pair of
+Fig.~\ref{fig:mechanism}(a).}
+\label{tab:seeds}
+\footnotesize
+\begin{ruledtabular}
+\begin{tabular}{lcccc}
+ & Seed 1 & Seed 2 & Seed 3 & First pair\\
+\colrule
+Noise-trained better, $1\MHz$ & $26\%$ & $28\%$ & $24\%$ & $21\%$\\
+$\Delta\Fbar$ at $0.1\MHz$ ($10^{-3}$) & $-0.5$ & $+0.1$ & $-0.7$ & $-1.7$\\
+$\Delta\Fbar$ at $1\MHz$ ($10^{-3}$) & $-1.6$ & $-1.7$ & $-2.0$ & $-3.5$\\
+$\Delta\Fbar$ at $3.5\MHz$ ($10^{-3}$) & $-11.5$ & $-11.9$ & $-12.1$ & $-14.9$\\
+\colrule
+$\Delta T$ (ns) & $+5.1$ & $+5.7$ & $+5.2$ & ---\\
+$\Delta F^{\mathrm{nom}}$ ($10^{-3}$) & $-0.5$ & $+0.1$ & $-0.9$ & ---\\
+Predicted $\Delta\Fbar$ at $1\MHz$ ($10^{-3}$) & $-1.9$ & $-1.6$ & $-2.2$ & ---\\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+The result is the same. From $0.75\MHz$ up, the noise-trained plan is the more robust one in $17$--$34\%$
+of the iterations, in every seed and at every noise strength, and the $95\%$ interval of the paired
+difference excludes zero in all three seeds; below, it does in two seeds, while in the third the two
+agents are level. The difference is about half that of the first pair: taking the noise out of the leakage
+bound reduces the handicap of the noise-trained agent and does not turn it into an advantage. Its size
+remains that of the spread between seeds. Pairing each noise-trained history with each nominal one,
+whatever their seeds, gives differences between $-3.5$ and $+0.2\times10^{-3}$ at $1\MHz$, so what three
+seeds establish is the absence of a gain, not a loss intrinsic to stochastic training. Nor is the
+difference a matter of pulse shape. The noise-trained plans are $5$--$6\ns$ longer on average and differ in
+nominal fidelity by $10^{-3}$ or less, and Eq.~\eqref{eq:whitenoise} turns those two numbers into
+$-1.6$ to $-2.2\times10^{-3}$ at $1\MHz$, against $-1.6$ to $-2.0\times10^{-3}$ measured. No plan of
+the six histories exceeds $\Fbar=0.968$ at $1\MHz$.
+
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{noise_training_mechanism.pdf}
@@ -971,7 +1023,11 @@ observations. The Adam horizon search, whose sampled losses rise by about $0.04$
 prefers the $60\ns$ plan to the more accurate $70\ns$ one. And the cost of a noisy TRPO rollout never falls
 below the stopping threshold: all $1.05\times10^6$ training episodes of the noise-optimized agent ran to
 the $180\ns$ ceiling, so the co-optimization of stopping time that distinguishes the RL formulation was
-inactive throughout noisy training.
+inactive throughout noisy training. The bound is not the only reason for the latter. In the three
+noise-trained agents of Table~\ref{tab:seeds}, whose bound does not see the noise, the training episodes
+still lasted $180.0\ns$ on average, and those of the nominal agents $177$--$178\ns$: the exploration
+noise of the stochastic policy, with the training noise on top of it, keeps the cost of a training rollout
+above a threshold that the deterministic plan of the same policy reaches at about $100\ns$.
 
 \emph{Third, what stochastic training changes is the policy's response to noisy states, and that
 response is not deployed.} During
@@ -1424,8 +1480,9 @@ $250$ and $4200$ times larger at $1$, $0.5$ and $0.25\ns$. On a grid of a thousa
 accumulated from the noisy Hamiltonian would exceed every other term of the objective by orders of
 magnitude, so Ref.~\cite{Niu2019} presumably evaluates it otherwise; it does not say how. The second
 observation of Sec.~\ref{sec:noisyleak} is therefore a property of our implementation, and we cannot tell
-whether it applies to theirs. The direct-optimizer test of Sec.~\ref{sec:memory} was repeated without it,
-and its outcome did not change.
+whether it applies to theirs. The direct-optimizer test of Sec.~\ref{sec:memory} and the matched
+comparison of TRPO agents (Table~\ref{tab:seeds}) were both repeated without it, and their outcome did not
+change.
 
 \subsection{Why the discrepancies arise}
 
@@ -1444,9 +1501,10 @@ pulse --- follow from the formulation itself, and we would expect them in any fa
 are the reason we read the robustness results of Ref.~\cite{Niu2019} as not established, rather than as
 not reproduced for incidental reasons. The third, the domination of the noisy objective by the leakage
 bound, depends on where the bound is evaluated and on the time step (Sec.~\ref{sec:noisescales}); it
-shaped the training of our noise-optimized agent and may not carry over. The conclusion on white-noise
+shaped the training of our first noise-optimized agent and may not carry over. The conclusion on white-noise
 training does not rest on it: the direct optimizer reaches it with the bound taken from the noisy and
-from the noise-free controls alike (Sec.~\ref{sec:memory}).
+from the noise-free controls alike (Sec.~\ref{sec:memory}), and so do three pairs of agents retrained
+with the bound taken from the noise-free controls (Sec.~\ref{sec:matched}).
 
 \subsection{Relation to hardware}
 \label{sec:hardware}
@@ -1510,18 +1568,19 @@ noise then gains about a fifth in sensitivity, and that agents trained under whi
 a policy trained under noise with memory finds such pulses, or better ones, we did not test, and it is the
 most important open question this work leaves.
 
-Each production agent was trained with a single seed, and we could not afford more runs. The matched
-comparison of training histories replaces part of what several seeds would give, but not all of it: the
-histories are autocorrelated, and the seed-to-seed spread measured in the sweeps is as large as the
-difference between the two TRPO agents. Conclusions that rest on differences of that size --- in
-particular the sign of the difference between the two TRPO agents --- are therefore not established.
-Conclusions that rest on larger effects are: the absence of an order-of-magnitude robustness gain, the
-direct optimizer's lead of about $0.012$ in $\Fbar$ at $1\MHz$ (and its explanation by duration and
-nominal fidelity), and the runtime results. The noise-optimized agent, moreover, was trained with the
-leakage bound accumulated from the noisy trajectory; we tested the alternative with the direct optimizer
-(Sec.~\ref{sec:memory}) but did not retrain the agent with it. The matched comparison of
-Sec.~\ref{sec:matched} is therefore an illustration of Eq.~\eqref{eq:whitenoise}, not an independent test
-of the original training; the argument rests on that equation and on the direct-optimizer experiment.
+The agents of Table~\ref{tab:single}, of Fig.~\ref{fig:robust} and of the closed-loop test were each
+trained with a single seed, and the first noise-optimized agent with the leakage bound accumulated from
+the noisy trajectory. The matched comparison was repeated with three seeds and with the bound taken from
+the noise-free controls (Table~\ref{tab:seeds}); the closed-loop test, the selected controllers and the
+runtime sweep were not. Three seeds settle less than they may seem to. The noise-trained plans are less
+robust in each of them, but by a margin that is within the spread between seeds and that their durations
+account for, so the data establish that stochastic training brings no gain, not that it does harm.
+Conclusions that rest on larger effects are established: the absence of an order-of-magnitude robustness
+gain, the direct optimizer's lead of about $0.012$ in $\Fbar$ at $1\MHz$ (and its explanation by duration
+and nominal fidelity), and the runtime results. All agents were trained at a time step of $2\ns$, and
+their training episodes almost never stopped early (Sec.~\ref{sec:noisyleak}); an implementation in which
+the stopping time is learned under noise could behave differently, although Eq.~\eqref{eq:whitenoise}
+would still bound what its pulses can gain.
 
 The time step of $2\ns$, about twenty times coarser than that of Ref.~\cite{Niu2019}, was set by the
 computational budget: each TRPO agent already takes $9.5\times10^7$ simulator steps, and the same number
@@ -1566,7 +1625,8 @@ The framework works: it produces high-fidelity analog gates, faster than a compi
 published hyperparameters are close to optimal in our hands. Three of its headline claims, however, are
 not supported in our implementation. A single-start direct optimizer beats our policy-gradient controller on every
 nominal metric and, against control noise, at every noise strength. Training the policy under noise does
-not make its deployed pulses more robust than those of an identical agent trained without noise; what it
+not make its deployed pulses more robust than those of an identical agent trained without noise, in any
+of four matched pairs of agents; what it
 changes is the agent's closed-loop behaviour, which open-loop pulses do not inherit. And the
 order-of-magnitude runtime gain sits around a target that is the identity, measured against a generic
 reference; against a target-specific two-CNOT synthesis the learned pulses are at most twice as fast.
@@ -1595,7 +1655,8 @@ figure sources and this manuscript under CC BY 4.0 at
 \url{https://github.com/FrancescoMinisini/Document}. The released data include every training run behind
 this paper (arguments, per-iteration
 logs, checkpoints and control plans), the raw and smoothed robustness curves of Fig.~\ref{fig:robust}, the
-matched-history and closed-loop evaluations of Fig.~\ref{fig:mechanism}, and the gate-structure,
+matched-history and closed-loop evaluations of Fig.~\ref{fig:mechanism}, the six runs and the evaluation
+behind Table~\ref{tab:seeds}, and the gate-structure,
 mirror-symmetry and first-order analyses of Secs.~\ref{sec:structure}, \ref{sec:runtime} and
 \ref{sec:noisyleak}. Every figure and table can be regenerated from them with the analysis scripts in the
 code repository, whose outputs are deterministic; a table in the data repository maps each figure to its
