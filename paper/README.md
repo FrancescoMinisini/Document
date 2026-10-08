@@ -1,7 +1,7 @@
 # Preprint source bundle
 
 `preprint.tex` — *Robust analog two-qubit gates from deep reinforcement learning: an independent
-reproduction and family-resolved assessment.* REVTeX 4.2, APS two-column preprint style, 23 pages.
+reproduction and family-resolved assessment.* REVTeX 4.2, APS two-column preprint style, 21 pages.
 
 ## Build
 
@@ -27,23 +27,45 @@ existing one and trim the first sentence of the acknowledgments.
 
 ## Figures
 
-Six figures are reused unchanged from the thesis (`gmon_architecture_schematic`, `ufo_cost_structure`,
-`architecture_sweep_pareto_combined`, `ufo_weight_sweep_robustness`, `adam_single_target_horizon_sweep`,
-`adam_family_sweep`). Five were built for this paper; their pgfplots sources are in `figsrc/` and read the
+Four figures are reused unchanged from the thesis (`architecture_sweep_pareto_combined`,
+`ufo_weight_sweep_robustness`, `adam_single_target_horizon_sweep`, `adam_family_sweep`). Four were built for
+this paper; their pgfplots sources are in `figsrc/` and read the
 CSVs under `../data/` directly.
 
 | File | Source | Content |
 | --- | --- | --- |
-| `single_target_comparison_v3.pdf` | `figsrc/fig_single_target.tex` | Fig. 4: nominal cost, fidelity, leakage and runtime of Adam (70 ns) and the two TRPO agents, with both synthesis references. Values typed from the nominal re-evaluation of the stored plans (listed in the source header). |
-| `robustness_v3.pdf` | `figsrc/fig_robustness.tex` | Fig. 5: average fidelity and variance versus noise strength for the four controllers of Table II, from `data/robustness_analysis_3/`. |
-| `noise_training_mechanism.pdf` | `figsrc/fig_mechanism.tex` | Fig. 6: matched-history paired differences, closed versus open loop, excess infidelity versus duration with the first-order prediction. |
-| `noise_with_memory.pdf` | `figsrc/fig_memory.tex` | Fig. 7: filter functions of three 70 ns Adam pulses, excess infidelity against the noise correlation time, quasi-static excess infidelity against duration for all plans. |
-| `runtime_vs_alpha_v4.pdf` | `figsrc/fig_runtime.tex` | Fig. 8: runtime, fidelity and leakage across `N(a, a, pi/2)` for the curriculum and the Adam sweep, with both synthesis references and the bandwidth-limited exchange time (grey band). |
+| `single_target_comparison_v3.pdf` | `figsrc/fig_single_target.tex` | No longer included (its values are those of Table I): nominal cost, fidelity, leakage and runtime of Adam (70 ns) and the two TRPO agents, with both synthesis references. Values typed from the nominal re-evaluation of the stored plans (listed in the source header). |
+| `robustness_v3.pdf` | `figsrc/fig_robustness.tex` | Fig. 2: average fidelity and variance versus noise strength for the four controllers of Table I, from `data/robustness_analysis_3/`. |
+| `noise_training_mechanism.pdf` | `figsrc/fig_mechanism.tex` | Fig. 3: matched-history paired differences, closed versus open loop, excess infidelity versus duration with the first-order prediction. |
+| `noise_with_memory.pdf` | `figsrc/fig_memory.tex` | Fig. 4: filter functions of three 70 ns Adam pulses, excess infidelity against the noise correlation time, quasi-static excess infidelity against duration for all plans. |
+| `runtime_vs_alpha_v4.pdf` | `figsrc/fig_runtime.tex` | Fig. 5: runtime, fidelity and leakage across `N(a, a, pi/2)` for the curriculum and the Adam sweep, with both synthesis references and the bandwidth-limited exchange time (grey band). |
 
 Rebuild any of them with `pdflatex fig_<name>` from inside `figsrc/`, then copy the resulting PDF into
 `figures/` under the name above. The `*_v2.pdf` files in `figures/` belong to the version of 2026-09-07
-and are no longer included; `runtime_vs_alpha_v3.pdf` is the version of 2026-09-22. Figure and table
-numbers above are those of the current version.
+and are no longer included; `runtime_vs_alpha_v3.pdf` is the version of 2026-09-22;
+`gmon_architecture_schematic.pdf`, `ufo_cost_structure.pdf` and `single_target_comparison_v3.pdf` were
+dropped on 2026-10-08. Figure and table numbers above are those of the current version.
+
+## Changes of 2026-10-08
+
+A readability pass: 24 pages to 21, about 17 400 to 15 000 words of source. No result, dataset or number
+was changed; section, figure, table and equation numbers quoted in the older entries below are those of
+their own date.
+
+- **Stated once.** The abstract is about 200 words (from 330); "What we find" has four short items; the Discussion
+  opens with a claim-by-claim table (Table V) in place of "What reproduces" / "What does not"; the
+  robustness "Interpretation" subsection is gone and the Conclusion is shorter.
+- **Explanation first.** The white-noise result, Eq. (18), now opens the robustness section (Sec. V B)
+  and the selected controllers, matched histories and direct-optimizer tests follow as checks of it. The
+  structure of the `gamma = pi/2` subfamily moved from Sec. II to the start of the runtime section
+  (Sec. VI A).
+- **Tables and figures.** The configuration table (Table VII) and the per-target curriculum table
+  (Table VIII) moved to Appendices D and E. The robustness table keeps three noise strengths, the
+  three-seed table four rows, and the Adam noise-model table lost its constant white-noise column (the
+  three values are in the text). The gmon and UFO schematics and the single-target bar chart were removed.
+- **Shorter restatement of the original.** Sec. II is about half its length; the Adam horizon sweep,
+  the hardware remarks, the limitations and Appendices B and F were tightened.
+- **Not done.** The panels of Fig. 3 keep their order, so panel (c) is cited before (a).
 
 ## Changes of 2026-10-01
 

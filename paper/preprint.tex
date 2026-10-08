@@ -47,35 +47,20 @@ an independent reproduction and family-resolved assessment}
 \begin{abstract}
 Reinforcement learning has been proposed as a unified route to analog quantum gate design, in which
 accuracy, leakage suppression, runtime and robustness against stochastic control errors are optimized
-jointly. We report an independent, from-scratch reimplementation of the Universal cost Function control
-Optimization (UFO) framework of Niu \emph{et al.} [npj Quantum Inf.\ \textbf{5}, 33 (2019)] for the
-two-qubit gate family
+jointly. We report an independent reimplementation of the Universal cost Function control Optimization
+(UFO) framework of Niu \emph{et al.} [npj Quantum Inf.\ \textbf{5}, 33 (2019)] for the two-qubit gate family
 $N(\alpha,\alpha,\gamma)=\exp[i(\alpha\sigma^x\sigma^x+\alpha\sigma^y\sigma^y+\gamma\sigma^z\sigma^z)]$ on a
-three-level gmon model, and compare its trust-region policy optimization (TRPO) agent with a direct
-gradient (GRAPE-style, Adam) optimizer that uses the same Hamiltonian, the same objective and the same
-training noise. The framework produces high-fidelity analog gates, but three of its central claims are
-not supported in our implementation, and for two of them the reason does not depend on the
-implementation. Against per-step white control noise, the open-loop robustness of any pulse is fixed to
-leading order by its nominal fidelity and its duration --- the white-noise limit of the filter-function
-picture --- at a rate that we compute from the Hamiltonian and verify on every pulse: no training
-procedure can buy robustness through the pulse shape. A direct optimizer confirms this over eight seeds and
-three durations. Trained under white noise it gains nothing in $48$ runs out of $48$, with the leakage
-bound evaluated on the noisy or on the noise-free controls; trained under quasi-static noise, where the
-shape does enter, it lowers the sensitivity of its pulses by about a fifth. Two TRPO agents that differ
-only in the training noise agree: their deployed pulses are equally robust within the seed-to-seed spread,
-and what stochastic training changes is the policy's reaction to noisy states, which an open-loop pulse
-cannot use. Three further pairs of agents, retrained with the leakage bound taken from the noise-free
-controls, give the same result: the noise-trained pulses are the more robust ones in about a quarter of
-the matched iterations, by the margin that their durations and nominal fidelities predict. In our implementation
-a single-start direct optimizer also beats the policy-gradient controller on every nominal metric and at
-every noise strength, which is a statement about our agents and not about reinforcement learning in
-general.
-Finally, every member of the benchmark subfamily $N(\alpha,\alpha,\pi/2)$ is an exchange rotation by
-$\alpha-\pi/2$, so the order-of-magnitude runtime gain reported near $\alpha=\pi/2$ sits around the
-identity. Against a target-specific two-CNOT synthesis the learned pulses are at most twice as fast, and
-the direct optimizer up to $3.75$ times, at nominal fidelities of $0.98$ or more; its pulse durations
-largely track the coupling-only, bandwidth-limited exchange-area bound of the model, a bandwidth that the
-gate times of the synthesis reference do not respect. All code and data are public.
+three-level gmon model, and compare its trust-region policy optimization agent with a direct gradient
+optimizer that uses the same Hamiltonian, the same objective and the same training noise. The framework
+produces high-fidelity analog gates, but three of its central claims are not supported. Against per-step
+white control noise, the open-loop robustness of a pulse is fixed to leading order by its nominal fidelity
+and its duration, so training under such noise cannot make a pulse more robust. Matched pairs of agents
+and the direct optimizer confirm this, and the optimizer gains robustness only when it is trained against
+quasi-static noise. In our implementation the direct optimizer also beats the learned controllers on every
+nominal metric. Finally, every member of the benchmark subfamily $N(\alpha,\alpha,\pi/2)$ is an exchange
+rotation by $\alpha-\pi/2$, so the reported order-of-magnitude runtime gain sits around the identity;
+against a target-specific two-CNOT synthesis the learned pulses are at most twice as fast. All code and
+data are public.
 \end{abstract}
 
 \maketitle
@@ -91,12 +76,12 @@ calibration drift, waveform distortion and multilevel structure all limit which 
 be run~\cite{Krantz2019,Kjaergaard2020,Koch2022}. Quantum control is therefore not a fine-tuning layer
 on top of compilation, but one of the binding constraints on usable computational depth.
 
-This observation motivates a shift of perspective. Rather than decomposing a target two-qubit unitary
+Rather than decomposing a target two-qubit unitary
 into a fixed universal gate alphabet and paying the runtime cost of every elementary operation, one
 may attempt to realize it directly through a single shaped analog pulse that exploits the native
-interactions of the device~\cite{Niu2019,Chen2014}. The appeal is concrete: if the target is well
+interactions of the device~\cite{Niu2019,Chen2014}. If the target is well
 aligned with the hardware's own entangling generator, the analog implementation can be substantially
-shorter than any compiled circuit. The difficulty is equally concrete. Superconducting modes are
+shorter than any compiled circuit. There are two difficulties. Superconducting modes are
 weakly anharmonic, so fast or aggressively modulated pulses drive population out of the computational
 subspace~\cite{Motzoi2009,Werninghaus2021}; and the pulse that reaches the device is never the pulse
 that was designed, because amplitudes fluctuate and Hamiltonian parameters are known only
@@ -134,74 +119,49 @@ actor--critic architecture and the UFO weights.
 
 \paragraph*{What we find.}
 The framework works as a pulse generator, but its central claims are not supported by controlled tests
-in our implementation. Items 3 and 4 below do not depend on the implementation; items 1 and 2 do.
+in our implementation. Items 1 and 3 below do not depend on the implementation; items 2 and 4 do.
 \begin{enumerate}
-\item On the representative target $\Ntgt{2.2}{\pi/2}$, a single-start Adam optimizer beats both TRPO
-agents on \emph{every} nominal metric --- against the nominal agent, total cost $0.158$ versus $0.298$,
-runtime $70$ versus $116\ns$ and leakage $2.8\times10^{-4}$ versus $1.6\times10^{-3}$ --- and one of its
-two plans is the most robust controller at every noise strength. This compares one gradient optimizer
-with our agents, whose curriculum fails on a third of the family (item 4); better-trained agents could
-narrow the gap.
-\item Stochastic training does not make the deployed pulse more robust. Two TRPO agents that share seed,
-architecture, objective and budget and differ only in the training noise produce open-loop pulses of the
-same robustness: over eighty matched iterations the noise-trained pulse is the more robust one in only
-$19$--$25\%$ of them, at every noise strength. The difference is of the size of the seed-to-seed spread,
-so its sign is not established; what the data exclude is a gain of the reported size. Our noise-trained
-agent also saw a leakage bound that responds to the noise (Sec.~\ref{sec:noisescales}). Three further
-pairs of agents, with three seeds and the bound taken from the noise-free controls, repeat the result:
-the noise-trained pulse is the more robust one in $24$--$28\%$ of the matched iterations at $1\MHz$.
-\item The reason is structural. Against per-step white control noise, the open-loop robustness of any
-pulse is fixed to leading order by its nominal fidelity and duration, Eq.~\eqref{eq:whitenoise}, at a rate
-that we compute from the Hamiltonian and verify on every pulse we produced. In addition, in our implementation the noisy
-objective is dominated by the leakage bound's response to the noise, which acts as a runtime penalty, and
-what stochastic training does change is the policy's reaction to noisy states: in closed loop the
-noise-trained agent is the more robust one, but a deployed pulse cannot use feedback. The same test with
-the direct optimizer, over eight seeds and three durations, agrees: white-noise training never helps, whether or not
-the leakage bound sees the noise, and
-training against quasi-static noise, where the pulse shape does enter, lowers the sensitivity by about a
-fifth (Sec.~\ref{sec:memory}).
-\item Every member of the subfamily $\Ntgt{\alpha}{\pi/2}$ is an exchange rotation by $\alpha-\pi/2$.
-The target at $\alpha=\pi/2$ is the identity, the order-of-magnitude runtime gain of
-Ref.~\cite{Niu2019} lies around it, and every non-local member needs two CNOTs, not three. Against that
-target-specific synthesis the converged curriculum pulses are $1.0$--$2.0\times$ faster; the curriculum
-fails to converge on a third of the family, and an exact mirror symmetry of the problem shows that these
-failures are the optimizer's, not the targets'.
-\item The runtime advantage over compiled synthesis belongs to analog pulse-level control, not to the
-learning method: the direct optimizer alone is faster at every non-trivial target ($1.9$--$3.75\times$
-over two-CNOT synthesis, also for its $21$ solutions with fidelity above $0.98$), and its pulse length tracks the exchange angle $|\alpha-\pi/2|$, close to the
-shortest time in which the bandwidth-limited coupling can deliver it. Under the same bandwidth limit a
-single-qubit $\pi$ rotation takes at least $54\ns$, not the $20\ns$ assumed by the synthesis reference.
+\item \emph{White noise leaves nothing to train for.} Against per-step white control noise, the open-loop
+robustness of any pulse is fixed to leading order by its nominal fidelity and its duration,
+Eq.~\eqref{eq:whitenoise}, at a rate that we compute from the Hamiltonian and verify on every pulse we
+produced (Sec.~\ref{sec:whitelimit}). Accordingly, four matched pairs of TRPO agents that differ only in
+the training noise deploy pulses of the same robustness, and a direct optimizer gains robustness only when
+it is trained against quasi-static noise, by about a fifth (Secs.~\ref{sec:matched}--\ref{sec:memory}).
+\item \emph{The direct optimizer is ahead.} On the representative target $\Ntgt{2.2}{\pi/2}$ a single-start
+Adam optimizer reaches about half the cost of our TRPO agents, with a pulse of $70\ns$ against $116\ns$,
+and is the most robust controller at every noise strength (Secs.~\ref{sec:single}
+and~\ref{sec:selected}). This compares one gradient optimizer with our agents; better-trained agents
+could narrow the gap.
+\item \emph{The benchmark family consists of exchange rotations.} Every member of $\Ntgt{\alpha}{\pi/2}$
+is an exchange rotation by $\alpha-\pi/2$: the target at $\alpha=\pi/2$ is the identity, the
+order-of-magnitude runtime gain of Ref.~\cite{Niu2019} lies around it, and every non-local member needs
+two CNOTs, not three (Sec.~\ref{sec:structure}). Against that synthesis the converged learned pulses are
+$1.0$--$2.0\times$ faster.
+\item \emph{The runtime advantage belongs to analog control, not to learning.} The direct optimizer alone
+is $1.9$--$3.75\times$ faster than two-CNOT synthesis, and its pulse durations track the exchange angle,
+close to the shortest time in which the bandwidth-limited coupling can deliver it
+(Sec.~\ref{sec:physicalinterp}).
 \end{enumerate}
 
-Section~\ref{sec:framework} states the framework; Sec.~\ref{sec:methods} gives the implementation and
-the complete parameter set; Appendix~\ref{app:modelsel} fixes the free parameters through two sweeps;
-Secs.~\ref{sec:single}--\ref{sec:runtime} present the nominal, robustness and runtime results;
-Sec.~\ref{sec:discussion} confronts them with the original claims.
+Section~\ref{sec:framework} summarizes the framework and Sec.~\ref{sec:methods} our implementation;
+Secs.~\ref{sec:single}--\ref{sec:runtime} present the nominal, robustness and runtime results; and
+Sec.~\ref{sec:discussion} compares them with the original claims. The complete parameter set and the
+sweeps that fix the free parameters are in Appendices~\ref{app:config} and~\ref{app:modelsel}.
 
 % =========================================================================
 \section{Control framework}
 \label{sec:framework}
 
-\subsection{Physical model and control channels}
+This section summarizes the framework of Ref.~\cite{Niu2019}.
+
+\subsection{Model and leakage bound}
 \label{sec:model}
+\label{sec:tswt}
 
-The platform is the gmon architecture, sketched in Fig.~\ref{fig:gmon}: two weakly anharmonic
-superconducting modes with local drive and frequency control, coupled through a flux-tunable
-interaction~\cite{Chen2014}. The tunability of the coupling is what makes the platform interesting for
-analog gate design, because the entangling interaction becomes a control resource rather than a fixed
-background.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\columnwidth]{gmon_architecture_schematic.pdf}
-\caption{The gmon control setting. Two weakly anharmonic modes are driven locally and coupled through a
-tunable interaction $g(t)$. Local addressability together with a time-dependent coupling gives the
-seven control channels of Eq.~\eqref{eq:controls}.}
-\label{fig:gmon}
-\end{figure}
-
-After circuit quantization, transformation to the interaction picture and a rotating-wave
-approximation, the effective two-mode Hamiltonian is~\cite{Niu2019}
+The platform is the gmon architecture: two weakly anharmonic superconducting modes with local drive and
+frequency control, coupled through a flux-tunable interaction~\cite{Chen2014}, so that the entangling
+interaction is itself a control. In the rotating-wave approximation the two-mode Hamiltonian
+is~\cite{Niu2019}
 \begin{align}
 \hat{H}_{\mathrm{RWA}}(t) =\;&
 \frac{\eta}{2}\sum_{j=1}^{2}\hat{n}_{j}\bigl(\hat{n}_{j}-1\bigr)
@@ -212,17 +172,9 @@ approximation, the effective two-mode Hamiltonian is~\cite{Niu2019}
 &+\sum_{j=1}^{2} i f_{j}(t)\Bigl(\hat{a}_{j}e^{i\phi_{j}} - \hat{a}_{j}^{\dagger}e^{-i\phi_{j}}\Bigr),
 \label{eq:hrwa}
 \end{align}
-with $\hat{n}_j=\hat{a}_j^\dagger \hat{a}_j$. The four terms carry distinct physical roles. The
-anharmonicity $\eta$ breaks the harmonic ladder and makes the lowest two levels of each mode a usable
-qubit; because $\eta$ is finite, the system stays intrinsically multilevel and leakage remains a real
-error channel. The exchange term is the entangling resource. The detunings act diagonally and shape
-relative phase accumulation. The drives generate local rotations. The available controls are therefore
-\begin{equation}
-\bm{u}(t)=\bigl\{g(t),\;\delta_1(t),\delta_2(t),\;f_1(t),f_2(t),\;\phi_1(t),\phi_2(t)\bigr\}.
-\label{eq:controls}
-\end{equation}
-
-Projected onto the logical subspace, Eq.~\eqref{eq:hrwa} becomes
+with $\hat{n}_j=\hat{a}_j^\dagger \hat{a}_j$, anharmonicity $\eta$, coupling $g$, detunings $\delta_j$, and
+drives of amplitude $f_j$ and phase $\phi_j$: seven control channels. Projected onto the two lowest
+levels of each mode it becomes
 \begin{align}
 \hat{H}_{\mathrm{qb}}(t)=\;&\frac{g(t)}{2}\bigl(\sigma_{1}^{x}\sigma_{2}^{x}+\sigma_{1}^{y}\sigma_{2}^{y}\bigr)
 \nonumber\\
@@ -230,40 +182,29 @@ Projected onto the logical subspace, Eq.~\eqref{eq:hrwa} becomes
 - f_{j}\bigl(\sin\phi_{j}\,\sigma_{j}^{x}+\cos\phi_{j}\,\sigma_{j}^{y}\bigr)\Bigr],
 \label{eq:hqb}
 \end{align}
-which shows that the coupling generates an $XY$-type entangler while the local channels supply
-arbitrary single-qubit rotations --- enough for universal two-qubit control. Equation~\eqref{eq:hqb}
-is an interpretive tool only; all dynamics in this work are propagated with the full multilevel
-Eq.~\eqref{eq:hrwa}, because the whole point is that leakage must not be projected away.
+an $XY$-type entangler with arbitrary single-qubit rotations, which is enough for universal two-qubit
+control. We use Eq.~\eqref{eq:hqb} for interpretation only: all dynamics are propagated with the
+multilevel Eq.~\eqref{eq:hrwa}, so that leakage is kept.
 
-\subsection{Subspaces and the TSWT leakage bound}
-\label{sec:tswt}
-
-In the Fock basis $\ket{n_1 n_2}$ the computational sector is
-$\Omega_0=\mathrm{span}\{\ket{00},\ket{01},\ket{10},\ket{11}\}$ and the leading leakage sector is
-$\Omega_1=\mathrm{span}\{\ket{02},\ket{20},\ket{12},\ket{21}\}$. Writing the physical space as
-$\mathcal{H}=\bigoplus_\alpha \Omega_\alpha$ and decomposing
+Because $\eta$ is finite, the controls that produce the logical rotations also couple the computational
+sector $\Omega_0=\mathrm{span}\{\ket{00},\ket{01},\ket{10},\ket{11}\}$ to the leakage sector
+$\Omega_1=\mathrm{span}\{\ket{02},\ket{20},\ket{12},\ket{21}\}$. Decompose
 \begin{equation}
 \hat{H}(t)=\hat{H}_0+\hat{H}_1(t)+\hat{H}_2(t),
 \label{eq:decomp}
 \end{equation}
-the diagonal drift $\hat H_0$ sets the subspace energies, $\hat{H}_1$ is block-diagonal (evolution
-within each sector) and $\hat{H}_2$ is block-off-diagonal (direct leakage). With $\Delta$ the minimum
-gap between $\Omega_0$ and the leakage sectors and $\epsilon\sim\|\hat H_1\|\sim\|\hat H_2\|$ the
-control scale, the regime of interest is $\epsilon/\Delta\ll1$.
-
-The essential difficulty is that $\hat H_2$ cannot simply be switched off: the same controls that
-produce the desired logical rotations also generate the inter-subspace coupling. Leakage suppression
-is therefore a control problem, not a projection argument. The TSWT addresses it by moving to a
-rotated frame $\ket{\tilde\psi}=e^{-\hat S(t)}\ket{\psi}$ with anti-Hermitian $\hat S$, in which
+into the diagonal drift $\hat H_0$, a block-diagonal part $\hat H_1$ and a block-off-diagonal part
+$\hat H_2$, with $\Delta$ the minimum gap between $\Omega_0$ and the leakage sectors and
+$\epsilon\sim\|\hat H_1\|\sim\|\hat H_2\|\ll\Delta$ the control scale. A time-dependent Schrieffer--Wolff
+transformation (TSWT) moves to a frame $\ket{\tilde\psi}=e^{-\hat S(t)}\ket{\psi}$, with anti-Hermitian
+$\hat S$, in which the Hamiltonian is
 \begin{equation}
-\hat{\mathbb{H}}(t)=-i\,\frac{d e^{-\hat{S}}}{dt}e^{\hat{S}} + e^{-\hat{S}}\hat{H}e^{\hat{S}}.
+\hat{\mathbb{H}}(t)=-i\,\frac{d e^{-\hat{S}}}{dt}e^{\hat{S}} + e^{-\hat{S}}\hat{H}e^{\hat{S}},
 \label{eq:tswt}
 \end{equation}
-The first term is the price of a moving basis: in a driven system, leakage is generated not only by
-direct coupling but also by the non-adiabatic motion of the frame itself. Expanding
-$\hat S=\epsilon\hat S_1+\epsilon^2\hat S_2+\dots$ and cancelling block-off-diagonal terms order by
-order leaves, at second order, a residual $\Hod=O(\epsilon^3/\Delta^2)$, from which the accumulated
-coherent leakage over a gate of duration $T$ is bounded by
+and chooses $\hat S$ to cancel the block-off-diagonal terms order by order. At second order a residual
+$\Hod=O(\epsilon^3/\Delta^2)$ is left, and it bounds the coherent leakage accumulated over a gate of
+duration $T$ (Appendix~\ref{app:tswt}):
 \begin{align}
 \Ltot(T)\;\lesssim\;&
 \frac{\|\Hod(0)\|}{\Delta(0)}+\frac{\|\Hod(T)\|}{\Delta(T)}
@@ -271,26 +212,13 @@ coherent leakage over a gate of duration $T$ is bounded by
 &+\int_{0}^{T}\frac{1}{\Delta(t)^{2}}\left\|\frac{d^{2}\Hod(t)}{dt^{2}}\right\|dt .
 \label{eq:leakbound}
 \end{align}
-A derivation is summarized in Appendix~\ref{app:tswt}. The structure of Eq.~\eqref{eq:leakbound} is
-what makes it useful for optimization rather than merely for diagnosis. The two boundary terms
-penalize residual off-diagonal coupling at the pulse endpoints, and therefore push the controls toward
-configurations where the dressed and bare bases coincide at $t=0$ and $t=T$. The integral term
-penalizes rapid modulation of $\Hod$ and is the quantitative expression of the speed--leakage
-trade-off: a pulse can be small in amplitude at every instant and still leak, if it changes too
-quickly. Crucially, Eq.~\eqref{eq:leakbound} is written in terms of the Hamiltonian and its
-derivatives, so it can be accumulated online during propagation instead of requiring a separate
-population measurement at the end of the pulse.
+The two boundary terms penalize residual off-diagonal coupling at the pulse ends. The integral penalizes
+rapid modulation: a pulse can be small in amplitude at every instant and still leak if it changes too
+quickly. Because the bound is written in terms of the Hamiltonian and its derivatives, it can be
+accumulated during propagation.
 
 \subsection{The UFO objective}
 \label{sec:ufo}
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\columnwidth]{ufo_cost_structure.pdf}
-\caption{The UFO objective, Eq.~\eqref{eq:ufo}, scalarizes four competing physical requirements:
-logical accuracy, accumulated leakage, boundary regularity and total runtime.}
-\label{fig:ufostructure}
-\end{figure}
 
 Let $U(T)=\mathcal{T}\exp[-i\int_0^T \hat H_{\mathrm{RWA}}(t)dt]$ and let $U_{\mathrm{proj}}$ be its
 restriction to $\Omega_0$. The gate fidelity with respect to $\Utgt$ is
@@ -298,8 +226,8 @@ restriction to $\Omega_0$. The gate fidelity with respect to $\Utgt$ is
 F=\frac{1}{16}\bigl|\mathrm{Tr}\bigl(U_{\mathrm{proj}}^{\dagger}(T)\,\Utgt\bigr)\bigr|^{2},
 \label{eq:fidelity}
 \end{equation}
-which equals $1$ exactly when the implemented gate matches the target up to a global phase. The full
-objective adds three penalties to this term, as summarized in Fig.~\ref{fig:ufostructure}~\cite{Niu2019}:
+which equals $1$ when the implemented gate matches the target up to a global phase. The objective adds
+three penalties~\cite{Niu2019},
 \begin{align}
 C(\chi,\beta,\mu,\kappa)=\;&
 \chi\bigl[1-F\bigr]+\beta \Ltot+\kappa T
@@ -307,40 +235,25 @@ C(\chi,\beta,\mu,\kappa)=\;&
 &+\mu\!\!\sum_{t\in\{0,T\}}\!\!\bigl[g(t)^2+f_1(t)^2+f_2(t)^2\bigr].
 \label{eq:ufo}
 \end{align}
-The boundary term enforces vanishing envelopes at the pulse edges, which both permits clean gate
-concatenation and reduces errors from deviations of the rotating-wave approximation; the linear
-runtime penalty encodes the fact that long gates buy more exposure to decoherence and drift.
-
-The design choice that matters here is that all of these are \emph{soft} constraints. Much earlier
-leakage-mitigation work proceeded by disabling control channels or imposing structural restrictions on
-the admissible pulse shape, which suppresses leakage at the price of controllability. UFO keeps every
-channel available and penalizes undesirable behaviour instead, leaving the optimizer free to trade the
-four objectives against one another. This also means the framework is modular: on a different platform
-the individual terms can be replaced without changing the logic.
+for leakage, for runtime and for control envelopes that do not vanish at the pulse edges. All four terms
+are soft constraints: every control channel stays available, and the optimizer trades the objectives
+against one another.
 
 \subsection{Reinforcement-learning formulation}
 \label{sec:rl}
 
-The pulse is built sequentially. Time is discretized in steps $\Delta t$; the state presented to the
-agent is a representation of the propagator accumulated so far, $s_n\sim U_n$; the action is the
-control vector for the next interval,
-$a_n=(g_n,\delta_{1,n},\delta_{2,n},f_{1,n},f_{2,n},\phi_{1,n},\phi_{2,n})$; and the environment
-propagates
+The pulse is built step by step. Time is discretized in steps $\Delta t$; the state presented to the
+agent is the propagator accumulated so far, $s_n\sim U_n$; the action is the control vector for the next
+interval; and the environment propagates
 \begin{equation}
 U_{n+1}=\exp\!\bigl[-i\Delta t(\hat{H}_{n+1}+\delta\hat{H}_{n+1})\bigr]U_n ,
 \label{eq:envstep}
 \end{equation}
 where $\delta\hat H$ is the stochastic perturbation used in noisy training. The reward is the negative
-running UFO cost, $r_n=-c_n$, so maximizing expected return minimizes the expected objective. An
-episode terminates at $\min(T_{\max},T_{\mathrm{stop}})$, where $T_{\mathrm{stop}}$ is the first time
-the cost falls below a threshold; the agent thus co-optimizes pulse shape \emph{and} stopping time,
-which is a structural difference from fixed-horizon pulse optimization.
-
-Using the accumulated unitary as the state is a deliberate choice: the agent reasons in terms of how
-much of the target operation has already been built, rather than in terms of local control variables,
-which matches the structure of gate synthesis.
-
-Optimization uses TRPO~\cite{Schulman2015}, which maximizes the importance-weighted surrogate
+running UFO cost, $r_n=-c_n$. An episode ends at $T_{\max}$ or at the first time the cost falls below a
+threshold, so the agent optimizes the stopping time together with the pulse shape, unlike a
+fixed-horizon pulse optimizer. The policy is trained with TRPO~\cite{Schulman2015}, which maximizes the
+importance-weighted surrogate
 \begin{equation}
 \mathcal{L}(\bm{\theta})=\mathbb{E}_{\pi_{\bm\theta_{\mathrm{old}}}}\!\left[
 \frac{\pi_{\bm{\theta}}(a|s)}{\pi_{\bm{\theta}_{\mathrm{old}}}(a|s)}\hat{A}(s,a)\right]
@@ -348,20 +261,14 @@ Optimization uses TRPO~\cite{Schulman2015}, which maximizes the importance-weigh
 \mathbb{E}_s\bigl[D_{\mathrm{KL}}\bigr]\le\delta_{\mathrm{KL}} .
 \label{eq:trpo}
 \end{equation}
-The trust-region constraint matters here for a specific reason: the UFO reward couples four competing
-terms and the environment is stochastic, so the landscape is irregular and a single over-large
-gradient step can destroy previously learned behaviour. Constraining the step in distribution space
-buys stability at the cost of speed.
+where the constraint limits how far one update can move the policy.
 
-Robustness enters through the environment rather than through an outer loop. In noise-optimized
-training, Gaussian fluctuations are added to the control amplitudes at every step, so the objective
-becomes an expectation over both the policy and the noise,
-$J(\bm\theta)=-\mathbb{E}_{\tau,\xi}[C]$. The intended effect is that pulse trajectories fragile under
-small perturbations earn poor average return and are disfavoured, so that stochastic training acts as
-an implicit regularizer. Throughout this paper we call \emph{nominal} an agent trained in the
-deterministic environment and \emph{noise-optimized} one trained in the stochastic environment. They
-differ only in the training distribution --- same architecture, same objective, same algorithm ---
-which is what makes their comparison informative.
+In noise-optimized training, Gaussian fluctuations are added to the control amplitudes at every step, so
+that the objective becomes an expectation over both the policy and the noise,
+$J(\bm\theta)=-\mathbb{E}_{\tau,\xi}[C]$, and pulse trajectories that are fragile under small
+perturbations earn a poor average return. We call \emph{nominal} an agent trained in the deterministic
+environment and \emph{noise-optimized} one trained in the stochastic environment. They differ only in the
+training distribution.
 
 Two details of this construction matter later. First, the agent observes the propagator produced by
 the \emph{noisy} dynamics, so during training it can react to the realized noise; the pulse that is
@@ -377,11 +284,9 @@ Benchmarking uses the family
 \Ntgt{\alpha}{\gamma}=\exp\!\bigl[i\bigl(\alpha\sigma_1^x\sigma_2^x+\alpha\sigma_1^y\sigma_2^y+\gamma\sigma_1^z\sigma_2^z\bigr)\bigr].
 \label{eq:family}
 \end{equation}
-The equal $XX$ and $YY$ coefficients mirror the exchange structure of the gmon coupling, so the family
-is deliberately close to the hardware's native interaction while remaining rich: up to single-qubit
-rotations it contains SWAP, iSWAP, CNOT and CZ, as well as the fermionic SWAP and Givens rotations
-that appear in Jordan--Wigner-mapped fermionic simulation~\cite{Niu2019}. Because it is continuously
-parametrized, one can study an entire manifold of related targets rather than isolated cases.
+The equal $XX$ and $YY$ coefficients mirror the exchange structure of the gmon coupling. Up to
+single-qubit rotations the family contains SWAP, iSWAP, CNOT and CZ, as well as the fermionic SWAP and
+Givens rotations of Jordan--Wigner-mapped fermionic simulation~\cite{Niu2019}.
 
 The runtime reference of Ref.~\cite{Niu2019} is a generic circuit decomposition: three CNOTs and four
 layers of single-qubit rotations, the Vatan--Williams construction, which is optimal for an
@@ -391,62 +296,9 @@ $T_{1q}=20\ns$ and $T_{\mathrm{CNOT}}=45\ns$, it takes
 \Tsyn\approx 215\ns .
 \label{eq:tsyn}
 \end{equation}
-We keep this number for comparability, but it is a generic reference, not the optimal synthesis of
-each member of the family: for the subfamily studied in Sec.~\ref{sec:runtime} two CNOTs suffice, and
-three members need no entangling gate at all (Sec.~\ref{sec:structure}).
-
-\subsection{Structure of the subfamily $\gamma=\pi/2$}
-\label{sec:structure}
-
-The runtime study uses $\gamma=\pi/2$, and there the two-qubit structure can be stated exactly. Since
-$\exp(i\tfrac{\pi}{2}\sigma^z_1\sigma^z_2)=i\sigma^z_1\sigma^z_2$ and
-$\exp[i\tfrac{\pi}{2}(\sigma^x_1\sigma^x_2+\sigma^y_1\sigma^y_2)]=\sigma^z_1\sigma^z_2$, every member is,
-up to a global phase, a pure exchange rotation,
-\begin{equation}
-\Ntgt{\alpha}{\pi/2}=i\exp\!\bigl[i\varepsilon\bigl(\sigma_1^x\sigma_2^x+\sigma_1^y\sigma_2^y\bigr)\bigr],
-\qquad \varepsilon=\alpha-\frac{\pi}{2},
-\label{eq:exchange}
-\end{equation}
-which is the decomposition noted in Ref.~\cite{Niu2019} with its local $Z$ rotations absorbed. Four
-consequences are used below.
-
-(i) \emph{Local members.} At $\alpha=\pi/2$ the target is the identity, and at $\alpha=0$ and
-$\alpha=\pi$ it is the local gate $\sigma^z_1\sigma^z_2$. Because the fidelity~\eqref{eq:fidelity}
-ignores global phases, a pulse that does nothing implements the $\alpha=\pi/2$ target exactly.
-
-(ii) \emph{Entangling class and CNOT count.} In the Weyl chamber~\cite{Zhang2003} each member lies at
-$(a,a,0)$ with $a=\min(|\varepsilon|,\pi/2-|\varepsilon|)$, so the most entangling members,
-$|\varepsilon|=\pi/4$, are iSWAP-equivalent. Because one canonical coordinate vanishes, every non-local
-member needs two CNOTs rather than three~\cite{VidalDawson2004,ShendeMarkovBullock2004}. With the gate
-times above and three single-qubit layers, the target-specific synthesis time is
-\begin{equation}
-\Tsyn^{\mathrm{tgt}}(\alpha)=
-\begin{cases}
-0 & \alpha=\pi/2,\\
-20\ns & \alpha\in\{0,\pi\},\\
-150\ns & \text{otherwise}.
-\end{cases}
-\label{eq:tsyntgt}
-\end{equation}
-On processors whose native entangler is itself a tunable exchange gate, as in the fSim gate set of
-gmon-type devices~\cite{Foxen2020}, each member is a single native two-qubit operation, and the
-synthesis overhead disappears altogether.
-
-(iii) \emph{Mirror symmetry.} The parity of the first mode, $P_1=(-1)^{\hat n_1}$, maps
-$\hat a_1\to-\hat a_1$. Conjugating Eq.~\eqref{eq:hrwa} by $P_1$ therefore sends $g\to-g$ and
-$\phi_1\to\phi_1+\pi$ and leaves everything else unchanged, including the leakage structure and the
-boundary penalty, while on the qubits it maps $\varepsilon\to-\varepsilon$. The control problems at
-$\alpha$ and $\pi-\alpha$ are thus exactly equivalent: a pulse for one, with those two substitutions,
-is a pulse for the other with the same cost.
-
-(iv) \emph{Required exchange area.} In the qubit projection~\eqref{eq:hqb}, the coupling alone
-generates Eq.~\eqref{eq:exchange} once $|\int g\,dt|=2|\varepsilon|$, with $g$ in angular units. At the
-$20\MHz$ bound this takes at most $25\ns$ for any member. Pulse durations are therefore set by the
-bandwidth filter, the boundary conditions and the cost trade-off rather than by the amount of entangling
-action required: each pole of the filter~\eqref{eq:filter} has a time constant $1/(\pi B)\approx32\ns$,
-and a filtered step needs about $52\ns$ to reach half its amplitude. Section~\ref{sec:physicalinterp}
-makes this quantitative: the largest exchange area that a bounded control can deliver through the filter
-in a given time is a linear program, and it sets the scale of every runtime in this paper.
+We keep this number for comparability, but it is not the optimal synthesis of each member of the family:
+for the subfamily $\gamma=\pi/2$ studied here two CNOTs suffice, which take $150\ns$
+[Eq.~\eqref{eq:tsyntgt}], and three members need no entangling gate at all (Sec.~\ref{sec:structure}).
 
 % =========================================================================
 \section{Numerical implementation}
@@ -454,11 +306,10 @@ in a given time is a linear program, and it sets the scale of every runtime in t
 
 \subsection{Simulator}
 
-Each mode is truncated to three levels, giving $d_{\mathrm{phys}}=3^2=9$ and $d_{\mathrm{comp}}=4$.
-Hamiltonians are kept in $\mathrm{rad}\,\mathrm{ns}^{-1}$ internally; one-step propagation uses exact
-diagonalization of the Hermitian generator rather than a series expansion. The base anharmonicity is
-$\eta=-200\MHz$, which also sets the gap scale entering Eq.~\eqref{eq:leakbound}. Control amplitudes
-are bounded at $20\MHz$, well below $|\eta|$ so that the perturbative regime $\epsilon/\Delta\ll1$ is
+Each mode is truncated to three levels, giving $d_{\mathrm{phys}}=9$ and $d_{\mathrm{comp}}=4$, and
+one-step propagation uses exact diagonalization of the Hermitian generator. The anharmonicity is
+$\eta=-200\MHz$, which also sets the gap scale entering Eq.~\eqref{eq:leakbound}. Control amplitudes are
+bounded at $20\MHz$, well below $|\eta|$ so that the perturbative regime $\epsilon/\Delta\ll1$ is
 respected, and phases are mapped to $[0,2\pi]$.
 
 Before reaching the Hamiltonian, the piecewise-constant controls pass through the two-pole
@@ -468,17 +319,13 @@ $a=\exp(-\pi B/f_s)$, $B=10\MHz$ the bandwidth and $f_s=1/\Delta t$ the sampling
 \tilde u_k=(1-a)^2 u_k + 2a\,\tilde u_{k-1} - a^2\,\tilde u_{k-2}.
 \label{eq:filter}
 \end{equation}
-This is not cosmetic. It ensures that the optimizer cannot exploit arbitrarily sharp control
-transitions that no waveform generator could produce, and it interacts directly with the
-non-adiabatic term of the leakage bound.
+The filter keeps the optimizer from exploiting control transitions sharper than a waveform generator can
+produce, and it interacts directly with the non-adiabatic term of the leakage bound.
 
-The leakage estimator implements the second-order TSWT numerically: at each step it decomposes $H_t$
-into $H_0,H_1,H_2$, solves for the generators $S_1$ and $S_2$ on the off-diagonal blocks, estimates
-$\dot S_1,\dot S_2$ by finite differences, forms the residual
-$H_{\mathrm{od}}^{(3)}=[H_1,S_2]+\tfrac{1}{3}[[H_2,S_1],S_1]-i\dot S_2$, and accumulates the boundary
-and integral contributions of Eq.~\eqref{eq:leakbound} incrementally (Appendix~\ref{app:algo}). The
-incremental form matters for cost: a naive implementation rescans the trajectory history at every step
-and is $O(T^2)$ per rollout.
+The leakage bound is evaluated numerically at every step. The estimator solves the second-order TSWT for
+the generators $S_1$ and $S_2$, takes their time derivatives by finite differences, forms the residual
+$H_{\mathrm{od}}^{(3)}$ and accumulates the boundary and integral terms of Eq.~\eqref{eq:leakbound}
+incrementally, at a cost per step that does not grow with the pulse length (Appendix~\ref{app:algo}).
 
 \subsection{Noise model}
 \label{sec:noise}
@@ -556,8 +403,7 @@ Nominal quality is reported through the gate fidelity Eq.~\eqref{eq:fidelity}, t
 estimate $\Ltot$ with its boundary/integral split, the boundary penalty, the effective runtime and the
 total cost Eq.~\eqref{eq:ufo}.
 
-Robustness is characterized by two distinct quantities, and the distinction is worth stating
-explicitly because they are often conflated. The first is the average fidelity of the
+Robustness is characterized by two distinct quantities. The first is the average fidelity of the
 \emph{noise-averaged channel} $\mathcal{E}$, estimated from the Monte Carlo ensemble of noisy projected
 unitaries $\{K_j\}$ through the standard formula~\cite{Nielsen2002}
 \begin{equation}
@@ -574,77 +420,13 @@ per-shot gate fidelity,
 A controller with good mean fidelity but large variance is experimentally fragile, so neither quantity
 alone settles the question.
 
-\subsection{Parameter set}
+\subsection{Parameters}
 \label{sec:params}
-
-Table~\ref{tab:config} collects every setting used. We report per-experiment values rather than a
-single idealized configuration, because the runs differ in budget and stopping cost, and the two
-single-target agents were trained in two stages; conflating them would misstate what was actually done.
-
-\begin{table*}[t]
-\caption{Complete configuration, as actually run. The four right-hand columns are the two single-target
-TRPO agents (Secs.~\ref{sec:single}--\ref{sec:robust}), the architecture and UFO-weight sweeps
-(Appendix~\ref{app:modelsel}) and the curriculum runtime sweep (Sec.~\ref{sec:runtime}); an entry spanning
-several columns applies to all of them. Every TRPO run except the nominal agent was trained with noise.}
-\label{tab:config}
-\footnotesize
-\begin{ruledtabular}
-\begin{tabular}{llcccc}
-Quantity & Symbol & Single target & Arch.\ sweep & Weight sweep & Curriculum \\
-\colrule
-\multicolumn{6}{l}{\textit{Physical model}}\\
-Levels per mode & --- & \multicolumn{4}{c}{$3$}\\
-Anharmonicity & $\eta$ & \multicolumn{4}{c}{$-200\MHz$}\\
-Control bound & $u_{\max}$ & \multicolumn{4}{c}{$20\MHz$}\\
-Filter bandwidth & $B$ & \multicolumn{4}{c}{$10\MHz$}\\
-Timestep & $\Delta t$ & \multicolumn{4}{c}{$2\ns$}\\
-Max gate duration & $T_{\max}$ & \multicolumn{4}{c}{$180\ns$}\\
-Runtime norm. & $T_{\mathrm{norm}}$ & \multicolumn{4}{c}{$60\ns$}\\
-Target & --- & \multicolumn{3}{c}{$\Ntgt{2.2}{\pi/2}$} & $\alpha=0,0.157,\dots,3.14$\\
-\colrule
-\multicolumn{6}{l}{\textit{UFO weights}}\\
-Fidelity, leakage & $\chi$, $\beta$ & $10$, $10$ & $10$, $10$ & $\{5,10,20\}$, $10$ & $10$, $10$\\
-Boundary & $\mu$ & $0.2$ & $0.2$ & $\{0.1,0.2,0.4\}$ & $0.2$\\
-Runtime & $\kappa$ & $0.1$ & $0.1$ & $\{0.05,0.1,0.2,0.4\}$ & $0.1$\\
-\colrule
-\multicolumn{6}{l}{\textit{TRPO}}\\
-Hidden sizes & --- & $(64,32,32)$ & five layouts & $(64,32,32)$ & $(64,32,32)$\\
-Trust region & $\delta_{\mathrm{KL}}$ & \multicolumn{4}{c}{$0.01$}\\
-Discount, GAE parameter & $\gamma_{\mathrm{RL}}$, $\lambda$ & \multicolumn{4}{c}{$0.99$, $0.97$}\\
-CG iterations, damping & --- & \multicolumn{4}{c}{$10$, $0.1$}\\
-Value lr, epochs & --- & \multicolumn{4}{c}{$10^{-3}$, $50$}\\
-Initial exploration & $\log\sigma_0$ & $-0.5$ & $-1.0$ & $-1.0$ & $-0.5$\\
-Episodes per batch & --- & $10\,000$\footnotemark[1] & $5000$ & $10\,000$ & $4000$\\
-Policy iterations & --- & $100+15$ / $100+5$\footnotemark[1] & $20$ & $5$ & ${\le}150$ per target\\
-Stopping cost & $C_{\mathrm{term}}$ & $0.40$, then $0.30$\footnotemark[1] & $0.40$ & $0.15$ & $0.40$\footnotemark[2]\\
-Training noise & $\strain$ & $0$ / $1\MHz$\footnotemark[3] & $1\MHz$ & $1\MHz$ & $1\MHz$\\
-Seeds & --- & $1$ & $1,2,3$ & $1,2$ & $2$\\
-\colrule
-\multicolumn{6}{l}{\textit{Adam baseline (single target and family sweep)}}\\
-Iterations per horizon, lr & --- & \multicolumn{4}{c}{$400$, $0.03$; one deterministic initialization; seed $2$}\\
-Horizon grid & --- & \multicolumn{4}{c}{$40$--$180\ns$, step $10\ns$}\\
-Training noise & $\strain$ & \multicolumn{4}{c}{$1\MHz$, one noisy trajectory per step}\\
-Family targets & --- & \multicolumn{4}{c}{$\alpha=0,0.1,\dots,3.1$ and $\pi$}\\
-\colrule
-\multicolumn{6}{l}{\textit{Robustness evaluation}}\\
-Dense grid & $\snoise$ & \multicolumn{4}{c}{$0.1$--$3.5\MHz$, step $0.001\MHz$, $60$ samples; EWMA spans $50$ / $80$}\\
-Matched trajectories & $\snoise$ & \multicolumn{4}{c}{$11$ values in $0.1$--$3.5\MHz$, $200$ samples each}\\
-Closed-loop test & $\snoise$ & \multicolumn{4}{c}{$1\MHz$, $100$ samples}\\
-\end{tabular}
-\end{ruledtabular}
-\footnotetext[1]{Both agents: iterations $1$--$100$ with $10\,000$ episodes per batch and
-$C_{\mathrm{term}}=0.40$, from the same seed. They then continued with $C_{\mathrm{term}}=0.30$: the
-nominal agent for $15$ iterations with $5000$ episodes per batch, the noise-optimized one for $5$
-iterations with $10\,000$. The three further pairs of Sec.~\ref{sec:matched} (seeds $1$, $2$, $3$) have
-the settings of iterations $1$--$100$, with the leakage bound of the noise-trained agents accumulated
-from the noise-free controls.}
-\footnotetext[2]{Also the advancement threshold. The cold-start target $\alpha=0$ used a hand-tuned
-sequence of stopping costs.}
-\footnotetext[3]{Nominal / noise-optimized agent.}
-\end{table*}
-
-\subsection{Free parameters}
 \label{sec:modelsel}
+
+All runs share the physical model above, a time step $\Delta t=2\ns$ and a maximum gate duration
+$T_{\max}=180\ns$; the runtime in Eq.~\eqref{eq:ufo} is measured in units of $T_{\mathrm{norm}}=60\ns$.
+Table~\ref{tab:config} in Appendix~\ref{app:config} gives the complete configuration of every experiment.
 
 Two ingredients of the framework are not determined by the physics: the capacity of the actor--critic
 networks and the relative weights in Eq.~\eqref{eq:ufo}. Both could silently drive the comparisons that
@@ -688,46 +470,33 @@ fidelity and are penalized by runtime.}
 \end{figure}
 
 The Adam baseline is trained under noise, but its plans are compared here in the deterministic
-simulator. Under that re-evaluation the best solution is at $T^\star=70\ns$, with nominal cost
-$0.1576$, fidelity $0.99662$, total leakage $2.82\times10^{-4}$ and boundary penalty
-$4.28\times10^{-3}$. Direct pulse optimization thus reaches fidelity comfortably above $99\%$ with
-leakage in the $10^{-4}$ regime --- exactly the scale the leakage-aware objective is designed to
-produce. The optimizer's own noisy objective selects $60\ns$ instead, a plan with fidelity $0.98205$;
-Sec.~\ref{sec:noisyleak} explains why it prefers the shorter horizon. The baseline is trained under noise
-to match the noise-optimized agent; optimized without noise at the same $70\ns$ it does better still,
-with fidelity $0.99939$ and cost $0.126$ (Sec.~\ref{sec:memory}); what then remains is the conditional
-phase of the higher levels (Sec.~\ref{sec:hardware}).
+simulator. Under that re-evaluation the best horizon is $T^\star=70\ns$, with nominal cost $0.158$,
+fidelity $0.9966$ and leakage $2.8\times10^{-4}$ (Table~\ref{tab:single}). The optimizer's own noisy
+objective selects $60\ns$ instead, a plan with fidelity $0.982$; Sec.~\ref{sec:noisyleak} explains why it
+prefers the shorter horizon. Optimized without noise at $70\ns$ the baseline does better still, with
+fidelity $0.99939$ and cost $0.126$ (Sec.~\ref{sec:memory}); what then remains is the conditional phase
+of the higher levels (Sec.~\ref{sec:hardware}).
 
-The horizon dependence (Fig.~\ref{fig:adamsweep}) is more informative than the optimum itself. Very
-short pulses fail badly: fidelity drops to $0.726$ at $40\ns$ and $0.882$ at $50\ns$, while the
-boundary penalties stay very large ($0.399$ and $0.357$). Notably, the leakage remains in the same
-$10^{-4}$ band throughout this regime. The failure mode of ultra-short solutions is therefore
-\emph{not} a leakage blow-up but the impossibility of satisfying accuracy and boundary regularity
-simultaneously under strong time compression --- the speed--smoothness tension implicit in
-Eq.~\eqref{eq:leakbound}. This is visible sharply between $60$ and $70\ns$: fidelity rises from $0.982$
-to $0.997$, the boundary term collapses from $9.75\times10^{-2}$ to $4.28\times10^{-3}$, total cost
-falls from $0.381$ to $0.158$, while leakage improves only moderately.
+The horizon dependence (Fig.~\ref{fig:adamsweep}) shows what sets the optimum. Below $60\ns$ the pulses
+fail, with fidelity $0.73$ at $40\ns$ and $0.88$ at $50\ns$, although their leakage stays in the
+$10^{-4}$ range: under strong time compression a pulse cannot be both accurate and zero at its ends, and
+it is the boundary term, not the leakage, that grows. Between $60$ and $70\ns$ that term collapses and the
+cost falls from $0.381$ to $0.158$. Longer pulses are slightly more accurate and less leaky (fidelity
+$0.9971$ at $150\ns$) but pay for it in runtime, so the optimum is the best-balanced pulse and not the
+most accurate one.
 
-The long-horizon side makes the multi-objective structure equally concrete. At $150\ns$ the fidelity is
-$0.99708$ --- slightly \emph{better} than at the optimum --- and the leakage is lower still,
-$6.82\times10^{-5}$; yet the total cost rises to $0.285$. Judged on fidelity alone the longer pulse
-would look preferable. Judged on the full objective it is not. The best solution is neither the most
-accurate nor the least leaky, but the best-balanced one.
-
-Compared against the generic compiled reference of Eq.~\eqref{eq:tsyn}, the $70\ns$ Adam solution is
-faster by $215/70\approx3.1$, and against the two-CNOT synthesis of Eq.~\eqref{eq:tsyntgt} by
-$150/70\approx2.1$, before any policy learning is introduced. Analog optimization on this hardware
-model exploits structure that a compiled implementation over a CNOT gate set cannot.
+The $70\ns$ solution is $3.1$ times faster than the generic compiled reference of Eq.~\eqref{eq:tsyn}
+and $2.1$ times faster than the two-CNOT synthesis of Eq.~\eqref{eq:tsyntgt}, before any policy learning
+is introduced.
 
 \subsection{Nominal TRPO}
 \label{sec:nominaltrpo}
 
 Trained in the deterministic environment with the same model and weights, the best TRPO policy reaches
 nominal cost $0.2982$, fidelity $0.99415$, leakage $1.60\times10^{-3}$ and an effective runtime of
-$116\ns$ (iteration $111$). Two features deserve comment. The agent stops well before the $180\ns$
-ceiling, confirming that it genuinely co-optimizes shape and duration rather than filling the available
-window. And $116\ns$ is below both synthesis references, by $215/116\approx1.85$ and
-$150/116\approx1.29$.
+$116\ns$ (iteration $111$). The agent stops well before the $180\ns$ ceiling, so it does optimize the
+duration together with the shape, and $116\ns$ is below both synthesis references, by factors of $1.85$
+and $1.29$.
 
 \subsection{Noise-optimized TRPO and nominal comparison}
 \label{sec:comparison}
@@ -763,34 +532,16 @@ Two-CNOT synthesis   & 150         & ---             & ---              & --- \\
 \end{ruledtabular}
 \end{table}
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=\columnwidth]{single_target_comparison_v3.pdf}
-\caption{Nominal comparison on $\Ntgt{2.2}{\pi/2}$ of the Adam baseline at its best horizon, the
-nominal TRPO controller and the noise-optimized TRPO controller; values are those of
-Table~\ref{tab:single}. (a) Total cost. (b) Nominal fidelity. (c) Total leakage. (d) Effective
-runtime, with the generic ($215\ns$) and two-CNOT ($150\ns$) synthesis references marked. Both TRPO
-controllers produce high-quality solutions, but the direct optimizer dominates both of them on all four
-deterministic metrics.}
-\label{fig:singlebar}
-\end{figure}
+On this deterministic benchmark the direct optimizer is ahead of the nominal agent in cost ($1.9\times$),
+runtime ($1.7\times$), leakage ($5.7\times$) and, marginally, fidelity, and it is ahead of the
+noise-optimized agent on the same four metrics. That is what one should expect: when the model is known
+exactly and the objective is differentiable, direct gradient methods are very effective on fixed-target
+closed-system pulse design~\cite{Khaneja2005,Koch2022}. The baseline against which the robustness claims
+are tested is therefore a capable one, even though its budget is small.
 
-The comparison that matters for the rest of the paper is the third row against the first. On this
-deterministic benchmark the direct optimizer beats the policy-gradient controller simultaneously in
-cost ($1.89\times$), runtime ($1.66\times$), leakage ($5.67\times$) and, marginally, fidelity
-($2.5\times10^{-3}$ absolute). It beats the noise-optimized agent on the same four metrics, by
-$2.24\times$ in cost, $1.4\times$ in runtime and $1.67\times$ in leakage, at fidelity $0.99662$ against
-$0.99078$. This is not a defect of the RL formulation; it is a delimitation of what it should be
-expected to deliver. When the model is known exactly and the objective is smooth and differentiable,
-direct gradient methods are extremely effective on fixed-target closed-system pulse
-design~\cite{Khaneja2005,Koch2022}, and nothing about policy optimization changes that. The baseline
-that the robustness claims are tested against is therefore a capable one, even though its budget is
-small.
-
-The noise-optimized agent's plan sits between the two: shorter and less leaky than the nominal agent's,
-but less accurate ($0.99078$ against $0.99415$) and more expensive ($0.354$ against $0.298$).
-Stochastic training has not bought nominal quality. Whether it has bought robustness is the subject of
-the next section.
+The noise-optimized agent's plan is shorter and less leaky than the nominal agent's, but less accurate and
+more expensive. Stochastic training has not bought nominal quality; whether it has bought robustness is
+the subject of the next section.
 
 % =========================================================================
 \section{Robustness under stochastic control noise}
@@ -799,24 +550,20 @@ the next section.
 \subsection{Evaluation protocol}
 
 Each stored control plan is replayed open loop under the noise model of Sec.~\ref{sec:noise} on a dense
-grid of $3401$ noise strengths spanning $\snoise\in[0.1,3.5]\MHz$ in steps of $0.001\MHz$, with $60$
-independent realizations at each point --- about $2\times10^5$ noisy rollouts per controller. Sixty
-samples give a noisy point estimate, so the curves are read through an exponentially weighted moving
-average along the $\snoise$ axis (span $50$ for the mean, $80$ for the variance). Because neighbouring
-$\snoise$ values differ by $0.001\MHz$, the average pools thousands of statistically comparable
-realizations; the underlying scatter is shown in the figures and kept in the released data, and no
-other post-processing is applied. Every controller is scored against $\Ntgt{2.2}{\pi/2}$, with the same
-seed at each grid point.
+grid of $3401$ noise strengths, $\snoise\in[0.1,3.5]\MHz$ in steps of $0.001\MHz$, with $60$ independent
+realizations at each point. Sixty samples give a noisy point estimate, so the curves are read through an
+exponentially weighted moving average along the $\snoise$ axis (span $50$ for the mean, $80$ for the
+variance). The underlying scatter is shown in the figures and kept in the released data, and no other
+post-processing is applied. Every controller is scored against $\Ntgt{2.2}{\pi/2}$, with the same seed at
+each grid point.
 
-Four controllers are compared: the two Adam plans of Table~\ref{tab:single} ($70\ns$, selected by
-deterministic re-evaluation, and $60\ns$, the optimizer's own choice), the nominal TRPO plan ($116\ns$)
-and the noise-optimized TRPO plan ($98\ns$). The other noise-optimized candidate, the $104\ns$ plan of
-iteration $91$, was evaluated too and lies between the two TRPO curves. Adam and the noise-optimized
-agent were both trained at $\strain=1\MHz$; the nominal agent never saw noise.
-
-Four individual plans cannot by themselves isolate the effect of stochastic training, since each is one
-draw from a training process. Section~\ref{sec:matched} therefore adds a controlled comparison over the
-whole training histories of the two TRPO agents, and Sec.~\ref{sec:noisyleak} explains what it finds.
+Four controllers are compared: the two Adam plans of Table~\ref{tab:single}, the nominal TRPO plan and
+the noise-optimized TRPO plan. The other noise-optimized candidate, the $104\ns$ plan of iteration $91$,
+was evaluated too and lies between the two TRPO curves. Four individual plans cannot isolate the effect of
+stochastic training, since each is one draw from a training process. We therefore first state what the
+noise model allows any pulse to gain (Sec.~\ref{sec:whitelimit}), and then test it on the selected plans
+(Sec.~\ref{sec:selected}), on the whole training histories of matched agents (Sec.~\ref{sec:matched}) and
+with the direct optimizer (Sec.~\ref{sec:memory}).
 
 \begin{figure*}[t]
 \centering
@@ -831,34 +578,86 @@ noise the four plans rank by duration.}
 \label{fig:robust}
 \end{figure*}
 
+\subsection{What white noise allows}
+\label{sec:whitelimit}
+
+Under this noise model the pulse shape cannot buy robustness. This is the white-noise limit of the
+filter-function description of open-loop control~\cite{Green2012,Green2013,Cerfontaine2021}: the response
+of a pulse to noise is the overlap of the noise spectrum with a filter function fixed by the pulse, and a
+flat spectrum sees only the integral of that function, which the pulse shape does not change
+(Appendix~\ref{app:firstorder}).
+
+In the present model the argument is short. The noise is independent from one $2\ns$ step to the next.
+Moving a kick to the end of the pulse conjugates its generator $G$ by the evolution so far, and as long as
+that evolution keeps the computational subspace invariant, the first-order infidelity of the kick depends
+only on the variance $V(G)=\mathrm{Tr}(PG^2P)/d-|\mathrm{Tr}(PGP)/d|^2$ of $G$ over that subspace $P$,
+which conjugation leaves unchanged. To leading order the noise-induced infidelity is therefore
+independent of the pulse shape and proportional to the duration,
+\begin{align}
+1-\Fbar(\snoise)&\simeq 1-\Fbar(0)+K\snoise^2T,
+\nonumber\\
+K&=\frac{d}{d+1}\bigl(2\pi\cdot10^{-3}\bigr)^2\Delta t\sum_c V_c ,
+\label{eq:whitenoise}
+\end{align}
+with $\snoise$ in MHz, $\Delta t$ and $T$ in ns, and the sum running over the noisy channels. The
+components of $G$ that lead out of the subspace, to states detuned by the anharmonicity, are partly
+averaged during the step; we weight them by the zero-order-hold factor $\mathrm{sinc}^2(\omega\Delta t/2)$
+at their transition frequency $\omega$. For the gmon model this gives $V=1/4$ for each detuning, $1.57$
+for each drive, $1.07$ for the coupling and $0$ for the anharmonicity, and hence
+$K=2.98\times10^{-4}\ns^{-1}\MHz^{-2}$. Two thirds of it come from the two drive amplitudes, and replaying
+the pulses with the noise on one channel at a time reproduces each channel's share
+(Table~\ref{tab:channels}).
+
+The prediction holds on every pulse we produced. For the $160$ plans stored along the training of the two
+TRPO agents (Sec.~\ref{sec:matched}), the measured excess infidelity per unit duration at $1\MHz$ is
+$2.97\times10^{-4}$ and $2.99\times10^{-4}$ for the nominal and noise-optimized histories, with
+interquartile ranges within $\pm2\%$. Evaluated with the exact response of every step instead of the sinc
+approximation (Appendix~\ref{app:firstorder}), the first-order rate of those plans varies by four parts in
+$10^4$: that is all the pulse shape can move. Excess infidelity and duration are correlated at $0.99$
+across both histories, and the two Adam plans fall on the same line [Fig.~\ref{fig:mechanism}(c)]. Away
+from $1\MHz$ the measured rate drifts, to $3.4\times10^{-4}$ at $0.5\MHz$ and $2.7\times10^{-4}$ at
+$2\MHz$, which reflects higher orders and the approximate treatment of the leaking components.
+
+Against white control noise an open-loop pulse is robust only by being accurate and short, and a
+noise-aware objective can improve robustness only through those two numbers. The rest of this section
+tests that statement.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{noise_training_mechanism.pdf}
+\caption{Open-loop robustness and stochastic training. (a) Paired difference in average fidelity between the
+noise-optimized and the nominal TRPO plan of the same iteration, over the matched iterations
+$21$--$100$, with $95\%$ block-bootstrap intervals; negative values favour the nominal agent. (b) Average
+fidelity at $1\MHz$ of the same checkpoints, replayed open loop (filled) and acting in closed loop on
+the noisy propagator (open); boxes span the quartiles and whiskers the full range. (c) Excess infidelity
+at $1\MHz$ against pulse duration for all plans of both histories and for the two Adam plans, with the
+first-order prediction of Eq.~\eqref{eq:whitenoise} (dashed); the plans at $180\ns$ are rollouts that
+reached the episode ceiling, where higher orders begin to matter.}
+\label{fig:mechanism}
+\end{figure*}
+
 \subsection{Selected controllers}
 \label{sec:selected}
 
-Figure~\ref{fig:robust} and Table~\ref{tab:robust} give the result. The direct optimizer is the most
-robust controller at every noise strength. The $70\ns$ Adam plan has the highest average fidelity and the
-lowest variance of all four up to about $2\MHz$, and the shorter $60\ns$ plan takes over beyond (the two
-cross between $2.1$ and $2.4\MHz$ in mean fidelity and between $1.9$ and $2.4\MHz$ in variance), so that
-one of the two Adam plans is best on the entire grid
-and neither TRPO plan is best anywhere. At the training noise the $70\ns$ plan reaches $\Fbar=0.9782$,
-against $0.9659$ for the noise-optimized TRPO plan and $0.9631$ for the nominal one.
+Figure~\ref{fig:robust} and Table~\ref{tab:robust} give the result for the selected plans. One of the two
+Adam plans is the most robust controller at every noise strength: the $70\ns$ plan has the highest average
+fidelity and the lowest variance up to about $2\MHz$, and the shorter $60\ns$ plan takes over beyond. At
+the training noise the $70\ns$ plan reaches $\Fbar=0.9782$, against $0.9659$ for the noise-optimized TRPO
+plan and $0.9631$ for the nominal one.
 
 Between the two TRPO plans the order depends on the noise strength. Below $\snoise\approx0.72\MHz$ the
 nominal plan is better, as its higher nominal fidelity dictates; above, the noise-optimized plan is, with
 an infidelity ratio of $1.08$ at $1\MHz$ that saturates near $1.14$ at large noise. That is an order of
-magnitude below the gain reported in Ref.~\cite{Niu2019}, and Sec.~\ref{sec:matched} shows that even
-this much does not come from stochastic training.
-
-A pattern in Table~\ref{tab:robust} anticipates the explanation. At $3.5\MHz$ the five evaluated plans
-rank exactly by duration --- $60$, $70$, $98$, $104$ and $116\ns$, with $\Fbar=0.799$, $0.785$, $0.713$,
-$0.697$ and $0.676$ --- whichever method produced them. Over the whole sweep the fidelity lost between
-$0.1$ and $3.5\MHz$ is $0.187$ and $0.212$ for the two Adam plans, $0.280$ for the noise-optimized TRPO
-plan and $0.319$ for the nominal one, again in order of duration.
+magnitude below the gain reported in Ref.~\cite{Niu2019}, and the order follows the durations, as
+Eq.~\eqref{eq:whitenoise} requires: at $3.5\MHz$ the five evaluated plans rank exactly by duration ($60$,
+$70$, $98$, $104$ and $116\ns$), whichever method produced them. Section~\ref{sec:matched} shows that
+even this difference does not come from stochastic training.
 
 \begin{table}[t]
-\caption{Robustness at representative noise strengths ($\snoise$ in MHz) of the two Adam plans, the
-nominal TRPO plan (nom.) and the noise-optimized TRPO plan (n.o.), with their durations. Upper block:
-channel average fidelity $\Fbar$, Eq.~\eqref{eq:favg}. Lower block: fidelity variance. All values are
-EWMA estimates over the dense grid; the best controller at each noise strength is in bold.}
+\caption{Robustness at three noise strengths ($\snoise$ in MHz) of the two Adam plans, the nominal TRPO
+plan (nom.) and the noise-optimized TRPO plan (n.o.), with their durations. Upper block: channel average
+fidelity $\Fbar$, Eq.~\eqref{eq:favg}. Lower block: fidelity variance. All values are EWMA estimates over
+the dense grid of Fig.~\ref{fig:robust}; the best controller at each noise strength is in bold.}
 \label{tab:robust}
 \footnotesize
 \begin{ruledtabular}
@@ -867,18 +666,13 @@ EWMA estimates over the dense grid; the best controller at each noise strength i
 $\snoise$ & $70\ns$ & $60\ns$ & $116\ns$ & $98\ns$\\
 \colrule
 0.1 & \textbf{0.9970} & 0.9857 & 0.9950 & 0.9925\\
-0.5 & \textbf{0.9926} & 0.9816 & 0.9874 & 0.9861\\
 1.0 & \textbf{0.9782} & 0.9691 & 0.9631 & 0.9659\\
-1.5 & \textbf{0.9543} & 0.9480 & 0.9238 & 0.9325\\
-2.0 & \textbf{0.9221} & 0.9193 & 0.8722 & 0.8883\\
-3.0 & 0.8367 & \textbf{0.8453} & 0.7449 & 0.7761\\
 3.5 & 0.7848 & \textbf{0.7989} & 0.6764 & 0.7128\\
 \colrule
 \multicolumn{5}{l}{\textit{Fidelity variance} $\mathrm{Var}(F)$}\\
 \colrule
 0.1 & $\bm{2.5\times10^{-7}}$ & $1.7\times10^{-6}$ & $1.2\times10^{-6}$ & $1.6\times10^{-6}$\\
 1.0 & $\bm{1.1\times10^{-4}}$ & $2.0\times10^{-4}$ & $2.9\times10^{-4}$ & $2.7\times10^{-4}$\\
-2.0 & $\bm{1.4\times10^{-3}}$ & $1.5\times10^{-3}$ & $3.1\times10^{-3}$ & $2.3\times10^{-3}$\\
 3.5 & $8.5\times10^{-3}$ & $\bm{7.6\times10^{-3}}$ & $1.4\times10^{-2}$ & $1.1\times10^{-2}$\\
 \end{tabular}
 \end{ruledtabular}
@@ -921,10 +715,10 @@ as before (Table~\ref{tab:seeds}).
 
 \begin{table}[t]
 \caption{Matched comparison for three seeds, with the leakage bound of the noise-trained agents taken
-from the noise-free controls; iterations $21$--$100$. Fraction of iterations in which the noise-trained
-plan has the higher $\Fbar$ at $1\MHz$; mean paired difference in $\Fbar$ (noise-trained minus nominal)
-at three noise strengths; mean difference in duration and in nominal fidelity; and the difference at
-$1\MHz$ that Eq.~\eqref{eq:whitenoise} predicts from those two. The last column is the pair of
+from the noise-free controls; iterations $21$--$100$, at $\snoise=1\MHz$. Fraction of iterations in which
+the noise-trained plan has the higher $\Fbar$; mean paired difference in $\Fbar$ (noise-trained minus
+nominal); mean difference in duration; and the difference in $\Fbar$ that Eq.~\eqref{eq:whitenoise}
+predicts from the durations and nominal fidelities. The last column is the pair of
 Fig.~\ref{fig:mechanism}(a).}
 \label{tab:seeds}
 \footnotesize
@@ -932,14 +726,10 @@ Fig.~\ref{fig:mechanism}(a).}
 \begin{tabular}{lcccc}
  & Seed 1 & Seed 2 & Seed 3 & First pair\\
 \colrule
-Noise-trained better, $1\MHz$ & $26\%$ & $28\%$ & $24\%$ & $21\%$\\
-$\Delta\Fbar$ at $0.1\MHz$ ($10^{-3}$) & $-0.5$ & $+0.1$ & $-0.7$ & $-1.7$\\
-$\Delta\Fbar$ at $1\MHz$ ($10^{-3}$) & $-1.6$ & $-1.7$ & $-2.0$ & $-3.5$\\
-$\Delta\Fbar$ at $3.5\MHz$ ($10^{-3}$) & $-11.5$ & $-11.9$ & $-12.1$ & $-14.9$\\
-\colrule
+Noise-trained better & $26\%$ & $28\%$ & $24\%$ & $21\%$\\
+$\Delta\Fbar$ ($10^{-3}$) & $-1.6$ & $-1.7$ & $-2.0$ & $-3.5$\\
 $\Delta T$ (ns) & $+5.1$ & $+5.7$ & $+5.2$ & ---\\
-$\Delta F^{\mathrm{nom}}$ ($10^{-3}$) & $-0.5$ & $+0.1$ & $-0.9$ & ---\\
-Predicted $\Delta\Fbar$ at $1\MHz$ ($10^{-3}$) & $-1.9$ & $-1.6$ & $-2.2$ & ---\\
+Predicted $\Delta\Fbar$ ($10^{-3}$) & $-1.9$ & $-1.6$ & $-2.2$ & ---\\
 \end{tabular}
 \end{ruledtabular}
 \end{table}
@@ -952,68 +742,19 @@ bound reduces the handicap of the noise-trained agent and does not turn it into 
 remains that of the spread between seeds. Pairing each noise-trained history with each nominal one,
 whatever their seeds, gives differences between $-3.5$ and $+0.2\times10^{-3}$ at $1\MHz$, so what three
 seeds establish is the absence of a gain, not a loss intrinsic to stochastic training. Nor is the
-difference a matter of pulse shape. The noise-trained plans are $5$--$6\ns$ longer on average and differ in
-nominal fidelity by $10^{-3}$ or less, and Eq.~\eqref{eq:whitenoise} turns those two numbers into
-$-1.6$ to $-2.2\times10^{-3}$ at $1\MHz$, against $-1.6$ to $-2.0\times10^{-3}$ measured. No plan of
-the six histories exceeds $\Fbar=0.968$ at $1\MHz$.
+difference a matter of pulse shape: the noise-trained plans are $5$--$6\ns$ longer on average and differ
+in nominal fidelity by $10^{-3}$ or less, and Eq.~\eqref{eq:whitenoise} turns those two numbers into the
+difference measured (Table~\ref{tab:seeds}). No plan of the six histories exceeds $\Fbar=0.968$ at
+$1\MHz$.
 
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\textwidth]{noise_training_mechanism.pdf}
-\caption{What stochastic training changes. (a) Paired difference in average fidelity between the
-noise-optimized and the nominal TRPO plan of the same iteration, over the matched iterations
-$21$--$100$, with $95\%$ block-bootstrap intervals; negative values favour the nominal agent. (b) Average
-fidelity at $1\MHz$ of the same checkpoints, replayed open loop (filled) and acting in closed loop on
-the noisy propagator (open); boxes span the quartiles and whiskers the full range. (c) Excess infidelity
-at $1\MHz$ against pulse duration for all plans of both histories and for the two Adam plans, with the
-first-order prediction of Eq.~\eqref{eq:whitenoise} (dashed); the plans at $180\ns$ are rollouts that
-reached the episode ceiling, where higher orders begin to matter.}
-\label{fig:mechanism}
-\end{figure*}
-
-\subsection{Why stochastic training does not reach the deployed pulse}
+\subsection{What stochastic training changes instead}
 \label{sec:noisyleak}
 
-Three observations explain the null result.
+Stochastic training does not change the robustness of the deployed pulse, but in our implementation it
+changes two other things: the objective that the agent sees, and the way the policy reacts to noisy
+states.
 
-\emph{First, under this noise model the pulse shape cannot buy robustness.} This is the white-noise limit
-of the filter-function description of open-loop control~\cite{Green2012,Green2013,Cerfontaine2021}: the
-response of a pulse to noise is the overlap of the noise spectrum with a filter function fixed by the
-pulse, and a flat spectrum sees only the integral of that function, which the pulse shape does not change
-(Appendix~\ref{app:firstorder}). In the present model the argument is short. The noise is independent
-from one $2\ns$ step to the next. Moving a kick to the end of the pulse conjugates its generator $G$ by the
-evolution so far, and as long as that evolution keeps the computational subspace invariant, the
-first-order infidelity of the kick depends only on the variance
-$V(G)=\mathrm{Tr}(PG^2P)/d-|\mathrm{Tr}(PGP)/d|^2$ of $G$ over that subspace $P$, which conjugation leaves
-unchanged. To leading order the noise-induced infidelity is therefore independent of the pulse shape
-and proportional to the duration,
-\begin{align}
-1-\Fbar(\snoise)&\simeq 1-\Fbar(0)+K\snoise^2T,
-\nonumber\\
-K&=\frac{d}{d+1}\bigl(2\pi\cdot10^{-3}\bigr)^2\Delta t\sum_c V_c ,
-\label{eq:whitenoise}
-\end{align}
-with $\snoise$ in MHz, $\Delta t$ and $T$ in ns, and the sum running over the noisy channels. The
-components of $G$ that lead out of the subspace, to states detuned by the anharmonicity, are partly
-averaged during the step; we weight them by the zero-order-hold factor $\mathrm{sinc}^2(\omega\Delta t/2)$
-at their transition frequency $\omega$. For the gmon model this gives $V=1/4$ for each detuning, $1.57$
-for each drive, $1.07$ for the coupling and $0$ for the anharmonicity, and hence
-$K=2.98\times10^{-4}\ns^{-1}\MHz^{-2}$ ($3.79\times10^{-4}$ without the step averaging). The measured excess
-infidelity per unit duration at $1\MHz$ is $2.97\times10^{-4}$ and $2.99\times10^{-4}$ for the plans of the
-nominal and noise-optimized histories, with interquartile ranges within $\pm2\%$; at $0.5$ and $2\MHz$ it
-is $3.4$ and $2.7\times10^{-4}$, the drift reflecting higher orders and the approximate treatment of the
-leaking components. Evaluated without the sinc approximation, with the exact response of every step
-(Appendix~\ref{app:firstorder}), the first-order rate of the $160$ plans of the two histories lies between
-$2.9794$ and $2.9805\times10^{-4}$: the pulse shape moves it by four parts in $10^4$. Two thirds of it
-come from the two drive amplitudes, $23\%$ from the coupling and $11\%$ from the detunings, and replaying
-the pulses with the noise on one channel at a time reproduces each share (Table~\ref{tab:channels}). The
-value of $K$ matters less than the fact that it is the same for every plan:
-excess infidelity and duration are correlated at $0.99$ across both histories, and the two Adam plans
-fall on the same line (Fig.~\ref{fig:mechanism}(c)). Against white control noise an open-loop pulse is
-robust only by being accurate and short. Every difference in Fig.~\ref{fig:robust} follows from those two
-numbers, and a noise-aware objective can improve robustness only through them.
-
-\emph{Second, the training signal is dominated by the noise itself.} Every term of Eq.~\eqref{eq:ufo} is
+\emph{The training signal is dominated by the noise itself.} Every term of Eq.~\eqref{eq:ufo} is
 evaluated on the noisy trajectory, including the leakage bound, whose second time derivative responds to
 the step-to-step jumps of white noise. At $\strain=1\MHz$ the bound grows by $3.8\times10^{-3}$ per ns for
 every plan we replayed, about $27$ times the leakage population actually present at the end of the pulse;
@@ -1024,14 +765,15 @@ observations. The Adam horizon search, whose sampled losses rise by about $0.04$
 prefers the $60\ns$ plan to the more accurate $70\ns$ one. And the cost of a noisy TRPO rollout never falls
 below the stopping threshold: all $1.05\times10^6$ training episodes of the noise-optimized agent ran to
 the $180\ns$ ceiling, so the co-optimization of stopping time that distinguishes the RL formulation was
-inactive throughout noisy training. The bound is not the only reason for the latter. In the three
+inactive throughout noisy training.
+
+The bound is not the only reason. In the three
 noise-trained agents of Table~\ref{tab:seeds}, whose bound does not see the noise, the training episodes
 still lasted $180.0\ns$ on average, and those of the nominal agents $177$--$178\ns$: the exploration
 noise of the stochastic policy, with the training noise on top of it, keeps the cost of a training rollout
 above a threshold that the deterministic plan of the same policy reaches at about $100\ns$.
 
-\emph{Third, what stochastic training changes is the policy's response to noisy states, and that
-response is not deployed.} During
+\emph{The policy learns to respond to noisy states, and that response is not deployed.} During
 training the agent observes the noisy propagator and acts on it. We ran every checkpoint of both histories
 in the noisy environment at $1\MHz$, in closed loop and for the duration of its own plan, and compared it
 with the open-loop replay of that plan (Fig.~\ref{fig:mechanism}(b)). In closed loop the noise-optimized
@@ -1072,15 +814,12 @@ channel held for the whole pulse and redrawn for every shot, and evaluated Eq.~\
 it (Appendix~\ref{app:firstorder}; the two agree within $3\%$ at $0.1\MHz$). At equal $\snoise$ the
 infidelity is $15$ to $23$ times the white-noise one for the controllers of Table~\ref{tab:single}, because
 the offsets of successive steps add coherently, and it grows as $T^2$ instead of $T$
-[Fig.~\ref{fig:memory}(c)]. Short pulses gain even more than under white noise: at $0.1\MHz$ the excess
-infidelity is $2.6\times10^{-3}$ and $3.6\times10^{-3}$ for the $60$ and $70\ns$ Adam plans, against
-$5.6\times10^{-3}$ and $8.0\times10^{-3}$ for the noise-optimized and nominal TRPO plans. The shape now
-enters, but among pulses that were not optimized for it, only weakly: divided by $T^2$, the sensitivity of
-the $160$ plans of the two TRPO histories spans $5.7$ to $6.3\times10^{-7}\ns^{-2}$, and the
-noise-optimized agent is not ahead. It has the higher average fidelity in $25\%$ of the matched iterations
-at $0.1\MHz$ and $20\%$ at $0.3\MHz$, and its sensitivity per $T^2$ differs from the nominal agent's by
-$0.3\times10^{-8}\ns^{-2}$ ($95\%$ interval $[-0.6,1.2]\times10^{-8}$). Training under white noise has not prepared the policy for noise with
-memory either.
+[Fig.~\ref{fig:memory}(c)], so short pulses gain even more than under white noise. The shape now enters,
+but among pulses that were not optimized for it, only weakly: divided by $T^2$, the sensitivity of the
+$160$ plans of the two TRPO histories spans $5.7$ to $6.3\times10^{-7}\ns^{-2}$, and the noise-optimized
+agent is not ahead. It has the higher average fidelity in $25\%$ of the matched iterations at $0.1\MHz$
+and $20\%$ at $0.3\MHz$. Training under white noise has not prepared the policy for noise with memory
+either.
 
 \emph{The direct optimizer under three noise models.} We then repeated the comparison of
 Sec.~\ref{sec:matched} with the gradient optimizer, where it costs minutes. At a fixed horizon, so that
@@ -1092,40 +831,41 @@ otherwise the settings of Sec.~\ref{sec:controllers}. Table~\ref{tab:adammodels}
 
 \begin{table}[t]
 \caption{Adam at fixed horizon $T$ under three training-noise models (mean over eight seeds for the
-stochastic ones; the noise-free optimization is deterministic). $1-F$: nominal infidelity. White:
-first-order excess infidelity at $1\MHz$, Eq.~\eqref{eq:firstorder}, and average fidelity $\Fbar$ from
-$2000$ realizations. Quasi-static: first-order excess infidelity at $0.1\MHz$, and $\Fbar$ at the training
-strength of $0.3\MHz$. Rows marked $\ast$: the leakage bound of the training objective is accumulated
-from the noise-free controls instead of the noisy Hamiltonian; under that choice the quasi-static rows
-change by less than $10^{-5}$ in every fidelity.}
+stochastic ones; the noise-free optimization is deterministic). $1-F$: nominal infidelity. White: average
+fidelity $\Fbar$ at $1\MHz$ from $2000$ realizations. Quasi-static: first-order excess infidelity at
+$0.1\MHz$, Eq.~\eqref{eq:firstorder}, and $\Fbar$ at the training strength of $0.3\MHz$. Rows marked
+$\ast$: the leakage bound of the training objective is accumulated from the noise-free controls instead of
+the noisy Hamiltonian; under that choice the quasi-static rows change by less than $10^{-5}$ in every
+fidelity.}
 \label{tab:adammodels}
 \footnotesize
 \begin{ruledtabular}
-\begin{tabular}{clccccc}
- & & & \multicolumn{2}{c}{White, $1\MHz$} & \multicolumn{2}{c}{Quasi-static}\\
-$T$ & Training & $1-F$ & excess & $\Fbar$ & excess & $\Fbar$\\
-(ns) & noise & ($10^{-3}$) & ($10^{-2}$) & & ($10^{-3}$) & $0.3\MHz$\\
+\begin{tabular}{clcccc}
+ & & & White & \multicolumn{2}{c}{Quasi-static}\\
+$T$ & Training & $1-F$ & $\Fbar$ & excess & $\Fbar$\\
+(ns) & noise & ($10^{-3}$) & $1\MHz$ & ($10^{-3}$) & $0.3\MHz$\\
 \colrule
-70  & none         & \textbf{0.6} & 2.085 & \textbf{0.9792} & 2.57 & 0.9762\\
-    & white        & 5.4  & 2.085 & 0.9757 & 3.04 & 0.9682\\
-    & white$^{\ast}$ & 2.6 & 2.085 & 0.9776 & 2.79 & 0.9727\\
-    & quasi-static & 3.5  & 2.086 & 0.9767 & \textbf{2.01} & \textbf{0.9792}\\
+70  & none         & \textbf{0.6} & \textbf{0.9792} & 2.57 & 0.9762\\
+    & white        & 5.4  & 0.9757 & 3.04 & 0.9682\\
+    & white$^{\ast}$ & 2.6 & 0.9776 & 2.79 & 0.9727\\
+    & quasi-static & 3.5  & 0.9767 & \textbf{2.01} & \textbf{0.9792}\\
 \colrule
-100 & none         & \textbf{0.3} & 2.980 & \textbf{0.9707} & 4.43 & 0.9602\\
-    & white        & 5.4  & 2.980 & 0.9667 & 4.73 & 0.9541\\
-    & white$^{\ast}$ & 3.7 & 2.980 & 0.9682 & 4.50 & 0.9569\\
-    & quasi-static & 5.9  & 2.980 & 0.9663 & \textbf{3.38} & \textbf{0.9654}\\
+100 & none         & \textbf{0.3} & \textbf{0.9707} & 4.43 & 0.9602\\
+    & white        & 5.4  & 0.9667 & 4.73 & 0.9541\\
+    & white$^{\ast}$ & 3.7 & 0.9682 & 4.50 & 0.9569\\
+    & quasi-static & 5.9  & 0.9663 & \textbf{3.38} & \textbf{0.9654}\\
 \colrule
-130 & none         & \textbf{0.2} & 3.874 & \textbf{0.9624} & 6.71 & \textbf{0.9411}\\
-    & white        & 10.3 & 3.874 & 0.9546 & 6.75 & 0.9334\\
-    & white$^{\ast}$ & 8.2 & 3.874 & 0.9567 & 6.69 & 0.9346\\
-    & quasi-static & 16.4 & 3.874 & 0.9504 & \textbf{5.47} & 0.9393\\
+130 & none         & \textbf{0.2} & \textbf{0.9624} & 6.71 & \textbf{0.9411}\\
+    & white        & 10.3 & 0.9546 & 6.75 & 0.9334\\
+    & white$^{\ast}$ & 8.2 & 0.9567 & 6.69 & 0.9346\\
+    & quasi-static & 16.4 & 0.9504 & \textbf{5.47} & 0.9393\\
 \end{tabular}
 \end{ruledtabular}
 \end{table}
 
-Under white noise the three models give the same first-order sensitivity to four digits, as
-Eq.~\eqref{eq:whitenoise} requires, and the only thing that white-noise training changes is the nominal
+Under white noise the pulses of a given horizon have the same first-order excess infidelity whatever
+the training noise, to better than one part in a thousand ($2.09$, $2.98$ and $3.87\times10^{-2}$ at
+$1\MHz$ for the three horizons), as Eq.~\eqref{eq:whitenoise} requires, and the only thing that white-noise training changes is the nominal
 fidelity, for the worse: none of the $24$ white-trained pulses is more accurate, or more robust against
 the very noise it was trained on, than the pulse optimized without noise at the same horizon. Its
 stochastic gradient costs $5$--$10\times10^{-3}$ in nominal fidelity and buys nothing. The null result of
@@ -1151,23 +891,66 @@ gates~\cite{KhodjastehViola2009}, and it is paid for in nominal fidelity, so it 
 the noise is strong enough: at $0.1\MHz$ a single quasi-static-trained pulse beats the noise-free one, at
 the training strength of $0.3\MHz$ $19$ of $24$ do, against $2$ of $24$ white-trained ones.
 
-\subsection{Interpretation}
-
-The robustness mechanism proposed in Ref.~\cite{Niu2019} does not survive a controlled test in our
-implementation. Two agents that differ only in the training noise produce open-loop pulses of the same
-robustness, and the direct optimizer, trained under the same noise, produces the most robust pulses of
-all, because they are the shortest and among the most accurate. Equation~\eqref{eq:whitenoise} shows that
-this is not an accident of our optimizer settings: against temporally uncorrelated amplitude noise,
-nominal fidelity and duration determine open-loop robustness to leading order, whatever method produced
-the pulse. Robustness that depends on the pulse shape requires noise with memory --- quasi-static offsets,
+Robustness that depends on the pulse shape therefore requires noise with memory --- quasi-static offsets,
 drift or low-frequency spectra --- which is what robust-control techniques are designed
-for~\cite{Koch2022} and what the UFO noise model does not contain. Section~\ref{sec:memory} shows both
-halves of this statement in the same optimizer: trained against quasi-static noise it lowers the
-sensitivity of its pulses by about a fifth, trained against white noise it lowers nothing.
+for~\cite{Koch2022} and what the UFO noise model does not contain.
 
 % =========================================================================
 \section{Runtime across the gate family}
 \label{sec:runtime}
+
+\subsection{Structure of the subfamily $\gamma=\pi/2$}
+\label{sec:structure}
+
+The runtime study uses $\gamma=\pi/2$, and there the two-qubit structure can be stated exactly. Since
+$\exp(i\tfrac{\pi}{2}\sigma^z_1\sigma^z_2)=i\sigma^z_1\sigma^z_2$ and
+$\exp[i\tfrac{\pi}{2}(\sigma^x_1\sigma^x_2+\sigma^y_1\sigma^y_2)]=\sigma^z_1\sigma^z_2$, every member is,
+up to a global phase, a pure exchange rotation,
+\begin{equation}
+\Ntgt{\alpha}{\pi/2}=i\exp\!\bigl[i\varepsilon\bigl(\sigma_1^x\sigma_2^x+\sigma_1^y\sigma_2^y\bigr)\bigr],
+\qquad \varepsilon=\alpha-\frac{\pi}{2},
+\label{eq:exchange}
+\end{equation}
+which is the decomposition noted in Ref.~\cite{Niu2019} with its local $Z$ rotations absorbed. Four
+consequences are used below.
+
+(i) \emph{Local members.} At $\alpha=\pi/2$ the target is the identity, and at $\alpha=0$ and
+$\alpha=\pi$ it is the local gate $\sigma^z_1\sigma^z_2$. Because the fidelity~\eqref{eq:fidelity}
+ignores global phases, a pulse that does nothing implements the $\alpha=\pi/2$ target exactly.
+
+(ii) \emph{Entangling class and CNOT count.} In the Weyl chamber~\cite{Zhang2003} each member lies at
+$(a,a,0)$ with $a=\min(|\varepsilon|,\pi/2-|\varepsilon|)$, so the most entangling members,
+$|\varepsilon|=\pi/4$, are iSWAP-equivalent. Because one canonical coordinate vanishes, every non-local
+member needs two CNOTs rather than three~\cite{VidalDawson2004,ShendeMarkovBullock2004}. With the gate
+times above and three single-qubit layers, the target-specific synthesis time is
+\begin{equation}
+\Tsyn^{\mathrm{tgt}}(\alpha)=
+\begin{cases}
+0 & \alpha=\pi/2,\\
+20\ns & \alpha\in\{0,\pi\},\\
+150\ns & \text{otherwise}.
+\end{cases}
+\label{eq:tsyntgt}
+\end{equation}
+On processors whose native entangler is itself a tunable exchange gate, as in the fSim gate set of
+gmon-type devices~\cite{Foxen2020}, each member is a single native two-qubit operation, and the
+synthesis overhead disappears altogether.
+
+(iii) \emph{Mirror symmetry.} The parity of the first mode, $P_1=(-1)^{\hat n_1}$, maps
+$\hat a_1\to-\hat a_1$. Conjugating Eq.~\eqref{eq:hrwa} by $P_1$ therefore sends $g\to-g$ and
+$\phi_1\to\phi_1+\pi$ and leaves everything else unchanged, including the leakage structure and the
+boundary penalty, while on the qubits it maps $\varepsilon\to-\varepsilon$. The control problems at
+$\alpha$ and $\pi-\alpha$ are thus exactly equivalent: a pulse for one, with those two substitutions,
+is a pulse for the other with the same cost.
+
+(iv) \emph{Required exchange area.} In the qubit projection~\eqref{eq:hqb}, the coupling alone
+generates Eq.~\eqref{eq:exchange} once $|\int g\,dt|=2|\varepsilon|$, with $g$ in angular units. At the
+$20\MHz$ bound this takes at most $25\ns$ for any member. Pulse durations are therefore set by the
+bandwidth filter, the boundary conditions and the cost trade-off rather than by the amount of entangling
+action required: each pole of the filter~\eqref{eq:filter} has a time constant $1/(\pi B)\approx32\ns$,
+and a filtered step needs about $52\ns$ to reach half its amplitude. Section~\ref{sec:physicalinterp}
+makes this quantitative: the largest exchange area that a bounded control can deliver through the filter
+in a given time is a linear program, and it sets the scale of every runtime in this paper.
 
 \subsection{Protocol}
 
@@ -1176,7 +959,7 @@ To test hardware efficiency beyond a single target we sweep the subfamily
 \Utgt(\alpha)=\Ntgt{\alpha}{\pi/2},\qquad \alpha\in[0,\pi],
 \label{eq:runtimefamily}
 \end{equation}
-whose structure was stated in Sec.~\ref{sec:structure}, in $21$ steps of $0.157$. Rather than retraining
+in $21$ steps of $0.157$. Rather than retraining
 from scratch at each point, the best checkpoint obtained at one $\alpha$ initializes training at the next
 --- a curriculum that exploits continuity in target space, in the spirit of the transfer strategy of
 Ref.~\cite{Niu2019}. Training at each target stops when the cost falls below $0.40$ or after $150$
@@ -1209,7 +992,8 @@ $\alpha=0$ ($0.56$ and $0.61$) is off scale. (c) Leakage bound of the evaluated 
 
 \subsection{Runtime landscape of the curriculum}
 
-Table~\ref{tab:runtime} and Fig.~\ref{fig:runtime} summarize the curriculum sweep. Of the $21$ targets,
+Figure~\ref{fig:runtime} summarizes the curriculum sweep, and Table~\ref{tab:runtime} in
+Appendix~\ref{app:curriculum} lists it target by target. Of the $21$ targets,
 $14$ converge. One of them is degenerate: at $\alpha=1.570$ the target is the identity to within
 $|\varepsilon|=8\times10^{-4}$, Eq.~\eqref{eq:exchange}, so the cost is already below threshold after the
 first $2\ns$ step and the phase ends after one iteration with fidelity $0.999999$ --- the value that doing
@@ -1234,44 +1018,6 @@ either: their rank correlation with $|\varepsilon|$ is $0.51$ ($p=0.08$), and wi
 it is $0.01$. The curriculum landscape records the order in which targets were visited and the stopping
 rule (Sec.~\ref{sec:runtimecaveat}) more than the targets themselves.
 
-\begin{table}[t]
-\caption{Curriculum runtime sweep over $\Ntgt{\alpha}{\pi/2}$. $\varepsilon=\alpha-\pi/2$ is the
-exchange angle of Eq.~\eqref{eq:exchange} and $T$ the final evaluation runtime; the last two columns give
-the speedup over the generic reference, $215\ns$, and over the target-specific synthesis time of
-Eq.~\eqref{eq:tsyntgt}, $150\ns$ for every row shown. Rows marked $\dagger$ did not converge (final cost
-above $0.40$): their rollouts run to the $180\ns$ ceiling and no speedup is quoted. The row marked
-$\ddagger$ is the identity target.}
-\label{tab:runtime}
-\footnotesize
-\begin{ruledtabular}
-\begin{tabular}{rrrccrr}
-$\alpha$ & $\varepsilon$ & $T$ (ns) & $F^{\mathrm{nom}}$ & $\Fbar_{\sigma=1}$ & $215/T$ & $\Tsyn^{\mathrm{tgt}}/T$\\
-\colrule
-$0.000^\dagger$ & $-1.571$ & 180 & 0.5577 & 0.6133 & --- & ---\\
-$0.157$ & $-1.414$ & 142 & 0.9880 & 0.9510 & 1.51 & 1.06\\
-$0.314$ & $-1.257$ & 140 & 0.9905 & 0.9533 & 1.54 & 1.07\\
-$0.471^\dagger$ & $-1.100$ & 180 & 0.9538 & 0.9179 & --- & ---\\
-$0.628^\dagger$ & $-0.943$ & 180 & 0.9480 & 0.9149 & --- & ---\\
-$0.785^\dagger$ & $-0.786$ & 180 & 0.9492 & 0.9055 & --- & ---\\
-$0.942$ & $-0.629$ & 148 & 0.9905 & 0.9504 & 1.45 & 1.01\\
-$1.099$ & $-0.472$ & 76 & 0.9850 & 0.9674 & 2.83 & 1.97\\
-$1.256$ & $-0.315$ & 140 & 0.9894 & 0.9535 & 1.54 & 1.07\\
-$1.413$ & $-0.158$ & 132 & 0.9880 & 0.9542 & 1.63 & 1.14\\
-$1.570^\ddagger$ & $-0.001$ & 2 & 0.99999 & 0.9994 & --- & ---\\
-$1.727$ & $0.156$ & 124 & 0.9861 & 0.9575 & 1.73 & 1.21\\
-$1.884$ & $0.313$ & 108 & 0.9821 & 0.9582 & 1.99 & 1.39\\
-$2.041$ & $0.470$ & 106 & 0.9825 & 0.9595 & 2.03 & 1.42\\
-$2.198$ & $0.627$ & 110 & 0.9837 & 0.9545 & 1.95 & 1.36\\
-$2.355$ & $0.784$ & 118 & 0.9863 & 0.9573 & 1.82 & 1.27\\
-$2.512$ & $0.941$ & 136 & 0.9919 & 0.9567 & 1.58 & 1.10\\
-$2.669$ & $1.098$ & 144 & 0.9918 & 0.9547 & 1.49 & 1.04\\
-$2.826^\dagger$ & $1.255$ & 180 & 0.9340 & 0.8944 & --- & ---\\
-$2.983^\dagger$ & $1.412$ & 180 & 0.9213 & 0.8872 & --- & ---\\
-$3.140^\dagger$ & $1.569$ & 180 & 0.9400 & 0.9020 & --- & ---\\
-\end{tabular}
-\end{ruledtabular}
-\end{table}
-
 \subsection{Comparison with gate synthesis}
 
 Measured against the generic reference $\Tsyn=215\ns$, every converged non-trivial target is faster, by
@@ -1291,11 +1037,10 @@ more than the controller. In our sweep the only target in that interval with a r
 identity itself.
 
 None of this removes the physical point. The synthesis benchmark is optimal within a circuit model over a
-fixed gate library, whereas the analog controller optimizes in the continuous Hamiltonian-control space,
-and the two solve related but different problems. Nothing in these results says that a quantum speed limit
-has been beaten. What they do say is that the size of the analog advantage depends on the reference, and
-that a fair reference must be target-specific --- or, on hardware with a native tunable exchange
-gate~\cite{Foxen2020}, must be that gate.
+fixed gate library, whereas the analog controller optimizes in the continuous Hamiltonian-control space.
+But the size of the analog advantage depends on the reference, and a fair reference must be
+target-specific --- or, on hardware with a native tunable exchange gate~\cite{Foxen2020}, must be that
+gate.
 
 \subsection{What the runtime comparison measures}
 \label{sec:runtimecaveat}
@@ -1363,13 +1108,12 @@ gives the band of Fig.~\ref{fig:runtime}(a): from $28$--$40\ns$ at $|\varepsilon
 at the ends of the family. It is an estimate for pulses that use the coupling alone, not a speed limit of
 the model; near the ends the optimizer also uses the detunings. The horizons selected by the direct
 optimizer lie inside the band for $20$ of the $26$ targets that are not pinned at the $40\ns$ grid
-minimum, and one grid step above it for one more. For $|\varepsilon|\le1.03$ its pulses deliver
-$75$--$99\%$ of the required area with the coupling; beyond, the detunings take over. The exceptions are
-the five targets with $|\varepsilon|\ge1.43$, where the selected $70\ns$ is shorter than even the lower
-edge: there the pulses are detuning pulses whose area, $2.77$--$2.80$, falls short of the $\pi$ that the
-local gate needs, which is why their fidelity stops at $0.94$--$0.97$. The converged curriculum pulses are
-$1.3$--$3.3$ times longer than the upper edge (median $1.8$). Within this model, then, the durations chosen by the
-direct optimizer largely track the coupling-only bound, and those of the learned pulses do not.
+minimum. The main exceptions are the five targets with $|\varepsilon|\ge1.43$, where the selected $70\ns$
+is shorter than even the lower edge: there the pulses are detuning pulses whose area falls short of the
+$\pi$ that the local gate needs, which is why their fidelity stops at $0.94$--$0.97$. The converged
+curriculum pulses are $1.3$--$3.3$ times longer than the upper edge (median $1.8$). Within this model,
+then, the durations chosen by the direct optimizer largely track the coupling-only bound, and those of the
+learned pulses do not.
 
 The same linear program applies to the single-qubit gates of the synthesis reference. A rotation by
 $\pi$ needs a drive area $\pi/2$, which the filtered, bounded drive delivers in no less than $54\ns$, or
@@ -1382,16 +1126,47 @@ the ratio between the two measures that mismatch as much as it measures analog c
 \section{Discussion}
 \label{sec:discussion}
 
-\subsection{What reproduces}
+\subsection{The original claims and what we find}
+\label{sec:claims}
 
-The framework itself reproduces. Rebuilt from the published description --- multilevel gmon model,
-second-order TSWT leakage bound, bandwidth filter, UFO objective, TRPO in a stochastic environment --- it
-produces genuine analog two-qubit gates: nominal fidelity around $0.99$ with leakage bounds of
-$10^{-4}$--$10^{-3}$, in pulses shorter than the compiled reference. The original UFO weights sit close to
-the best region of an independent weight sweep, and the original network layout is as good as any we
-tried within the seed-to-seed spread. The curriculum strategy works in the sense Ref.~\cite{Niu2019}
-describes: once warm-started, seven of the thirteen non-trivial converged targets were solved within $20$
-iterations.
+\begin{table*}[t]
+\caption{The claims of Ref.~\cite{Niu2019} and what our implementation finds.}
+\label{tab:claims}
+\begin{ruledtabular}
+\begin{tabular}{p{0.27\textwidth}p{0.52\textwidth}p{0.13\textwidth}}
+Claim & Finding & Section \\
+\colrule
+The framework produces high-fidelity, low-leakage analog gates &
+Reproduces: nominal fidelity around $0.99$ and leakage bounds of $10^{-4}$--$10^{-3}$, with the published
+weights and network layout; infidelities across the family are about ten times those reported &
+\ref{sec:single}, \ref{sec:runtime} \\
+RL outperforms gradient optimization, by two orders of magnitude in infidelity &
+Not supported: a single-start direct optimizer is ahead on every nominal metric and at every noise
+strength &
+\ref{sec:single}, \ref{sec:selected} \\
+Stochastic training makes the pulses robust, by up to an order of magnitude in infidelity &
+Not supported: no gain in four matched pairs of agents, and none is possible to leading order under white
+noise &
+\ref{sec:whitelimit}, \ref{sec:matched} \\
+Runtime is an order of magnitude below gate synthesis for $\alpha\in[1.2,1.7]$ &
+Needs a different reading: the interval surrounds the identity target and the reference is a generic
+three-CNOT circuit; against two-CNOT synthesis the learned pulses are $1.0$--$2.0\times$ faster &
+\ref{sec:structure}, \ref{sec:runtime} \\
+The runtime advantage is a benefit of RL &
+Not supported: the direct optimizer is faster across the family, $1.9$--$3.75\times$ over two-CNOT
+synthesis &
+\ref{sec:runtimecaveat} \\
+\end{tabular}
+\end{ruledtabular}
+\end{table*}
+
+Table~\ref{tab:claims} sets the claims of Ref.~\cite{Niu2019} against our findings. The framework itself
+reproduces. Rebuilt from the published description, it produces genuine analog two-qubit gates in pulses
+shorter than the compiled reference; the original UFO weights sit close to the best region of an
+independent weight sweep, and the original network layout is as good as any we tried within the
+seed-to-seed spread (Appendix~\ref{app:modelsel}). The curriculum strategy works in the sense
+Ref.~\cite{Niu2019} describes: once warm-started, seven of the thirteen non-trivial converged targets
+were solved within $20$ iterations.
 
 The absolute fidelities are lower than those reported. Ref.~\cite{Niu2019} quotes gate infidelities of
 order $10^{-3}$ for every member of the family (its Fig.~3); our $13$ non-trivial converged targets have
@@ -1401,41 +1176,21 @@ average fidelity is $0.995$ there, against $0.9950$ and $0.9925$ for our nominal
 agents (Table~\ref{tab:robust}). We have not identified the cause; the training budget, the single seed
 and the coarser time step are candidates.
 
-The qualitative runtime claim also holds: analog pulses on this hardware model are shorter than a
-CNOT-based synthesis of the same targets, and the advantage is largest near the centre of the family.
+Two rows of the table need a comment.
 
-\subsection{What does not}
-
-Three claims are not supported in our implementation, and a fourth needs a different reading.
-
-\emph{Nominal superiority.} On $\Ntgt{2.2}{\pi/2}$ a single-start Adam optimization beats both TRPO agents
-on cost, runtime, leakage and fidelity (Table~\ref{tab:single}). The SGD baseline of Ref.~\cite{Niu2019}
-was also Adam with a noisy objective, and it received about $2000$ random restarts, yet its average
-fidelity on this same target stays near $0.75$--$0.77$ over the whole noise range of its Fig.~4. We cannot
-reconstruct why; the gap between the two gradient baselines is larger than any gap between RL and
-gradient optimization that we observe. With a gradient optimizer that works, the reported two orders of
-magnitude in infidelity over SGD do not reproduce: at every noise strength our direct optimizer is ahead
-of the RL controllers. This is the least general of our findings. It sets one gradient optimizer against
+\emph{The gradient baseline.} The SGD baseline of Ref.~\cite{Niu2019} was also Adam with a noisy
+objective, and it received about $2000$ random restarts, yet its average fidelity on this same target
+stays near $0.75$--$0.77$ over the whole noise range of its Fig.~4. We cannot reconstruct why; the gap
+between the two gradient baselines is larger than any gap between RL and gradient optimization that we
+observe. Our own comparison is the least general of our findings. It sets one gradient optimizer against
 our TRPO agents, which reach cost $0.30$--$0.35$ where the optimizer reaches $0.16$ and whose curriculum
-fails on a third of the family (Sec.~\ref{sec:runtime}); a better-trained agent could narrow it.
+fails on a third of the family; a better-trained agent could narrow the gap.
 
-\emph{Robustness from stochastic training.} In a controlled comparison, noise-aware training does not make
-the deployed pulse more robust (Sec.~\ref{sec:matched}), and Eq.~\eqref{eq:whitenoise} explains why it
-could not: against per-step white noise the open-loop robustness of a pulse is fixed, to leading order, by
-its nominal fidelity and its duration. An order-of-magnitude difference in infidelity between two
-open-loop pulses of similar fidelity and length cannot arise under this noise model. Differences of that
-size can only come from different nominal fidelities or durations, or from an evaluation in which the
+\emph{The size of the reported robustness gain.} An order-of-magnitude difference in infidelity between
+two open-loop pulses of similar fidelity and length cannot arise under this noise model. Differences of
+that size can only come from different nominal fidelities or durations, or from an evaluation in which the
 policy acts on the noisy state (Sec.~\ref{sec:noisyleak}); Ref.~\cite{Niu2019} does not give enough detail
 to tell which, if either, applies to its results.
-
-\emph{The runtime advantage as a property of RL.} The independently optimized direct baseline is faster
-than the curriculum controller across the family (Sec.~\ref{sec:runtimecaveat}); the analog speedup
-belongs to pulse-level optimization, not to the learning method.
-
-\emph{The order-of-magnitude runtime reduction.} It is located at $\alpha\in[1.2,1.7]$, around the target
-that is the identity, and it is measured against a generic three-CNOT circuit. Against a target-specific
-two-CNOT synthesis the converged curriculum pulses are $1.0$--$2.0\times$ faster and the direct optimizer
-$1.9$--$3.75\times$; the local members of the family need no entangling gate at all.
 
 \subsection{Comparing noise scales}
 \label{sec:noisescales}
@@ -1457,17 +1212,14 @@ Ref.~\cite{Niu2019} describes its pulses as piecewise constant with ``around one
 each, which for gates of about $100\ns$ is a step of about $0.1\ns$, twenty times shorter than ours; it
 does not state its convention for $\snoise$. At that step the same $\snoise$ costs sixteen times less
 infidelity, and the fidelity loss that its Fig.~4 shows over $\snoise\in[0.1,3.5]\MHz$ is indeed more
-than an order of magnitude smaller than the loss we obtain over the same nominal range for pulses of
-comparable length. There the average fidelity of the noise-optimized controller stays between $0.995$ and
-$0.98$, within $0.007$ of the ideal at $1\MHz$; ours falls from $0.9925$ to $0.713$, with $0.966$ at
-$1\MHz$ (Table~\ref{tab:robust}). Dividing our loss relative to $0.1\MHz$ by sixteen gives about $0.991$
-at $1\MHz$ and $0.975$ at $3.5\MHz$, where the loss is too large for the first-order scaling to be more
-than indicative. The time step alone accounts for a difference of that size; angular units or noise
-injected before the filter would change it further. The $\snoise$ axes of the two studies should not be
-identified, and no number in this paper at a given $\snoise$ should be compared with
-a number at the same $\snoise$ in Ref.~\cite{Niu2019}. The conclusions above do not depend on the scale:
-Eq.~\eqref{eq:whitenoise} holds at every noise strength, and the matched comparison is negative over the
-whole range.
+than an order of magnitude smaller than ours for pulses of comparable length: there the average fidelity
+of the noise-optimized controller stays between $0.995$ and $0.98$, while ours falls from $0.9925$ to
+$0.713$ (Table~\ref{tab:robust}). Dividing our loss by sixteen gives about $0.991$ at $1\MHz$, so the time
+step alone accounts for a difference of that size; angular units or noise injected before the filter would
+change it further. The $\snoise$ axes of the two studies should not be identified, and no number in this
+paper at a given $\snoise$ should be compared with a number at the same $\snoise$ in Ref.~\cite{Niu2019}.
+The conclusions above do not depend on the scale: Eq.~\eqref{eq:whitenoise} holds at every noise strength,
+and the matched comparison is negative over the whole range.
 
 The same applies to the training noise. Under the same assumptions, $\strain=1\MHz$ at $2\ns$ corresponds
 to about $4\MHz$ at $0.1\ns$, above the range evaluated in Ref.~\cite{Niu2019}. We did not train at the
@@ -1479,33 +1231,28 @@ The step matters in a second way. The part of the leakage bound that responds to
 $\Delta t^{-4}$: replayed on finer grids, its growth of $3.8\times10^{-3}$ per ns at $2\ns$ becomes about $15$,
 $250$ and $4200$ times larger at $1$, $0.5$ and $0.25\ns$. On a grid of a thousand steps a bound
 accumulated from the noisy Hamiltonian would exceed every other term of the objective by orders of
-magnitude, so Ref.~\cite{Niu2019} presumably evaluates it otherwise; it does not say how. The second
-observation of Sec.~\ref{sec:noisyleak} is therefore a property of our implementation, and we cannot tell
+magnitude, so Ref.~\cite{Niu2019} presumably evaluates it otherwise; it does not say how. The domination
+of the noisy objective by the bound (Sec.~\ref{sec:noisyleak}) is therefore a property of our implementation, and we cannot tell
 whether it applies to theirs. The direct-optimizer test of Sec.~\ref{sec:memory} and the matched
 comparison of TRPO agents (Table~\ref{tab:seeds}) were both repeated without it, and their outcome did not
 change.
 
 \subsection{Why the discrepancies arise}
 
-Some differences are simply what independent reimplementation means. The two studies differ in
-discretization, filtering pipeline, stopping rules, curriculum schedule, training budget and evaluation
-protocol, and the optimization problem is high-dimensional and non-convex; exact numerical coincidence is
-not the appropriate standard. The parameter studies of Appendix~\ref{app:modelsel} make the same point from
-the other side: performance depends measurably on the architecture and interpretably on the UFO weights,
-and a single run of any configuration carries a seed-to-seed spread of several $10^{-3}$ in $\Fbar$ at
-$1\MHz$.
+Some differences are what independent reimplementation means. The two studies differ in discretization,
+filtering pipeline, stopping rules, curriculum schedule, training budget and evaluation protocol, the
+optimization problem is high-dimensional and non-convex, and a single run of any configuration carries a
+seed-to-seed spread of several $10^{-3}$ in $\Fbar$ at $1\MHz$ (Appendix~\ref{app:modelsel}). Exact
+numerical coincidence is not the appropriate standard.
 
-The main discrepancy, however, is not an implementation detail. Two properties of the UFO formulation
-under white control noise --- the pulse-independence of Eq.~\eqref{eq:whitenoise}, and the fact that a
-policy observing the noisy propagator learns to respond to it rather than to produce a robust open-loop
-pulse --- follow from the formulation itself, and we would expect them in any faithful implementation. They
-are the reason we read the robustness results of Ref.~\cite{Niu2019} as not established, rather than as
-not reproduced for incidental reasons. The third, the domination of the noisy objective by the leakage
-bound, depends on where the bound is evaluated and on the time step (Sec.~\ref{sec:noisescales}); it
-shaped the training of our first noise-optimized agent and may not carry over. The conclusion on white-noise
-training does not rest on it: the direct optimizer reaches it with the bound taken from the noisy and
-from the noise-free controls alike (Sec.~\ref{sec:memory}), and so do three pairs of agents retrained
-with the bound taken from the noise-free controls (Sec.~\ref{sec:matched}).
+The main discrepancy is not an implementation detail. Two properties of the UFO formulation under white
+control noise follow from the formulation itself, and we would expect them in any faithful implementation:
+the pulse-independence of Eq.~\eqref{eq:whitenoise}, and the fact that a policy observing the noisy
+propagator learns to respond to it rather than to produce a robust open-loop pulse. They are the reason we
+read the robustness results of Ref.~\cite{Niu2019} as not established, rather than as not reproduced for
+incidental reasons. The domination of the noisy objective by the leakage bound, by contrast, depends on
+where the bound is evaluated and on the time step (Sec.~\ref{sec:noisescales}) and may not carry over; the
+conclusion on white-noise training does not rest on it (Secs.~\ref{sec:matched} and~\ref{sec:memory}).
 
 \subsection{Relation to hardware}
 \label{sec:hardware}
@@ -1522,15 +1269,13 @@ the white model of Ref.~\cite{Niu2019}, under which no training can help, the fu
 $\Gamma_\varphi=1/T_\varphi$ on each qubit, lower the average fidelity of any two-qubit gate of duration
 $T$ by $\tfrac{4}{5}T(\Gamma_1+\Gamma_\varphi)$, whatever the gate~\cite{Abad2022}: like white control
 noise, Markovian decoherence leaves a pulse nothing to exploit but its duration. For
-$T_1=T_\varphi=100\,\mu\mathrm{s}$, of the order of current processors ($T_1=68\,\mu\mathrm{s}$ in
-Ref.~\cite{GoogleQAI2025}), this is $1.1\times10^{-3}$ for the $70\ns$ Adam pulse and $1.9\times10^{-3}$
-for the $116\ns$ TRPO pulse: comparable to the nominal infidelities of Table~\ref{tab:single} and ordered,
-again, by duration. By the same formula the white noise of the model at $1\MHz$ costs as much as
-$T_1=T_\varphi\approx5\,\mu\mathrm{s}$, and the runtime weight of Eq.~\eqref{eq:ufo}, which prices a
-nanosecond at $\kappa/(\chi T_{\mathrm{norm}})=1.7\times10^{-4}$ of gate infidelity, corresponds to
-$T_1=T_\varphi\approx12\,\mu\mathrm{s}$. Both describe devices an order of magnitude less coherent than
-today's; a weight matched to current coherence would move the optimum of Eq.~\eqref{eq:ufo} towards
-longer and more accurate pulses.
+$T_1=T_\varphi=100\,\mu\mathrm{s}$, of the order of current processors~\cite{GoogleQAI2025}, this is
+$1.1\times10^{-3}$ for the $70\ns$ Adam pulse and $1.9\times10^{-3}$ for the $116\ns$ TRPO pulse,
+comparable to the nominal infidelities of Table~\ref{tab:single}. By the same formula the white noise of
+the model at $1\MHz$ costs as much as $T_1=T_\varphi\approx5\,\mu\mathrm{s}$, and the runtime weight of
+Eq.~\eqref{eq:ufo} corresponds to $T_1=T_\varphi\approx12\,\mu\mathrm{s}$. Both describe devices an order
+of magnitude less coherent than today's; a weight matched to current coherence would move the optimum of
+Eq.~\eqref{eq:ufo} towards longer and more accurate pulses.
 
 \emph{Bandwidth.} The $10\MHz$ filter is narrow by hardware standards. Sycamore processors, descendants of
 the gmon, drive single-qubit gates with $25\ns$ pulses and perform iSWAP-like gates by turning on a
@@ -1541,64 +1286,48 @@ of Ref.~\cite{Niu2019} more than by the coupler.
 
 \emph{Higher levels.} Those fast gates are not members of the benchmark family. The coupling shifts
 $\ket{11}$ through $\ket{02}$ and $\ket{20}$ by $4g^2/|\eta|$, so an exchange pulse carries a conditional
-phase $\phi=(4/|\eta|)\int g^2dt$; it is $\pi/6$ for the Sycamore gate~\cite{Arute2019}, and $\pi/5$ in
-our model for a square $20\MHz$ pulse of the same exchange angle. $\Ntgt{\alpha}{\pi/2}$ contains no such
-phase and local rotations cannot remove it, which leaves an otherwise perfect pulse with
-$1-F=\sin^2(\phi/4)$. This is what limits the pulses optimized without noise in Sec.~\ref{sec:memory}:
-their nominal infidelities, $6.1$, $2.8$ and $1.6\times10^{-4}$ at $70$, $100$ and $130\ns$, equal
+phase $\phi=(4/|\eta|)\int g^2dt$, which $\Ntgt{\alpha}{\pi/2}$ does not contain and local rotations
+cannot remove; an otherwise perfect pulse is left with $1-F=\sin^2(\phi/4)$. This is what limits the
+pulses optimized without noise in Sec.~\ref{sec:memory}, whose nominal infidelities equal
 $\sin^2(\phi/4)$ to within $1\%$. In this model the fidelity of an exchange pulse therefore improves only
-as $1/T^2$, a trade-off that native gate sets avoid by making $\phi$ part of the
-gate~\cite{Foxen2020} or by cancelling it through the level structure of the coupler~\cite{Sung2021}.
+as $1/T^2$, a trade-off that native gate sets avoid by making $\phi$ part of the gate~\cite{Foxen2020} or
+by cancelling it through the level structure of the coupler~\cite{Sung2021}.
 
 \emph{Absolute fidelity.} Two-qubit gates on tunable-coupler transmons reach a Pauli error of
 $3.8\times10^{-3}$ for a continuous fSim family on gmon qubits~\cite{Foxen2020}, and fidelities of
-$99.76\%$ and $99.87\%$ for CZ and iSWAP gates~\cite{Sung2021}, decoherence included. Closed-system
-fidelities of $0.982$--$0.997$ (Table~\ref{tab:single}) are not competitive pulse designs and are not
-offered as such. What transfers from this study is the comparison between methods and the two structural
-results of Sec.~\ref{sec:conclusion}, not the pulses.
+$99.76\%$ and $99.87\%$ for CZ and iSWAP gates~\cite{Sung2021}, decoherence included. The closed-system
+fidelities of Table~\ref{tab:single} are not competitive pulse designs and are not offered as such: what
+transfers from this study is the comparison between methods and the two structural results of
+Sec.~\ref{sec:conclusion}.
 
 \subsection{Limitations}
 
-The study is simulation-based. The model is physically motivated but truncated to three levels per mode
-under a rotating-wave description, and real devices add transfer-function nonlinearities, spurious modes,
-drift and measurement constraints that are not represented. The noise model used in the
-reproduction and in the RL training is Gaussian and white, applied to the control amplitudes and to
-$\eta$, and Eq.~\eqref{eq:whitenoise} is specific to it. Section~\ref{sec:memory} extends the analysis to
-quasi-static and exponentially correlated noise, using the stored pulses and the direct optimizer: there
-the pulse shape does matter, a gradient optimizer trained against quasi-static noise gains about a fifth
-in sensitivity, and agents trained under white noise do not. We did not train an RL policy under noise
-with memory, nor consider device-specific noise spectra or open-system decoherence. Whether a policy
-trained under noise with memory finds such pulses, or better ones, is therefore the most important open
-question this work leaves.
+The study is simulation-based. The model is truncated to three levels per mode under a rotating-wave
+description, and it has no transfer-function nonlinearities, spurious modes, drift or open-system
+decoherence. The noise used in the reproduction and in the RL training is Gaussian and white, and
+Eq.~\eqref{eq:whitenoise} is specific to it. We did not train an RL policy under noise with memory.
+Whether such a policy finds the pulse shapes that the gradient optimizer finds under quasi-static noise
+(Sec.~\ref{sec:memory}), or better ones, is the most important open question this work leaves.
 
-The agents of Table~\ref{tab:single}, of Fig.~\ref{fig:robust} and of the closed-loop test were each
-trained with a single seed, and the first noise-optimized agent with the leakage bound accumulated from
-the noisy trajectory. The matched comparison was repeated with three seeds and with the bound taken from
-the noise-free controls (Table~\ref{tab:seeds}); the closed-loop test, the selected controllers and the
-runtime sweep were not. Three seeds settle less than they may seem to. The noise-trained plans are less
-robust in each of them, but by a margin that is within the spread between seeds and that their durations
-account for, so the data establish that stochastic training brings no gain, not that it does harm.
-Conclusions that rest on larger effects are established: the absence of an order-of-magnitude robustness
-gain, the direct optimizer's lead of about $0.012$ in $\Fbar$ at $1\MHz$ (and its explanation by duration
-and nominal fidelity), and the runtime results. All agents were trained at a time step of $2\ns$, and
-their training episodes almost never stopped early (Sec.~\ref{sec:noisyleak}); an implementation in which
-the stopping time is learned under noise could behave differently, although Eq.~\eqref{eq:whitenoise}
-would still bound what its pulses can gain.
-
-The time step of $2\ns$, about twenty times coarser than that of Ref.~\cite{Niu2019}, was set by the
-computational budget: each TRPO agent already takes $9.5\times10^7$ simulator steps, and the same number
-of episodes at $0.1\ns$ would take twenty times more. Its consequences for the noise scale and for the
-leakage bound are discussed in Sec.~\ref{sec:noisescales}; we did not train at a finer step.
+The agents of Table~\ref{tab:single}, of Fig.~\ref{fig:robust}, of the closed-loop test and of the runtime
+sweep were each trained with a single seed, in stages with changing stopping costs
+(Table~\ref{tab:config}); only the matched comparison was repeated with three seeds
+(Table~\ref{tab:seeds}). Conclusions that rest on large effects are established: the absence of an
+order-of-magnitude robustness gain, the direct optimizer's lead of about $0.012$ in $\Fbar$ at $1\MHz$,
+and the runtime results. Differences of a few $10^{-3}$ between two agents are not. All agents were
+trained at a time step of $2\ns$, about twenty times coarser than that of Ref.~\cite{Niu2019}, because
+each TRPO agent already takes $9.5\times10^7$ simulator steps; the consequences for the noise scale and
+for the leakage bound are discussed in Sec.~\ref{sec:noisescales}. Their training episodes almost never
+stopped early (Sec.~\ref{sec:noisyleak}), and an implementation in which the stopping time is learned
+under noise could behave differently, although Eq.~\eqref{eq:whitenoise} would still bound what its pulses
+can gain.
 
 The direct optimizer is deliberately minimal --- one initialization and $400$ iterations per horizon on a
-$10\ns$ grid starting at $40\ns$ --- and is not a survey of gradient methods such as automatic-differentiation
-GRAPE or Krotov. The comparison is between one RL framework and one gradient optimizer on one hardware
-model, not a ranking of control methodologies, and it does not include model-based
-RL~\cite{Khalid2023}. Finally, both production TRPO agents and the curriculum's first target were trained
-in stages with changing stopping costs, as documented in Table~\ref{tab:config}. Nor do we survey earlier
-comparisons between reinforcement learning and gradient methods in quantum control. That gradients do
-well when the model is known is not new; what this paper adds is the mechanism of
-Eq.~\eqref{eq:whitenoise} and the structure of the benchmark family.
+$10\ns$ grid starting at $40\ns$ --- and is not a survey of gradient methods such as
+automatic-differentiation GRAPE or Krotov. The comparison is between one RL framework and one gradient
+optimizer on one hardware model, not a ranking of control methodologies, and it does not include
+model-based RL~\cite{Khalid2023}. That gradients do well when the model is known is not new; what this
+paper adds is the mechanism of Eq.~\eqref{eq:whitenoise} and the structure of the benchmark family.
 
 \subsection{Relation to subsequent work}
 
@@ -1620,19 +1349,12 @@ modelled one~\cite{Vetter2024,Glaser2025,Wang2024}.
 \label{sec:conclusion}
 
 We have independently reimplemented the UFO framework for robust analog two-qubit gate design on a
-multilevel gmon model --- second-order TSWT leakage bound, exact bandwidth filter and TRPO training in a
-stochastic control environment --- and compared it with a direct gradient optimizer that uses the same
-Hamiltonian, the same objective and the same training noise.
-
-The framework works: it produces high-fidelity analog gates, faster than a compiled implementation, and its
-published hyperparameters are close to optimal in our hands. Three of its headline claims, however, are
-not supported in our implementation. A single-start direct optimizer beats our policy-gradient controller on every
-nominal metric and, against control noise, at every noise strength. Training the policy under noise does
-not make its deployed pulses more robust than those of an identical agent trained without noise, in any
-of four matched pairs of agents; what it
-changes is the agent's closed-loop behaviour, which open-loop pulses do not inherit. And the
-order-of-magnitude runtime gain sits around a target that is the identity, measured against a generic
-reference; against a target-specific two-CNOT synthesis the learned pulses are at most twice as fast.
+multilevel gmon model and compared it with a direct gradient optimizer that uses the same Hamiltonian, the
+same objective and the same training noise. The framework works: it produces high-fidelity analog gates,
+faster than a compiled implementation, and its published hyperparameters are close to optimal in our
+hands. Three of its headline claims are not supported in our implementation. The learned controller does
+not outperform a direct optimizer, training under noise does not make the deployed pulses more robust, and
+the order-of-magnitude runtime gain sits around a target that is the identity.
 
 Two results explain these findings and should transfer beyond this study. Against temporally uncorrelated
 control noise, the open-loop robustness of any pulse is fixed to leading order by its nominal fidelity and
@@ -1661,7 +1383,7 @@ logs, checkpoints and control plans), the raw and smoothed robustness curves of 
 matched-history and closed-loop evaluations of Fig.~\ref{fig:mechanism}, the six runs and the evaluation
 behind Table~\ref{tab:seeds}, and the gate-structure,
 mirror-symmetry and first-order analyses of Secs.~\ref{sec:structure}, \ref{sec:runtime} and
-\ref{sec:noisyleak}. Every figure and table can be regenerated from them with the analysis scripts in the
+\ref{sec:whitelimit}. Every figure and table can be regenerated from them with the analysis scripts in the
 code repository, whose outputs are deterministic; a table in the data repository maps each figure to its
 data file, script and source run.
 
@@ -1739,14 +1461,11 @@ saved every iteration, so that comparisons can be made at the level of the reali
 only at the level of network weights.
 
 \paragraph*{Adam baseline.}
-For each candidate horizon: discretize the trajectory into $N_T=T/\Delta t$ steps; initialize all raw
-parameters to zero, which after the $\tanh$ map gives zero amplitudes and phases $\pi$; for $400$ steps,
-filter the controls, simulate one trajectory perturbed at $\strain$, evaluate the UFO cost including the
-leakage bound on that noisy trajectory, back-propagate, clip the gradient norm at $10$ and take an Adam
-step; keep the iterate with the lowest sampled cost. The optimizer's own choice of horizon is the one with
-the lowest sampled cost. Each horizon's stored plan is also re-evaluated deterministically for cost,
-fidelity, leakage, boundary penalty and runtime, and Table~\ref{tab:single} reports both selections, the
-$60\ns$ plan chosen by the sampled cost and the $70\ns$ plan chosen by the deterministic one.
+For each candidate horizon the raw parameters are initialized to zero, which after the $\tanh$ map gives
+zero amplitudes and phases $\pi$. Each of the $400$ steps filters the controls, simulates one trajectory
+perturbed at $\strain$, evaluates the UFO cost including the leakage bound on that noisy trajectory,
+back-propagates, clips the gradient norm at $10$ and takes an Adam step. Section~\ref{sec:controllers}
+describes how the stored plan and the horizon are selected.
 
 % =========================================================================
 \section{First-order response to control noise}
@@ -1774,7 +1493,7 @@ v_c(k,l)&=\frac{\mathrm{Re}\,\mathrm{Tr}\bigl(P\tilde G_{c,k}\tilde G_{c,l}P\big
 For stationary noise the double sum is the overlap of the noise spectrum with the filter function
 $\Phi_c(f)=\sum_{k,l}v_c(k,l)\cos[2\pi f(t_k-t_l)]$ of the
 pulse~\cite{Green2012,Green2013,Cerfontaine2021}. White noise, $C(k,l)=\snoise^2\delta_{kl}$, keeps only
-the diagonal $v_c(k,k)$, which is the variance $V$ of Sec.~\ref{sec:noisyleak} evaluated on
+the diagonal $v_c(k,k)$, which is the variance $V$ of Sec.~\ref{sec:whitelimit} evaluated on
 $\tilde G_{c,k}$ and does not depend on $W_k$ as long as the nominal evolution keeps the computational
 subspace invariant: this is Eq.~\eqref{eq:whitenoise}, and in the frequency domain it is the statement
 that the average of $\Phi_c$ over the Nyquist band is the same for every pulse of a given duration.
@@ -1805,13 +1524,126 @@ All channels                      & $29.79$--$29.80$ & $28.8$--$29.3$\\
 \end{table}
 
 % =========================================================================
+\section{Complete configuration}
+\label{app:config}
+
+Table~\ref{tab:config} collects every setting used. We report per-experiment values rather than a single
+idealized configuration, because the runs differ in budget and stopping cost, and the two single-target
+agents were trained in two stages.
+
+\begin{table*}[t]
+\caption{Complete configuration, as actually run. The four right-hand columns are the two single-target
+TRPO agents (Secs.~\ref{sec:single}--\ref{sec:robust}), the architecture and UFO-weight sweeps
+(Appendix~\ref{app:modelsel}) and the curriculum runtime sweep (Sec.~\ref{sec:runtime}); an entry spanning
+several columns applies to all of them. Every TRPO run except the nominal agent was trained with noise.}
+\label{tab:config}
+\footnotesize
+\begin{ruledtabular}
+\begin{tabular}{llcccc}
+Quantity & Symbol & Single target & Arch.\ sweep & Weight sweep & Curriculum \\
+\colrule
+\multicolumn{6}{l}{\textit{Physical model}}\\
+Levels per mode & --- & \multicolumn{4}{c}{$3$}\\
+Anharmonicity & $\eta$ & \multicolumn{4}{c}{$-200\MHz$}\\
+Control bound & $u_{\max}$ & \multicolumn{4}{c}{$20\MHz$}\\
+Filter bandwidth & $B$ & \multicolumn{4}{c}{$10\MHz$}\\
+Timestep & $\Delta t$ & \multicolumn{4}{c}{$2\ns$}\\
+Max gate duration & $T_{\max}$ & \multicolumn{4}{c}{$180\ns$}\\
+Runtime norm. & $T_{\mathrm{norm}}$ & \multicolumn{4}{c}{$60\ns$}\\
+Target & --- & \multicolumn{3}{c}{$\Ntgt{2.2}{\pi/2}$} & $\alpha=0,0.157,\dots,3.14$\\
+\colrule
+\multicolumn{6}{l}{\textit{UFO weights}}\\
+Fidelity, leakage & $\chi$, $\beta$ & $10$, $10$ & $10$, $10$ & $\{5,10,20\}$, $10$ & $10$, $10$\\
+Boundary & $\mu$ & $0.2$ & $0.2$ & $\{0.1,0.2,0.4\}$ & $0.2$\\
+Runtime & $\kappa$ & $0.1$ & $0.1$ & $\{0.05,0.1,0.2,0.4\}$ & $0.1$\\
+\colrule
+\multicolumn{6}{l}{\textit{TRPO}}\\
+Hidden sizes & --- & $(64,32,32)$ & five layouts & $(64,32,32)$ & $(64,32,32)$\\
+Trust region & $\delta_{\mathrm{KL}}$ & \multicolumn{4}{c}{$0.01$}\\
+Discount, GAE parameter & $\gamma_{\mathrm{RL}}$, $\lambda$ & \multicolumn{4}{c}{$0.99$, $0.97$}\\
+CG iterations, damping & --- & \multicolumn{4}{c}{$10$, $0.1$}\\
+Value lr, epochs & --- & \multicolumn{4}{c}{$10^{-3}$, $50$}\\
+Initial exploration & $\log\sigma_0$ & $-0.5$ & $-1.0$ & $-1.0$ & $-0.5$\\
+Episodes per batch & --- & $10\,000$\footnotemark[1] & $5000$ & $10\,000$ & $4000$\\
+Policy iterations & --- & $100+15$ / $100+5$\footnotemark[1] & $20$ & $5$ & ${\le}150$ per target\\
+Stopping cost & $C_{\mathrm{term}}$ & $0.40$, then $0.30$\footnotemark[1] & $0.40$ & $0.15$ & $0.40$\footnotemark[2]\\
+Training noise & $\strain$ & $0$ / $1\MHz$\footnotemark[3] & $1\MHz$ & $1\MHz$ & $1\MHz$\\
+Seeds & --- & $1$ & $1,2,3$ & $1,2$ & $2$\\
+\colrule
+\multicolumn{6}{l}{\textit{Adam baseline (single target and family sweep)}}\\
+Iterations per horizon, lr & --- & \multicolumn{4}{c}{$400$, $0.03$; one deterministic initialization; seed $2$}\\
+Horizon grid & --- & \multicolumn{4}{c}{$40$--$180\ns$, step $10\ns$}\\
+Training noise & $\strain$ & \multicolumn{4}{c}{$1\MHz$, one noisy trajectory per step}\\
+Family targets & --- & \multicolumn{4}{c}{$\alpha=0,0.1,\dots,3.1$ and $\pi$}\\
+\colrule
+\multicolumn{6}{l}{\textit{Robustness evaluation}}\\
+Dense grid & $\snoise$ & \multicolumn{4}{c}{$0.1$--$3.5\MHz$, step $0.001\MHz$, $60$ samples; EWMA spans $50$ / $80$}\\
+Matched trajectories & $\snoise$ & \multicolumn{4}{c}{$11$ values in $0.1$--$3.5\MHz$, $200$ samples each}\\
+Closed-loop test & $\snoise$ & \multicolumn{4}{c}{$1\MHz$, $100$ samples}\\
+\end{tabular}
+\end{ruledtabular}
+\footnotetext[1]{Both agents: iterations $1$--$100$ with $10\,000$ episodes per batch and
+$C_{\mathrm{term}}=0.40$, from the same seed. They then continued with $C_{\mathrm{term}}=0.30$: the
+nominal agent for $15$ iterations with $5000$ episodes per batch, the noise-optimized one for $5$
+iterations with $10\,000$. The three further pairs of Sec.~\ref{sec:matched} (seeds $1$, $2$, $3$) have
+the settings of iterations $1$--$100$, with the leakage bound of the noise-trained agents accumulated
+from the noise-free controls.}
+\footnotetext[2]{Also the advancement threshold. The cold-start target $\alpha=0$ used a hand-tuned
+sequence of stopping costs.}
+\footnotetext[3]{Nominal / noise-optimized agent.}
+\end{table*}
+
+% =========================================================================
+\section{Curriculum sweep, target by target}
+\label{app:curriculum}
+
+Table~\ref{tab:runtime} lists the curriculum sweep of Sec.~\ref{sec:runtime}.
+
+\begin{table}[t]
+\caption{Curriculum runtime sweep over $\Ntgt{\alpha}{\pi/2}$. $\varepsilon=\alpha-\pi/2$ is the
+exchange angle of Eq.~\eqref{eq:exchange} and $T$ the final evaluation runtime; the last two columns give
+the speedup over the generic reference, $215\ns$, and over the target-specific synthesis time of
+Eq.~\eqref{eq:tsyntgt}, $150\ns$ for every row shown. Rows marked $\dagger$ did not converge (final cost
+above $0.40$): their rollouts run to the $180\ns$ ceiling and no speedup is quoted. The row marked
+$\ddagger$ is the identity target.}
+\label{tab:runtime}
+\footnotesize
+\begin{ruledtabular}
+\begin{tabular}{rrrccrr}
+$\alpha$ & $\varepsilon$ & $T$ (ns) & $F^{\mathrm{nom}}$ & $\Fbar_{\sigma=1}$ & $215/T$ & $\Tsyn^{\mathrm{tgt}}/T$\\
+\colrule
+$0.000^\dagger$ & $-1.571$ & 180 & 0.5577 & 0.6133 & --- & ---\\
+$0.157$ & $-1.414$ & 142 & 0.9880 & 0.9510 & 1.51 & 1.06\\
+$0.314$ & $-1.257$ & 140 & 0.9905 & 0.9533 & 1.54 & 1.07\\
+$0.471^\dagger$ & $-1.100$ & 180 & 0.9538 & 0.9179 & --- & ---\\
+$0.628^\dagger$ & $-0.943$ & 180 & 0.9480 & 0.9149 & --- & ---\\
+$0.785^\dagger$ & $-0.786$ & 180 & 0.9492 & 0.9055 & --- & ---\\
+$0.942$ & $-0.629$ & 148 & 0.9905 & 0.9504 & 1.45 & 1.01\\
+$1.099$ & $-0.472$ & 76 & 0.9850 & 0.9674 & 2.83 & 1.97\\
+$1.256$ & $-0.315$ & 140 & 0.9894 & 0.9535 & 1.54 & 1.07\\
+$1.413$ & $-0.158$ & 132 & 0.9880 & 0.9542 & 1.63 & 1.14\\
+$1.570^\ddagger$ & $-0.001$ & 2 & 0.99999 & 0.9994 & --- & ---\\
+$1.727$ & $0.156$ & 124 & 0.9861 & 0.9575 & 1.73 & 1.21\\
+$1.884$ & $0.313$ & 108 & 0.9821 & 0.9582 & 1.99 & 1.39\\
+$2.041$ & $0.470$ & 106 & 0.9825 & 0.9595 & 2.03 & 1.42\\
+$2.198$ & $0.627$ & 110 & 0.9837 & 0.9545 & 1.95 & 1.36\\
+$2.355$ & $0.784$ & 118 & 0.9863 & 0.9573 & 1.82 & 1.27\\
+$2.512$ & $0.941$ & 136 & 0.9919 & 0.9567 & 1.58 & 1.10\\
+$2.669$ & $1.098$ & 144 & 0.9918 & 0.9547 & 1.49 & 1.04\\
+$2.826^\dagger$ & $1.255$ & 180 & 0.9340 & 0.8944 & --- & ---\\
+$2.983^\dagger$ & $1.412$ & 180 & 0.9213 & 0.8872 & --- & ---\\
+$3.140^\dagger$ & $1.569$ & 180 & 0.9400 & 0.9020 & --- & ---\\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+% =========================================================================
 \section{Fixing the free parameters}
 \label{app:modelsel}
 
-Two ingredients of the framework are not determined by the physics: the capacity of the actor--critic
-networks and the relative weights in Eq.~\eqref{eq:ufo}. Both could silently drive the comparisons
-that follow, so we fix them first, on the representative target $\Ntgt{2.2}{\pi/2}$, under a reduced
-budget and before any production run. Every sweep run is noise-optimized at $\strain=1\MHz$.
+The two sweeps summarized in Sec.~\ref{sec:modelsel} were run on the representative target
+$\Ntgt{2.2}{\pi/2}$, under a reduced budget and before any production run. Every sweep run is
+noise-optimized at $\strain=1\MHz$.
 
 \subsection{Actor--critic architecture}
 \label{sec:arch}
@@ -1856,13 +1688,10 @@ deepest model tested achieves the \emph{lowest} mean leakage of the sweep and si
 principle.
 
 The best aggregate performer is $(64,64,64)$, but its margin over the paper layout $(64,32,32)$ is
-$0.2\%$ in evaluation cost, and $(64,32,32)$ is in fact better in mean nominal fidelity and mean
-leakage. That margin is well inside the seed-to-seed spread: the three seeds of $(64,32,32)$ alone
-reach $\Fbar_{\sigma=1}=0.959$, $0.962$ and $0.965$. Given a margin that small, and a sweep run under a
-deliberately reduced budget --- which makes this a comparison of practical trainability rather than of
-asymptotic capacity --- we retain the paper architecture $(64,32,32)$ for all production runs. This
-maximizes comparability with Ref.~\cite{Niu2019} at negligible empirical cost. The same spread sets the
-resolution of every single-seed comparison later in the paper: differences of a few $10^{-3}$ in
+$0.2\%$ in evaluation cost, well inside the seed-to-seed spread: the three seeds of $(64,32,32)$ alone
+reach $\Fbar_{\sigma=1}=0.959$, $0.962$ and $0.965$. We therefore retain the paper architecture
+$(64,32,32)$ for all production runs, which maximizes comparability with Ref.~\cite{Niu2019}. The same
+spread sets the resolution of every single-seed comparison in the paper: differences of a few $10^{-3}$ in
 $\Fbar$ at $1\MHz$ between two individual runs are not significant on their own.
 
 \subsection{Sensitivity to the UFO weights}
@@ -1906,9 +1735,8 @@ is the observable rather than a fixed boundary condition.
 
 The Pareto-favourable region is occupied jointly by $(\chi,\mu)\approx(10,0.2)$ and
 $(\chi,\mu)\approx(20,0.4)$, with the latter marginally ahead. Given two seeds and a small budget, that
-margin does not justify departing from the reference scalarization, so we retain the weights of Eq.~\eqref{eq:weights} throughout. The useful conclusion is not the choice itself but its two components: the weights matter,
-in a physically interpretable way, and the original values sit close to the best region in an
-independent implementation.
+margin does not justify departing from the reference scalarization, so we retain the weights of
+Eq.~\eqref{eq:weights} throughout.
 
 % =========================================================================
 \bibliographystyle{apsrev4-2}
