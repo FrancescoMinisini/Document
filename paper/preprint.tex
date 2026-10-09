@@ -39,8 +39,14 @@
 an independent reproduction and family-resolved assessment}
 
 \author{Francesco Giuseppe Minisini}
-\email{fg.minisini@gmail.com}
-\affiliation{Physics Department, EPFL, Switzerland}
+% \email{fg.minisini@gmail.com}
+\affiliation{EPFL, Switzerland}
+\author{Davide Emilio Galli}
+% \email{davide.galli@unimi.it}
+\affiliation{Università Degli Studi di Milano, Italy}
+\author{Morten Hjort Jensen}
+% \email{Morten-Hjort-Jensen@uio.no}
+\affiliation{University Of Oslo, Norway}
 
 \date{\today}
 
@@ -51,7 +57,7 @@ jointly. We report an independent reimplementation of the Universal cost Functio
 (UFO) framework of Niu \emph{et al.} [npj Quantum Inf.\ \textbf{5}, 33 (2019)] for the two-qubit gate family
 $N(\alpha,\alpha,\gamma)=\exp[i(\alpha\sigma^x\sigma^x+\alpha\sigma^y\sigma^y+\gamma\sigma^z\sigma^z)]$ on a
 three-level gmon model, and compare its trust-region policy optimization agent with a direct gradient
-optimizer that uses the same Hamiltonian, the same objective and the same training noise. The framework
+optimizer that uses the same Hamiltonian and the same objective, the same training noise, but with different simulation parameters. The framework
 produces high-fidelity analog gates, but three of its central claims are not supported. Against per-step
 white control noise, the open-loop robustness of a pulse is fixed to leading order by its nominal fidelity
 and its duration, so training under such noise cannot make a pulse more robust. Matched pairs of agents
@@ -59,8 +65,8 @@ and the direct optimizer confirm this, and the optimizer gains robustness only w
 quasi-static noise. In our implementation the direct optimizer also beats the learned controllers on every
 nominal metric. Finally, every member of the benchmark subfamily $N(\alpha,\alpha,\pi/2)$ is an exchange
 rotation by $\alpha-\pi/2$, so the reported order-of-magnitude runtime gain sits around the identity;
-against a target-specific two-CNOT synthesis the learned pulses are at most twice as fast. All code and
-data are public.
+against a target-specific two-CNOT synthesis the learned pulses are at most twice as fast. 
+% All code and data are public.
 \end{abstract}
 
 \maketitle
@@ -106,12 +112,12 @@ language for robust pulse design~\cite{Bukov2018,Sivak2022,Khalid2023}. They hav
 knowledge, been subjected to an independent reimplementation. That is the purpose of this work.
 
 \paragraph*{What this paper does.}
-We rebuild the framework from scratch --- multilevel gmon simulator, second-order TSWT leakage
-estimator, exact bandwidth filter, UFO objective, TRPO agent and stochastic environment --- and use it
+We rebuild the framework from scratch (multilevel gmon simulator, second-order TSWT leakage
+estimator, exact bandwidth filter, UFO objective, TRPO agent and stochastic environment) and use it
 to ask four questions. (i) Does the framework reproduce under an independent implementation, and with
 what quantitative fidelity? (ii) How does the policy-gradient controller compare with a direct pulse
 optimizer that computes exact gradients through the same simulator, with the same objective and the
-same training noise --- the question Ref.~\cite{Niu2019} left open? (iii) Does stochastic training make
+same training noise? (Question left open by Ref.~\cite{Niu2019}) (iii) Does stochastic training make
 the deployed pulses more robust, and if not, why not? (iv) What does the runtime comparison with gate
 synthesis actually measure, given the structure of the benchmark family? Along the way we test how
 much the conclusions depend on the free parameters the original paper does not pin down, the
@@ -354,15 +360,15 @@ perturbation model at $\strain=1\MHz$ (Sec.~\ref{sec:controllers}). All controll
 For a fixed target and a fixed horizon $T$, the full discretized trajectory
 $\{g_\ell,\delta_{j,\ell},f_{j,\ell},\phi_{j,\ell}\}_{\ell=0}^{N_T-1}$ is optimized directly with
 Adam~\cite{Kingma2015} on the same multilevel model, the same filter and the same objective
-Eq.~\eqref{eq:ufo}, differentiating exactly through the simulation --- a GRAPE-style direct pulse
+Eq.~\eqref{eq:ufo}, differentiating exactly through the simulation: a GRAPE-style direct pulse
 search~\cite{Khaneja2005,Koch2022} rather than a literal reproduction of the canonical algorithm. It is
 trained under the same noise model as the noise-optimized agent: at every Adam step the loss is the
 cost of one trajectory perturbed at $\strain=1\MHz$, a single-sample stochastic gradient of
 $\mathbb{E}_\xi[C]$. Since the horizon is not a free variable of a single run, the procedure is
 repeated over $T\in\{40,50,\dots,180\}\ns$, with $400$ Adam iterations per horizon, learning rate
-$0.03$ and a single deterministic initialization (all amplitudes zero, phases $\pi$) --- $3.3\times10^5$
-simulator steps in all, against $9.5\times10^7$ for each TRPO agent, a factor of about $290$. Within a horizon
-the stored plan is the iterate with the lowest sampled loss, and the optimizer's own choice of horizon
+$0.03$ and a single deterministic initialization (all amplitudes zero, phases $\pi$): $3.3\times10^5$
+simulator steps in all, against $9.5\times10^7$ for each TRPO agent, a ratio of about $290$. Within a horizon
+the stored plan is to iterate with the lowest sampled loss, and the optimizer's own choice of horizon
 is the one with the lowest such loss. Because single-sample losses are noisy, we also re-evaluate every
 horizon's plan in the deterministic simulator and report both selections. One horizon takes about
 $100\,$s on one CPU core.
@@ -371,8 +377,8 @@ By the standards of Ref.~\cite{Niu2019} this baseline is modest. The SGD baselin
 and a noisy objective, but averaged ten noisy trajectories per gradient step and received about $2000$
 random restarts per target. What differs here is that the gradients are exact and are computed through
 the same filtered multilevel simulator in which TRPO is trained. The comparison therefore addresses
-the question Ref.~\cite{Niu2019} left open --- whether the advantage of reinforcement learning persists
-when gradient estimation is cheap enough for gradient-based optimization to apply --- rather than
+the question Ref.~\cite{Niu2019} left open: whether the advantage of reinforcement learning persists
+when gradient estimation is cheap enough for gradient-based optimization to apply, rather than
 whether a weak baseline can be beaten. The baseline is a family of fixed-horizon problems, whereas TRPO
 learns a variable-time policy; this structural difference is part of what the comparison tests.
 
@@ -1372,29 +1378,27 @@ pulse or of a feedback policy. Benchmarks that separate those two cases, and tha
 units of their noise model, would make results in this area comparable.
 
 % =========================================================================
-\section*{Data availability}
+% \section*{Data availability}
 
-All code and data are public. The simulation and analysis code is released under the MIT licence at
-\url{https://github.com/FrancescoMinisini/RL-for-Universal-Analog-Quantum-Control}, and the data, the
-figure sources and this manuscript under CC BY 4.0 at
-\url{https://github.com/FrancescoMinisini/Document}. The released data include every training run behind
-this paper (arguments, per-iteration
-logs, checkpoints and control plans), the raw and smoothed robustness curves of Fig.~\ref{fig:robust}, the
-matched-history and closed-loop evaluations of Fig.~\ref{fig:mechanism}, the six runs and the evaluation
-behind Table~\ref{tab:seeds}, and the gate-structure,
-mirror-symmetry and first-order analyses of Secs.~\ref{sec:structure}, \ref{sec:runtime} and
-\ref{sec:whitelimit}. Every figure and table can be regenerated from them with the analysis scripts in the
-code repository, whose outputs are deterministic; a table in the data repository maps each figure to its
-data file, script and source run.
+% All code and data are public. The simulation and analysis code is released under the MIT licence at
+% \url{https://github.com/FrancescoMinisini/RL-for-Universal-Analog-Quantum-Control}, and the data, the
+% figure sources and this manuscript under CC BY 4.0 at
+% \url{https://github.com/FrancescoMinisini/Document}. The released data include every training run behind
+% this paper (arguments, per-iteration
+% logs, checkpoints and control plans), the raw and smoothed robustness curves of Fig.~\ref{fig:robust}, the
+% matched-history and closed-loop evaluations of Fig.~\ref{fig:mechanism}, the six runs and the evaluation
+% behind Table~\ref{tab:seeds}, and the gate-structure,
+% mirror-symmetry and first-order analyses of Secs.~\ref{sec:structure}, \ref{sec:runtime} and
+% \ref{sec:whitelimit}. Every figure and table can be regenerated from them with the analysis scripts in the
+% code repository, whose outputs are deterministic; a table in the data repository maps each figure to its
+% data file, script and source run.
 
 % =========================================================================
 \begin{acknowledgments}
 I thank Prof.\ Morten Hjorth-Jensen and Prof.\ Davide Emilio Galli for their supervision and for many
 discussions that shaped this work. This study was carried out as part of a Bachelor's thesis at the
 Department of Physics, Universit\`a degli Studi di Milano. AI-based tools were used as auxiliary
-instruments for code drafting and debugging, literature search, and stylistic revision; all
-derivations, modeling assumptions, numerical methodology, experimental design and results were
-independently verified by the author.
+instruments for code drafting and debugging, literature search, and stylistic revision.
 \end{acknowledgments}
 
 % =========================================================================
