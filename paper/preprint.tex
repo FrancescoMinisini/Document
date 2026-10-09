@@ -713,8 +713,8 @@ agent \emph{is} the more robust one: it beats the noise-free agent in $81\%$ of 
 $5.4\times10^{-3}$ in $\Fbar$ on average ($95\%$ interval $[3.4,7.4]\times10^{-3}$). The reason is that the
 noise-free agent, fed states it never saw in training, reacts badly: its closed-loop fidelity falls below its
 own open-loop value in $99\%$ of iterations, by $8.8\times10^{-3}$ on average, with three times the
-variance. Stochastic training removes this instability --- the noise-trained agent's closed-loop and
-open-loop fidelities agree within $10^{-3}$ --- but it neither produces feedback that beats open loop nor
+variance. Stochastic training removes this instability (the noise-trained agent's closed-loop and
+open-loop fidelities agree within $10^{-3}$) but it neither produces feedback that beats open loop nor
 changes the open-loop pulse. A robustness test carried out in the training environment would credit the
 noise-trained agent with an advantage that its deployable pulses do not have.
 
@@ -817,8 +817,8 @@ gates~\cite{KhodjastehViola2009}, and it is paid for in nominal fidelity, so it 
 the noise is strong enough: at $0.1\MHz$ a single quasi-static-trained pulse beats the noise-free one, at
 the training strength of $0.3\MHz$ $19$ of $24$ do, against $2$ of $24$ white-trained ones.
 
-Robustness that depends on the pulse shape therefore requires noise with memory --- quasi-static offsets,
-drift or low-frequency spectra --- which is what robust-control techniques are designed
+Robustness that depends on the pulse shape therefore requires noise with memory (like quasi-static offsets,
+drift or low-frequency spectra) which is what robust-control techniques are designed
 for~\cite{Koch2022} and what the UFO noise model does not contain.
 
 % =========================================================================
@@ -1137,8 +1137,8 @@ training episodes almost never stopped early (Appendix~\ref{app:leak}), and an i
 under noise could behave differently, although Eq.~\eqref{eq:whitenoise} would still bound what its pulses
 can gain.
 
-The direct optimizer is deliberately minimal --- one initialization and $400$ iterations per horizon on a
-$10\ns$ grid starting at $40\ns$ --- and is not a survey of gradient methods such as
+The direct optimizer is deliberately minimal (one initialization and $400$ iterations per horizon on a
+$10\ns$ grid starting at $40\ns$) and is not a survey of gradient methods such as
 automatic-differentiation GRAPE or Krotov. The comparison is between one RL framework and one gradient
 optimizer on one hardware model, not a ranking of control methodologies, and it does not include
 model-based RL~\cite{Khalid2023}. That gradients do well when the model is known is not new; what this
@@ -1155,7 +1155,7 @@ model-free RL expensive~\cite{Khalid2023}. Our results sharpen the case for both
 and the noise is white, a direct optimizer wins both the nominal and the robustness problem, simply by
 producing short and accurate pulses. What a noise-trained policy does learn is feedback, which is useful
 only where the state can be observed during the operation. Learning therefore earns its cost where the
-model is uncertain or the noise has structure that a pulse can exploit --- the regime of closed-loop
+model is uncertain or the noise has structure that a pulse can exploit: the regime of closed-loop
 refinement against the device, where the perturbation distribution is the device's own rather than a
 modelled one~\cite{Vetter2024,Glaser2025,Wang2024}.
 
@@ -1180,7 +1180,7 @@ $\alpha-\pi/2$, which makes its runtime landscape a function of the exchange ang
 synthesis reference at two CNOTs.
 
 The useful question for noise-aware learning in quantum control is therefore not how large its advantage is
-under white noise --- there, to leading order, there is none to be had --- but whether it finds pulse shapes
+under white noise (to leading order, there is none) but whether it finds pulse shapes
 that exploit noise with memory, as a gradient optimizer trained against quasi-static noise already does
 to a modest degree, and whether the robustness it reports is that of a deployable open-loop
 pulse or of a feedback policy. Benchmarks that separate those two cases, and that state the time step and
