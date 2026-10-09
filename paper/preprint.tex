@@ -43,10 +43,10 @@ an independent reproduction and family-resolved assessment}
 \affiliation{EPFL, Switzerland}
 \author{Davide Emilio Galli}
 % \email{davide.galli@unimi.it}
-\affiliation{Università Degli Studi di Milano, Italy}
-\author{Morten Hjort-Jensen}
-% \email{Morten-Hjort-Jensen@uio.no}
-\affiliation{University Of Oslo, Norway}
+\affiliation{Università degli Studi di Milano, Italy}
+\author{Morten Hjorth-Jensen}
+% \email{Morten-Hjorth-Jensen@uio.no}
+\affiliation{University of Oslo, Norway}
 
 \date{\today}
 
@@ -57,8 +57,9 @@ jointly. We report an independent reimplementation of the Universal cost Functio
 (UFO) framework of Niu \emph{et al.} [npj Quantum Inf.\ \textbf{5}, 33 (2019)] for the two-qubit gate family
 $N(\alpha,\alpha,\gamma)=\exp[i(\alpha\sigma^x\sigma^x+\alpha\sigma^y\sigma^y+\gamma\sigma^z\sigma^z)]$ on a
 three-level gmon model, and compare its trust-region policy optimization agent with a direct gradient
-optimizer that uses the same Hamiltonian and the same objective, the same training noise, but with different simulation parameters. The framework
-produces high-fidelity analog gates, but three of its central claims are not supported. Against per-step
+optimizer that uses the same Hamiltonian, the same objective and the same training noise. Our time step is
+coarser than that of the original, which changes the noise scale but not the conclusions. The framework
+produces high-fidelity analog gates, but its central claims are not supported. Against per-step
 white control noise, the open-loop robustness of a pulse is fixed to leading order by its nominal fidelity
 and its duration, so training under such noise cannot make a pulse more robust. Matched pairs of agents
 and the direct optimizer confirm this, and the optimizer gains robustness only when it is trained against
@@ -117,7 +118,7 @@ estimator, exact bandwidth filter, UFO objective, RL agent and stochastic enviro
 to ask four questions. (i) Does the framework reproduce under an independent implementation, and with
 what quantitative fidelity? (ii) How does the RL agent compare with a direct pulse
 optimizer that computes exact gradients through the same simulator, with the same objective and the
-same training noise? (Question left open by Ref.~\cite{Niu2019}) (iii) Does stochastic training make
+same training noise, the question left open by Ref.~\cite{Niu2019}? (iii) Does stochastic training make
 the deployed pulses more robust, and if not, why not? (iv) What does the runtime comparison with gate
 synthesis actually measure, given the structure of the benchmark family? Along the way we test how
 much the conclusions depend on the free parameters the original paper does not pin down, the
@@ -269,7 +270,7 @@ importance-weighted surrogate
 \end{equation}
 where the constraint limits how far one update can move the policy.
 
-In noise-trained training, Gaussian fluctuations are added to the control amplitudes at every step, so
+In stochastic training, Gaussian fluctuations are added to the control amplitudes at every step, so
 that the objective becomes an expectation over both the policy and the noise,
 $J(\bm\theta)=-\mathbb{E}_{\tau,\xi}[C]$, and pulse trajectories that are fragile under small
 perturbations earn a poor average return. We call \emph{noise-free} the agent trained in the
@@ -346,7 +347,14 @@ after the bandwidth filter and is independent from one $2\ns$ step to the next, 
 the $250\MHz$ Nyquist frequency of the grid, above the $200\MHz$ gap to the leakage sector.
 Ref.~\cite{Niu2019} discretizes its pulses more finely, in ``around one thousand time steps''; the
 filter time constant of $32\ns$ is well resolved at $2\ns$, so the noise-free control problem is
-essentially the same, but the step changes the meaning of $\snoise$ (Sec.~\ref{sec:noisescales}).
+essentially the same.
+
+The step does change the meaning of $\snoise$, and this is a caveat for every comparison with
+Ref.~\cite{Niu2019}. Because the noise is redrawn at every step, the same $\snoise$ is a stronger physical
+noise at a coarser step: at our $2\ns$ it costs about sixteen times more infidelity than at a step of
+$0.1\ns$. The $\snoise$ axes of the two studies should therefore not be identified, and our fidelities
+under noise are not to be compared with those of Ref.~\cite{Niu2019} at equal $\snoise$
+(Sec.~\ref{sec:noisescales} and Appendix~\ref{app:scales}). None of our conclusions depends on this scale.
 
 Training noise and evaluation noise are kept separate. The noise-free agent is optimized without
 perturbations. The noise-trained agent and the direct optimizer are both optimized under this
@@ -368,8 +376,8 @@ the horizon is not a free variable of a single run, the procedure is repeated ov
 $T\in\{40,50,\dots,180\}\ns$, with $400$ iterations per horizon, learning rate $0.03$ and a single
 deterministic initialization (all amplitudes zero, phases $\pi$): $3.3\times10^5$ simulator steps in all,
 against $9.5\times10^7$ for each RL agent, a ratio of about $290$. Because single-sample losses are noisy,
-every horizon's pulse is re-evaluated in the deterministic simulator, and the pulse we report is the one
-with the lowest deterministic cost.
+every horizon's pulse is re-evaluated in the deterministic simulator, and the pulse we report for the
+single-target benchmark is the one with the lowest deterministic cost.
 
 By the standards of Ref.~\cite{Niu2019} this baseline is modest. The SGD baseline there also used Adam
 and a noisy objective, but averaged ten noisy trajectories per gradient step and received about $2000$
@@ -606,8 +614,9 @@ Between the two RL pulses the order depends on the noise strength. Below $\snois
 noise-free agent's pulse is better, as its higher nominal fidelity dictates; above, the noise-trained one
 is, with an infidelity ratio of $1.08$ at $1\MHz$ that saturates near $1.14$ at large noise. That is an
 order of magnitude below the gain reported in Ref.~\cite{Niu2019}, and the order follows the durations,
-as Eq.~\eqref{eq:whitenoise} requires. At $3.5\MHz$ the five evaluated pulses rank exactly by duration
-($60$, $70$, $98$, $104$ and $116\ns$), whichever method produced them, and the $60\ns$ pulse, although
+as Eq.~\eqref{eq:whitenoise} requires. At $3.5\MHz$ the four pulses of Fig.~\ref{fig:robust} and the
+$104\ns$ pulse of the noise-trained agent (Sec.~\ref{sec:single}; not shown) rank exactly by duration ($60$,
+$70$, $98$, $104$ and $116\ns$), whichever method produced them, and the $60\ns$ pulse, although
 less accurate, overtakes the $70\ns$ one above about $2\MHz$. Section~\ref{sec:matched} shows that even
 the difference between the two RL pulses does not come from stochastic training.
 
@@ -1069,11 +1078,11 @@ to tell which, if either, applies to its results.
 \label{sec:noisescales}
 
 One point limits any quantitative comparison with Ref.~\cite{Niu2019}: the noise scales of the two studies
-are not the same. Because the kicks are independent from step to step, the noise power per unit bandwidth
-is $\snoise^2\Delta t$, and $K$ in Eq.~\eqref{eq:whitenoise} is proportional to $\Delta t$.
-Ref.~\cite{Niu2019} describes its pulses as piecewise constant with ``around one thousand time steps''
-each, a step of about $0.1\ns$, twenty times shorter than our $2\ns$, and at that step the same $\snoise$
-costs sixteen times less infidelity. This alone accounts for the size of the difference between its
+are not the same (Sec.~\ref{sec:noise}). Because the kicks are independent from step to step, the noise
+power per unit bandwidth is $\snoise^2\Delta t$, and $K$ in Eq.~\eqref{eq:whitenoise} scales with
+$\Delta t$, apart from the weight of the leaking components, which grows as the step shrinks. At the step
+of Ref.~\cite{Niu2019}, about $0.1\ns$ and twenty times shorter than our $2\ns$, the same $\snoise$
+therefore costs sixteen times less infidelity, not twenty. This alone accounts for the size of the difference between its
 Fig.~4, where the average fidelity of the noise-optimized controller stays between $0.995$ and $0.98$ over
 $\snoise\in[0.1,3.5]\MHz$, and our Table~\ref{tab:robust}, where that of the noise-trained agent falls from
 $0.9925$ to $0.713$. The $\snoise$ axes of the two studies should therefore not be identified
@@ -1123,8 +1132,8 @@ order-of-magnitude robustness gain, the direct optimizer's lead of about $0.012$
 and the runtime results. Differences of a few $10^{-3}$ between two agents are not. All agents were
 trained at a time step of $2\ns$, about twenty times coarser than that of Ref.~\cite{Niu2019}, because
 each RL agent already takes $9.5\times10^7$ simulator steps; the consequences for the noise scale and
-for the leakage bound are discussed in Sec.~\ref{sec:noisescales}. Their training episodes almost never
-stopped early (Sec.~\ref{sec:noisyleak}), and an implementation in which the stopping time is learned
+for the leakage bound are discussed in Sec.~\ref{sec:noisescales} and Appendix~\ref{app:leak}. Their
+training episodes almost never stopped early (Appendix~\ref{app:leak}), and an implementation in which the stopping time is learned
 under noise could behave differently, although Eq.~\eqref{eq:whitenoise} would still bound what its pulses
 can gain.
 
@@ -1158,7 +1167,7 @@ We have independently reimplemented the UFO framework for robust analog two-qubi
 multilevel gmon model and compared it with a direct gradient optimizer that uses the same Hamiltonian, the
 same objective and the same training noise. The framework works: it produces high-fidelity analog gates,
 faster than a compiled implementation, and its published hyperparameters are close to optimal in our
-hands. Three of its headline claims are not supported in our implementation. The RL agent does
+hands. Its headline claims are not supported in our implementation. The RL agent does
 not outperform a direct optimizer, training under noise does not make the deployed pulses more robust, and
 the order-of-magnitude runtime gain sits around a target that is the identity.
 
@@ -1243,7 +1252,8 @@ covariance. Table~\ref{tab:channels} gives the white-noise case channel by chann
 \begin{table}[t]
 \caption{White-noise infidelity rate per channel, in $10^{-5}\ns^{-1}\MHz^{-2}$: first-order value of
 Eq.~\eqref{eq:firstorder} and Monte Carlo replay with the noise on that channel alone ($\snoise=1\MHz$,
-$4000$ realizations). Ranges are over the five pulses of Sec.~\ref{sec:robust}.}
+$4000$ realizations). Ranges are over the four pulses of Fig.~\ref{fig:robust} and the $104\ns$ pulse of
+Sec.~\ref{sec:single}.}
 \label{tab:channels}
 \begin{ruledtabular}
 \begin{tabular}{lcc}
@@ -1305,13 +1315,12 @@ runs. The quasi-static results change by less than $10^{-5}$ in every fidelity.
 \section{Noise scales and time step}
 \label{app:scales}
 
-This appendix gives the details behind Sec.~\ref{sec:noisescales}. Because the kicks are
-independent from step to step, the noise power per unit bandwidth is $\snoise^2\Delta t$, and $K$ in
-Eq.~\eqref{eq:whitenoise} is proportional to $\Delta t$: the same $\snoise$ describes a different physical
+This appendix gives the details behind Sec.~\ref{sec:noisescales}. The same $\snoise$ describes a different physical
 noise level at a different time step, and it matters whether amplitudes are quoted in cyclic or angular
 units. Replaying our pulses with the noise redrawn every $0.1$, $0.5$, $1$, $4$ or $8\ns$ instead of
 every $2\ns$, at the same $\snoise$, multiplies the excess infidelity by $0.06$, $0.31$, $0.6$, $1.3$ and
-$2.5$, as the first-order rate predicts to within $5\%$. It also matters where the noise enters. Added to the raw controls,
+$2.5$, as the first-order rate predicts to within $5\%$; the factor is not exactly the ratio of the steps
+because the components of the noise that lead out of the subspace weigh more at a finer step. It also matters where the noise enters. Added to the raw controls,
 before the bandwidth filter instead of after it, the same $\snoise$ costs our five pulses $5$ to $18$ times
 less infidelity, and reaches the Hamiltonian with the $32\ns$ memory of the filter. In physical terms, the
 detuning noise of our model at $\snoise=1\MHz$ and $\Delta t=2\ns$ is white frequency noise that dephases
@@ -1328,8 +1337,6 @@ $0.713$ (Table~\ref{tab:robust}). Dividing our loss by sixteen gives about $0.99
 step alone accounts for a difference of that size; angular units or noise injected before the filter would
 change it further. The $\snoise$ axes of the two studies should not be identified, and no number in this
 paper at a given $\snoise$ should be compared with a number at the same $\snoise$ in Ref.~\cite{Niu2019}.
-The conclusions above do not depend on the scale: Eq.~\eqref{eq:whitenoise} holds at every noise strength,
-and the matched comparison is negative over the whole range.
 
 The same applies to the training noise. Under the same assumptions, $\strain=1\MHz$ at $2\ns$ corresponds
 to about $4\MHz$ at $0.1\ns$, above the range evaluated in Ref.~\cite{Niu2019}. We did not train at the

@@ -40,10 +40,10 @@ an independent reproduction and family-resolved assessment''}
 \affiliation{EPFL, Switzerland}
 \author{Davide Emilio Galli}
 % \email{davide.galli@unimi.it}
-\affiliation{Università Degli Studi di Milano, Italy}
-\author{Morten Hjort Jensen}
-% \email{Morten-Hjort-Jensen@uio.no}
-\affiliation{University Of Oslo, Norway}
+\affiliation{Università degli Studi di Milano, Italy}
+\author{Morten Hjorth-Jensen}
+% \email{Morten-Hjorth-Jensen@uio.no}
+\affiliation{University of Oslo, Norway}
 
 \date{\today}
 
@@ -125,8 +125,9 @@ only at the level of network weights.
 For each candidate horizon the raw parameters are initialized to zero, which after the $\tanh$ map gives
 zero amplitudes and phases $\pi$. Each of the $400$ steps filters the controls, simulates one trajectory
 perturbed at $\strain$, evaluates the UFO cost including the leakage bound on that noisy trajectory,
-back-propagates, clips the gradient norm at $10$ and takes an Adam step. Section~\ref{M-sec:controllers}
-describes how the stored pulse and the horizon are selected.
+back-propagates, clips the gradient norm at $10$ and takes an Adam step. Within a horizon the stored pulse
+is the iterate with the lowest sampled loss; Secs.~\ref{M-sec:controllers} and~\ref{supp:horizon} describe
+how the horizon is selected.
 
 \section{Complete configuration}
 \label{app:config}
@@ -138,7 +139,7 @@ agents were trained in two stages.
 \begin{table*}[t]
 \caption{Complete configuration, as actually run. The four right-hand columns are the two single-target
 RL agents (Secs.~\ref{M-sec:single}--\ref{M-sec:robust}), the architecture and UFO-weight sweeps
-(Appendix~\ref{app:modelsel}) and the curriculum runtime sweep (Sec.~\ref{M-sec:runtime}); an entry spanning
+(Sec.~\ref{app:modelsel}) and the curriculum runtime sweep (Sec.~\ref{M-sec:runtime}); an entry spanning
 several columns applies to all of them. Every RL run except the noise-free agent was trained with noise.}
 \label{tab:config}
 \footnotesize
@@ -174,7 +175,7 @@ Stopping cost & $C_{\mathrm{term}}$ & $0.40$, then $0.30$\footnotemark[1] & $0.4
 Training noise & $\strain$ & $0$ / $1\MHz$\footnotemark[3] & $1\MHz$ & $1\MHz$ & $1\MHz$\\
 Seeds & --- & $1$ & $1,2,3$ & $1,2$ & $2$\\
 \colrule
-\multicolumn{6}{l}{\textit{direct optimizer (single target and family sweep)}}\\
+\multicolumn{6}{l}{\textit{Direct optimizer (single target and family sweep)}}\\
 Iterations per horizon, lr & --- & \multicolumn{4}{c}{$400$, $0.03$; one deterministic initialization; seed $2$}\\
 Horizon grid & --- & \multicolumn{4}{c}{$40$--$180\ns$, step $10\ns$}\\
 Training noise & $\strain$ & \multicolumn{4}{c}{$1\MHz$, one noisy trajectory per step}\\
@@ -194,7 +195,7 @@ the settings of iterations $1$--$100$, with the leakage bound of the noise-train
 from the noise-free controls.}
 \footnotetext[2]{Also the advancement threshold. The cold-start target $\alpha=0$ used a hand-tuned
 sequence of stopping costs.}
-\footnotetext[3]{Nominal / noise-trained agent.}
+\footnotetext[3]{Noise-free / noise-trained agent.}
 \end{table*}
 
 \section{Fixing the free parameters}
@@ -303,7 +304,7 @@ Eq.~\eqref{M-eq:weights} throughout.
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{adam_single_target_horizon_sweep.pdf}
-\caption{direct optimizer on $\Ntgt{2.2}{\pi/2}$ versus gate horizon. (a) Nominal total cost, with the
+\caption{Direct optimizer on $\Ntgt{2.2}{\pi/2}$ versus gate horizon. (a) Nominal total cost, with the
 optimum at $70\ns$ and the pulse selected by the noisy objective at $60\ns$ both marked. (b) Boundary
 and runtime penalties. (c) Nominal fidelity and total leakage. The optimum arises from the
 simultaneous collapse of the boundary term and the rise in fidelity; longer horizons saturate in

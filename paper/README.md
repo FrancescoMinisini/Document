@@ -41,10 +41,9 @@ nominal cost). TRPO is named only where the algorithm itself is meant.
 
 ## Authorship
 
-The paper is set with the thesis author as sole author and both supervisors thanked in the
-acknowledgments, which is the usual convention for a preprint drawn from a bachelor's thesis. If they
-should instead appear as co-authors, add `\author{...}` / `\affiliation{...}` blocks after the
-existing one and trim the first sentence of the acknowledgments.
+Three authors since 2026-10-09: the thesis author and both supervisors. The acknowledgments and the Data
+availability section are commented out in `preprint.tex`; whether they come back is the author's decision
+(the text still mentions "the released data" in the evaluation protocol).
 
 ## Figures
 
@@ -75,6 +74,12 @@ those of the current version.
 A second readability pass: 21 pages to 16, plus a 5-page supplement; about 15 000 to 11 700 words of
 source in the main text. No result, dataset or number was changed.
 
+- **Consistency pass after the audit of the same day.** The caveat that the noise scale differs from the
+  original's (coarser time step, sixteen times more infidelity at equal sigma) is now stated in the noise
+  model section and in the abstract, and the Discussion and Appendix C no longer repeat each other; the
+  factor sixteen against a step ratio of twenty is explained. The abstract and the conclusion no longer
+  count "three" unsupported claims (Table V lists them). Stale cross-references in the Limitations and in
+  the supplement were fixed, and the fifth evaluated pulse (104 ns) is named where it is used.
 - **One story in the main text.** Everything that is specific to this implementation or secondary moved
   out: the domination of the noisy objective by the leakage bound and its time-step scaling (new
   Appendix B), the details of the noise-scale comparison (new Appendix C), and to the supplement the TSWT
