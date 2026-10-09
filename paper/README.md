@@ -1,7 +1,10 @@
 # Preprint source bundle
 
 `preprint.tex` — *Robust analog two-qubit gates from deep reinforcement learning: an independent
-reproduction and family-resolved assessment.* REVTeX 4.2, APS two-column preprint style, 21 pages.
+reproduction and family-resolved assessment.* REVTeX 4.2, APS two-column preprint style, 16 pages.
+`supplement.tex` is its Supplemental Material (5 pages): derivation of the leakage bound, algorithmic
+details, complete configuration, parameter sweeps, horizon and family sweeps of the direct optimizer,
+relation to hardware.
 
 ## Build
 
@@ -10,13 +13,31 @@ pdflatex preprint
 bibtex   preprint
 pdflatex preprint
 pdflatex preprint
+pdflatex supplement
+bibtex   supplement
+pdflatex supplement
+pdflatex supplement
 ```
 
-No `-shell-escape` is needed: unlike the thesis, this document contains no live TikZ and no
+Build the main text first: the supplement reads `preprint.aux` (package `xr-hyper`, prefix `M-`) to quote
+the main text's equation, table and section numbers. The main text cites the supplement as reference
+`supp` and names its sections by hand (S1 to S7), so if the order of the supplement's sections changes,
+update those mentions in `preprint.tex`.
+
+No `-shell-escape` is needed: unlike the thesis, these documents contain no live TikZ and no
 externalization. All figures are pre-rendered PDFs in `figures/`. `references.bib` here is the thesis
-bibliography plus fifteen entries used only by the preprint (Zhang2003, Makhlin2002, VidalDawson2004,
+bibliography plus the entries used only by the preprint (Zhang2003, Makhlin2002, VidalDawson2004,
 ShendeMarkovBullock2004, Foxen2020, Green2012, Green2013, Cerfontaine2021, KhodjastehViola2009, Wu2019,
-Paladino2014, Abad2022, Arute2019, Sung2021, GoogleQAI2025).
+Paladino2014, Abad2022, Arute2019, Sung2021, GoogleQAI2025, and `supp` for the Supplemental Material).
+
+## Terminology
+
+The text uses one name for each thing. The two RL agents are the *noise-free* agent (trained in the
+deterministic environment; `final_results/nominal/` in the code repository) and the *noise-trained* agent
+(trained under noise; "noise-optimized" in Niu et al. and in the thesis). The gradient method is the
+*direct optimizer* (Adam is named once, in the methods). What a method produces is a *pulse* (a "control
+plan" in the code). "Nominal" is kept only for quantities evaluated without noise (nominal fidelity,
+nominal cost). TRPO is named only where the algorithm itself is meant.
 
 ## Authorship
 
@@ -27,24 +48,51 @@ existing one and trim the first sentence of the acknowledgments.
 
 ## Figures
 
-Four figures are reused unchanged from the thesis (`architecture_sweep_pareto_combined`,
-`ufo_weight_sweep_robustness`, `adam_single_target_horizon_sweep`, `adam_family_sweep`). Four were built for
-this paper; their pgfplots sources are in `figsrc/` and read the
-CSVs under `../data/` directly.
+The main text has four figures, all built for this paper; their pgfplots sources are in `figsrc/` and read
+the CSVs under `../data/` directly. Legends sit outside the plot area or in an empty corner, so that they
+cover no data.
 
 | File | Source | Content |
 | --- | --- | --- |
-| `single_target_comparison_v3.pdf` | `figsrc/fig_single_target.tex` | No longer included (its values are those of Table I): nominal cost, fidelity, leakage and runtime of Adam (70 ns) and the two TRPO agents, with both synthesis references. Values typed from the nominal re-evaluation of the stored plans (listed in the source header). |
-| `robustness_v3.pdf` | `figsrc/fig_robustness.tex` | Fig. 2: average fidelity and variance versus noise strength for the four controllers of Table I, from `data/robustness_analysis_3/`. |
-| `noise_training_mechanism.pdf` | `figsrc/fig_mechanism.tex` | Fig. 3: matched-history paired differences, closed versus open loop, excess infidelity versus duration with the first-order prediction. |
-| `noise_with_memory.pdf` | `figsrc/fig_memory.tex` | Fig. 4: filter functions of three 70 ns Adam pulses, excess infidelity against the noise correlation time, quasi-static excess infidelity against duration for all plans. |
-| `runtime_vs_alpha_v4.pdf` | `figsrc/fig_runtime.tex` | Fig. 5: runtime, fidelity and leakage across `N(a, a, pi/2)` for the curriculum and the Adam sweep, with both synthesis references and the bandwidth-limited exchange time (grey band). |
+| `robustness_v3.pdf` | `figsrc/fig_robustness.tex` | Fig. 1: average fidelity and variance versus noise strength for the three pulses of Table I and the 60 ns pulse of the direct optimizer, from `data/robustness_analysis_3/`. |
+| `noise_training_mechanism.pdf` | `figsrc/fig_mechanism.tex` | Fig. 2: (a) excess infidelity versus duration with the first-order prediction, (b) matched-pair paired differences, (c) closed versus open loop. |
+| `noise_with_memory.pdf` | `figsrc/fig_memory.tex` | Fig. 3: filter functions of three 70 ns pulses of the direct optimizer, excess infidelity against the noise correlation time, quasi-static excess infidelity against duration for all pulses. |
+| `runtime_vs_alpha_v4.pdf` | `figsrc/fig_runtime.tex` | Fig. 4: runtime, fidelity and leakage across `N(a, a, pi/2)` for the RL curriculum and the direct optimizer, with both synthesis references and the bandwidth-limited exchange time (grey band). |
 
-Rebuild any of them with `pdflatex fig_<name>` from inside `figsrc/`, then copy the resulting PDF into
+The supplement reuses four figures unchanged from the thesis (`adam_single_target_horizon_sweep`,
+`adam_family_sweep`, `architecture_sweep_pareto_combined`, `ufo_weight_sweep_robustness`); their labels
+still say "Adam" and "TRPO".
+
+Rebuild a figure with `pdflatex fig_<name>` from inside `figsrc/`, then copy the resulting PDF into
 `figures/` under the name above. The `*_v2.pdf` files in `figures/` belong to the version of 2026-09-07
 and are no longer included; `runtime_vs_alpha_v3.pdf` is the version of 2026-09-22;
-`gmon_architecture_schematic.pdf`, `ufo_cost_structure.pdf` and `single_target_comparison_v3.pdf` were
-dropped on 2026-10-08. Figure and table numbers above are those of the current version.
+`gmon_architecture_schematic.pdf`, `ufo_cost_structure.pdf` and `single_target_comparison_v3.pdf`
+(source `figsrc/fig_single_target.tex`) were dropped on 2026-10-08. Figure and table numbers above are
+those of the current version.
+
+## Changes of 2026-10-09
+
+A second readability pass: 21 pages to 16, plus a 5-page supplement; about 15 000 to 11 700 words of
+source in the main text. No result, dataset or number was changed.
+
+- **One story in the main text.** Everything that is specific to this implementation or secondary moved
+  out: the domination of the noisy objective by the leakage bound and its time-step scaling (new
+  Appendix B), the details of the noise-scale comparison (new Appendix C), and to the supplement the TSWT
+  derivation, the algorithmic details, the configuration table, the parameter sweeps, the horizon sweep of
+  the direct optimizer, the per-target curriculum table, the family-sweep figure and four of the five
+  hardware remarks in full.
+- **Fewer parallel tracks.** The single-target section is one table and three paragraphs, with one pulse
+  per method (the 60 ns pulse of the direct optimizer appears only in the robustness section, and the
+  iteration-91 pulse in a footnote). The first matched pair and the three retrained pairs are presented
+  together as four pairs (Table III). The rows with the leakage bound taken from the noise-free controls
+  left Table IV and are summarized in Appendix B.
+- **Runtime section.** Five subsections became four; the comparison with synthesis and with the direct
+  optimizer is one subsection.
+- **Names.** See Terminology above. Table and figure labels were changed to match.
+- **Figures.** Legends were moved off the data in all four figures. In `noise_with_memory` panel (c) the
+  old legend hid the points at 100 and 130 ns. The panels of `noise_training_mechanism` were reordered so
+  that they are cited in order. The robustness figure has one legend above both panels, and the runtime
+  figure one legend above panel (a).
 
 ## Changes of 2026-10-08
 
@@ -65,7 +113,6 @@ their own date.
   three values are in the text). The gmon and UFO schematics and the single-target bar chart were removed.
 - **Shorter restatement of the original.** Sec. II is about half its length; the Adam horizon sweep,
   the hardware remarks, the limitations and Appendices B and F were tightened.
-- **Not done.** The panels of Fig. 3 keep their order, so panel (c) is cited before (a).
 
 ## Changes of 2026-10-01
 

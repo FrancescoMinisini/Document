@@ -1,8 +1,8 @@
 % What stochastic training changes, and why it does not reach the deployed pulse.
 % Data (all under ../../data/, written by the uqc_repro/analysis scripts named below):
-%   (a) trajectory_robustness_results/trajectory_robustness_summary.csv  robustness_training_trajectories.py
-%   (b) closed_loop_results/closed_loop_vs_open_loop_summary.csv          closed_loop_vs_open_loop.py
-%   (c) white_noise_results/excess_vs_duration.csv                        white_noise_first_order.py
+%   (b) trajectory_robustness_results/trajectory_robustness_summary.csv  robustness_training_trajectories.py
+%   (c) closed_loop_results/closed_loop_vs_open_loop_summary.csv          closed_loop_vs_open_loop.py
+%   (a) white_noise_results/excess_vs_duration.csv                        white_noise_first_order.py
 % Build: pdflatex fig_mechanism (from figsrc/).
 \documentclass[border=2pt]{standalone}
 \usepackage[T1]{fontenc}
@@ -58,10 +58,32 @@
     unbounded coords=discard
 ]
 
-% ---------------------------------------------------------------- (a) paired difference
+% ---------------------------------------------------------------- (a) excess infidelity vs duration
+\nextgroupplot[
+    xlabel={Pulse duration $T$ (ns)},
+    ylabel={$\overline{F}(0.1\,\mathrm{MHz})-\overline{F}(1\,\mathrm{MHz})$ ($10^{-2}$)},
+    xmin=50, xmax=190, ymin=0, ymax=5.8,
+    legend style={at={(0.98,0.03)}, anchor=south east, draw=none, fill=none},
+]
+    \addplot[black!70, dashed, thick, domain=50:190, samples=2] {100*\Krate*(1-0.01)*x};
+    \addlegendentry{first order, $K\sigma^2T$}
+    \addplot[color=cNom, only marks, mark=o, mark size=1.4pt, keep if={source}{trajectory_nominal}]
+        table[x=time_ns, y expr=100*\thisrow{excess_infidelity_1mhz}, col sep=comma] {\excsv};
+    \addlegendentry{RL, noise-free}
+    \addplot[color=cNoise, only marks, mark=x, mark size=1.8pt, keep if={source}{trajectory_noise}]
+        table[x=time_ns, y expr=100*\thisrow{excess_infidelity_1mhz}, col sep=comma] {\excsv};
+    \addlegendentry{RL, noise-trained}
+    \addplot[color=cAdam, only marks, mark=square*, mark size=2pt, keep if={source}{selected_adam70}]
+        table[x=time_ns, y expr=100*\thisrow{excess_infidelity_1mhz}, col sep=comma] {\excsv};
+    \addlegendentry{direct optimizer}
+    \addplot[color=cAdam, only marks, mark=square*, mark size=2pt, keep if={source}{selected_adam60}, forget plot]
+        table[x=time_ns, y expr=100*\thisrow{excess_infidelity_1mhz}, col sep=comma] {\excsv};
+    \node[font=\small\bfseries, anchor=north west, fill=white, fill opacity=0.85, text opacity=1, inner sep=1.5pt] at (rel axis cs:0.02,0.98) {(a)};
+
+% ---------------------------------------------------------------- (b) paired difference
 \nextgroupplot[
     xlabel={Noise strength $\sigma_{\mathrm{noise}}$ (MHz)},
-    ylabel={$\overline{F}_{\mathrm{noise\text{-}opt.}}-\overline{F}_{\mathrm{nominal}}$ ($10^{-3}$)},
+    ylabel={$\overline{F}_{\mathrm{noise\text{-}trained}}-\overline{F}_{\mathrm{noise\text{-}free}}$ ($10^{-3}$)},
     xmin=0, xmax=3.7, ymin=-32, ymax=6,
 ]
     \draw[black!60, thick] (axis cs:0,0) -- (axis cs:3.7,0);
@@ -74,9 +96,9 @@
               col sep=comma] {\trajcsv};
     \node[font=\scriptsize, anchor=south west, align=left, inner sep=1pt] at (rel axis cs:0.04,0.05)
         {matched iterations $21$--$100$;\\ mean and $95\%$ interval};
-    \node[font=\small\bfseries, anchor=north west, fill=white, fill opacity=0.85, text opacity=1, inner sep=1.5pt] at (rel axis cs:0.02,0.98) {(a)};
+    \node[font=\small\bfseries, anchor=north west, fill=white, fill opacity=0.85, text opacity=1, inner sep=1.5pt] at (rel axis cs:0.02,0.98) {(b)};
 
-% ---------------------------------------------------------------- (b) closed vs open loop
+% ---------------------------------------------------------------- (c) closed vs open loop
 \nextgroupplot[
     ylabel={$\overline{F}$ at $1\,$MHz},
     xmin=0.4, xmax=4.6,
@@ -93,31 +115,9 @@
     \addplot[color=cNom, fill=white, boxplot prepared={draw position=2, lower whisker=\AminB, lower quartile=\AqoB, median=\AmedB, upper quartile=\AqtB, upper whisker=\AmaxB}] coordinates {};
     \addplot[color=cNoise, fill=cNoise!25, boxplot prepared={draw position=3, lower whisker=\AminC, lower quartile=\AqoC, median=\AmedC, upper quartile=\AqtC, upper whisker=\AmaxC}] coordinates {};
     \addplot[color=cNoise, fill=white, boxplot prepared={draw position=4, lower whisker=\AminD, lower quartile=\AqoD, median=\AmedD, upper quartile=\AqtD, upper whisker=\AmaxD}] coordinates {};
-    \node[font=\small\bfseries, anchor=north west, fill=white, fill opacity=0.85, text opacity=1, inner sep=1.5pt] at (rel axis cs:0.02,0.98) {(b)};
-    \node[font=\scriptsize, color=cNom!80!black, anchor=north] at (axis cs:1.5,0.9095) {nominal TRPO};
-    \node[font=\scriptsize, color=cNoise!80!black, anchor=north] at (axis cs:3.5,0.9095) {noise-opt.\ TRPO};
-
-% ---------------------------------------------------------------- (c) excess infidelity vs duration
-\nextgroupplot[
-    xlabel={Pulse duration $T$ (ns)},
-    ylabel={$\overline{F}(0.1\,\mathrm{MHz})-\overline{F}(1\,\mathrm{MHz})$ ($10^{-2}$)},
-    xmin=50, xmax=190, ymin=1.2, ymax=5.8,
-    legend style={at={(0.03,0.97)}, anchor=north west},
-]
-    \addplot[black!70, dashed, thick, domain=50:190, samples=2] {100*\Krate*(1-0.01)*x};
-    \addlegendentry{first order, $K\sigma^2T$}
-    \addplot[color=cNom, only marks, mark=o, mark size=1.4pt, keep if={source}{trajectory_nominal}]
-        table[x=time_ns, y expr=100*\thisrow{excess_infidelity_1mhz}, col sep=comma] {\excsv};
-    \addlegendentry{nominal TRPO plans}
-    \addplot[color=cNoise, only marks, mark=x, mark size=1.8pt, keep if={source}{trajectory_noise}]
-        table[x=time_ns, y expr=100*\thisrow{excess_infidelity_1mhz}, col sep=comma] {\excsv};
-    \addlegendentry{noise-opt.\ TRPO plans}
-    \addplot[color=cAdam, only marks, mark=square*, mark size=2pt, keep if={source}{selected_adam70}]
-        table[x=time_ns, y expr=100*\thisrow{excess_infidelity_1mhz}, col sep=comma] {\excsv};
-    \addlegendentry{Adam, $60$ and $70\,$ns}
-    \addplot[color=cAdam, only marks, mark=square*, mark size=2pt, keep if={source}{selected_adam60}, forget plot]
-        table[x=time_ns, y expr=100*\thisrow{excess_infidelity_1mhz}, col sep=comma] {\excsv};
-    \node[font=\small\bfseries, anchor=south east, fill=white, fill opacity=0.85, text opacity=1, inner sep=1.5pt] at (rel axis cs:0.98,0.03) {(c)};
+    \node[font=\small\bfseries, anchor=north west, fill=white, fill opacity=0.85, text opacity=1, inner sep=1.5pt] at (rel axis cs:0.02,0.98) {(c)};
+    \node[font=\scriptsize, color=cNom!80!black, anchor=north] at (axis cs:1.5,0.9095) {noise-free};
+    \node[font=\scriptsize, color=cNoise!80!black, anchor=north] at (axis cs:3.5,0.9095) {noise-trained};
 
 \end{groupplot}
 \end{tikzpicture}

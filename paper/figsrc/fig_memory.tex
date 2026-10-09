@@ -51,7 +51,7 @@
     xlabel={Noise frequency (MHz)},
     ylabel={Normalized filter function},
     xmin=0.1, xmax=250, ymin=0.02, ymax=40,
-    legend style={at={(0.03,0.03)}, anchor=south west},
+    legend style={at={(0.03,0.03)}, anchor=south west, draw=none, fill=none},
 ]
     \draw[black!55, thick] (axis cs:0.1,1) -- (axis cs:250,1);
     \addplot[color=cNone, thick] table[x=frequency_mhz, y=normalized_filter_function_none, col sep=comma] {\ffcsv};
@@ -90,24 +90,24 @@
     xlabel={Pulse duration $T$ (ns)},
     ylabel={Quasi-static excess infidelity ($10^{-3}$)},
     xmin=55, xmax=190, ymin=0, ymax=18.5,
-    legend style={at={(0.97,0.03)}, anchor=south east},
+    legend style={at={(0.02,0.99)}, anchor=north west, draw=none, fill=none},
 ]
     \addplot[color=cNom, only marks, mark=o, mark size=1.2pt, keep if={source}{trajectory_nominal}]
         table[x=time_ns, y expr=1000*\thisrow{quasi_static_excess_0p1mhz}, col sep=comma] {\pscsv};
-    \addlegendentry{nominal TRPO plans}
+    \addlegendentry{RL, noise-free}
     \addplot[color=cNoise, only marks, mark=x, mark size=1.6pt, keep if={source}{trajectory_noise}]
         table[x=time_ns, y expr=1000*\thisrow{quasi_static_excess_0p1mhz}, col sep=comma] {\pscsv};
-    \addlegendentry{noise-opt.\ TRPO plans}
+    \addlegendentry{RL, noise-trained}
     \addplot[color=cNone, only marks, mark=*, mark size=2pt, keep if={source}{adam_none}]
         table[x=time_ns, y expr=1000*\thisrow{quasi_static_excess_0p1mhz}, col sep=comma] {\pscsv};
-    \addlegendentry{Adam, no noise}
+    \addlegendentry{direct, no noise}
     \addplot[color=cWhite, only marks, mark=square, mark size=1.6pt, keep if={source}{adam_white}]
         table[x expr=\thisrow{time_ns}+3, y expr=1000*\thisrow{quasi_static_excess_0p1mhz}, col sep=comma] {\pscsv};
-    \addlegendentry{Adam, white}
+    \addlegendentry{direct, white}
     \addplot[color=cQS, only marks, mark=triangle, mark size=1.9pt, keep if={source}{adam_quasi_static}]
         table[x expr=\thisrow{time_ns}-3, y expr=1000*\thisrow{quasi_static_excess_0p1mhz}, col sep=comma] {\pscsv};
-    \addlegendentry{Adam, quasi-static}
-    \node[font=\small\bfseries, anchor=north west, fill=white, fill opacity=0.85, text opacity=1, inner sep=1.5pt] at (rel axis cs:0.02,0.98) {(c)};
+    \addlegendentry{direct, quasi-static}
+    \node[font=\small\bfseries, anchor=south east, fill=white, fill opacity=0.85, text opacity=1, inner sep=1.5pt] at (rel axis cs:0.98,0.03) {(c)};
 
 \end{groupplot}
 \end{tikzpicture}

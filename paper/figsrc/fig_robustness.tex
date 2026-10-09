@@ -9,6 +9,7 @@
 \usepackage{pgfplots}
 \usepackage{pgfplotstable}
 \pgfplotsset{compat=1.18}
+\usetikzlibrary{calc}
 
 \newcommand{\datadir}{../../data}
 \newcommand{\rcsv}{\datadir/robustness_analysis_3/combined_ewma_data.csv}
@@ -39,9 +40,9 @@
     grid style={dashed, gray!30},
     label style={font=\small},
     tick label style={font=\footnotesize},
-    legend style={at={(0.98,0.98)}, anchor=north east, font=\scriptsize,
-                  legend cell align=left, draw=gray!60, fill=white, fill opacity=0.9,
-                  text opacity=1, row sep=0pt, inner sep=2pt},
+    legend to name=roblegend, legend columns=4,
+    legend style={font=\scriptsize, legend cell align=left, draw=none,
+                  /tikz/every even column/.append style={column sep=9pt}},
     each nth point=3,
     filter discard warning=false,
     unbounded coords=discard
@@ -56,13 +57,13 @@
         at (axis cs:1.0,0.885) {$\sigma_{\mathrm{train}}$};
 
     \addplot[a70] table[x=sigma_mhz, y=adam70_fidelity_ewma,  col sep=comma] {\rcsv};
-    \addlegendentry{Adam, $70\,$ns}
+    \addlegendentry{direct optimizer, $70\,$ns}
     \addplot[a60] table[x=sigma_mhz, y=adam60_fidelity_ewma,  col sep=comma] {\rcsv};
-    \addlegendentry{Adam, $60\,$ns}
+    \addlegendentry{direct optimizer, $60\,$ns}
     \addplot[noi] table[x=sigma_mhz, y=noise_fidelity_ewma,   col sep=comma] {\rcsv};
-    \addlegendentry{Noise-opt.\ TRPO, $98\,$ns}
+    \addlegendentry{RL, noise-trained, $98\,$ns}
     \addplot[nom] table[x=sigma_mhz, y=nominal_fidelity_ewma, col sep=comma] {\rcsv};
-    \addlegendentry{Nominal TRPO, $116\,$ns}
+    \addlegendentry{RL, noise-free, $116\,$ns}
 \end{axis}
 
 % inset: low-noise magnification
@@ -89,7 +90,7 @@
     \addplot[nom] table[x=sigma_mhz, y=nominal_fidelity_ewma, col sep=comma] {\rcsv};
 \end{axis}
 
-\node[font=\small\bfseries, anchor=north west] at (mainplot.north west) [xshift=-8pt, yshift=10pt] {(a)};
+\node[font=\small\bfseries, anchor=north east] at (mainplot.north east) [xshift=-3pt, yshift=-3pt] {(a)};
 
 % ------------------------------------------------------------------ panel (b)
 \begin{axis}[
@@ -107,9 +108,6 @@
     minor grid style={dotted, gray!20},
     label style={font=\small},
     tick label style={font=\footnotesize},
-    legend style={at={(0.98,0.03)}, anchor=south east, font=\scriptsize,
-                  legend cell align=left, draw=gray!60, fill=white, fill opacity=0.9,
-                  text opacity=1, row sep=0pt, inner sep=2pt},
     each nth point=3,
     filter discard warning=false,
     unbounded coords=discard
@@ -124,16 +122,15 @@
         at (axis cs:1.0,3.2e-2) {$\sigma_{\mathrm{train}}$};
 
     \addplot[a70] table[x=sigma_mhz, y=adam70_variance_ewma,  col sep=comma] {\rcsv};
-    \addlegendentry{Adam, $70\,$ns}
     \addplot[a60] table[x=sigma_mhz, y=adam60_variance_ewma,  col sep=comma] {\rcsv};
-    \addlegendentry{Adam, $60\,$ns}
     \addplot[noi] table[x=sigma_mhz, y=noise_variance_ewma,   col sep=comma] {\rcsv};
-    \addlegendentry{Noise-opt.\ TRPO, $98\,$ns}
     \addplot[nom] table[x=sigma_mhz, y=nominal_variance_ewma, col sep=comma] {\rcsv};
-    \addlegendentry{Nominal TRPO, $116\,$ns}
 \end{axis}
 
-\node[font=\small\bfseries, anchor=north west] at (varplot.north west) [xshift=-8pt, yshift=10pt] {(b)};
+\node[font=\small\bfseries, anchor=north west] at (varplot.north west) [xshift=3pt, yshift=-3pt] {(b)};
+
+% shared legend, above both panels so that it covers no data
+\node[anchor=south, inner sep=0pt] at ($(mainplot.north west)!0.5!(varplot.north east)+(0,5pt)$) {\pgfplotslegendfromname{roblegend}};
 
 \end{tikzpicture}
 \end{document}

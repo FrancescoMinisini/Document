@@ -71,13 +71,13 @@
 
     \addplot[color=cTRPO, only marks, mark=square*, mark size=1.7pt, keep if={method}{trpo_curriculum}, keep if={converged}{True}]
         table[x=alpha, y=runtime_ns, col sep=comma] {\gscsv};
-    \addlegendentry{Curriculum TRPO, converged}
+    \addlegendentry{RL curriculum, converged}
     \addplot[color=cTRPO, only marks, mark=square, mark size=1.7pt, thick, keep if={method}{trpo_curriculum}, keep if={converged}{False}]
         table[x=alpha, y=runtime_ns, col sep=comma] {\gscsv};
     \addlegendentry{not converged}
     \addplot[color=cAdam, mark=*, mark size=1.3pt, thick, keep if={method}{adam}]
         table[x=alpha, y=runtime_ns, col sep=comma] {\gscsv};
-    \addlegendentry{Adam}
+    \addlegendentry{direct optimizer}
     \addlegendimage{area legend, fill=gray!35, draw=none}
     \addlegendentry{exchange area through the filter}
     \addplot[color=black!75, only marks, mark=diamond*, mark size=2.2pt, forget plot]
@@ -93,42 +93,36 @@
     ytick={0.86,0.88,0.90,0.92,0.94,0.96,0.98,1.00},
     yticklabel style={/pgf/number format/fixed, /pgf/number format/precision=2},
     xticklabels={\empty},
-    legend style={at={(0.5,0.03)}, anchor=south, legend columns=4}
 ]
     \foreach \xm in {0.7854,1.5708,2.3562} {\edef\temp{\noexpand\draw[gray!55, dotted, thick] (axis cs:\xm,0.845) -- (axis cs:\xm,1.006);}\temp}
     \addplot[color=cTRPO, only marks, mark=square*, mark size=1.5pt, keep if={method}{trpo_curriculum}]
         table[x=alpha, y=nominal_fidelity, col sep=comma] {\gscsv};
-    \addlegendentry{TRPO, $F$}
     \addplot[color=cTRPO, only marks, mark=square, mark size=1.5pt, keep if={method}{trpo_curriculum}]
         table[x=alpha, y=avg_fidelity_1mhz, col sep=comma] {\gscsv};
-    \addlegendentry{TRPO, $\overline{F}$ at $1$\,MHz}
     \addplot[color=cAdam, mark=*, mark size=1.2pt, keep if={method}{adam}]
         table[x=alpha, y=nominal_fidelity, col sep=comma] {\gscsv};
-    \addlegendentry{Adam, $F$}
     \addplot[color=cAdam, densely dashed, mark=o, mark size=1.2pt, keep if={method}{adam}]
         table[x=alpha, y=avg_fidelity_1mhz, col sep=comma] {\gscsv};
-    \addlegendentry{Adam, $\overline{F}$ at $1$\,MHz}
 
     \node[font=\small\bfseries, anchor=north west, fill=white, fill opacity=0.85, text opacity=1, inner sep=1.5pt] at (rel axis cs:0.008,0.97) {(b)};
+
+    \node[font=\scriptsize, anchor=south west, inner sep=1pt] at (rel axis cs:0.012,0.04)
+        {filled symbols, solid line: nominal $F$; open symbols, dashed line: $\overline{F}$ at $1$\,MHz};
 
 % ------------------------------------------------------------ (c) leakage
 \nextgroupplot[
     ymode=log,
     ylabel={Leakage bound},
     ymin=2.5e-5, ymax=2.5e-2,
-    xlabel={Target parameter $\alpha$},
-    legend style={at={(0.5,0.03)}, anchor=south, legend columns=3}
+    xlabel={Target parameter $\alpha$}
 ]
     \foreach \xm in {0.7854,1.5708,2.3562} {\edef\temp{\noexpand\draw[gray!55, dotted, thick] (axis cs:\xm,2.5e-5) -- (axis cs:\xm,2.5e-2);}\temp}
     \addplot[color=cTRPO, only marks, mark=square*, mark size=1.5pt, keep if={method}{trpo_curriculum}, keep if={converged}{True}]
         table[x=alpha, y=nominal_leakage, col sep=comma] {\gscsv};
-    \addlegendentry{TRPO, converged}
     \addplot[color=cTRPO, only marks, mark=square, mark size=1.5pt, thick, keep if={method}{trpo_curriculum}, keep if={converged}{False}]
         table[x=alpha, y=nominal_leakage, col sep=comma] {\gscsv};
-    \addlegendentry{not converged}
     \addplot[color=cAdam, mark=*, mark size=1.2pt, keep if={method}{adam}]
         table[x=alpha, y=nominal_leakage, col sep=comma] {\gscsv};
-    \addlegendentry{Adam}
 
     \node[font=\small\bfseries, anchor=north west, fill=white, fill opacity=0.85, text opacity=1, inner sep=1.5pt] at (rel axis cs:0.008,0.97) {(c)};
 

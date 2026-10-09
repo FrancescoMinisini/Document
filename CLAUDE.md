@@ -86,6 +86,17 @@ Cross-reference label prefixes are used consistently and cited via `\eqref`/`\re
 
 `chapters/04_empirical_assessment.tex` contains several fully commented-out earlier versions of result subsections (superseded orderings, alternative figure blocks). Check whether a block is live before editing it.
 
+## Preprint (`paper/`)
+
+`paper/preprint.tex` (REVTeX, 16 pages) and its Supplemental Material `paper/supplement.tex` are built in
+place with `pdflatex`/`bibtex`, main text first: the supplement reads `preprint.aux` through `xr-hyper`
+(prefix `M-`), while the main text names the supplement's sections by hand (S1 to S7) and cites it as
+`supp`. `paper/README.md` has the figure table, the change log and the terminology, which must be kept:
+the RL agents are the *noise-free* and the *noise-trained* agent, the gradient method is the *direct
+optimizer*, and what they produce is a *pulse* (not "nominal/noise-optimized TRPO", "Adam baseline",
+"plan" or "controller"). Figure sources are `paper/figsrc/fig_*.tex`, standalone documents built from
+inside `figsrc/` and copied to `paper/figures/`; keep legends off the data.
+
 ## Data
 
 `data/<experiment>/` pairs the CSVs consumed by `plots/*.tex` with the matplotlib PNGs originally produced by the simulation code. The PNGs are reference only — the thesis ships the pgfplots renderings, not the PNGs. Experiment directories: `adam`, `adam_vs_nominal_results`, `cost_function_sweep_results`, `nn_size_sweep_results`, `robustness_analysis`, `runtime_results`, `trpo_nominal_results`. The preprint (`paper/figsrc/*.tex`) also reads `robustness_analysis_3`, `trajectory_robustness_results`, `closed_loop_results`, `white_noise_results`, `noisy_leakage_results`, `gate_structure_results`, `noise_memory_results` and `compute_budget_results`; `data/README.md` lists what writes each.
